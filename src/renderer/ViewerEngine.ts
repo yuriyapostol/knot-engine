@@ -19,6 +19,7 @@ export class ViewerEngine {
   private alive = true
   private visible = true
   private active = true
+  private reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')
   private ready = false
   private operation = 0
   private theme: 'light' | 'dark' = 'light'
@@ -46,10 +47,11 @@ export class ViewerEngine {
     this.scene.add(key)
     this.controls = new OrbitControls(this.camera, this.canvas)
     this.controls.enablePan = false
-    this.controls.enableDamping = false
+    this.controls.enableDamping = !this.reducedMotion?.matches
     this.controls.minDistance = 0.1
     this.controls.addEventListener('change', this.requestRender)
     this.controls.addEventListener('end', this.emitCamera)
+    this.reducedMotion?.addEventListener('change', this.motionPreferenceChanged)
     this.canvas.addEventListener('webglcontextlost', this.contextLost)
     this.canvas.addEventListener('webglcontextrestored', this.contextRestored)
   }
@@ -61,9 +63,15 @@ export class ViewerEngine {
       if (!this.alive || !this.built || !this.active || !this.visible || document.hidden) return
       const { width, height } = this.container.getBoundingClientRect()
       if (width <= 0 || height <= 0) return
+      const moving = this.controls.enableDamping && this.controls.update()
       this.renderer.render(this.scene, this.camera)
       if (!this.ready) { this.ready = true; this.onReady?.(this.built.warnings) }
+      if (moving) this.requestRender()
     })
+  }
+  private motionPreferenceChanged = () => {
+    this.controls.enableDamping = !this.reducedMotion?.matches
+    this.requestRender()
   }
   private emitCamera = () => this.onCameraChange?.(this.view())
   private contextLost = (event: Event) => {
@@ -227,6 +235,7 @@ export class ViewerEngine {
     this.clear()
     this.controls.removeEventListener('change', this.requestRender)
     this.controls.removeEventListener('end', this.emitCamera)
+    this.reducedMotion?.removeEventListener('change', this.motionPreferenceChanged)
     this.controls.dispose()
     this.canvas.removeEventListener('webglcontextlost', this.contextLost)
     this.canvas.removeEventListener('webglcontextrestored', this.contextRestored)

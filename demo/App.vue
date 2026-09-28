@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import { KnotViewer, validateModel, type KnotModelV1, type CameraView, type CaptureOptions } from '../src'
 import loop from '../examples/models/prototype-loop.json'
 
@@ -15,16 +15,30 @@ const quality = ref<'low' | 'medium' | 'high'>('medium')
 const active = ref(true)
 const status = ref('initializing')
 const camera = ref<CameraView | null>(null)
-const draft = ref('')
+const draft = ref(JSON.stringify(examples.loop, null, 2))
+let draftTimer: ReturnType<typeof setTimeout> | undefined
 const issue = ref('')
 const viewer = ref<InstanceType<typeof KnotViewer> | null>(null)
 const content = computed(() => locale.value === 'uk' ? {
-  title: 'Knot Viewer', intro: 'Інтерактивний перегляд моделей мотузок із контрольних точок.', model: 'Модель', loop: 'Замкнена крива', open: 'Відкрита мотузка', pair: 'Дві мотузки', complex: 'Складніша крива', quality: 'Якість', active: 'Активний перегляд', export: 'Зберегти поточний PNG', preview: 'Зберегти PNG прев’ю', editor: 'Перевірити власну модель', apply: 'Застосувати JSON', restore: 'Відновити приклад', hint: 'Вставте JSON або виберіть локальний файл. Дані залишаються в браузері.', file: 'Вибрати JSON файл', reset: 'Скинути', fit: 'Умістити'
+  title: 'Knot Viewer', intro: 'Інтерактивний перегляд моделей мотузок із контрольних точок.', model: 'Модель', loop: 'Замкнена крива', open: 'Відкрита мотузка', pair: 'Дві мотузки', complex: 'Складніша крива', quality: 'Якість', active: 'Активний перегляд', export: 'Зберегти поточний PNG', preview: 'Зберегти PNG прев’ю', editor: 'Код моделі', apply: 'Застосувати зараз', restore: 'Відновити приклад', hint: 'Редагуйте JSON: після короткої паузи зображення оновиться. Дані залишаються в браузері.', file: 'Вибрати JSON файл', reset: 'Скинути', fit: 'Умістити'
 } : {
-  title: 'Knot Viewer', intro: 'Interactive rope models built from control points.', model: 'Model', loop: 'Closed curve', open: 'Open rope', pair: 'Two ropes', complex: 'Complex curve', quality: 'Quality', active: 'Viewer active', export: 'Save current PNG', preview: 'Save preview PNG', editor: 'Try your own model', apply: 'Apply JSON', restore: 'Restore example', hint: 'Paste JSON or choose a local file. Data stays in your browser.', file: 'Choose JSON file', reset: 'Reset', fit: 'Fit'
+  title: 'Knot Viewer', intro: 'Interactive rope models built from control points.', model: 'Model', loop: 'Closed curve', open: 'Open rope', pair: 'Two ropes', complex: 'Complex curve', quality: 'Quality', active: 'Viewer active', export: 'Save current PNG', preview: 'Save preview PNG', editor: 'Model code', apply: 'Apply now', restore: 'Restore example', hint: 'Edit the JSON; the image updates after a short pause. Data stays in your browser.', file: 'Choose JSON file', reset: 'Reset', fit: 'Fit'
 })
-function choose() { model.value = examples[selected.value]; issue.value = ''; status.value = 'initializing' }
+function choose() {
+  clearTimeout(draftTimer)
+  const example = examples[selected.value]
+  if (!example) return
+  model.value = example
+  draft.value = JSON.stringify(example, null, 2)
+  issue.value = ''
+  status.value = 'initializing'
+}
+function scheduleDraft() {
+  clearTimeout(draftTimer)
+  draftTimer = setTimeout(applyDraft, 300)
+}
 function applyDraft() {
+  clearTimeout(draftTimer)
   try {
     const data: unknown = JSON.parse(draft.value)
     const result = validateModel(data, { strict: true })
@@ -41,6 +55,7 @@ async function chooseFile(event: Event) {
   draft.value = await file.text()
   applyDraft()
 }
+onBeforeUnmount(() => clearTimeout(draftTimer))
 async function download(options: CaptureOptions, name: string) {
   try {
     const blob = await viewer.value?.capture(options)
@@ -60,6 +75,6 @@ async function download(options: CaptureOptions, name: string) {
       <section class="stage"><KnotViewer ref="viewer" :model="model" :label="model.id || 'Rope model'" :locale="locale" :theme="theme" :quality="quality" :active="active" @ready="status = 'ready'" @error="status = $event.code" @camera-change="camera = $event" /></section>
       <aside class="panel"><label>{{ content.model }}<select v-model="selected" @change="choose"><option value="loop">{{ content.loop }}</option><option value="open">{{ content.open }}</option><option value="pair">{{ content.pair }}</option><option value="complex">{{ content.complex }}</option><option v-if="selected === 'custom'" value="custom">Custom</option></select></label><label>{{ content.quality }}<select v-model="quality"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></label><label class="check"><input v-model="active" type="checkbox">{{ content.active }}</label><div class="actions"><button type="button" @click="viewer?.resetView()">{{ content.reset }}</button><button type="button" @click="viewer?.fitToView()">{{ content.fit }}</button><button type="button" @click="download({ view: 'current' }, 'knot-current.png')">{{ content.export }}</button><button type="button" @click="download({ view: 'model-preview' }, 'knot-preview.png')">{{ content.preview }}</button></div><dl><dt>ID</dt><dd>{{ model.id }}</dd><dt>Schema</dt><dd>{{ model.schemaVersion }}</dd><dt>Status</dt><dd>{{ status }}</dd><dt>Camera</dt><dd>{{ camera?.position.map(n => n.toFixed(1)).join(', ') || '—' }}</dd></dl></aside>
     </div>
-    <section class="editor"><h2>{{ content.editor }}</h2><p>{{ content.hint }}</p><label class="file">{{ content.file }}<input type="file" accept=".json,application/json" @change="chooseFile"></label><textarea v-model="draft" spellcheck="false" rows="9" placeholder="{ &quot;schemaVersion&quot;: 1, ... }"></textarea><pre v-if="issue" role="alert">{{ issue }}</pre><div class="actions"><button type="button" @click="applyDraft">{{ content.apply }}</button><button type="button" @click="selected = 'loop'; choose()">{{ content.restore }}</button></div></section>
+    <section class="editor"><h2>{{ content.editor }}</h2><p>{{ content.hint }}</p><label class="file">{{ content.file }}<input type="file" accept=".json,application/json" @change="chooseFile"></label><textarea v-model="draft" @input="scheduleDraft" spellcheck="false" rows="9" aria-label="Model JSON"></textarea><pre v-if="issue" role="alert">{{ issue }}</pre><div class="actions"><button type="button" @click="applyDraft">{{ content.apply }}</button><button type="button" @click="selected = 'loop'; choose()">{{ content.restore }}</button></div></section>
   </main>
 </template>
