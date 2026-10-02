@@ -4,10 +4,7 @@ import { KnotViewer, validateModel, type KnotModelV1, type CameraView, type Capt
 import loop from '../examples/models/prototype-loop.json'
 import overhand from '../examples/models/overhand.json'
 
-const open: KnotModelV1 = { schemaVersion: 1, id: 'open-rope', coordinateSystem: 'right-handed-y-up', units: 'relative', curves: [{ id: 'open', closed: false, interpolation: { type: 'catmullrom', tension: 0.5 }, radius: 0.46, points: [[-7, -3, 0],[-4, 3, 1],[0, 5, -1],[4, 1, 1],[7, -3, 0]] }] }
-const pair: KnotModelV1 = { ...open, id: 'two-ropes', curves: [open.curves[0], { id: 'second', closed: false, interpolation: { type: 'catmullrom', tension: 0.5 }, radius: 0.38, points: [[-6, 4, -1],[-3, 0, -2],[0, -3, -1],[3, 0, -2],[6, 4, -1]] }] }
-const complex: KnotModelV1 = { schemaVersion: 1, id: 'complex-curve', coordinateSystem: 'right-handed-y-up', units: 'relative', curves: [{ id: 'complex', closed: true, interpolation: { type: 'catmullrom', tension: 0.6 }, radius: 0.32, points: [[-6, -3, 0],[-3, -6, 1],[0, -2, 2],[3, -6, 1],[6, -3, 0],[3, 0, -2],[6, 3, -1],[2, 6, 1],[0, 2, 2],[-2, 6, 1],[-6, 3, -1],[-3, 0, -2]] }] }
-const examples: Record<string, KnotModelV1> = { overhand: overhand as KnotModelV1, loop: loop as KnotModelV1, open, pair, complex }
+const examples: Record<string, KnotModelV1> = { overhand: overhand as KnotModelV1, loop: loop as KnotModelV1 }
 function formatModel(value: unknown, level = 0): string {
   const indent = '  '.repeat(level)
   if (Array.isArray(value)) {
@@ -44,9 +41,9 @@ const issue = ref('')
 const viewer = ref<InstanceType<typeof KnotViewer> | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 const content = computed(() => locale.value === 'uk' ? {
-  title: 'Knot Viewer', intro: 'Інтерактивний перегляд моделей мотузок із контрольних точок.', model: 'Модель', overhand: 'Простий вузол', loop: 'Замкнена крива', open: 'Відкрита мотузка', pair: 'Дві мотузки', complex: 'Складніша крива', export: 'Експорт в PNG', preview: 'Експорт прев’ю в PNG', editor: 'Код', openFile: 'Відкрити з файлу', saveFile: 'Зберегти в файл'
+  title: 'Knot Viewer', intro: 'Інтерактивний перегляд моделей мотузок із контрольних точок.', model: 'Модель', overhand: 'Простий вузол', loop: 'Замкнена крива', export: 'Експорт в PNG', preview: 'Експорт прев’ю в PNG', editor: 'Код', openFile: 'Відкрити з файлу', saveFile: 'Зберегти в файл'
 } : {
-  title: 'Knot Viewer', intro: 'Interactive rope models built from control points.', model: 'Model', overhand: 'Overhand knot', loop: 'Closed curve', open: 'Open rope', pair: 'Two ropes', complex: 'Complex curve', export: 'Export to PNG', preview: 'Export preview to PNG', editor: 'Code', openFile: 'Open from file', saveFile: 'Save to file'
+  title: 'Knot Viewer', intro: 'Interactive rope models built from control points.', model: 'Model', overhand: 'Overhand knot', loop: 'Closed curve', export: 'Export to PNG', preview: 'Export preview to PNG', editor: 'Code', openFile: 'Open from file', saveFile: 'Save to file'
 })
 function choose() {
   clearTimeout(draftTimer)
@@ -104,8 +101,10 @@ async function download(options: CaptureOptions, name: string) {
     <div class="layout">
       <section class="stage"><KnotViewer ref="viewer" :model="model" :initial-camera="demoCamera" :label="model.id || 'Rope model'" :locale="locale" :theme="theme" @ready="status = 'ready'" @error="status = $event.code" @camera-change="camera = $event" /></section>
       <aside class="panel">
-        <label>{{ content.model }}<select v-model="selected" @change="choose"><option value="overhand">{{ content.overhand }}</option><option value="loop">{{ content.loop }}</option><option value="open">{{ content.open }}</option><option value="pair">{{ content.pair }}</option><option value="complex">{{ content.complex }}</option><option v-if="selected === 'custom'" value="custom">Custom</option></select></label>
-        <section class="editor"><label class="code-label">{{ content.editor }}<textarea v-model="draft" @input="scheduleDraft" spellcheck="false" rows="9"></textarea></label><input ref="fileInput" class="file-input" type="file" accept=".json,application/json" @change="chooseFile"><pre v-if="issue" role="alert">{{ issue }}</pre><div class="actions"><button type="button" @click="fileInput?.click()">{{ content.openFile }}</button><button type="button" @click="saveCode">{{ content.saveFile }}</button></div></section>
+        <label>{{ content.model }}<select v-model="selected" @change="choose"><option value="overhand">{{ content.overhand }}</option><option value="loop">{{ content.loop }}</option><option v-if="selected === 'custom'" value="custom">Custom</option></select></label>
+        <div class="actions"><button type="button" @click="fileInput?.click()">{{ content.openFile }}</button></div>
+        <input ref="fileInput" class="file-input" type="file" accept=".json,application/json" @change="chooseFile">
+        <section class="editor"><label class="code-label">{{ content.editor }}<textarea v-model="draft" @input="scheduleDraft" spellcheck="false" rows="9"></textarea></label><pre v-if="issue" role="alert">{{ issue }}</pre><div class="actions"><button type="button" @click="saveCode">{{ content.saveFile }}</button></div></section>
         <div class="actions"><button type="button" @click="download({ view: 'current' }, 'knot-current.png')">{{ content.export }}</button><button type="button" @click="download({ view: 'model-preview' }, 'knot-preview.png')">{{ content.preview }}</button></div>
         <dl><dt>ID</dt><dd>{{ model.id }}</dd><dt>Schema</dt><dd>{{ model.schemaVersion }}</dd><dt>Status</dt><dd>{{ status }}</dd><dt>Camera</dt><dd>{{ camera?.position.map(n => n.toFixed(1)).join(', ') || '—' }}</dd></dl>
       </aside>
