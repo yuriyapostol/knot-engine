@@ -15,9 +15,9 @@
 | curves | 1–8 кривих із незалежними ID |
 | preview | Необов'язковий preset та camera; за відсутності камера auto-fit |
 
-Curve: id (унікальний рядок до 128 символів), closed:boolean, interpolation:{type:'catmullrom', tension:number}, radius:number, points:[number,number,number][]. Усі ці поля обов'язкові. Початковий v1 підтримує саме catmullrom з явною tension у межах 0..1 для явного визначення форми кривої; інші режими можуть бути додані як версійовані capabilities після fixture-перевірки, не застосовуються мовчки.
+Curve: id (унікальний рядок до 128 символів), closed:boolean, interpolation:{type:'catmullrom', tension:number}, radius:number, points:[number, number, number][]. Усі ці поля обов'язкові. Початковий v1 підтримує саме catmullrom з явною tension у межах 0..1 для явного визначення форми кривої; інші режими можуть бути додані як версійовані capabilities після fixture-перевірки, не застосовуються мовчки.
 
-Preview: preset='light-outline-v1'; опційно cameraPosition:[x,y,z], target:[x,y,z], fov:number. Позиція і target задаються разом. fov у межах 10..100 градусів, default 55. Невідомий preset — діагностика UNSUPPORTED_SCHEMA/validation issue, не підміна на випадковий вигляд. У майбутньому preset registry розширюється з явною сумісністю. Демо перемикання теми не переписує preview даних.
+Preview: preset='light-outline-v1'; опційно cameraPosition:[x, y, z], target:[x, y, z], fov:number. Позиція і target задаються разом. fov у межах 10..100 градусів, default 55. Невідомий preset — діагностика UNSUPPORTED_SCHEMA/validation issue, не підміна на випадковий вигляд. У майбутньому preset registry розширюється з явною сумісністю. Демо перемикання теми не переписує preview даних.
 
 ## Геометричні правила
 
