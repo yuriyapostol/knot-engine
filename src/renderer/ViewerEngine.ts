@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { verticalDrag } from './touchGesture'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import type { CameraView, KnotModelV1 } from '../core'
 import { ViewerError } from '../core'
@@ -12,6 +13,7 @@ export class ViewerEngine {
   private scene = new THREE.Scene()
   private camera = new THREE.PerspectiveCamera(55, 1, 0.01, 10000)
   private controls: OrbitControls
+  private touches = new Map<number, { x: number; y: number }>()
   private built?: BuiltModel
   private model?: KnotModelV1
   private initial?: CameraView
@@ -47,6 +49,14 @@ export class ViewerEngine {
     this.scene.add(key)
     this.controls = new OrbitControls(this.camera, this.canvas)
     this.controls.enablePan = false
+    this.controls.minPolarAngle = 0.05
+    this.controls.maxPolarAngle = Math.PI - 0.05
+    this.canvas.style.touchAction = 'none'
+    this.canvas.addEventListener('pointerdown', this.touchStart, true)
+    this.canvas.addEventListener('pointermove', this.touchMove, true)
+    this.canvas.addEventListener('pointerup', this.touchEnd, true)
+    this.canvas.addEventListener('pointercancel', this.touchEnd, true)
+    this.canvas.addEventListener('lostpointercapture', this.touchEnd, true)
     this.controls.enableDamping = !this.reducedMotion?.matches
     this.controls.minDistance = 0.1
     this.controls.addEventListener('change', this.requestRender)
@@ -86,8 +96,54 @@ export class ViewerEngine {
   view(): CameraView { return { position: this.camera.position.toArray() as CameraView['position'], target: this.controls.target.toArray() as CameraView['target'], fov: this.camera.fov } }
   setActive(active: boolean) { this.active = active; if (!active) { cancelAnimationFrame(this.frame); this.frame = 0 } else this.requestRender() }
   setVisible(visible: boolean) { this.visible = visible; if (visible) this.requestRender() }
-  setInteractive(interactive: boolean) { this.controls.enabled = interactive }
-  setTouchActive(active: boolean) { this.canvas.style.touchAction = active ? 'none' : 'auto'; this.controls.touches.ONE = active ? THREE.TOUCH.ROTATE : THREE.TOUCH.PAN; this.controls.touches.TWO = THREE.TOUCH.DOLLY_ROTATE }
+  setInteractive(interactive: boolean) {
+    this.controls.enabled = interactive
+    this.canvas.style.touchAction = interactive ? 'none' : 'auto'
+    if (!interactive) this.touches.clear()
+  }
+  private touchStart = (event: PointerEvent) => {
+    if (event.pointerType !== 'touch' || !this.controls.enabled) return
+    event.stopImmediatePropagation()
+    this.touches.set(event.pointerId, { x: event.clientX, y: event.clientY })
+    this.canvas.setPointerCapture(event.pointerId)
+  }
+  private touchMove = (event: PointerEvent) => {
+    const previous = this.touches.get(event.pointerId)
+    if (!previous) return
+    event.stopImmediatePropagation()
+    const current = { x: event.clientX, y: event.clientY }
+    if (this.touches.size === 1) {
+      const height = Math.max(this.canvas.clientHeight, 1)
+      const speed = 2 * Math.PI * this.controls.rotateSpeed / height
+      const phi = this.controls.getPolarAngle()
+      const drag = verticalDrag(phi, current.y - previous.y, speed, this.controls.minPolarAngle, this.controls.maxPolarAngle)
+      this.orbit(-(current.x - previous.x) * speed, drag.angle - phi)
+      if (drag.scroll) this.scrollPage(drag.scroll)
+    } else if (this.touches.size === 2) {
+      const other = [...this.touches.entries()].find(([id]) => id !== event.pointerId)![1]
+      const before = Math.hypot(previous.x - other.x, previous.y - other.y)
+      const after = Math.hypot(current.x - other.x, current.y - other.y)
+      if (before > 0 && after > 0) this.zoom(before / after)
+    }
+    this.touches.set(event.pointerId, current)
+  }
+  private touchEnd = (event: PointerEvent) => {
+    if (!this.touches.delete(event.pointerId)) return
+    event.stopImmediatePropagation()
+    if (this.canvas.hasPointerCapture(event.pointerId)) this.canvas.releasePointerCapture(event.pointerId)
+    this.emitCamera()
+  }
+  private scrollPage(delta: number) {
+    for (let parent = this.container.parentElement; parent; parent = parent.parentElement) {
+      if (parent === document.scrollingElement) break
+      if (!/(auto|scroll)/.test(getComputedStyle(parent).overflowY)) continue
+      const before = parent.scrollTop
+      parent.scrollTop += delta
+      delta -= parent.scrollTop - before
+      if (Math.abs(delta) < 0.01) return
+    }
+    window.scrollBy({ top: delta, behavior: 'instant' })
+  }
   setTheme(theme: 'light' | 'dark') {
     if (this.theme === theme) return
     this.theme = theme
@@ -168,7 +224,7 @@ export class ViewerEngine {
     if (!this.built) return
     const offset = this.camera.position.clone().sub(this.controls.target)
     const spherical = new THREE.Spherical().setFromVector3(offset)
-    spherical.theta += dx; spherical.phi = THREE.MathUtils.clamp(spherical.phi + dy, 0.05, Math.PI - 0.05)
+    spherical.theta += dx; spherical.phi = THREE.MathUtils.clamp(spherical.phi + dy, this.controls.minPolarAngle, this.controls.maxPolarAngle)
     this.camera.position.copy(this.controls.target).add(new THREE.Vector3().setFromSpherical(spherical))
     this.controls.update(); this.emitCamera()
   }
@@ -236,6 +292,12 @@ export class ViewerEngine {
     this.controls.removeEventListener('change', this.requestRender)
     this.controls.removeEventListener('end', this.emitCamera)
     this.reducedMotion?.removeEventListener('change', this.motionPreferenceChanged)
+    this.touches.clear()
+    this.canvas.removeEventListener('pointerdown', this.touchStart, true)
+    this.canvas.removeEventListener('pointermove', this.touchMove, true)
+    this.canvas.removeEventListener('pointerup', this.touchEnd, true)
+    this.canvas.removeEventListener('pointercancel', this.touchEnd, true)
+    this.canvas.removeEventListener('lostpointercapture', this.touchEnd, true)
     this.controls.dispose()
     this.canvas.removeEventListener('webglcontextlost', this.contextLost)
     this.canvas.removeEventListener('webglcontextrestored', this.contextRestored)

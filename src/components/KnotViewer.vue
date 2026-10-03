@@ -26,7 +26,7 @@ const root = ref<HTMLElement | null>(null)
 const surface = ref<HTMLElement | null>(null)
 const state = ref<'empty' | 'initializing' | 'ready' | 'error'>('empty')
 const error = ref<ViewerErrorEvent | null>(null)
-const touchActive = ref(false)
+const touchActive = computed(() => props.interactive)
 const text = computed(() => ({ ...builtInMessages[props.locale], ...props.messages }))
 let engine: ViewerEngine | undefined
 let resize: ResizeObserver | undefined
@@ -51,8 +51,7 @@ function ensureEngine() {
     engine.onError = report
     engine.onCameraChange = view => emit('camera-change', view)
     engine.setActive(props.active)
-    engine.setTouchActive(touchActive.value)
-    engine.setInteractive(props.interactive && touchActive.value)
+    engine.setInteractive(props.interactive)
     resize = new ResizeObserver(() => engine?.resize())
     resize.observe(surface.value)
     intersection = new IntersectionObserver(entries => engine?.setVisible(entries[0]?.isIntersecting ?? false))
@@ -84,8 +83,6 @@ async function loadModel() {
   } catch (cause) { engine.clear(); report(cause instanceof ViewerError ? cause : new ViewerError('RENDER_FAILED', 'Unable to build model')) }
 }
 function retry() { engine?.dispose(); engine = undefined; resize?.disconnect(); intersection?.disconnect(); document.removeEventListener('visibilitychange', onVisibility); void loadModel() }
-function activate() { if (!props.interactive) return; touchActive.value = true; engine?.setTouchActive(true); engine?.setInteractive(true); root.value?.focus() }
-function deactivate() { touchActive.value = false; engine?.setTouchActive(false); engine?.setInteractive(false) }
 function onPointerDown(event: PointerEvent) { if (event.pointerType === 'mouse' && props.interactive) { root.value?.focus(); engine?.setInteractive(true) } }
 function resetView() { engine?.resetView() }
 function fitToView() { engine?.fitToView() }
@@ -93,7 +90,6 @@ function zoomIn() { engine?.zoom(0.8) }
 function zoomOut() { engine?.zoom(1.25) }
 function onKeydown(event: KeyboardEvent) {
   if (!props.interactive || !(event.target instanceof Node) || !root.value?.contains(event.target)) return
-  if (event.key === 'Escape') { deactivate(); return }
   if (event.target !== root.value) return
   const actions: Record<string, () => void> = { ArrowLeft: () => engine?.orbit(-0.14, 0), ArrowRight: () => engine?.orbit(0.14, 0), ArrowUp: () => engine?.orbit(0, -0.14), ArrowDown: () => engine?.orbit(0, 0.14), '+': zoomIn, '=': zoomIn, '-': zoomOut, Home: resetView }
   const action = actions[event.key]
@@ -104,14 +100,14 @@ watch(() => props.quality, loadModel)
 watch(() => props.initialCamera, value => engine?.setInitialCamera(value))
 watch(() => props.theme, value => engine?.setTheme(value))
 watch(() => props.active, value => engine?.setActive(value))
-watch(() => props.interactive, value => { if (!value) deactivate(); engine?.setInteractive(value && touchActive.value) })
+watch(() => props.interactive, value => engine?.setInteractive(value))
 onMounted(() => { void loadModel() })
 onBeforeUnmount(() => { generation++; resize?.disconnect(); intersection?.disconnect(); document.removeEventListener('visibilitychange', onVisibility); engine?.dispose() })
 defineExpose({ resetView, fitToView, capture: (options?: CaptureOptions) => engine?.capture(options) ?? Promise.reject(new ViewerError('CAPTURE_FAILED', 'Viewer is not ready')) })
 </script>
 
 <template>
-  <div ref="root" class="knot-viewer" :data-theme="theme" :data-state="state" :aria-label="label" :aria-description="description" role="group" tabindex="0" @keydown="onKeydown" @focus="engine?.setInteractive(interactive)" @blur="engine?.setInteractive(false)">
+  <div ref="root" class="knot-viewer" :data-theme="theme" :data-state="state" :aria-label="label" :aria-description="description" role="group" tabindex="0" @keydown="onKeydown">
     <div ref="surface" class="knot-viewer__surface" @pointerdown.capture="onPointerDown"></div>
     <div v-if="state !== 'ready'" class="knot-viewer__fallback" :role="state === 'error' ? 'alert' : undefined">
       <slot v-if="state === 'initializing'" name="loading" :state="state">
@@ -121,7 +117,7 @@ defineExpose({ resetView, fitToView, capture: (options?: CaptureOptions) => engi
       <slot v-else name="fallback" :state="state" :error="error" :poster="poster">
         <img v-if="poster" :src="poster" :alt="label" class="knot-viewer__poster">
         <span v-else>{{ state === 'empty' ? text.empty : text.unavailable }}</span>
-        <button v-if="state === 'error' && error?.recoverable" type="button" @click="retry">{{ text.retry }}</button>
+        <button v-if="showControls && state === 'error' && error?.recoverable" type="button" @click="retry">{{ text.retry }}</button>
       </slot>
     </div>
     <div v-if="showControls && state === 'ready'" class="knot-viewer__toolbar">
@@ -130,7 +126,6 @@ defineExpose({ resetView, fitToView, capture: (options?: CaptureOptions) => engi
         <button type="button" :title="text.fit" :aria-label="text.fit" @click="fitToView">⌗</button>
         <button type="button" :title="text.zoomIn" :aria-label="text.zoomIn" @click="zoomIn">+</button>
         <button type="button" :title="text.zoomOut" :aria-label="text.zoomOut" @click="zoomOut">−</button>
-        <button type="button" class="knot-viewer__interact" :aria-pressed="touchActive" @click="touchActive ? deactivate() : activate()">{{ touchActive ? text.exit : text.interact }}</button>
       </slot>
     </div>
   </div>
