@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createSSRApp } from 'vue'
 import { renderToString } from 'vue/server-renderer'
-import { KnotViewer, validateModel, type KnotModelV1 } from '../src'
+import { KnotViewer, validateModel, resolveKnotModelV1, type KnotModelV1 } from '../src'
 import { buildGeometry } from '../src/geometry/build'
 import loop from '../examples/models/prototype-loop.json'
 
@@ -39,7 +39,7 @@ describe('model contract', () => {
 })
 describe('rendering contracts', () => {
   it('builds finite geometry and disposes resources', () => {
-    const built = buildGeometry(model, 'medium', 'light')
+    const built = buildGeometry(resolveKnotModelV1(model), 'medium', 'light')
     expect(built.bounds.isEmpty()).toBe(false)
     for (const mesh of built.group.children) {
       if (!('geometry' in mesh)) continue

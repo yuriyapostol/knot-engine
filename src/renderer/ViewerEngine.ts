@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { verticalDrag } from './touchGesture'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import type { CameraView, KnotModelV1 } from '../core'
+import type { CameraView, RenderableModel } from '../core'
 import { ViewerError } from '../core'
 import { buildGeometry, type BuiltModel, type Quality } from '../geometry/build'
 
@@ -15,7 +15,7 @@ export class ViewerEngine {
   private controls: OrbitControls
   private touches = new Map<number, { x: number; y: number }>()
   private built?: BuiltModel
-  private model?: KnotModelV1
+  private model?: RenderableModel
   private initial?: CameraView
   private frame = 0
   private alive = true
@@ -156,7 +156,7 @@ export class ViewerEngine {
     this.requestRender()
   }
   private quality: Quality = 'medium'
-  setModel(model: KnotModelV1, quality: Quality, initial?: CameraView) {
+  setModel(model: RenderableModel, quality: Quality, initial?: CameraView) {
     this.operation++
     this.ready = false
     this.quality = quality
@@ -208,8 +208,7 @@ export class ViewerEngine {
   setInitialCamera(initial?: CameraView) { this.initial = initial; this.resetView() }
   resetView() {
     if (!this.built) return
-    const p = this.model?.preview
-    const view = this.initial ?? (p?.cameraPosition && p.target ? { position: p.cameraPosition, target: p.target, fov: p.fov ?? 55 } : undefined)
+    const view = this.initial ?? this.model?.camera
     if (!view) { this.camera.fov = 55; this.fitToView(); return }
     const radius = Math.max(this.built.bounds.getBoundingSphere(new THREE.Sphere()).radius, 0.01)
     const distance = new THREE.Vector3(...view.position).distanceTo(new THREE.Vector3(...view.target))
@@ -246,8 +245,8 @@ export class ViewerEngine {
       camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * this.camera.aspect / camera.aspect))
     }
     if (options.view === 'model-preview') {
-      const p = this.model?.preview
-      if (p?.cameraPosition && p.target) { camera.position.set(...p.cameraPosition); camera.lookAt(...p.target); camera.fov = p.fov ?? 55 }
+      const p = this.model?.camera
+      if (p) { camera.position.set(...p.position); camera.lookAt(...p.target); camera.fov = p.fov }
       else {
         const sphere = this.built.bounds.getBoundingSphere(new THREE.Sphere())
         const distance = sphere.radius * 1.25 / Math.sin(Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * Math.min(camera.aspect, 1)))

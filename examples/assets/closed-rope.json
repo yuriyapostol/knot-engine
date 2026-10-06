@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "closed-rope",
+  "units": "m",
+  "elements": [
+    {
+      "id": "rope-1",
+      "type": "rope",
+      "topology": "closed",
+      "ends": [],
+      "diameter": 0.01
+    }
+  ],
+  "representations": [
+    {
+      "id": "view-3d",
+      "dimension": 3,
+      "snapshots": [
+        {
+          "id": "rest",
+          "elements": [
+            {
+              "id": "rope-1",
+              "geometry": {
+                "type": "curve",
+                "closed": true,
+                "interpolation": {
+                  "type": "catmullrom",
+                  "tension": 0.5
+                },
+                "points": [
+                  [
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0.4,
+                    0.3,
+                    0.1
+                  ],
+                  [
+                    0.8,
+                    0,
+                    0
+                  ]
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

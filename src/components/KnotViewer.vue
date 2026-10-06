@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import type { CameraView, KnotModelV1, ViewerErrorCode, ValidationIssue } from '../core'
-import { validateModel, ViewerError } from '../core'
+import type { CameraView, KnotModelV1, KnotAsset, RenderableModel, ViewerErrorCode, ValidationIssue } from '../core'
+import { resolveKnotAsset, resolveKnotModelV1, ViewerError } from '../core'
 import type { Quality } from '../geometry/build'
 import { ViewerEngine, type CaptureOptions } from '../renderer/ViewerEngine'
 import { messages as builtInMessages, type ViewerMessages } from '../locales'
 
 export interface ViewerErrorEvent { code: ViewerErrorCode; message: string; issues?: ValidationIssue[]; recoverable: boolean }
 const props = withDefaults(defineProps<{
-  model: KnotModelV1 | null; label: string; description?: string; poster?: string
+  model?: KnotModelV1 | null; asset?: KnotAsset | null; representationId?: string; snapshotId?: string; label: string; description?: string; poster?: string
   locale?: 'uk' | 'en'; messages?: Partial<ViewerMessages>; theme?: 'light' | 'dark'
   quality?: Quality; active?: boolean; interactive?: boolean; showControls?: boolean; initialCamera?: CameraView
 }>(), { locale: 'uk', theme: 'light', quality: 'medium', active: true, interactive: true, showControls: true })
@@ -43,10 +43,10 @@ function ensureEngine() {
   try {
     engine = new ViewerEngine(surface.value)
     engine.onReady = warnings => {
-      if (!props.model || !engine) return
+      if ((!props.model && !props.asset) || !engine) return
       state.value = 'ready'
       error.value = null
-      emit('ready', { modelId: props.model.id, schemaVersion: 1, warnings })
+      emit('ready', { modelId: (props.asset ?? props.model)?.id, schemaVersion: 1, warnings })
     }
     engine.onError = report
     engine.onCameraChange = view => emit('camera-change', view)
@@ -63,11 +63,16 @@ function ensureEngine() {
 function onVisibility() { if (!document.hidden) engine?.resize() }
 async function loadModel() {
   const current = ++generation
-  if (!props.model) { engine?.clear(); state.value = 'empty'; error.value = null; return }
-  const validation = validateModel(props.model)
-  if (!validation.valid) {
+  if (!props.model && !props.asset) { engine?.clear(); state.value = 'empty'; error.value = null; return }
+  let resolved: RenderableModel
+  try {
+    if (props.model && props.asset) throw new ViewerError('INVALID_MODEL', 'Supply either model or asset, not both', undefined, false)
+    resolved = props.asset
+      ? resolveKnotAsset(props.asset, { representationId: props.representationId, snapshotId: props.snapshotId })
+      : resolveKnotModelV1(props.model)
+  } catch (cause) {
     engine?.clear()
-    report(new ViewerError(validation.issues[0].code, 'Invalid model', validation.issues, false))
+    report(cause instanceof ViewerError ? cause : new ViewerError('INVALID_MODEL', 'Unable to resolve input', undefined, false))
     return
   }
   engine?.clear()
@@ -77,7 +82,7 @@ async function loadModel() {
   ensureEngine()
   if (!engine) return
   try {
-    engine.setModel(validation.model, props.quality, props.initialCamera)
+    engine.setModel(resolved, props.quality, props.initialCamera)
     engine.setTheme(props.theme)
     engine.resize()
   } catch (cause) { engine.clear(); report(cause instanceof ViewerError ? cause : new ViewerError('RENDER_FAILED', 'Unable to build model')) }
@@ -95,7 +100,7 @@ function onKeydown(event: KeyboardEvent) {
   const action = actions[event.key]
   if (action) { event.preventDefault(); action() }
 }
-watch(() => props.model, loadModel)
+watch(() => [props.model, props.asset, props.representationId, props.snapshotId], loadModel)
 watch(() => props.quality, loadModel)
 watch(() => props.initialCamera, value => engine?.setInitialCamera(value))
 watch(() => props.theme, value => engine?.setTheme(value))

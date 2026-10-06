@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "diagram-crossings",
+  "units": "m",
+  "elements": [
+    {
+      "id": "rope-1",
+      "type": "rope",
+      "topology": "open",
+      "ends": [
+        {
+          "id": "a"
+        },
+        {
+          "id": "b"
+        }
+      ],
+      "diameter": 0.01
+    }
+  ],
+  "representations": [
+    {
+      "id": "diagram",
+      "dimension": 2,
+      "snapshots": [
+        {
+          "id": "rest",
+          "elements": [
+            {
+              "id": "rope-1",
+              "geometry": {
+                "type": "curve",
+                "closed": false,
+                "interpolation": {
+                  "type": "catmullrom",
+                  "tension": 0.5
+                },
+                "points": [
+                  [
+                    0,
+                    0
+                  ],
+                  [
+                    0.4,
+                    0.3
+                  ],
+                  [
+                    0.8,
+                    0
+                  ]
+                ]
+              }
+            }
+          ],
+          "crossings": [
+            {
+              "over": {
+                "element": "rope-1",
+                "u": 0.2
+              },
+              "under": {
+                "element": "rope-1",
+                "u": 0.8
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

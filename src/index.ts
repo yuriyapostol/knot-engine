@@ -1,6 +1,5 @@
 export { default as KnotViewer } from './components/KnotViewer.vue'
-export { validateModel, ViewerError } from './core'
-export type { KnotModelV1, KnotCurve, CameraView, Point3, ValidationIssue, ValidationResult, ViewerErrorCode } from './core'
+export * from './core'
 export type { CaptureOptions } from './renderer/ViewerEngine'
 export type { ViewerMessages } from './locales'
 export type { Quality } from './geometry/build'

@@ -1,142 +1,147 @@
-# Специфікація knot-viewer
+# KnotViewer in the knot-engine package
 
-Дата: 2026-09-27. Документ для реалізації окремого пакета. Продукт має власний публічний API, формат даних та демонстраційну сторінку. Конкретні імена API й технічні параметри тут запропоновані та стабілізуються після прототипу.
+[English](specification.md) | [Українська](specification.uk.md) · [Documentation](../README.md)
 
-## Призначення
+Original document: 2026-09-27. KnotViewer is a Vue component of knot-engine. The authoritative domain contract belongs to [KnotAsset v1](knot-asset-v1.md), while the historical [KnotModelV1](model-format.md) is supported through a legacy adapter. Current APIs, migration boundaries and implementation policies are described in the [architecture](architecture.md). The initial acceptance criteria are also retained below; they do not mean that all historical scenarios have already been implemented.
 
-Переносимий Vue-компонент будує геометрію мотузки за контрольними точками та показує інтерактивну 3D-модель. Підтримує клієнтський рендеринг, SSR із hydration, настільні й сенсорні браузери та сумісні WebView. Окремі можливості — генерація статичних зображень і демонстраційна сторінка.
+## Purpose
 
-Вхід компонента — дані моделі. Джерело й спосіб зберігання цих даних визначає користувач бібліотеки. model.id є непрозорим рядком, наприклад examples/loops/sample; він не інтерпретується як шлях до файла, URL або DOM-селектор.
+A portable Vue component builds rope geometry from control points and displays an interactive 3D model. It supports client rendering, SSR with hydration, desktop and touch browsers, and compatible WebViews. Additional capabilities are static image generation and a demo page.
 
-## Перший реліз
+The component input is model data. The library consumer determines its source and storage method. model.id is an opaque string, such as examples/loops/sample; it is not interpreted as a file path, URL or DOM selector.
 
-Обов'язкові: статичні моделі з однією або кількома кривими, керування камерою, reset/fit, touch і клавіатура, локалізовані контролі uk/en, poster fallback, зміна моделі без remount, контроль життєвого циклу й ресурсів, export зображення та демка. Перевірка формату до створення геометрії обов'язкова навіть для локальних assets.
+## First release
 
-Не входять: редактор вузлів, фізична симуляція, автоматичне визначення правильності вузла, та інший, неописаний в специфікації функціонал. Кроки зав'язування й анімація — наступний реліз, не прихована частина v1.
+Required: static models with one or more curves, camera controls, reset/fit, touch and keyboard input, localized uk/en controls, poster fallback, model replacement without remounting, lifecycle and resource management, image export and a demo. Format validation before geometry creation is required even for local assets.
 
-## Архітектура пакета
+Excluded: a knot editor, physical simulation, automatic determination of knot correctness and other functionality not described in the specification. Algorithms and steps are KnotAsset v1 data; their animation and instructional UI remain future viewer capabilities.
 
-Рекомендація: Vue 3 peer dependency, Three.js як залежність реалізації. Узгодити підтримані версії Node/Vue/Three.js під час прототипу й зафіксувати lockfile. Залежності встановлюються менеджером пакетів; не включати вручну скопійовані збірки рушія.
+## Package architecture
+
+Recommendation: Vue 3 as a peer dependency, Three.js as an implementation dependency. Agree on supported Node/Vue/Three.js versions during prototyping and commit a lockfile. Dependencies are installed through the package manager; do not include manually copied engine builds.
 
 ```text
 src/
-  index.ts                  публічний Vue API
-  core/                     типи, validation, нормалізація даних без DOM
-  geometry/                 спільний builder Three.js geometry
+  index.ts                  public Vue API
+  core/                     types, validation, data normalization without DOM
+  geometry/                 shared Three.js geometry builder
   renderer/                 scene, camera, controls, lifecycle, capture
   components/KnotViewer.vue
-  locales/                  uk/en, типізовані ключі
-  styles/                   явний CSS export
-examples/models/            невеликі локальні fixture-моделі
-demo/                       окремий Vue + Vite застосунок
-scripts/preview/            browser harness/CLI для CI-прев'ю
+  locales/                  uk/en, typed keys
+  styles/                   explicit CSS export
+examples/models/            small local fixture models
+demo/                       separate Vue + Vite application
+scripts/preview/            browser harness/CLI for CI previews
 tests/                      meaningful contract/integration/browser tests
 docs/
 ```
 
-Пропоновані package entry points: кореневий Vue export, /core для типів і validateModel без WebGL/DOM, /styles.css та /preview для окремої інтеграції capture за потреби. CLI/harness не має потрапляти в клієнтський bundle. Geometry builder спільний у viewer і preview, не дві незалежні реалізації.
+Proposed package entry points: root Vue export, /core for types, validateKnotAsset, validateKnotModelV1, legacy alias validateModel and resolvers without WebGL/DOM, /styles.css and /preview for separate capture integration if needed. The CLI/harness must not enter the client bundle. Viewer and preview share one geometry builder, rather than two independent implementations.
 
-Публічний API не повертає Three.js scene/material/renderer як стабільний контракт. Це дозволяє змінювати внутрішню реалізацію. Vue й типи external у library build; Three.js не дублювати окремо для controls. Документувати фактичні bundle sizes і перевіряти tree shaking, а не обіцяти lazy-loading лише через наявність кількох файлів. Host може завантажувати компонент через defineAsyncComponent.
+The public API does not expose a Three.js scene/material/renderer as a stable contract. This allows internal implementation changes. Vue and types are external in the library build; do not duplicate Three.js separately for controls. Document actual bundle sizes and verify tree shaking rather than promising lazy loading solely because several files exist. A host can load the component through defineAsyncComponent.
 
-Контролі мають власні базові стилі й не потребують сторонньої UI-бібліотеки. Користувач бібліотеки може замінити toolbar/fallback slots і налаштувати кольори через публічні CSS-токени.
+Controls have their own base styles and do not require a third-party UI library. Library consumers can replace toolbar/fallback slots and customize colors through public CSS tokens.
 
-## Запропонований Vue API
+## Proposed Vue API
 
-| Prop | Тип / default | Поведінка |
+| Prop | Type / default | Behavior |
 | --- | --- | --- |
-| model | KnotModelV1 або null | Не мутується; null означає відсутність моделі |
-| label | string, обов'язковий | Доступна назва конкретної моделі, задається host мовою контенту |
-| description | string, optional | Текстова альтернатива/пояснення до моделі |
-| poster | string, optional | Уже резолвлений URL локального/дозволеного host зображення |
-| locale | 'uk' або 'en', default 'uk' | Мова вбудованих контролів; default не залежить від navigator під час SSR |
-| messages | Partial<ViewerMessages> | Override локалізованих рядків, без i18n-framework dependency |
-| theme | 'light' або 'dark', default 'light' | Host визначає system mode; змінює renderer і контролі узгоджено |
-| quality | 'low'/'medium'/'high', default 'medium' | Tessellation/DPR budget, не змінює контрольні точки |
-| active | boolean, default true | Дозволяє host призупиняти viewer, наприклад при прихованому екрані |
-| interactive | boolean, default true | false вимикає controls/input, але дозволяє статичний render/capture |
-| showControls | boolean, default true | Видимість toolbar; host відповідає за альтернативні controls при false |
-| initialCamera | CameraView, optional | Перекриває модельну preview camera; інакше preview → auto-fit |
+| model | KnotModelV1 or null, optional | Legacy static input; do not supply together with asset |
+| asset | KnotAsset or null, optional | Domain input; full validation before the renderer |
+| representationId | string, optional | Representation selection; default is the first dimension=3 representation |
+| snapshotId | string, optional | Snapshot within the selected representation; default is the first |
+| label | string, required | Accessible name of the particular model, supplied by the host in the content language |
+| description | string, optional | Text alternative/explanation for the model |
+| poster | string, optional | Already resolved URL of a local/host-approved image |
+| locale | 'uk' or 'en', default 'uk' | Built-in control language; the default does not depend on navigator during SSR |
+| messages | Partial<ViewerMessages> | Localized string overrides, without an i18n framework dependency |
+| theme | 'light' or 'dark', default 'light' | The host determines system mode; changes renderer and controls consistently |
+| quality | 'low'/'medium'/'high', default 'medium' | Tessellation/DPR budget; does not change control points |
+| active | boolean, default true | Allows the host to pause the viewer, for example on a hidden screen |
+| interactive | boolean, default true | false disables controls/input but allows static rendering/capture |
+| showControls | boolean, default true | Toolbar visibility; the host is responsible for alternative controls when false |
+| initialCamera | CameraView, optional | Overrides the model preview camera; otherwise preview → auto-fit |
 
-Розмір задається CSS контейнера, не window.innerWidth. Компонент має документований default aspect-ratio та min-height, підтримує resize. Для нового object reference model: скасувати стару підготовку, провалідувати, перебудувати й звільнити старі ресурси, застосувати початкову камеру. Глибока мутація масивів точок не є підтриманим update API v1; host передає новий об'єкт.
+Size is set by container CSS, not window.innerWidth. The component has documented default aspect-ratio and min-height values and supports resizing. For a new model object reference: cancel old preparation, validate, rebuild and release old resources, then apply the initial camera. Deep mutation of point arrays is not a supported v1 update API; the host supplies a new object.
 
-Валідна заміна initialCamera скидає вид за тим самим правилом, тема/locale не перебудовують геометрію, якість змінює лише tessellation. При невалідній новій моделі показати error/fallback, а не видавати стару геометрію за нову.
+A valid initialCamera replacement resets the view using the same rule; theme/locale do not rebuild geometry, and quality changes only tessellation. An invalid new model must display error/fallback, not present old geometry as the new model.
 
-Події:
+Events:
 
-- ready: { modelId?, schemaVersion, warnings } після першого успішного render поточної моделі; один раз на завантаження/відновлення контексту. Не emit для скасованої моделі.
-- error: { code, message, issues?, recoverable }, без кидання необробленої помилки в host render. Коди: INVALID_MODEL, UNSUPPORTED_SCHEMA, LIMIT_EXCEEDED, WEBGL_UNAVAILABLE, CONTEXT_LOST, RENDER_FAILED, CAPTURE_FAILED.
-- camera-change: CameraView після завершення взаємодії, не кожен frame. Немає аналітики чи мережевої відправки всередині пакета.
+- ready: { modelId?, schemaVersion, warnings } after the first successful render of the current model; once per load/context restoration. Do not emit for a cancelled model.
+- error: { code, message, issues?, recoverable }, without throwing an unhandled error in the host render. Codes: INVALID_MODEL, UNSUPPORTED_SCHEMA, LIMIT_EXCEEDED, WEBGL_UNAVAILABLE, CONTEXT_LOST, RENDER_FAILED, CAPTURE_FAILED.
+- camera-change: CameraView after interaction ends, not every frame. The package contains no analytics or network reporting.
 
-Expose methods: resetView(), fitToView(), capture(options): Promise<Blob>. Capture до ready відхиляється типізованою помилкою; unmount/context loss скасовує незавершені операції. Reset і fit до ready безпечні no-op. Slots: toolbar (reset/fit/zoom callbacks + state), fallback (state/error/poster), loading; їхні props задокументувати в types.
+Exposed methods: resetView(), fitToView(), capture(options): Promise<Blob>. Capture before ready rejects with a typed error; unmount/context loss cancels pending operations. Reset and fit before ready are safe no-ops. Slots: toolbar (reset/fit/zoom callbacks + state), fallback (state/error/poster), loading; document their props in types.
 
-Мінімальний приклад майбутнього API (import path залежить від npm-назви):
+Minimal example of the future API (the import path depends on the npm name):
 
 ```vue
 <KnotViewer
   :model="model"
-  label="Модель вузла"
+  label="Knot model"
   poster="/images/knot-preview.png"
-  locale="uk"
+  locale="en"
   theme="light"
   @error="handleViewerError"
 />
 ```
 
-model приймає об'єкт із даними. Завантаження файла або перетворення зовнішнього ідентифікатора на об'єкт виконується до передачі prop; неявного fetch усередині компонента немає.
+model accepts a data object. Loading a file or resolving an external identifier to an object happens before passing the prop; there is no implicit fetch inside the component.
 
-## Керування й доступність
+## Controls and accessibility
 
-Миша: drag для orbit, масштабування після активації viewer. Touch: окремий режим «Взаємодіяти з моделлю», щоб стаття прокручувалась одним пальцем до активації; після активації один палець обертає, pinch масштабує, є явний вихід із режиму. Escape виходить і повертає стандартне прокручування. Wheel не перехоплює прокручування сторінки без фокусу/активації. Pan у v1 можна вимкнути, якщо він не потрібен сценарію; reset/fit завжди повертають видиму модель.
+Mouse: drag to orbit, zoom after viewer activation. Touch: a separate “Interact with model” mode allows one-finger article scrolling before activation; after activation, one finger rotates, pinch zooms and there is an explicit way to exit the mode. Escape exits and restores normal scrolling. Wheel input does not intercept page scrolling without focus/activation. Pan may be disabled in v1 if the scenario does not need it; reset/fit always restore a visible model.
 
-Клавіатура на сфокусованому viewer: стрілки обертають, +/- масштабують, Home скидає камеру; доступні еквівалентні кнопки. Не перехоплювати клавіші глобально. Видимий focus, семантичні button, label та текстова альтернатива; canvas сам собою не передає форму screen reader. Повідомлення про помилку оголошується один раз, зміни камери не заповнюють live region. Reduced motion вимикає плавний reset/damping, самостійного auto-rotate у v1 немає.
+Keyboard on a focused viewer: arrows rotate, +/- zoom, Home resets the camera; equivalent buttons are available. Do not intercept keys globally. Provide visible focus, semantic buttons, a label and a text alternative; canvas alone does not communicate shape to a screen reader. An error is announced once, and camera changes do not fill a live region. Reduced motion disables smooth reset/damping; v1 has no autonomous auto-rotate.
 
-Обмеження камери не дозволяють пройти всередину об'єкта/втратити його через zoom; near/far розраховуються з bounding box, а не фіксованого масштабу моделі. Perspective camera і framing мають враховувати aspect-ratio. На вузькому екрані кнопки залишаються доступними, touch targets не менші за 44 CSS px як проєктний критерій.
+Camera constraints prevent entering the object/losing it through zoom; near/far are calculated from the bounding box, not a fixed model scale. Perspective camera and framing must account for aspect-ratio. Buttons remain accessible on narrow screens, with touch targets of at least 44 CSS px as a project criterion.
 
-## SSR, офлайн і життєвий цикл
+## SSR, offline use and lifecycle
 
-Імпорт пакета і SSR render не звертаються до window/document/WebGL. Сервер і перший клієнтський render показують ту саму оболонку/poster, GPU створюється після mount. Сумісність перевірити через SSR + hydration, із перевіркою відсутності hydration mismatch. Відсутність poster не повинна породжувати мережевий запит або порожній необмежений canvas.
+Package import and SSR rendering do not access window/document/WebGL. The server and first client render display the same shell/poster; GPU resources are created after mount. Verify compatibility through SSR + hydration, checking that no hydration mismatch occurs. A missing poster must not trigger a network request or an empty, unbounded canvas.
 
-Без зовнішніх запитів зсередини пакета: шрифти, icons, матеріали й shaders локальні, textures у v1 не потрібні. poster надає host і відповідає за доступність URL. Renderer не містить eval/довільних shaders із JSON. Модель — дані, новий код розповсюджується версією пакета.
+No external requests from inside the package: fonts, icons, materials and shaders are local; v1 does not require textures. The host supplies the poster and is responsible for URL availability. The renderer contains no eval/arbitrary shaders from JSON. A model is data; new code is distributed through a package version.
 
-Стани: empty → initializing → ready; із initializing/ready можливий error; active=false, hidden tab/viewport або context loss призупиняють роботу. Поки документ hidden, кадри не плануються. Для нерухомої моделі render-on-demand; damping планує кадри лише доки триває рух. IntersectionObserver оптимізує невидимі instances, active лишається явним host API.
+States: empty → initializing → ready; initializing/ready may transition to error; active=false, a hidden tab/viewport or context loss pauses work. No frames are scheduled while the document is hidden. A stationary model renders on demand; damping schedules frames only while motion continues. IntersectionObserver optimizes invisible instances; active remains an explicit host API.
 
-Використати ResizeObserver, не припускати fullscreen. Нульовий розмір контейнера відкладає render, не ділить на нуль. При unmount від'єднати listeners/observers/controls, скасувати animation frame/capture, dispose renderer/geometries/materials. Спільні geometry pipe/outline не dispose двічі. Кілька viewer instances не ділять камеру, DOM ID або mutable state.
+Use ResizeObserver; do not assume fullscreen. A zero-sized container defers rendering rather than dividing by zero. On unmount, detach listeners/observers/controls, cancel animation frame/capture and dispose of the renderer/geometries/materials. Do not dispose of shared tube/outline geometry twice. Multiple viewer instances do not share a camera, DOM ID or mutable state.
 
-Context loss: припинити рендер, показати poster/стан, emit помилку; відновлення за browser event перебудовує ресурси з поточної моделі й дає ready. За повторного збою — керована кнопка retry, без нескінченного циклу. Зовнішній контейнер може синхронізувати active зі своїм життєвим циклом.
+Context loss: stop rendering, display poster/state and emit an error; restoration through a browser event rebuilds resources from the current model and emits ready. A repeated failure offers a controlled retry button, without an infinite loop. The external container may synchronize active with its own lifecycle.
 
-## Прев'ю карток
+## Card previews
 
-Один geometry builder та версійований preset застосовуються для viewer й карток. Capture(options) підтримує width/height, format='image/png' у v1, view='current' або 'model-preview', opaque/transparent background. Default — current, 512×512, opaque. Upper bound — 2048×2048 у v1; перевірити ресурсні бюджети перед збільшенням.
+One geometry builder and versioned preset are used for both viewer and cards. Capture(options) supports width/height, format='image/png' in v1, view='current' or 'model-preview', and opaque/transparent backgrounds. Default: current, 512×512, opaque. Upper bound: 2048×2048 in v1; verify resource budgets before increasing it.
 
-Захоплення не змінює видиму користувацьку камеру/розмір; використати окремий target або надійне тимчасове збереження/відновлення стану. Render у потрібному aspect-ratio з framing, readback з правильною орієнтацією та alpha; результат — Blob, без автоматичного download. Demo може завантажити його сама. Не лишати preserveDrawingBuffer=true за замовчуванням заради export.
+Capture does not change the user's visible camera/size; use a separate target or reliable temporary state save/restore. Render at the required aspect-ratio with framing, and read back with the correct orientation and alpha; the result is a Blob without automatic download. The demo may download it itself. Do not leave preserveDrawingBuffer=true by default just for export.
 
-CLI/harness запускає browser renderer у CI, чекає ready, викликає capture(view='model-preview') і пише image asset. Результат кешується за model data + preset + camera + renderer version + output size. Фіксуються browser/Three.js versions; pixel-identical картинки на різних GPU не гарантуються. Помилка capture зупиняє генерацію обов'язкової картки, не дає порожній image.
+The CLI/harness launches the browser renderer in CI, waits for ready, calls capture(view='model-preview') and writes an image asset. The result is cached by model data + preset + camera + renderer version + output size. Browser/Three.js versions are pinned; pixel-identical images across GPUs are not guaranteed. A capture failure stops generation of a required card rather than producing an empty image.
 
-У demo та browser capture мають працювати без Node APIs; Node потрібний лише CI harness. Згенероване зображення є окремим результатом API; спосіб його зберігання визначає користувач бібліотеки.
+Demo and browser capture must work without Node APIs; Node is needed only for the CI harness. The generated image is a separate API output; the library consumer determines how it is stored.
 
-## Темізація
+## Theming
 
-Явний stylesheet export, без прихованого global reset. Префікс CSS класів/токенів --knot-viewer-*. Мінімальні токени: background, foreground, border, focus, toolbar-background, error; їхні default light/dark значення забезпечують самостійне використання. SVG/icons локальні. Renderer preset визначає мотузку/outline; CSS не змінює 3D-матеріали неявно. Theme prop узгоджує preset defaults, явний preview preset має стабільний вигляд незалежно від теми сторінки.
+Explicit stylesheet export, without a hidden global reset. CSS class/token prefix: --knot-viewer-*. Minimum tokens: background, foreground, border, focus, toolbar-background, error; their default light/dark values enable standalone use. SVG/icons are local. The renderer preset defines the rope/outline; CSS does not implicitly change 3D materials. The theme prop coordinates preset defaults; an explicit preview preset has a stable appearance independently of the page theme.
 
-Публічні CSS-токени дозволяють узгодити вигляд компонента з довільною дизайн-системою. uk/en мають повний однаковий набір ключів, мова моделі й label може відрізнятися від мови toolbar. Додати нову мову можна через messages, не змінюючи формат геометрії.
+Public CSS tokens allow the component's appearance to match any design system. uk/en have the same complete set of keys; the model and label language may differ from the toolbar language. A new language can be added through messages without changing the geometry format.
 
-## Приймання й план
+## Acceptance and plan
 
-1. Типи/validation і fixture імпорту старого прототипу. Валідатор повертає результат із шляхами до помилок, не змінює вхід.
-2. Geometry/renderer: відкрита, замкнена та дві незалежні мотузки; reset/fit, шов, resize, capture, disposal.
-3. Vue API, SSR/hydration та lifecycle; заміна моделі під час підготовки, кілька instances, context loss, offline.
-4. Demo за demo.md та генератор preview; controls миші/touch/клавіатури, uk/en, light/dark.
-5. Пакування: typecheck, library/demo build, npm pack і встановлення tarball у чисті клієнтський Vue та Vue SSR fixtures. Якщо версія Vue peer підтримує діапазон — перевірити його нижню межу.
-6. Перевірка на сенсорних пристроях і в WebView: scroll vs orbit/pinch, background/resume, offline, memory. Матрицю підтриманих браузерів і версій середовищ опублікувати за результатами фактичних перевірок; емуляцію не видавати за перевірку на пристрої.
+1. Types/validation and a fixture imported from the old prototype. The validator returns a result with error paths and does not mutate input.
+2. Geometry/renderer: open, closed and two independent ropes; reset/fit, seam, resize, capture, disposal.
+3. Vue API, SSR/hydration and lifecycle; model replacement during preparation, multiple instances, context loss, offline use.
+4. Demo according to demo.md and a preview generator; mouse/touch/keyboard controls, uk/en, light/dark.
+5. Packaging: typecheck, library/demo build, npm pack and tarball installation in clean client Vue and Vue SSR fixtures. If the Vue peer version supports a range, test its lower bound.
+6. Checks on touch devices and in WebViews: scroll vs orbit/pinch, background/resume, offline use, memory. Publish the supported browser/environment version matrix based on actual checks; do not present emulation as device testing.
 
-Обов'язкові перевірки: malformed/oversized input, unsupported schema, duplicate IDs/points, invalid camera; geometry finite/bounds; closed seam; відсутність зайвих кадрів у спокої; відсутність listeners/resources після repeated mount/unmount; SSR без DOM; fallback без WebGL; export валідного PNG; model changes не дають stale ready/capture. Візуальні регресії — на фіксованому browser середовищі з допуском, не точне порівняння на довільному GPU.
+Required checks: malformed/oversized input, unsupported schema, duplicate IDs/points, invalid camera; finite geometry/bounds; closed seam; no unnecessary frames at rest; no lingering listeners/resources after repeated mount/unmount; SSR without DOM; fallback without WebGL; valid PNG export; model changes do not produce stale ready/capture. Visual regressions use a fixed browser environment with tolerance, not exact comparison on arbitrary GPUs.
 
-Зафіксувати bundle gzip, cold viewer startup, кількість triangles та frame time на визначеному базовому сенсорному пристрої. До вибору базового пристрою числову обіцянку FPS не давати. Початкові захисні ліміти формату — model-format.md; зміни на основі вимірювання явно версіонувати/документувати.
+Record gzipped bundle size, cold viewer startup, triangle count and frame time on a designated baseline touch device. Do not promise a numerical FPS before selecting the baseline device. Initial protective format limits are in model-format.md; explicitly version/document measurement-driven changes.
 
-Реліз готовий, коли приклад використання з tarball працює у двох web consumers, демка зібрана, наведені сценарії протестовані, відомі обмеження опубліковані. Publishing npm/GitHub Pages — окрема дія після готового результату; цей документ не означає, що щось уже опубліковано.
+The release is ready when the tarball usage example works in two web consumers, the demo is built, the listed scenarios are tested and known limitations are published. Publishing to npm/GitHub Pages is a separate action after the result is ready; this document does not mean anything has already been published.
 
-## Приклад і технічні довідки
+## Example and technical references
 
-Локальний fixture examples/models/prototype-loop.json містить замкнену криву з шести контрольних точок. Використовувати його для початкової перевірки форми й камери разом із прикладами відкритої кривої та кількох мотузок. closed застосовується узгоджено до кривої та її оболонки; frame loop і resize мають відповідати життєвому циклу компонента.
+The local fixture examples/models/prototype-loop.json contains a closed curve with six control points. Use it for initial shape and camera checks alongside open-curve and multiple-rope examples. closed is applied consistently to the curve and its surface; the frame loop and resize behavior must follow the component lifecycle.
 
-Первинні довідки: [CatmullRomCurve3](https://threejs.org/docs/pages/CatmullRomCurve3.html), [Vue SSR](https://vuejs.org/guide/scaling-up/ssr.html). Перед реалізацією перевірити API саме обраної версії залежностей.
+Primary references: [CatmullRomCurve3](https://threejs.org/docs/pages/CatmullRomCurve3.html), [Vue SSR](https://vuejs.org/guide/scaling-up/ssr.html). Before implementation, check the API of the selected dependency versions.

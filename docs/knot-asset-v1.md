@@ -1,26 +1,30 @@
 # Knot Engine — KnotAsset v1
 
-## 1. Призначення
+[English](knot-asset-v1.md) | [Українська](knot-asset-v1.uk.md) · [Documentation](../README.md)
 
-`KnotAsset` — еталонний машинний опис одного вузла в широкому розумінні.
+This is the authoritative domain-data specification for knot-engine. [Implementation policies and migration architecture](architecture.md) separately document numeric limits, unspecified details and the boundaries of the first renderer.
 
-Один asset може містити:
+## 1. Purpose
 
-- один або кілька фізичних елементів;
-- кілька незалежних 2D- і 3D-представлень;
-- статичні та покрокові представлення;
-- кілька алгоритмів зав'язування;
-- альтернативні кінцеві форми та художні варіанти;
-- представлення замкнених мотузок для теорії вузлів;
-- рекомендовані параметри перегляду.
+`KnotAsset` is the canonical machine-readable description of a single knot in the broad sense.
 
-Формат описує дані вузла незалежно від Vue, Three.js, конкретного renderer, UI, локалізації та способу зберігання.
+One asset may contain:
 
-JSON є авторським джерелом даних. Three.js objects, meshes, textures, previews та інші render-specific результати є похідними даними.
+- one or more physical elements;
+- multiple independent 2D and 3D representations;
+- static and step-by-step representations;
+- multiple tying algorithms;
+- alternative final forms and artistic variants;
+- closed-rope representations for knot theory;
+- recommended viewing parameters.
+
+The format describes knot data independently of Vue, Three.js, any particular renderer, UI, localization and storage method.
+
+JSON is the authored source of data. Three.js objects, meshes, textures, previews and other rendering-specific outputs are derived data.
 
 ---
 
-# 2. Коренева структура
+# 2. Root structure
 
 ```ts
 interface KnotAsset {
@@ -37,7 +41,7 @@ interface KnotAsset {
 }
 ```
 
-Приклад:
+Example:
 
 ```json
 {
@@ -52,19 +56,19 @@ interface KnotAsset {
 }
 ```
 
-`id` є непрозорим стабільним ідентифікатором вузла. Він не є URL, шляхом до файла або локалізованою назвою.
+`id` is an opaque, stable knot identifier. It is not a URL, file path or localized name.
 
-`schemaVersion` версіонує саме контракт `KnotAsset`.
+`schemaVersion` versions the `KnotAsset` contract itself.
 
-Версія npm-пакета `knot-engine`, версія renderer та версії presentation presets є незалежними від `schemaVersion`.
+The `knot-engine` npm package version, renderer version and presentation preset versions are independent of `schemaVersion`.
 
 ---
 
 # 3. Elements
 
-`Element` — фізичний або концептуальний об'єкт, що входить до композиції вузла.
+`Element` is a physical or conceptual object that forms part of the knot composition.
 
-Початково визначаються три типи:
+Three types are initially defined:
 
 ```ts
 type KnotElement =
@@ -73,7 +77,7 @@ type KnotElement =
   | CarabinerElement
 ```
 
-У майбутньому список може бути розширений.
+The list may be extended in the future.
 
 ## 3.1 Rope
 
@@ -93,7 +97,7 @@ interface RopeElement {
 }
 ```
 
-Приклад звичайної мотузки:
+Example of an ordinary rope:
 
 ```json
 {
@@ -114,27 +118,27 @@ interface RopeElement {
 
 ### topology
 
-`topology` описує фізичну структуру мотузки, а не геометричну форму конкретного representation.
+`topology` describes the physical structure of the rope, not the geometric shape of a particular representation.
 
 ```text
 open
 ```
 
-означає фізично відкриту мотузку.
+means a physically open rope.
 
 ```text
 closed
 ```
 
-означає замкнений шнур/петлю без фізичних кінців.
+means a closed cord/loop with no physical ends.
 
-Це поняття не слід змішувати з `geometry.closed`.
+This concept must not be confused with `geometry.closed`.
 
 ### ends
 
-`ends` містить кінці, доступні для маніпуляцій у межах описуваної задачі.
+`ends` contains the ends accessible for manipulation within the task being described.
 
-Відкрита мотузка може мати:
+An open rope may have:
 
 ```text
 2 accessible ends
@@ -142,7 +146,7 @@ closed
 0 accessible ends
 ```
 
-Наприклад:
+For example:
 
 ```json
 {
@@ -154,7 +158,7 @@ closed
 }
 ```
 
-— доступні обидва кінці.
+— both ends are accessible.
 
 ```json
 {
@@ -165,7 +169,7 @@ closed
 }
 ```
 
-— доступний один кінець; інший може бути закріплений, приєднаний до вантажу, людини тощо.
+— one end is accessible; the other may be fixed, attached to a load, a person, etc.
 
 ```json
 {
@@ -174,9 +178,9 @@ closed
 }
 ```
 
-— доступна лише частина мотузки, але жоден фізичний кінець недоступний.
+— only part of the rope is accessible, but neither physical end is accessible.
 
-Для:
+For:
 
 ```json
 {
@@ -185,17 +189,17 @@ closed
 }
 ```
 
-мотузка фізично замкнена.
+the rope is physically closed.
 
-Для `topology: "closed"` непорожній `ends` є помилкою validation.
+For `topology: "closed"`, a nonempty `ends` array is a validation error.
 
-`ends` не описує connections з іншими об'єктами.
+`ends` does not describe connections to other objects.
 
-Connections у KnotAsset v1 не визначаються.
+Connections are not defined in KnotAsset v1.
 
-### length і diameter
+### length and diameter
 
-Фізичні розміри задаються в метрах.
+Physical dimensions are specified in meters.
 
 ```json
 {
@@ -204,11 +208,11 @@ Connections у KnotAsset v1 не визначаються.
 }
 ```
 
-означає 1,5 м і 10 мм.
+means 1.5 m and 10 mm.
 
-Обидва поля optional.
+Both fields are optional.
 
-Довжина `geometry` не зобов'язана точно дорівнювати `length`.
+The length of `geometry` does not have to exactly match `length`.
 
 ---
 
@@ -222,9 +226,9 @@ interface SupportElement {
 }
 ```
 
-`support` представляє опору, навколо або відносно якої формується вузол.
+`support` represents a support around or relative to which a knot is formed.
 
-Конкретні конструктивні параметри додаються лише за реальною потребою.
+Specific construction parameters are added only when an actual need arises.
 
 ---
 
@@ -238,15 +242,15 @@ interface CarabinerElement {
 }
 ```
 
-Конструктивні параметри карабіна не стандартизуються в KnotAsset v1.
+Carabiner construction parameters are not standardized in KnotAsset v1.
 
 ---
 
 # 4. Representations
 
-`Representation` — конкретне координатне представлення вузла.
+`Representation` is a particular coordinate representation of a knot.
 
-Один KnotAsset може містити довільну кількість незалежних representations.
+One KnotAsset may contain any number of independent representations.
 
 ```ts
 interface Representation {
@@ -259,7 +263,7 @@ interface Representation {
 }
 ```
 
-Наприклад:
+For example:
 
 ```json
 {
@@ -269,7 +273,7 @@ interface Representation {
 }
 ```
 
-або:
+or:
 
 ```json
 {
@@ -279,17 +283,17 @@ interface Representation {
 }
 ```
 
-`id` не має прихованої семантики. Не слід визначати тип representation за значеннями на кшталт `spatial`, `diagram` тощо.
+`id` has no hidden semantics. Do not infer a representation type from values such as `spatial`, `diagram`, etc.
 
-Формальну dimensionality задає `dimension`.
+`dimension` formally specifies dimensionality.
 
-Один asset може містити кілька representations з однаковою dimensionality.
+One asset may contain multiple representations with the same dimensionality.
 
 ---
 
 # 5. Snapshots
 
-`Snapshot` — стан геометрії representation у певний момент або логічний етап.
+`Snapshot` is the geometry state of a representation at a particular moment or logical stage.
 
 ```ts
 interface Snapshot {
@@ -300,7 +304,7 @@ interface Snapshot {
 }
 ```
 
-Приклад:
+Example:
 
 ```json
 {
@@ -327,11 +331,11 @@ interface Snapshot {
 }
 ```
 
-Snapshots належать конкретному Representation.
+Snapshots belong to a particular Representation.
 
-2D- і 3D-representations не зобов'язані мати однаковий набір snapshots.
+2D and 3D representations do not have to contain the same set of snapshots.
 
-Наприклад:
+For example:
 
 ```text
 primary-3d
@@ -348,9 +352,9 @@ instruction-2d
 └── finished
 ```
 
-Вони можуть описувати той самий процес із різною кількістю логічних станів.
+They may describe the same process with different numbers of logical states.
 
-Representation може містити лише один Snapshot. Наявність Algorithm для статичного representation не вимагається.
+A Representation may contain just one Snapshot. A static representation does not require an Algorithm.
 
 ---
 
@@ -363,25 +367,25 @@ interface SnapshotElement {
 }
 ```
 
-`id` посилається на `KnotAsset.elements[].id`.
+`id` references `KnotAsset.elements[].id`.
 
-Фізичні властивості Element не дублюються в Snapshot.
+The physical properties of an Element are not duplicated in a Snapshot.
 
-Snapshot містить лише стан, який може змінюватися між snapshots.
+A Snapshot contains only state that may change between snapshots.
 
 ---
 
 # 7. Geometry
 
-`geometry` — універсальна назва координатної геометрії Element.
+`geometry` is the general name for the coordinate geometry of an Element.
 
-У KnotAsset v1 визначається:
+KnotAsset v1 defines:
 
 ```ts
 type Geometry = CurveGeometry
 ```
 
-Архітектура повинна дозволяти в майбутньому додати інші типи:
+The architecture must allow other types to be added in the future:
 
 ```text
 curve
@@ -390,7 +394,7 @@ primitive
 ...
 ```
 
-без зміни семантики поля `geometry`.
+without changing the semantics of the `geometry` field.
 
 ## 7.1 CurveGeometry
 
@@ -409,88 +413,88 @@ interface CurveGeometry {
 }
 ```
 
-`Point` залежить від `Representation.dimension`.
+`Point` depends on `Representation.dimension`.
 
-Для 3D:
+For 3D:
 
 ```ts
 type Point3D = [number, number, number]
 ```
 
-Для 2D:
+For 2D:
 
 ```ts
 type Point2D = [number, number]
 ```
 
-Усі coordinates використовують `KnotAsset.units`.
+All coordinates use `KnotAsset.units`.
 
 ### geometry.closed
 
-`geometry.closed` означає лише геометричне замикання конкретної кривої.
+`geometry.closed` means only the geometric closure of a particular curve.
 
-Воно не визначає фізичну topology Element.
+It does not determine the physical topology of an Element.
 
-Наприклад, відкрита фізична мотузка може мати спеціальне теоретичне representation із замкненою geometry.
+For example, a physically open rope may have a special theoretical representation with closed geometry.
 
-Перша точка не дублюється як остання. Замикання задається через `closed: true`.
+The first point is not repeated as the last point. Closure is specified with `closed: true`.
 
 ---
 
-# 8. Стабільна параметризація Element
+# 8. Stable Element parameterization
 
-Положення вздовж rope адресується нормалізованою координатою:
+A position along a rope is addressed by a normalized coordinate:
 
 ```text
 u ∈ [0, 1]
 ```
 
-Для відкритої мотузки:
+For an open rope:
 
 ```text
-u = 0   → один край параметризованого Element
-u = 1   → другий край
+u = 0   → one end of the parameterized Element
+u = 1   → the other end
 ```
 
-`u` описує стабільне положення вздовж самого Element, а не індекс конкретної контрольної точки і не частку довжини поточної spline.
+`u` describes a stable position along the Element itself, not the index of a particular control point or a fraction of the current spline length.
 
-Це дозволяє використовувати `u` після resampling geometry.
+This allows `u` to be used after geometry resampling.
 
-Ідентичність напрямку параметризації Element повинна залишатися стабільною між snapshots.
+The identity of the Element parameterization direction must remain stable between snapshots.
 
 ---
 
-# 9. Відповідність контрольних точок
+# 9. Control-point correspondence
 
-Для snapshots, що використовуються послідовно одним Algorithm для анімації, відповідний Element повинен мати однакову кількість контрольних точок та стабільний порядок цих точок.
+For snapshots used consecutively by one Algorithm for animation, the corresponding Element must have the same number of control points and a stable order of those points.
 
-Таким чином:
+Thus:
 
 ```text
 snapshot A points[i]
 ```
 
-відповідає:
+corresponds to:
 
 ```text
 snapshot B points[i]
 ```
 
-для того самого Element.
+for the same Element.
 
-Це дозволяє renderer інтерполювати координати контрольних точок.
+This allows the renderer to interpolate control-point coordinates.
 
-Формат KnotAsset v1 не гарантує, що проста лінійна інтерполяція створить фізично правильний рух мотузки.
+The KnotAsset v1 format does not guarantee that simple linear interpolation produces physically correct rope motion.
 
-Transitions та trajectories в KnotAsset v1 не специфікуються.
+Transitions and trajectories are not specified in KnotAsset v1.
 
 ---
 
 # 10. Crossings
 
-`crossings` застосовуються лише до 2D Representation.
+`crossings` applies only to a 2D Representation.
 
-Вони не є частиною `Geometry`, оскільки описують відношення між двома ділянками geometry.
+Crossings are not part of `Geometry`, because they describe a relationship between two sections of geometry.
 
 ```ts
 interface CrossingPoint {
@@ -505,7 +509,7 @@ interface Crossing {
 }
 ```
 
-Приклад:
+Example:
 
 ```json
 {
@@ -521,17 +525,17 @@ interface Crossing {
 }
 ```
 
-Crossings зберігаються в конкретному Snapshot 2D Representation, оскільки взаємне проходження ділянок може змінюватися між snapshots.
+Crossings are stored in a particular Snapshot of a 2D Representation, because the relative over/under arrangement of sections may change between snapshots.
 
-Для `dimension: 3` наявність `crossings` є validation error.
+For `dimension: 3`, the presence of `crossings` is a validation error.
 
-У 3D взаємне просторове положення визначається координатами geometry.
+In 3D, relative spatial position is determined by the geometry coordinates.
 
 ---
 
 # 11. Algorithms
 
-`Algorithm` описує один спосіб зав'язування вузла.
+`Algorithm` describes one way of tying a knot.
 
 ```ts
 interface Algorithm {
@@ -541,9 +545,9 @@ interface Algorithm {
 }
 ```
 
-Algorithm працює в межах одного Representation.
+An Algorithm operates within one Representation.
 
-Це дозволяє мати незалежні алгоритми/послідовності для 3D та 2D:
+This allows independent algorithms/sequences for 3D and 2D:
 
 ```text
 algorithm: standard-3d
@@ -553,7 +557,7 @@ algorithm: standard-diagram
 representation: instruction-2d
 ```
 
-Вони не зобов'язані мати однакову кількість Steps.
+They do not have to contain the same number of Steps.
 
 ## Step
 
@@ -564,36 +568,36 @@ interface Step {
 }
 ```
 
-`snapshot` посилається на Snapshot у Representation, визначеному через `Algorithm.representation`.
+`snapshot` references a Snapshot within the Representation specified by `Algorithm.representation`.
 
-`Step` не є Snapshot.
+`Step` is not a Snapshot.
 
-Step є семантичним елементом алгоритму, а Snapshot — станом геометрії.
+A Step is a semantic element of an algorithm, while a Snapshot is a geometry state.
 
-Це дозволяє надалі додавати до Step:
+This allows the following to be added to a Step in the future:
 
-- локалізовані instructions;
+- localized instructions;
 - annotations;
 - active elements/ends;
 - hints;
 - timing;
-- інші навчальні metadata,
+- other educational metadata,
 
-не змінюючи геометричну модель Snapshot.
+without changing the geometry model of a Snapshot.
 
-У KnotAsset v1 Algorithm є лінійною послідовністю Steps.
+In KnotAsset v1, an Algorithm is a linear sequence of Steps.
 
-Branching не визначається. Альтернативний спосіб зав'язування описується окремим Algorithm.
+Branching is not defined. An alternative tying method is described by a separate Algorithm.
 
-Transitions між Steps у KnotAsset v1 не описуються.
+Transitions between Steps are not described in KnotAsset v1.
 
-Їхня runtime-реалізація залишається відповідальністю knot-engine/viewer.
+Their runtime implementation remains the responsibility of knot-engine/viewer.
 
 ---
 
 # 12. Variants
 
-`Variant` — іменоване посилання на конкретний Snapshot конкретного Representation.
+`Variant` is a named reference to a particular Snapshot of a particular Representation.
 
 ```ts
 interface Variant {
@@ -603,7 +607,7 @@ interface Variant {
 }
 ```
 
-Наприклад:
+For example:
 
 ```json
 {
@@ -613,7 +617,7 @@ interface Variant {
 }
 ```
 
-або:
+or:
 
 ```json
 {
@@ -623,21 +627,21 @@ interface Variant {
 }
 ```
 
-Один Snapshot може одночасно:
+One Snapshot may simultaneously:
 
-- бути Variant;
-- бути Step одного Algorithm;
-- бути Step кількох Algorithms.
+- be a Variant;
+- be a Step of one Algorithm;
+- be a Step of multiple Algorithms.
 
-Variant не дублює geometry.
+A Variant does not duplicate geometry.
 
 ---
 
 # 13. Presentation
 
-Presentation-параметри належать Representation, а не Snapshot.
+Presentation parameters belong to a Representation, not a Snapshot.
 
-Початково допускається:
+Initially, the following is supported:
 
 ```ts
 interface Presentation {
@@ -646,7 +650,7 @@ interface Presentation {
 }
 ```
 
-Для 3D:
+For 3D:
 
 ```ts
 interface CameraView {
@@ -656,15 +660,15 @@ interface CameraView {
 }
 ```
 
-Presentation не змінює семантику geometry.
+Presentation does not change the semantics of geometry.
 
-Одна й та сама geometry може бути відображена різними renderer/presentation presets.
+The same geometry may be displayed using different renderers/presentation presets.
 
-У майбутньому за потреби може бути додано кілька іменованих camera views.
+Multiple named camera views may be added in the future if needed.
 
 ---
 
-# 14. Приклад мінімального KnotAsset
+# 14. Minimal KnotAsset example
 
 ```json
 {
@@ -771,64 +775,64 @@ Presentation не змінює семантику geometry.
 
 # 15. Validation
 
-Validator повинен щонайменше перевіряти:
+The validator must check at least:
 
-- підтримуваний `schemaVersion`;
-- унікальність Element IDs;
-- унікальність Representation IDs;
-- унікальність Snapshot IDs у межах Representation;
-- унікальність Algorithm IDs;
-- унікальність Variant IDs;
-- існування всіх referenced IDs;
-- `units === "m"` для v1;
+- supported `schemaVersion`;
+- unique Element IDs;
+- unique Representation IDs;
+- unique Snapshot IDs within a Representation;
+- unique Algorithm IDs;
+- unique Variant IDs;
+- existence of all referenced IDs;
+- `units === "m"` for v1;
 - finite coordinates;
-- правильну dimensionality points;
-- допустимий `tension`;
-- мінімальну кількість points;
-- відсутність послідовних однакових points;
-- відсутність дублювання першої точки в кінці closed curve;
+- correct point dimensionality;
+- valid `tension`;
+- minimum number of points;
+- no consecutive identical points;
+- no repetition of the first point at the end of a closed curve;
 - `u ∈ [0,1]`;
-- crossings тільки для dimension=2;
+- crossings only for dimension=2;
 - `topology:"closed"` → `ends.length === 0`;
-- для `topology:"open"` не більше двох accessible ends;
-- унікальність RopeEnd IDs;
-- однакову кількість відповідних control points у snapshots, які послідовно використовуються Algorithm для анімації.
+- no more than two accessible ends for `topology:"open"`;
+- unique RopeEnd IDs;
+- equal numbers of corresponding control points in snapshots used consecutively by an Algorithm for animation.
 
-Resource limits мають бути окремо визначені й протестовані, а не неявно успадковані зі старого KnotModelV1.
+Resource limits must be defined and tested separately, not implicitly inherited from the old KnotModelV1.
 
 ---
 
-# 16. Що навмисно не входить до KnotAsset v1
+# 16. Deliberately outside KnotAsset v1
 
-KnotAsset v1 не визначає:
+KnotAsset v1 does not define:
 
 - transitions;
 - easing;
 - trajectories;
-- фізичну симуляцію;
+- physical simulation;
 - collision/contact model;
-- connections між Elements;
-- автоматичне визначення правильності вузла;
-- механічну міцність;
-- навантаження;
-- довільний executable code;
+- connections between Elements;
+- automatic determination of knot correctness;
+- mechanical strength;
+- loads;
+- arbitrary executable code;
 - Three.js objects;
 - shaders;
-- зовнішні URL;
-- спосіб завантаження asset;
-- локалізовані навчальні тексти.
+- external URLs;
+- how an asset is loaded;
+- localized educational text.
 
-Ці можливості можуть бути додані окремими versioned capabilities після появи конкретних вимог.
+These features may be added as separate versioned capabilities once specific requirements arise.
 
 ---
 
-# 17. Відношення до legacy KnotModelV1
+# 17. Relationship to legacy KnotModelV1
 
-Існуючий `KnotModelV1` не є KnotAsset v1.
+The existing `KnotModelV1` is not KnotAsset v1.
 
-Він розглядається як legacy/render-oriented формат статичної геометрії.
+It is treated as a legacy, render-oriented format for static geometry.
 
-Під час міграції knot-engine може тимчасово підтримувати:
+During migration, knot-engine may temporarily support:
 
 ```text
 KnotModelV1
@@ -838,19 +842,19 @@ legacy adapter
 KnotAsset v1
 ```
 
-або безпосередньо перетворювати legacy model у внутрішній renderable representation.
+or convert a legacy model directly to an internal renderable representation.
 
-Не слід змінювати значення старого `schemaVersion: 1`, щоб воно мовчки означало новий KnotAsset.
+Do not change the meaning of the old `schemaVersion: 1` so that it silently means the new KnotAsset.
 
-`KnotAsset.schemaVersion: 1` належить новому окремому schema contract.
+`KnotAsset.schemaVersion: 1` belongs to a new, separate schema contract.
 
-Тип root object повинен визначатися явним validator/entry point, а не вгадуватися лише за числом `schemaVersion`.
+The root object type must be determined by an explicit validator/entry point, not inferred solely from the `schemaVersion` number.
 
 ---
 
-# 18. Архітектурний принцип knot-engine
+# 18. Architectural principle of knot-engine
 
-Рекомендована залежність:
+Recommended dependency flow:
 
 ```text
 KnotAsset
@@ -872,8 +876,8 @@ renderer
    └── future editor
 ```
 
-Viewer не є власником формату KnotAsset.
+The viewer does not own the KnotAsset format.
 
-Renderer не повинен мутувати авторські дані.
+The renderer must not mutate authored data.
 
-Редактор у майбутньому працює з KnotAsset, а не з Three.js scene як джерелом істини.
+A future editor works with KnotAsset as the source of truth, rather than a Three.js scene.

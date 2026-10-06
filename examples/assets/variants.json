@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "id": "variants",
+  "units": "m",
+  "elements": [
+    {
+      "id": "rope-1",
+      "type": "rope",
+      "topology": "open",
+      "ends": [
+        {
+          "id": "a"
+        },
+        {
+          "id": "b"
+        }
+      ],
+      "diameter": 0.01
+    }
+  ],
+  "representations": [
+    {
+      "id": "view-3d",
+      "dimension": 3,
+      "snapshots": [
+        {
+          "id": "rest",
+          "elements": [
+            {
+              "id": "rope-1",
+              "geometry": {
+                "type": "curve",
+                "closed": false,
+                "interpolation": {
+                  "type": "catmullrom",
+                  "tension": 0.5
+                },
+                "points": [
+                  [
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0.4,
+                    0.3,
+                    0.1
+                  ],
+                  [
+                    0.8,
+                    0,
+                    0
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "bend",
+          "elements": [
+            {
+              "id": "rope-1",
+              "geometry": {
+                "type": "curve",
+                "closed": false,
+                "interpolation": {
+                  "type": "catmullrom",
+                  "tension": 0.5
+                },
+                "points": [
+                  [
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0.4,
+                    0.5,
+                    0.2
+                  ],
+                  [
+                    0.8,
+                    0,
+                    0
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "finish",
+          "elements": [
+            {
+              "id": "rope-1",
+              "geometry": {
+                "type": "curve",
+                "closed": false,
+                "interpolation": {
+                  "type": "catmullrom",
+                  "tension": 0.5
+                },
+                "points": [
+                  [
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0.2,
+                    0.4,
+                    -0.1
+                  ],
+                  [
+                    0.6,
+                    0,
+                    0
+                  ]
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "algorithms": [
+    {
+      "id": "sequence-a",
+      "representation": "view-3d",
+      "steps": [
+        {
+          "id": "rest",
+          "snapshot": "rest"
+        },
+        {
+          "id": "bend",
+          "snapshot": "bend"
+        },
+        {
+          "id": "finish",
+          "snapshot": "finish"
+        }
+      ]
+    },
+    {
+      "id": "sequence-b",
+      "representation": "view-3d",
+      "steps": [
+        {
+          "id": "rest",
+          "snapshot": "rest"
+        },
+        {
+          "id": "finish",
+          "snapshot": "finish"
+        }
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "id": "variant-bend",
+      "representation": "view-3d",
+      "snapshot": "bend"
+    },
+    {
+      "id": "variant-finish",
+      "representation": "view-3d",
+      "snapshot": "finish"
+    }
+  ]
+}

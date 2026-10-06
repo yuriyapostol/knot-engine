@@ -1,0 +1,598 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://knot-engine.local/schema/knot-asset-v1.schema.json",
+  "title": "KnotAsset v1",
+  "description": "Domain contract in docs/knot-asset-v1.md; implementation policy in docs/architecture.md. Runtime additionally checks ID uniqueness, references, repeated points, camera separation, algorithm point correspondence and aggregate resource budgets.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "units",
+    "elements",
+    "representations"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "units": {
+      "const": "m"
+    },
+    "elements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/element"
+      },
+      "maxItems": 256
+    },
+    "representations": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/representation2"
+          },
+          {
+            "$ref": "#/$defs/representation3"
+          }
+        ]
+      },
+      "maxItems": 32
+    },
+    "algorithms": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/algorithm"
+      },
+      "maxItems": 256
+    },
+    "variants": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/variant"
+      },
+      "maxItems": 1024
+    }
+  },
+  "$defs": {
+    "ropeEnd": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "rope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "topology",
+        "ends"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "rope"
+        },
+        "topology": {
+          "enum": [
+            "open",
+            "closed"
+          ]
+        },
+        "ends": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ropeEnd"
+          },
+          "maxItems": 2
+        },
+        "length": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "diameter": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "subtype": {
+          "type": "string"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "topology": {
+                "const": "closed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "ends": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    "support": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "support"
+        },
+        "subtype": {
+          "type": "string"
+        }
+      }
+    },
+    "carabiner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "carabiner"
+        },
+        "subtype": {
+          "type": "string"
+        }
+      }
+    },
+    "element": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/rope"
+        },
+        {
+          "$ref": "#/$defs/support"
+        },
+        {
+          "$ref": "#/$defs/carabiner"
+        }
+      ]
+    },
+    "crossingPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "element",
+        "u"
+      ],
+      "properties": {
+        "element": {
+          "type": "string",
+          "minLength": 1
+        },
+        "u": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "crossing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "over",
+        "under"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "over": {
+          "$ref": "#/$defs/crossingPoint"
+        },
+        "under": {
+          "$ref": "#/$defs/crossingPoint"
+        }
+      }
+    },
+    "interpolation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "tension"
+      ],
+      "properties": {
+        "type": {
+          "const": "catmullrom"
+        },
+        "tension": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "camera": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "position",
+        "target"
+      ],
+      "properties": {
+        "position": {
+          "$ref": "#/$defs/point3"
+        },
+        "target": {
+          "$ref": "#/$defs/point3"
+        },
+        "fov": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 180
+        }
+      }
+    },
+    "presentation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "camera": {
+          "$ref": "#/$defs/camera"
+        },
+        "preset": {
+          "type": "string"
+        }
+      }
+    },
+    "point2": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "maxItems": 2,
+      "minItems": 2
+    },
+    "curve2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "closed",
+        "interpolation",
+        "points"
+      ],
+      "properties": {
+        "type": {
+          "const": "curve"
+        },
+        "closed": {
+          "type": "boolean"
+        },
+        "interpolation": {
+          "$ref": "#/$defs/interpolation"
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/point2"
+          },
+          "maxItems": 4096,
+          "minItems": 2
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "closed": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "points": {
+                "minItems": 3
+              }
+            }
+          }
+        }
+      ]
+    },
+    "snapshotElement2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "geometry"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "geometry": {
+          "$ref": "#/$defs/curve2"
+        }
+      }
+    },
+    "snapshot2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "elements"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/snapshotElement2"
+          },
+          "maxItems": 256
+        },
+        "crossings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/crossing"
+          },
+          "maxItems": 4096
+        }
+      }
+    },
+    "representation2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "dimension",
+        "snapshots"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dimension": {
+          "const": 2
+        },
+        "snapshots": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/snapshot2"
+          },
+          "maxItems": 256
+        },
+        "presentation": {
+          "$ref": "#/$defs/presentation"
+        }
+      }
+    },
+    "point3": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "maxItems": 3,
+      "minItems": 3
+    },
+    "curve3": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "closed",
+        "interpolation",
+        "points"
+      ],
+      "properties": {
+        "type": {
+          "const": "curve"
+        },
+        "closed": {
+          "type": "boolean"
+        },
+        "interpolation": {
+          "$ref": "#/$defs/interpolation"
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/point3"
+          },
+          "maxItems": 4096,
+          "minItems": 2
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "closed": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "points": {
+                "minItems": 3
+              }
+            }
+          }
+        }
+      ]
+    },
+    "snapshotElement3": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "geometry"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "geometry": {
+          "$ref": "#/$defs/curve3"
+        }
+      }
+    },
+    "snapshot3": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "elements"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/snapshotElement3"
+          },
+          "maxItems": 256
+        }
+      }
+    },
+    "representation3": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "dimension",
+        "snapshots"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dimension": {
+          "const": 3
+        },
+        "snapshots": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/snapshot3"
+          },
+          "maxItems": 256
+        },
+        "presentation": {
+          "$ref": "#/$defs/presentation"
+        }
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "snapshot"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "snapshot": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "algorithm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "representation",
+        "steps"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "representation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/step"
+          },
+          "maxItems": 1024
+        }
+      }
+    },
+    "variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "representation",
+        "snapshot"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "representation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "snapshot": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

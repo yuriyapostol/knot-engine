@@ -1,49 +1,53 @@
-# Демонстраційний застосунок
+# knot-engine demo application
 
-Демка — обов'язковий результат розробки v1. Локальний застосунок реалізовано в demo/; цей документ лишається планом приймання, а неперевірені сценарії зазначено в README. Технологія: окремий Vue 3 + TypeScript + Vite проєкт у demo/, який використовує публічний API пакета.
+[English](demo.md) | [Українська](demo.uk.md) · [Documentation](../README.md)
 
-## Призначення
+The demo is a required v1 development deliverable. The local application is implemented in demo/; this document remains an acceptance plan, and unverified scenarios are listed in README. Technology: a separate Vue 3 + TypeScript + Vite project in demo/ that uses the package's public API.
 
-Показати компонент як окремий продукт і дати відтворювані сценарії для автора моделей та інтегратора. Усі базові fixtures постачаються локально; після завантаження assets/збірки робота з моделями не вимагає мережі. Це не обіцянка PWA/installable offline cache: service worker не входить у scope демки.
+## Purpose
 
-## Основний екран
+Present the component as a standalone product and provide reproducible scenarios for model authors and integrators. All basic fixtures are supplied locally; once assets/the build are loaded, working with models requires no network. This is not a promise of a PWA/installable offline cache: a service worker is outside the demo scope.
 
-- Адаптивний layout: великий viewer, вибір fixture, коротка назва/пояснення й панель контролів. На телефоні панель під viewer, прокручування сторінки вільне до активації 3D.
-- uk/en перемикач для всього UI, включно з помилками; light/dark імітують host theme. Labels доступні клавіатурою й screen reader.
-- Fixtures: простий вузол із симетричною петлею, замкнена крива з локального fixture, відкрита мотузка, дві окремі мотузки, складніша крива для огляду геометрії. Початкова камера демо дивиться вздовж осі z на площину x-y та підлаштовує відстань під габарити моделі. Інші приклади лишаються технічними моделями, доки редактор не підтвердить конкретний вузол.
-- Кнопка взаємодії та елементи керування камерою у viewer; показ поточних model ID/schema version/стану в бічній панелі, без перевантаження основного перегляду.
-- Export PNG поточного виду та PNG модельного preview — окремі дії; локальне завантаження Blob, revoke object URLs після використання.
+A static KnotAsset fixture with snapshot selection has been added to the main viewer. The JSON textarea retains legacy mode; KnotAsset editing and algorithm animation are not implemented.
 
-## Перевірка власної моделі
+## Main screen
 
-Кнопки відкриття і збереження JSON та textarea розміщені в бічній колонці під вибором моделі. Редактор показує JSON вибраного пресета та після короткої паузи в наборі автоматично застосовує валідні зміни. Кнопка збереження завантажує поточний текст редактора як JSON файл. Файл читається локально, не надсилається на сервер. Ліміт файлу 1 MiB до parse; ліміти geometry додатково перевіряє core validator. Невалідний draft лишається в редакторі з шляхом помилки, а viewer зберігає попередню валідну модель. Це поведінка демки, не контракт самого viewer на невалідний model prop.
+- Responsive layout: a large viewer, fixture selection, a short name/description and a controls panel. On phones, the panel sits below the viewer and page scrolling is unrestricted until 3D is activated.
+- A uk/en switch for the entire UI, including errors; light/dark modes simulate the host theme. Labels are accessible by keyboard and screen reader.
+- Fixtures: a simple knot with a symmetric loop, a closed curve from the local fixture, an open rope, two separate ropes and a more complex curve for inspecting geometry. The demo's initial camera looks along the z axis at the x-y plane and adjusts its distance to the model's bounds. Other examples remain technical models until an editor confirms a particular knot.
+- An interaction button and camera controls in the viewer; current model ID/schema version/state in the side panel without overloading the main view.
+- Exporting a PNG of the current view and a PNG of the model preview are separate actions; download the Blob locally and revoke object URLs after use.
 
-Помилки, наприклад curves[0].points[2], мають зрозумілий текст і код, не лише stack trace. Немає eval, вставляння HTML із JSON або автоматичного переходу за model.id. При повторному виборі того самого файла import працює. Вибір пресета у списку повертає його fixture.
+## Checking a custom model
 
-## Приклади інтеграції
+The JSON open/save buttons and textarea are in the side column below model selection. The editor displays the selected preset's JSON and automatically applies valid changes after a short typing pause. The save button downloads the current editor text as a JSON file. Files are read locally and are not sent to a server. The file limit is 1 MiB before parsing; geometry limits are additionally checked by the core validator. An invalid draft remains in the editor with an error path, while the viewer retains the previous valid model. This is demo behavior, not the viewer's own contract for an invalid model prop.
 
-Показати копійований мінімальний Vue snippet з реальною npm-назвою після її вибору, явним import CSS і props. Окремі секції показують модель у статті з довгим текстом, дві незалежні моделі поруч і вузький контейнер. Компонент працює в контейнерах різного розміру незалежно від структури сторінки.
+Errors, such as curves[0].points[2], have understandable text and a code, not just a stack trace. There is no eval, HTML insertion from JSON or automatic navigation to model.id. Import works when the same file is selected again. Selecting a preset in the list restores its fixture.
 
-Fallback page/секція: null model, invalid model, відсутній poster та симуляція недоступного renderer на рівні demo test adapter. Не додавати production prop simulateWebGLFailure у публічний компонент заради демки. Реальний context loss перевіряється у browser test, де доступне відповідне розширення, з явним skip у середовищі без нього.
+## Integration examples
 
-## Збірка та розміщення
+Show a copyable minimal Vue snippet with the actual npm name once chosen, explicit CSS import and props. Separate sections show a model in an article with long text, two independent models side by side and a narrow container. The component works in differently sized containers independently of page structure.
 
-Майбутні scripts: dev:demo, build:demo, preview:demo, build, typecheck, test, test:browser та preview:model. Реалізація має документувати точні команди після вибору менеджера пакетів. Dev використовує source package; окремий CI smoke перевіряє install npm pack tarball, щоб alias на src не приховав broken exports/styles/types.
+Fallback page/section: null model, invalid model, missing poster and simulated renderer unavailability through a demo test adapter. Do not add a production simulateWebGLFailure prop to the public component just for the demo. Real context loss is checked in a browser test where the relevant extension is available, with an explicit skip in environments without it.
 
-Demo будується у свій output, відмінний від library dist; вона не входить до npm files пакета. Base path конфігурується для GitHub Pages project path, не зашивається /knot-viewer/ в компоненти. Усі fixture/poster URLs коректні під непорожнім base; без browser history routes або з узгодженим hash routing для статичного хостингу. Власний домен чи deploy не потрібні для локальної приймальної збірки.
+## Build and hosting
 
-Підготувати GitHub Actions build workflow під час реалізації; публічний deploy вмикається після вибору репозиторного Pages target. Не вважати написаний workflow підтвердженням успішного розміщення. Немає сторонньої аналітики, зовнішніх шрифтів чи рекламних SDK.
+Current npm scripts: dev:demo, build:demo, build, typecheck, test, test:browser, test:package and preview:model. There are no preview:demo, lint or format scripts. Development uses the source package; a separate CI smoke test checks an installed npm pack tarball so that an alias to src cannot hide broken exports/styles/types.
 
-## Критерії готовності
+The demo builds to its own output directory, separate from library dist; it is not included in the package's npm files. The base path is configurable for a GitHub Pages project path; /knot-engine/ is not hardcoded in components. All fixture/poster URLs work under a nonempty base; use no browser history routes or use consistent hash routing for static hosting. A custom domain or deployment is not required for a local acceptance build.
 
-1. Локальний запуск із README за документованими командами та production build/preview.
-2. Default fixture показується; перемикання fixture/uk/en/theme працює без stale render і втрати керування.
-3. Відкрита крива має caps; замкнена — коректний шов; дві криві показуються одночасно.
-4. Scroll сторінки на touch не блокується до активації viewer; кнопки/клавіатура дають доступні альтернативи.
-5. Invalid/oversized JSON не зависає й показує шлях проблеми; всі приклади доступні локально.
-6. Export дає непорожній PNG потрібного розміру, current/model-preview не плутаються; capture не змінює поточну камеру.
-7. Прокручування viewer поза viewport та active=false зупиняють рендер; повернення відновлює актуальну модель.
-8. Дві instances незалежні; повторний mount/unmount не накопичує listeners/RAF/GPU resources.
-9. Збірка працює на / та project base; library tarball проходить окремий consumer smoke.
+Prepare a GitHub Actions build workflow during implementation; public deployment is enabled after choosing the repository's Pages target. A written workflow is not evidence of successful hosting. There is no third-party analytics, external fonts or advertising SDKs.
 
-Демо не замінює перевірки Vue SSR, сенсорних пристроїв і WebView зі specification.md.
+## Readiness criteria
+
+1. Local startup from README using documented commands and a production build/preview.
+2. The default fixture displays; switching fixture/uk/en/theme works without stale rendering or loss of controls.
+3. An open curve has caps; a closed curve has a correct seam; two curves display simultaneously.
+4. Touch page scrolling is not blocked until viewer activation; buttons/keyboard provide accessible alternatives.
+5. Invalid/oversized JSON does not hang and shows the problem path; all examples are available locally.
+6. Export produces a nonempty PNG of the required size; current/model-preview are not confused; capture does not change the current camera.
+7. Scrolling the viewer out of the viewport and active=false stop rendering; returning restores the current model.
+8. Two instances are independent; repeated mount/unmount does not accumulate listeners/RAF/GPU resources.
+9. The build works at / and a project base; the library tarball passes a separate consumer smoke test.
+
+The demo does not replace the Vue SSR, touch-device and WebView checks in specification.md.

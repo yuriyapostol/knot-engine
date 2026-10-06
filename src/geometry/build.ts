@@ -1,20 +1,20 @@
 import * as THREE from 'three'
-import type { KnotModelV1 } from '../core'
+import { ViewerError, type RenderableModel } from '../core'
 
 export type Quality = 'low' | 'medium' | 'high'
 const profiles = { low: [64, 8], medium: [128, 12], high: [256, 16] } as const
 
 export interface BuiltModel { group: THREE.Group; bounds: THREE.Box3; warnings: string[]; dispose(): void }
 
-export function buildGeometry(model: KnotModelV1, quality: Quality, theme: 'light' | 'dark'): BuiltModel {
-  const warnings: string[] = []
+export function buildGeometry(model: RenderableModel, quality: Quality, theme: 'light' | 'dark'): BuiltModel {
+  const warnings: string[] = [...model.warnings]
   let profile: Quality = quality
   const triangles = (p: Quality) => model.curves.length * (profiles[p][0] * profiles[p][1] * 4 + profiles[p][1] * 4)
   while (triangles(profile) > 100000 && profile !== 'low') {
     profile = profile === 'high' ? 'medium' : 'low'
     warnings.push(`Geometry quality reduced to ${profile} to stay within the triangle budget`)
   }
-  if (triangles(profile) > 100000) throw new Error('Geometry exceeds triangle budget')
+  if (triangles(profile) > 100000) throw new ViewerError('LIMIT_EXCEEDED', 'Geometry exceeds triangle budget', undefined, false)
   const group = new THREE.Group()
   const resources: Array<THREE.BufferGeometry | THREE.Material> = []
   const [tubular, radial] = profiles[profile]

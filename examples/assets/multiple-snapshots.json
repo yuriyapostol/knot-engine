@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "id": "multiple-snapshots",
+  "units": "m",
+  "elements": [
+    {
+      "id": "rope-1",
+      "type": "rope",
+      "topology": "open",
+      "ends": [
+        {
+          "id": "a"
+        },
+        {
+          "id": "b"
+        }
+      ],
+      "diameter": 0.01
+    }
+  ],
+  "representations": [
+    {
+      "id": "view-3d",
+      "dimension": 3,
+      "snapshots": [
+        {
+          "id": "rest",
+          "elements": [
+            {
+              "id": "rope-1",
+              "geometry": {
+                "type": "curve",
+                "closed": false,
+                "interpolation": {
+                  "type": "catmullrom",
+                  "tension": 0.5
+                },
+                "points": [
+                  [
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0.4,
+                    0.3,
+                    0.1
+                  ],
+                  [
+                    0.8,
+                    0,
+                    0
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "bend",
+          "elements": [
+            {
+              "id": "rope-1",
+              "geometry": {
+                "type": "curve",
+                "closed": false,
+                "interpolation": {
+                  "type": "catmullrom",
+                  "tension": 0.5
+                },
+                "points": [
+                  [
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0.4,
+                    0.5,
+                    0.2
+                  ],
+                  [
+                    0.8,
+                    0,
+                    0
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "finish",
+          "elements": [
+            {
+              "id": "rope-1",
+              "geometry": {
+                "type": "curve",
+                "closed": false,
+                "interpolation": {
+                  "type": "catmullrom",
+                  "tension": 0.5
+                },
+                "points": [
+                  [
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0.2,
+                    0.4,
+                    -0.1
+                  ],
+                  [
+                    0.6,
+                    0,
+                    0
+                  ]
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
