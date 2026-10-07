@@ -77,4 +77,4 @@ There are no formatting or lint scripts in this repository. The existing `previe
 
 ## Deferred capabilities
 
-The model and validator support 2D; this migration renders only static 3D snapshots. Animation, editing, transitions, trajectories, physics, collisions, connections, automatic knot correctness and mesh/primitive geometry are not implemented. A future editor will use KnotAsset as its source of truth. Publishing, pushing commits and repository renaming are separate operations.
+The model and validator support 2D; this migration renders only static 3D snapshots. Animation, a graphical knot editor, transitions, trajectories, physics, collisions, connections, automatic knot correctness and mesh/primitive geometry are not implemented. A future editor will use KnotAsset as its source of truth. Publishing, pushing commits and repository renaming are separate operations.

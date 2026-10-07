@@ -8,7 +8,7 @@ The demo is a required v1 development deliverable. The local application is impl
 
 Present the component as a standalone product and provide reproducible scenarios for model authors and integrators. All basic fixtures are supplied locally; once assets/the build are loaded, working with models requires no network. This is not a promise of a PWA/installable offline cache: a service worker is outside the demo scope.
 
-A static KnotAsset fixture with snapshot selection has been added to the main viewer. The JSON textarea retains legacy mode; KnotAsset editing and algorithm animation are not implemented.
+The “Rope with multiple snapshots” option is a neutral technical KnotAsset fixture, not another rendering mode for the selected legacy knot. Its snapshots contain different control-point coordinates, so choosing the fixture or a different snapshot changes the shape. All fixtures use the same camera framing, JSON editor, file import/save and PNG export controls. Algorithm animation is not implemented.
 
 ## Main screen
 
@@ -20,7 +20,7 @@ A static KnotAsset fixture with snapshot selection has been added to the main vi
 
 ## Checking a custom model
 
-The JSON open/save buttons and textarea are in the side column below model selection. The editor displays the selected preset's JSON and automatically applies valid changes after a short typing pause. The save button downloads the current editor text as a JSON file. Files are read locally and are not sent to a server. The file limit is 1 MiB before parsing; geometry limits are additionally checked by the core validator. An invalid draft remains in the editor with an error path, while the viewer retains the previous valid model. This is demo behavior, not the viewer's own contract for an invalid model prop.
+The JSON open/save buttons and textarea are available for both legacy KnotModelV1 and KnotAsset in the side column below model selection. The editor displays the selected preset's JSON and automatically applies valid changes after a short typing pause. The save button downloads the current editor text as a JSON file. Files are read locally and are not sent to a server. The file limit is 1 MiB before parsing; geometry limits are additionally checked by the core validator. An invalid draft remains in the editor with an error path, while the viewer retains the previous valid model. This is demo behavior, not the viewer's own contract for an invalid model or asset prop. The host selects the explicit validator from the root structure (`curves` or `representations`), never from `schemaVersion` alone; ambiguous roots are rejected. For assets, selection controls remain available after editing/import, retain existing representation/snapshot IDs where possible, and fall back to the first 3D representation/snapshot when IDs change. The editor and saved JSON contain the complete asset, including every snapshot.
 
 Errors, such as curves[0].points[2], have understandable text and a code, not just a stack trace. There is no eval, HTML insertion from JSON or automatic navigation to model.id. Import works when the same file is selected again. Selecting a preset in the list restores its fixture.
 
@@ -36,7 +36,7 @@ Current npm scripts: dev:demo, build:demo, build, typecheck, test, test:browser,
 
 The demo builds to its own output directory, separate from library dist; it is not included in the package's npm files. The base path is configurable for a GitHub Pages project path; /knot-engine/ is not hardcoded in components. All fixture/poster URLs work under a nonempty base; use no browser history routes or use consistent hash routing for static hosting. A custom domain or deployment is not required for a local acceptance build.
 
-Prepare a GitHub Actions build workflow during implementation; public deployment is enabled after choosing the repository's Pages target. A written workflow is not evidence of successful hosting. There is no third-party analytics, external fonts or advertising SDKs.
+The [Pages workflow](../.github/workflows/pages.yml) publishes `demo-dist/` on pushes to `main` and manual runs on `main`, after typecheck and unit tests. It uses GitHub Pages metadata for the base path and the `github-pages` environment for deployment. Select GitHub Actions as the Pages source and follow the [setup instructions](../README.md#github-pages-demo). No additional secrets or `gh-pages` branch are required. A written workflow and local build are not evidence of successful hosting. There is no third-party analytics, external fonts or advertising SDKs.
 
 ## Readiness criteria
 

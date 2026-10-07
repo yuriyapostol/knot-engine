@@ -68,10 +68,76 @@ try {
   await page.waitForSelector('.knot-viewer[data-state="ready"]')
   await page.locator('.model-select select').selectOption('asset')
   await page.waitForSelector('.knot-viewer[data-state="ready"]')
-  await page.locator('.panel > label select').last().selectOption('finish')
+  await page.locator('.snapshot-select').selectOption('finish')
   await page.waitForSelector('.knot-viewer[data-state="ready"]')
   assert.deepEqual(failures, [])
-  console.log('Demo: legacy default and KnotAsset snapshot selection passed')
+  const editor = page.locator('.editor textarea')
+  assert.ok(await editor.isVisible(), 'KnotAsset must use the same visible JSON editor')
+  assert.equal(JSON.parse(await editor.inputValue()).representations[0].snapshots.length, 3)
+  const waitForModel = async id => {
+    // Filling the editor scrolls the narrow layout; hidden viewers intentionally pause rendering.
+    await page.locator('.knot-viewer').scrollIntoViewIfNeeded()
+    try {
+      await page.waitForFunction(value => {
+        const viewer = document.querySelector('.knot-viewer')
+        return viewer?.getAttribute('data-state') === 'ready' && viewer.getAttribute('aria-label') === value
+      }, id, { timeout: 10000 })
+    } catch (error) {
+      console.error(await page.evaluate(() => ({ state: document.querySelector('.knot-viewer')?.getAttribute('data-state'), label: document.querySelector('.knot-viewer')?.getAttribute('aria-label'), issue: document.querySelector('.editor pre')?.textContent })))
+      throw error
+    }
+  }
+  const edited = structuredClone(asset)
+  edited.id = 'edited-asset'
+  edited.representations[0].snapshots[2].elements[0].geometry.points[1][1] += 0.1
+  await editor.fill(JSON.stringify(edited))
+  await waitForModel('edited-asset')
+  assert.equal(await page.locator('.snapshot-select').inputValue(), 'finish', 'Editing must preserve selected snapshot')
+  assert.equal(await page.locator('.model-select select').inputValue(), 'custom')
+  const invalidDraft = structuredClone(edited); invalidDraft.units = 'relative'
+  await editor.fill(JSON.stringify(invalidDraft))
+  await page.waitForSelector('.editor pre[role="alert"]')
+  assert.equal(await page.locator('.knot-viewer').getAttribute('aria-label'), 'edited-asset', 'Invalid edits must retain last valid model')
+  await editor.fill(JSON.stringify({ ...edited, id: 'recovered-asset' }))
+  await waitForModel('recovered-asset')
+  const saveJSON = async filename => {
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByRole('button', { name: 'Зберегти в файл', exact: true }).click()
+    ])
+    assert.equal(download.suggestedFilename(), filename)
+    const stream = await download.createReadStream(), chunks = []
+    for await (const chunk of stream) chunks.push(chunk)
+    assert.deepEqual(JSON.parse(Buffer.concat(chunks).toString()), JSON.parse(await editor.inputValue()))
+  }
+  await saveJSON('knot-asset.json')
+  const imported = fixture('examples/assets/open-rope.json')
+  imported.id = 'imported-asset'
+  imported.representations[0].id = 'import-view'
+  imported.representations[0].snapshots[0].id = 'import-state'
+  imported.representations.push({ ...structuredClone(imported.representations[0]), id: 'second-view' })
+  await page.locator('input[type="file"]').setInputFiles({ name: 'asset.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(imported)) })
+  await waitForModel('imported-asset')
+  assert.equal(await page.locator('.snapshot-select').inputValue(), 'import-state')
+  assert.equal(await page.locator('.representation-select').inputValue(), 'import-view')
+  await page.locator('.representation-select').selectOption('second-view')
+  await page.waitForSelector('.knot-viewer[data-state="ready"]')
+  assert.equal(await page.locator('.snapshot-select').inputValue(), 'import-state')
+  await page.locator('.model-select select').selectOption('loop')
+  await waitForModel('prototype-loop')
+  assert.equal(await page.locator('.snapshot-select').count(), 0)
+  assert.equal(JSON.parse(await editor.inputValue()).units, 'relative')
+  const legacyEdit = fixture('examples/models/prototype-loop.json'); legacyEdit.id = 'edited-legacy'
+  await editor.fill(JSON.stringify(legacyEdit))
+  await waitForModel('edited-legacy')
+  await saveJSON('knot-model.json')
+  // Importing the other contract uses the same file control and restores its selection UI.
+  await page.locator('input[type="file"]').setInputFiles({ name: 'asset.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(imported)) })
+  await waitForModel('imported-asset')
+  await page.locator('input[type="file"]').setInputFiles({ name: 'legacy.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(legacyEdit)) })
+  await waitForModel('edited-legacy')
+  assert.deepEqual(failures, [])
+  console.log('Demo: shared legacy/asset JSON editing, validation recovery, snapshot preservation, representation selection, import and save passed')
 } finally {
   await browser?.close()
   await server.close()

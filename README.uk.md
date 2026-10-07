@@ -29,6 +29,17 @@ npm pack --dry-run
 
 Робоча назва пакета — `knot-engine`; реліз у npm ще не публікувався. Збірка бібліотеки міститься в `dist/`, а збірка демо — у `demo-dist/`. Для збірки демо за підшляхом проєкту задайте `BASE_PATH=/your-path/`.
 
+## Демо на GitHub Pages
+
+[Workflow Pages](.github/workflows/pages.yml) збирає й публікує `demo-dist/` після push у `main` або ручного запуску на `main`. Перед цим мають пройти typecheck і модульні тести. Базовий шлях Vite береться з метаданих GitHub Pages: `/knot-engine/` для цього репозиторію та `/` для налаштованого власного домену. Особистий токен доступу або додаткові secrets не потрібні.
+
+1. У репозиторії відкрийте **Settings → Pages → Build and deployment** і виберіть **GitHub Actions** у полі **Source**. Див. [інструкції GitHub щодо джерела публікації](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
+2. Зробіть коміт і push workflow та змін демо в `main`.
+3. Відкрийте **Actions → Deploy demo to GitHub Pages** і перевірте успішне завершення обох jobs: `build` та `deploy`. Для ручного повторного запуску виберіть **Run workflow** і гілку `main`.
+4. Відкрийте URL із deployment `github-pages`. Очікувана стандартна адреса — [yuriyapostol.github.io/knot-engine/](https://yuriyapostol.github.io/knot-engine/).
+
+Якщо Actions вимкнено, увімкніть їх у **Settings → Actions → General** і дозвольте офіційні actions `actions/*`, які використовує workflow. Якщо середовище `github-pages` обмежує гілки публікації, дозвольте `main` у **Settings → Environments → github-pages**. Workflow сам задає потрібні права токена. Згенеровані файли не потрібно комітити в гілку `gh-pages`. Локальна перевірка не означає, що сайт уже опубліковано.
+
 ## Використання
 
 ```vue

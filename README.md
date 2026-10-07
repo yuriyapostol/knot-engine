@@ -29,6 +29,17 @@ Generate a card PNG with `npm run preview:model -- --model examples/models/proto
 
 The working package name is `knot-engine`; no npm release has been published. The library build is in `dist/`, and the demo build is in `demo-dist/`. To build the demo for a project subpath, set `BASE_PATH=/your-path/`.
 
+## GitHub Pages demo
+
+The [Pages workflow](.github/workflows/pages.yml) builds and publishes `demo-dist/` after a push to `main`, or when manually run on `main`. Typecheck and unit tests must pass first. The Vite base path comes from GitHub Pages metadata, giving `/knot-engine/` for this repository and `/` for a configured custom domain. No personal access token or additional secrets are required.
+
+1. In the repository, open **Settings → Pages → Build and deployment** and choose **GitHub Actions** as the **Source**. See [GitHub's publishing-source instructions](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
+2. Commit and push the workflow and demo changes to `main`.
+3. Open **Actions → Deploy demo to GitHub Pages** and check that both `build` and `deploy` succeed. To retry manually, select **Run workflow** with branch `main`.
+4. Open the URL shown by the `github-pages` deployment. The expected default URL is [yuriyapostol.github.io/knot-engine/](https://yuriyapostol.github.io/knot-engine/).
+
+If Actions are disabled, enable them in **Settings → Actions → General** and allow the official `actions/*` actions used by the workflow. If the `github-pages` environment restricts deployment branches, allow `main` under **Settings → Environments → github-pages**. The workflow grants its own required token permissions. Generated files do not need to be committed to a `gh-pages` branch. Local verification does not mean the site has already been published.
+
 ## Use
 
 ```vue
