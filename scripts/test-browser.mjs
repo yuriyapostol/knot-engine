@@ -31,7 +31,7 @@ try {
   assert.match(await setInput({ asset: invalid }), /INVALID_MODEL/)
   assert.equal(await page.evaluate(() => window.__webglContexts), 0, 'Malformed asset must fail before WebGL allocation')
 
-  for (const model of ['overhand', 'prototype-loop']) {
+  for (const model of ['overhand', 'twisted-loop']) {
     assert.equal(await setInput({ model: fixture(`examples/models/${model}.json`) }), undefined)
     const capture = await page.evaluate(async () => {
       const blob = await window.__previewCapture(240, 180)
@@ -64,6 +64,7 @@ try {
   assert.equal(await setInput({ asset }), undefined)
   assert.deepEqual(failures, [])
   console.log('KnotAsset: render, snapshot replacement, PNG capture, invalid selection, input conflict, and recovery passed')
+  await page.setViewportSize({ width: 1280, height: 1000 })
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/`)
   await page.waitForSelector('.knot-viewer[data-state="ready"]')
   await page.locator('.model-select select').selectOption('asset')
@@ -124,10 +125,10 @@ try {
   await page.waitForSelector('.knot-viewer[data-state="ready"]')
   assert.equal(await page.locator('.snapshot-select').inputValue(), 'import-state')
   await page.locator('.model-select select').selectOption('loop')
-  await waitForModel('prototype-loop')
+  await waitForModel('twisted-loop')
   assert.equal(await page.locator('.snapshot-select').count(), 0)
   assert.equal(JSON.parse(await editor.inputValue()).units, 'relative')
-  const legacyEdit = fixture('examples/models/prototype-loop.json'); legacyEdit.id = 'edited-legacy'
+  const legacyEdit = fixture('examples/models/twisted-loop.json'); legacyEdit.id = 'edited-legacy'
   await editor.fill(JSON.stringify(legacyEdit))
   await waitForModel('edited-legacy')
   await saveJSON('knot-model.json')
@@ -137,6 +138,27 @@ try {
   await page.locator('input[type="file"]').setInputFiles({ name: 'legacy.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(legacyEdit)) })
   await waitForModel('edited-legacy')
   assert.deepEqual(failures, [])
+  assert.equal(await page.getByRole('button', { name: 'Експорт в PNG', exact: true }).count(), 1)
+  assert.equal(await page.getByRole('button', { name: 'Експорт прев’ю в PNG', exact: true }).count(), 0)
+  const exportPNG = async () => {
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByRole('button', { name: 'Експорт в PNG', exact: true }).click()
+    ])
+    assert.equal(download.suggestedFilename(), 'knot-current.png')
+    const stream = await download.createReadStream(), chunks = []
+    for await (const chunk of stream) chunks.push(chunk)
+    const png = Buffer.concat(chunks)
+    assert.equal(png.readUInt32BE(16), 512)
+    assert.equal(png.readUInt32BE(20), 512)
+    return png
+  }
+  await exportPNG()
+  assert.equal(await page.locator('.presentation-select').count(), 0)
+  const square = await page.locator('.knot-viewer').boundingBox()
+  assert.ok(Math.abs(square.width - square.height) < 1, 'Viewer must remain square')
+  assert.deepEqual(failures, [])
+  console.log('Demo: current-image PNG export and square viewer passed')
   console.log('Demo: shared legacy/asset JSON editing, validation recovery, snapshot preservation, representation selection, import and save passed')
 } finally {
   await browser?.close()

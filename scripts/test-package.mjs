@@ -25,7 +25,7 @@ try {
     for (const key of ['window','document','WebGLRenderingContext']) Object.defineProperty(globalThis, key, { get() { throw new Error('DOM access: '+key) } })
     const core = await import('knot-engine/core')
     assert.equal(core.validateKnotAsset(${readFileSync('examples/assets/open-rope.json', 'utf8')}).valid, true)
-    assert.equal(core.validateKnotModelV1(${readFileSync('examples/models/prototype-loop.json', 'utf8')}).valid, true)
+    assert.equal(core.validateKnotModelV1(${readFileSync('examples/models/twisted-loop.json', 'utf8')}).valid, true)
     assert.equal(core.resolveKnotAsset(${readFileSync('examples/assets/open-rope.json', 'utf8')}).curves.length, 1)
   `)
   execFileSync(process.execPath, ['--no-warnings', '--experimental-loader', join(temp, 'core-loader.mjs'), join(temp, 'core.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })

@@ -3,7 +3,7 @@ import { createSSRApp } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import { KnotViewer, validateModel, resolveKnotModelV1, type KnotModelV1 } from '../src'
 import { buildGeometry } from '../src/geometry/build'
-import loop from '../examples/models/prototype-loop.json'
+import loop from '../examples/models/twisted-loop.json'
 
 const model = loop as KnotModelV1
 describe('model contract', () => {

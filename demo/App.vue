@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, shallowRef } from 'vue'
 import { KnotViewer, validateKnotAsset, validateKnotModelV1, resolveKnotAsset, resolveKnotModelV1, ViewerError, type KnotModelV1, type KnotAsset, type CameraView, type CaptureOptions } from '../src'
-import loop from '../examples/models/prototype-loop.json'
+import loop from '../examples/models/twisted-loop.json'
 import overhand from '../examples/models/overhand.json'
 import assetFixture from '../examples/assets/variants.json'
 type DemoInput = { kind: 'legacy'; data: KnotModelV1 } | { kind: 'asset'; data: KnotAsset }
@@ -58,9 +58,9 @@ const issue = ref('')
 const viewer = ref<InstanceType<typeof KnotViewer> | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 const content = computed(() => locale.value === 'uk' ? {
-  title: 'Knot Engine', intro: 'Система моделювання та візуалізації вузлів і мотузкових конструкцій.', model: 'Модель', overhand: 'Простий вузол', loop: 'Замкнена крива', asset: 'Мотузка з кількома станами', snapshot: 'Стан', representation: 'Представлення', custom: 'Власна модель', invalidJSON: 'Некоректний JSON', invalidFormat: 'Очікується KnotModelV1 з curves або KnotAsset з representations', fileLimit: 'Файл перевищує 1 MiB', export: 'Експорт в PNG', preview: 'Експорт прев’ю в PNG', editor: 'Код', openFile: 'Відкрити з файлу', saveFile: 'Зберегти в файл'
+  title: 'Knot Engine', intro: 'Система моделювання та візуалізації вузлів і мотузкових конструкцій.', model: 'Модель', overhand: 'Простий вузол', loop: 'Скручена петля', asset: 'Мотузка з кількома станами', snapshot: 'Стан', representation: 'Представлення', custom: 'Власна модель', invalidJSON: 'Некоректний JSON', invalidFormat: 'Очікується KnotModelV1 з curves або KnotAsset з representations', fileLimit: 'Файл перевищує 1 MiB', export: 'Експорт в PNG', editor: 'Код', openFile: 'Відкрити з файлу', saveFile: 'Зберегти в файл'
 } : {
-  title: 'Knot Engine', intro: 'A system for modeling and visualizing knots and rope structures.', model: 'Model', overhand: 'Overhand knot', loop: 'Closed curve', asset: 'Rope with multiple snapshots', snapshot: 'Snapshot', representation: 'Representation', custom: 'Custom model', invalidJSON: 'Invalid JSON', invalidFormat: 'Expected KnotModelV1 with curves or KnotAsset with representations', fileLimit: 'File exceeds 1 MiB', export: 'Export to PNG', preview: 'Export preview to PNG', editor: 'Code', openFile: 'Open from file', saveFile: 'Save to file'
+  title: 'Knot Engine', intro: 'A system for modeling and visualizing knots and rope structures.', model: 'Model', overhand: 'Overhand knot', loop: 'Twisted loop', asset: 'Rope with multiple snapshots', snapshot: 'Snapshot', representation: 'Representation', custom: 'Custom model', invalidJSON: 'Invalid JSON', invalidFormat: 'Expected KnotModelV1 with curves or KnotAsset with representations', fileLimit: 'File exceeds 1 MiB', export: 'Export to PNG', editor: 'Code', openFile: 'Open from file', saveFile: 'Save to file'
 })
 function setCurrent(input: DemoInput) {
   if (input.kind === 'asset') {
@@ -141,16 +141,19 @@ async function download(options: CaptureOptions, name: string) {
   <main :data-theme="theme">
     <header class="top"><div><h1>{{ content.title }}</h1><p>{{ content.intro }}</p></div><div class="switches"><button type="button" @click="locale = locale === 'uk' ? 'en' : 'uk'">{{ locale.toUpperCase() }}</button><button type="button" @click="theme = theme === 'light' ? 'dark' : 'light'">{{ theme === 'light' ? '☾' : '☀' }}</button></div></header>
     <div class="layout">
-      <section class="stage"><KnotViewer ref="viewer" :show-controls="false" :model="model" :asset="asset" :representation-id="representationId" :snapshot-id="snapshotId" :initial-camera="demoCamera" :label="current.data.id || 'Rope model'" :locale="locale" :theme="theme" @error="issue = $event.message" /></section>
-      <aside class="panel">
-        <label>{{ content.model }}<span class="model-select select-field"><select v-model="selected" @change="choose"><option value="overhand">{{ content.overhand }}</option><option value="loop">{{ content.loop }}</option><option value="asset">{{ content.asset }}</option><option v-if="selected === 'custom'" value="custom">{{ content.custom }}</option></select></span></label>
-        <label v-if="asset && representations.length > 1">{{ content.representation }}<span class="select-field"><select v-model="representationId" class="representation-select" @change="chooseRepresentation"><option v-for="representation in representations" :key="representation.id" :value="representation.id">{{ representation.id }}</option></select></span></label>
-        <label v-if="asset">{{ content.snapshot }}<span class="select-field"><select v-model="snapshotId" class="snapshot-select"><option v-for="snapshot in snapshots" :key="snapshot.id" :value="snapshot.id">{{ snapshot.id }}</option></select></span></label>
-        <div class="actions"><button type="button" @click="fileInput?.click()">{{ content.openFile }}</button></div>
-        <input ref="fileInput" class="file-input" type="file" accept=".json,application/json" @change="chooseFile">
-        <section class="editor"><label class="code-label">{{ content.editor }}<textarea v-model="draft" @input="scheduleDraft" spellcheck="false" rows="18"></textarea></label><pre v-if="issue" role="alert">{{ issue }}</pre><div class="actions"><button type="button" @click="saveCode">{{ content.saveFile }}</button></div></section>
-        <div class="actions"><button type="button" @click="download({ view: 'current' }, 'knot-current.png')">{{ content.export }}</button><button type="button" @click="download({ view: 'model-preview' }, 'knot-preview.png')">{{ content.preview }}</button></div>
+      <aside class="sidebar">
+        <section class="panel">
+          <label>{{ content.model }}<span class="model-select select-field"><select v-model="selected" @change="choose"><option value="overhand">{{ content.overhand }}</option><option value="loop">{{ content.loop }}</option><option value="asset">{{ content.asset }}</option><option v-if="selected === 'custom'" value="custom">{{ content.custom }}</option></select></span></label>
+          <input ref="fileInput" class="file-input" type="file" accept=".json,application/json" @change="chooseFile">
+          <section class="editor"><label class="code-label">{{ content.editor }}<textarea v-model="draft" @input="scheduleDraft" spellcheck="false" rows="18"></textarea></label><pre v-if="issue" role="alert">{{ issue }}</pre><div class="actions"><button type="button" @click="fileInput?.click()">{{ content.openFile }}</button><button type="button" @click="saveCode">{{ content.saveFile }}</button></div></section>
+        </section>
+        <section class="panel view-settings">
+          <label v-if="asset">{{ content.representation }}<span class="select-field"><select v-model="representationId" class="representation-select" @change="chooseRepresentation"><option v-for="representation in representations" :key="representation.id" :value="representation.id">{{ representation.id }}</option></select></span></label>
+          <label v-if="asset">{{ content.snapshot }}<span class="select-field"><select v-model="snapshotId" class="snapshot-select"><option v-for="snapshot in snapshots" :key="snapshot.id" :value="snapshot.id">{{ snapshot.id }}</option></select></span></label>
+          <div class="actions"><button type="button" @click="download({ view: 'current' }, 'knot-current.png')">{{ content.export }}</button></div>
+        </section>
       </aside>
+      <section class="stage"><KnotViewer ref="viewer" :show-controls="false" :model="model" :asset="asset" :representation-id="representationId" :snapshot-id="snapshotId" :initial-camera="demoCamera" :label="current.data.id || 'Rope model'" :locale="locale" :theme="theme" @error="issue = $event.message" /></section>
     </div>
   </main>
 </template>

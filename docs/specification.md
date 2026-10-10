@@ -142,6 +142,6 @@ The release is ready when the tarball usage example works in two web consumers, 
 
 ## Example and technical references
 
-The local fixture examples/models/prototype-loop.json contains a closed curve with six control points. Use it for initial shape and camera checks alongside open-curve and multiple-rope examples. closed is applied consistently to the curve and its surface; the frame loop and resize behavior must follow the component lifecycle.
+The local fixture examples/models/twisted-loop.json contains a closed curve with six control points. Use it for initial shape and camera checks alongside open-curve and multiple-rope examples. closed is applied consistently to the curve and its surface; the frame loop and resize behavior must follow the component lifecycle.
 
 Primary references: [CatmullRomCurve3](https://threejs.org/docs/pages/CatmullRomCurve3.html), [Vue SSR](https://vuejs.org/guide/scaling-up/ssr.html). Before implementation, check the API of the selected dependency versions.

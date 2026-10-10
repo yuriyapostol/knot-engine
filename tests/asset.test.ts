@@ -8,7 +8,7 @@ import { buildGeometry } from '../src/geometry/build'
 import open from '../examples/assets/open-rope.json'
 import sequence from '../examples/assets/variants.json'
 import diagram from '../examples/assets/diagram-crossings.json'
-import legacy from '../examples/models/prototype-loop.json'
+import legacy from '../examples/models/twisted-loop.json'
 
 const asset = () => structuredClone(sequence) as KnotAsset
 const first = (a: KnotAsset) => a.representations[0].snapshots[0] as Snapshot<3>

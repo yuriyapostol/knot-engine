@@ -6,7 +6,7 @@ This static-geometry contract is retained for compatibility. The authoritative d
 
 The format describes geometry independently of the interface, localization and storage method. JSON with control points is the authored source; meshes and previews are derived outputs. The machine-readable JSON Schema is in schema/knot-model-v1.schema.json; TypeScript types and the runtime validator are in src/core. Semantic checks such as duplicate points are performed by the runtime validator.
 
-Example: [prototype-loop.json](../examples/models/prototype-loop.json). This is a technical model for demonstrating geometry; its name does not certify that it represents a particular practical knot.
+Example: [twisted-loop.json](../examples/models/twisted-loop.json). This is a technical model for demonstrating geometry; its name does not certify that it represents a particular practical knot.
 
 ## Fields
 

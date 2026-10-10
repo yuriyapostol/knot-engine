@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "prototype-loop",
+  "id": "twisted-loop",
   "coordinateSystem": "right-handed-y-up",
   "units": "relative",
   "curves": [
@@ -10,12 +10,12 @@
       "interpolation": { "type": "catmullrom", "tension": 0.7 },
       "radius": 0.5,
       "points": [
-        [3, -6, -1],
-        [0, -10.5, 0],
-        [-3, -6, 1],
-        [5, 5, -0.2],
-        [0, 10, 0],
-        [-5, 5, 0.2]
+        [-4, 3, -1],
+        [-8, 0, 0],
+        [-4, -3, 1],
+        [4, 3, 1],
+        [8, 0, 0],
+        [4, -3, -1]
       ]
     }
   ],

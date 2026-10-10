@@ -25,7 +25,7 @@ npm run test:package
 npm pack --dry-run
 ```
 
-Щоб згенерувати PNG для картки, виконайте `npm run preview:model -- --model examples/models/prototype-loop.json --out /tmp/knot-preview.png`. Скрипт використовує локальний Chrome (або `CHROME_PATH`) і кешує результат за моделлю, розміром, браузером та версією renderer.
+Щоб згенерувати PNG для картки, виконайте `npm run preview:model -- --model examples/models/twisted-loop.json --out /tmp/knot-preview.png`. Скрипт використовує локальний Chrome (або `CHROME_PATH`) і кешує результат за моделлю, розміром, браузером та версією renderer.
 
 Робоча назва пакета — `knot-engine`; реліз у npm ще не публікувався. Збірка бібліотеки міститься в `dist/`, а збірка демо — у `demo-dist/`. Для збірки демо за підшляхом проєкту задайте `BASE_PATH=/your-path/`.
 
