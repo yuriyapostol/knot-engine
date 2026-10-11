@@ -28,6 +28,11 @@ JSON is the authored source of data. Three.js objects, meshes, textures, preview
 
 ```ts
 interface KnotAsset {
+  schema?: 'KnotAsset'
+  $schema?: string
+  name?: string
+  aliases?: string[]
+  diagrams?: GridDiagram[]
   schemaVersion: 1
   id: string
 
@@ -45,6 +50,7 @@ Example:
 
 ```json
 {
+  "schema": "KnotAsset",
   "schemaVersion": 1,
   "id": "bowline",
   "units": "m",
@@ -672,6 +678,7 @@ Multiple named camera views may be added in the future if needed.
 
 ```json
 {
+  "schema": "KnotAsset",
   "schemaVersion": 1,
   "id": "bowline",
   "units": "m",
@@ -881,3 +888,35 @@ The viewer does not own the KnotAsset format.
 The renderer must not mutate authored data.
 
 A future editor works with KnotAsset as the source of truth, rather than a Three.js scene.
+
+## Modular assets and grid diagrams
+
+`schema: "KnotAsset"` identifies the document contract; `schemaVersion` identifies its version. `$schema` optionally points editors to the JSON Schema. New examples include both. These fields remain optional when reading initial v1 assets. `name` and `aliases` are optional display/catalogue names; `id` remains the stable identity.
+
+Coordinate `representations` retain their existing geometry semantics. `diagrams` holds combinatorial views, initially `GridDiagram`:
+
+```ts
+interface GridDiagram {
+  id: string
+  type: 'grid'
+  size: number
+  x: number[]
+  o: number[]
+}
+```
+
+Rows are indexed from the bottom, columns from the left, starting at zero. `x[row]` and `o[row]` give marker columns. Each array is a permutation of `0..size-1`; X and O occupy different cells in each row. Horizontal arcs run O→X, vertical arcs X→O, with vertical arcs over horizontal arcs. Size is bounded to 2–256. These are integer cell coordinates, not meter coordinates. A grid may describe multiple components; validation does not establish knot identity or component count.
+
+Use `validateGridDiagram(value, { strict: true })` for standalone runtime validation. A component displaying a grid should accept `GridDiagram`, optionally together with `KnotIdentity`, rather than the whole asset. Standalone subschemas are exported at `knot-engine/schema/grid-diagram-v1.schema.json`, `representation-2d-v1.schema.json`, `representation-3d-v1.schema.json` and `element-v1.schema.json`. Their `$ref` dependencies must be registered/resolved alongside the root schema. Schema validation is structural; runtime validation additionally enforces grid length, bounds relative to size, and X/O separation.
+
+```ts
+const gridOnly = selectKnotAsset(asset, { diagrams: ['grid'] })
+const spatialOnly = selectKnotAsset(asset, { representations: ['view-3d'] })
+const combined = composeKnotAsset([gridOnly, spatialOnly])
+```
+
+Selections retain identity, requested views, referenced physical elements, and algorithms/variants belonging to retained coordinate representations. They return independent copies. A grid-only asset has empty `elements` and `representations`; it is valid domain data and cannot be rendered by the current 3D viewer. Composition accepts self-contained, valid fragments of the same asset ID and units. Equal collection IDs deduplicate only when content matches; conflicts are errors. Partial snapshots and dangling references are rejected. Composition does not merge different versions of a representation or fetch external data.
+
+The former relative-unit overhand and twisted-loop examples now live in `examples/assets`. Their explicit demonstration scale is **1 former unit = 0.01 m**, applied to points, radius/diameter and camera coordinates. This preserves proportions and is not a measured rope size. Original documents live only in `tests/fixtures/legacy` to check compatibility.
+
+See [format analysis and extension plan](asset-evolution.uk.md) for notation, mathematical presentations, invariants, provenance and further diagram types. These are design proposals, not accepted arbitrary fields in v1.

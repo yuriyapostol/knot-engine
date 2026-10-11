@@ -2,6 +2,8 @@
 
 [English](architecture.md) | [Українська](architecture.uk.md) · [Documentation](../README.md)
 
+**Current development policy:** there are no external users yet. Keep package and schema version numbers unchanged; backward compatibility is not a requirement. The agreed direction is a complete transition to KnotAsset and removal of KnotModelV1 support, without mandatory legacy adapters or dual APIs. The sections below describe the existing implementation; preserving the old API is not a constraint on the target architecture. Design decisions are recorded in the [contract draft (Ukrainian)](knot-asset-next-draft.uk.md).
+
 [**KnotAsset v1**](knot-asset-v1.md) is the authoritative domain-data specification. [KnotModelV1](model-format.md) remains a separate, legacy, render-oriented static format. Their `schemaVersion: 1` values belong to different contracts. Neither validator nor viewer dispatches by that number.
 
 ```text
@@ -69,7 +71,7 @@ The domain does not standardize appearance or a preset registry. The first rende
 
 ## Fixtures and verification
 
-`examples/models/` remains unchanged for legacy regression tests. `examples/assets/` contains neutral technical fixtures for open/closed rope, two ropes, support, carabiner, multiple snapshots, algorithms sharing a final snapshot, variants and 2D crossings. These curves do not claim to be verified practical knots. `examples/assets/invalid/` contains malformed examples; tests additionally exercise non-JSON values such as NaN/Infinity, reference scopes, frozen input and resource boundaries.
+`tests/fixtures/legacy/` preserves original KnotModelV1 documents for compatibility tests. The demo and authored examples use KnotAsset; migrated relative-unit models explicitly adopt a 0.01 m per unit demo scale. `examples/assets/` contains neutral technical fixtures for open/closed rope, two ropes, support, carabiner, multiple snapshots, algorithms sharing a final snapshot, variants and 2D crossings. These curves do not claim to be verified practical knots. `examples/assets/invalid/` contains malformed examples; tests additionally exercise non-JSON values such as NaN/Infinity, reference scopes, frozen input and resource boundaries.
 
 Run `npm run typecheck`, `npm test`, `npm run build`, `npm run build:demo`, `npm run test:browser` and `npm run test:package`. The browser script requires local Chrome or `CHROME_PATH`; it tests real WebGL using software rendering, both legacy fixtures, asset snapshot replacement, capture, rejection before WebGL allocation and demo selection. The package test extracts the actual npm tarball into an isolated consumer; only Vue/Three/type dependencies are linked from the workspace. It checks core-only imports, SSR, public declarations and a client build including CSS. This is not a fresh network dependency installation or a minimum-peer-version matrix.
 

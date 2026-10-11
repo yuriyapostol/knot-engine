@@ -31,8 +31,9 @@ try {
   assert.match(await setInput({ asset: invalid }), /INVALID_MODEL/)
   assert.equal(await page.evaluate(() => window.__webglContexts), 0, 'Malformed asset must fail before WebGL allocation')
 
-  for (const model of ['overhand', 'twisted-loop']) {
-    assert.equal(await setInput({ model: fixture(`examples/models/${model}.json`) }), undefined)
+  for (const kind of ['legacy', 'asset']) for (const model of ['overhand', 'twisted-loop']) {
+    const path = kind === 'legacy' ? `tests/fixtures/legacy/${model}.json` : `examples/assets/${model}.json`
+    assert.equal(await setInput({ [kind === 'legacy' ? 'model' : 'asset']: fixture(path) }), undefined)
     const capture = await page.evaluate(async () => {
       const blob = await window.__previewCapture(240, 180)
       const bitmap = await createImageBitmap(blob)
@@ -45,7 +46,7 @@ try {
       return { size: blob.size, width: canvas.width, height: canvas.height, colored }
     })
     assert.ok(capture.size > 1000 && capture.colored > 100, `${model}: capture must contain rendered geometry`)
-    console.log(`Legacy ${model}: render and 240×180 PNG capture passed`)
+    console.log(`${kind} ${model}: render and 240×180 PNG capture passed`)
   }
   const asset = fixture('examples/assets/variants.json')
   assert.equal(await setInput({ asset, selection: { representationId: 'view-3d', snapshotId: 'rest' } }), undefined)
@@ -60,7 +61,7 @@ try {
   assert.notDeepEqual(before, after, 'Snapshot selection must change the captured geometry')
   assert.match(await setInput({ asset, selection: { snapshotId: 'missing' } }), /INVALID_MODEL/)
   assert.equal(await page.locator('.knot-viewer').getAttribute('data-state'), 'error')
-  assert.match(await setInput({ asset, model: fixture('examples/models/overhand.json') }), /INVALID_MODEL/)
+  assert.match(await setInput({ asset, model: fixture('tests/fixtures/legacy/overhand.json') }), /INVALID_MODEL/)
   assert.equal(await setInput({ asset }), undefined)
   assert.deepEqual(failures, [])
   console.log('KnotAsset: render, snapshot replacement, PNG capture, invalid selection, input conflict, and recovery passed')
@@ -126,9 +127,10 @@ try {
   assert.equal(await page.locator('.snapshot-select').inputValue(), 'import-state')
   await page.locator('.model-select select').selectOption('loop')
   await waitForModel('twisted-loop')
-  assert.equal(await page.locator('.snapshot-select').count(), 0)
-  assert.equal(JSON.parse(await editor.inputValue()).units, 'relative')
-  const legacyEdit = fixture('examples/models/twisted-loop.json'); legacyEdit.id = 'edited-legacy'
+  assert.equal(await page.locator('.snapshot-select').count(), 1)
+  assert.equal(JSON.parse(await editor.inputValue()).schema, 'KnotAsset')
+  assert.equal(JSON.parse(await editor.inputValue()).units, 'm')
+  const legacyEdit = fixture('tests/fixtures/legacy/twisted-loop.json'); legacyEdit.id = 'edited-legacy'
   await editor.fill(JSON.stringify(legacyEdit))
   await waitForModel('edited-legacy')
   await saveJSON('knot-model.json')

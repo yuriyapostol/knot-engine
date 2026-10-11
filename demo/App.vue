@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, shallowRef } from 'vue'
 import { KnotViewer, validateKnotAsset, validateKnotModelV1, resolveKnotAsset, resolveKnotModelV1, ViewerError, type KnotModelV1, type KnotAsset, type CameraView, type CaptureOptions } from '../src'
-import loop from '../examples/models/twisted-loop.json'
-import overhand from '../examples/models/overhand.json'
+import loop from '../examples/assets/twisted-loop.json'
+import overhand from '../examples/assets/overhand.json'
 import assetFixture from '../examples/assets/variants.json'
 type DemoInput = { kind: 'legacy'; data: KnotModelV1 } | { kind: 'asset'; data: KnotAsset }
 const examples: Record<string, DemoInput> = {
-  overhand: { kind: 'legacy', data: overhand as KnotModelV1 },
-  loop: { kind: 'legacy', data: loop as KnotModelV1 },
+  overhand: { kind: 'asset', data: overhand as KnotAsset },
+  loop: { kind: 'asset', data: loop as unknown as KnotAsset },
   asset: { kind: 'asset', data: assetFixture as KnotAsset }
 }
 const representationId = ref('view-3d')

@@ -25,7 +25,7 @@ npm run test:package
 npm pack --dry-run
 ```
 
-Щоб згенерувати PNG для картки, виконайте `npm run preview:model -- --model examples/models/twisted-loop.json --out /tmp/knot-preview.png`. Скрипт використовує локальний Chrome (або `CHROME_PATH`) і кешує результат за моделлю, розміром, браузером та версією renderer.
+Щоб згенерувати PNG для картки, виконайте `npm run preview:model -- --model examples/assets/twisted-loop.json --out /tmp/knot-preview.png`. Скрипт використовує локальний Chrome (або `CHROME_PATH`) і кешує результат за моделлю, розміром, браузером та версією renderer.
 
 Робоча назва пакета — `knot-engine`; реліз у npm ще не публікувався. Збірка бібліотеки міститься в `dist/`, а збірка демо — у `demo-dist/`. Для збірки демо за підшляхом проєкту задайте `BASE_PATH=/your-path/`.
 
@@ -44,13 +44,13 @@ npm pack --dry-run
 
 ```vue
 <script setup lang="ts">
-import { KnotViewer, type KnotModelV1 } from 'knot-engine'
+import { KnotViewer, type KnotAsset } from 'knot-engine'
 import 'knot-engine/styles.css'
-defineProps<{ model: KnotModelV1 }>()
+defineProps<{ asset: KnotAsset }>()
 </script>
 
 <template>
-  <KnotViewer :model="model" label="Rope model" locale="en" />
+  <KnotViewer :asset="asset" label="Rope model" locale="en" />
 </template>
 ```
 

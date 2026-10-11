@@ -58,8 +58,12 @@ export function validateKnotAsset(value: unknown, options: { strict?: boolean } 
     })
     if (v.closed === true && points.length && samePoint(points[0], points.at(-1))) add(`${path}.points[${points.length - 1}]`, 'Closed curve must not repeat its first point')
   }
-  if (!object(value, '', ['schemaVersion', 'id', 'units', 'elements', 'representations', 'algorithms', 'variants'])) return { valid: false, issues }
+  if (!object(value, '', ['schema', '$schema', 'schemaVersion', 'id', 'name', 'aliases', 'units', 'elements', 'representations', 'algorithms', 'variants', 'diagrams'])) return { valid: false, issues }
   if (value.schemaVersion !== 1) add('schemaVersion', 'Only KnotAsset schema version 1 is supported', 'UNSUPPORTED_SCHEMA')
+  if (value.schema !== undefined && value.schema !== 'KnotAsset') add('schema', 'Expected KnotAsset', 'UNSUPPORTED_SCHEMA')
+  optionalString(value.$schema, '$schema')
+  optionalString(value.name, 'name')
+  if (value.aliases !== undefined) list(value.aliases, 'aliases', 256).forEach((alias, i) => id(alias, `aliases[${i}]`))
   id(value.id, 'id')
   if (value.units !== 'm') add('units', 'Expected meters (m)')
   const elementIds = new Set<string>()
@@ -124,6 +128,26 @@ export function validateKnotAsset(value: unknown, options: { strict?: boolean } 
         if (samePoint(camera.position, camera.target)) add(`${cp}.position`, 'Camera position must differ from target')
         if (camera.fov !== undefined && (!finite(camera.fov) || camera.fov <= 0 || camera.fov >= 180)) add(`${cp}.fov`, 'Expected FOV greater than 0 and less than 180 degrees')
       }
+    }
+  })
+  const diagramIds = new Set<string>()
+  if (value.diagrams !== undefined) list(value.diagrams, 'diagrams', 32).forEach((diagram, i) => {
+    const path = `diagrams[${i}]`
+    if (!object(diagram, path, ['id', 'type', 'size', 'x', 'o'])) return
+    id(diagram.id, `${path}.id`, diagramIds)
+    if (diagram.type !== 'grid') add(`${path}.type`, 'Only grid diagrams are supported', 'UNSUPPORTED_SCHEMA')
+    const size = diagram.size
+    if (!Number.isInteger(size) || (size as number) < 2 || (size as number) > 256) add(`${path}.size`, 'Expected integer size from 2 to 256')
+    for (const marker of ['x', 'o']) {
+      const columns = list(diagram[marker], `${path}.${marker}`, 256)
+      if (columns.length !== size) add(`${path}.${marker}`, 'Expected one marker per row')
+      const seen = new Set<number>()
+      columns.forEach((column, row) => {
+        if (!Number.isInteger(column) || (column as number) < 0 || (column as number) >= (size as number)) add(`${path}.${marker}[${row}]`, 'Column is outside the grid')
+        if (seen.has(column as number)) add(`${path}.${marker}[${row}]`, 'Expected one marker per column')
+        seen.add(column as number)
+        if (marker === 'o' && Array.isArray(diagram.x) && diagram.x[row] === column) add(`${path}.o[${row}]`, 'X and O must occupy different cells')
+      })
     }
   })
   const algorithmIds = new Set<string>(), variantIds = new Set<string>()

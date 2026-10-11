@@ -8,7 +8,7 @@ import { buildGeometry } from '../src/geometry/build'
 import open from '../examples/assets/open-rope.json'
 import sequence from '../examples/assets/variants.json'
 import diagram from '../examples/assets/diagram-crossings.json'
-import legacy from '../examples/models/twisted-loop.json'
+import legacy from './fixtures/legacy/twisted-loop.json'
 
 const asset = () => structuredClone(sequence) as KnotAsset
 const first = (a: KnotAsset) => a.representations[0].snapshots[0] as Snapshot<3>
@@ -231,7 +231,7 @@ describe('snapshot resolution and rendering', () => {
     const b = asset(); b.representations[0].snapshots[2].elements[0].geometry.points[0][0] = NaN
     expect(() => resolveKnotAsset(b, { snapshotId: 'rest' })).toThrow(ViewerError)
   })
-  for (const file of readdirSync('examples/assets').filter(f => f.endsWith('.json') && !f.startsWith('diagram'))) {
+  for (const file of readdirSync('examples/assets').filter(f => f.endsWith('.json') && !f.startsWith('diagram') && !f.startsWith('grid'))) {
     it(`builds finite 3D geometry for ${file}`, () => {
       const a = JSON.parse(readFileSync(`examples/assets/${file}`, 'utf8'))
       const built = buildGeometry(resolveKnotAsset(a), 'low', 'light')

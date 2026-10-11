@@ -46,7 +46,20 @@ export type Representation<D extends Dimension = Dimension> = D extends Dimensio
 export interface Step { id: string; snapshot: string }
 export interface Algorithm { id: string; representation: string; steps: Step[] }
 export interface Variant { id: string; representation: string; snapshot: string }
-export interface KnotAsset {
+/** Combinatorial grid: row 0 is the bottom row; columns increase to the right.
+ * Horizontal arcs run O→X, vertical arcs X→O and pass over horizontal arcs. */
+export interface GridDiagram {
+  id: string
+  type: 'grid'
+  size: number
+  x: number[]
+  o: number[]
+}
+export interface KnotIdentity { id: string; name?: string; aliases?: string[] }
+export interface KnotAsset extends KnotIdentity {
+  /** Optional only for compatibility with the initial v1 documents. */
+  schema?: 'KnotAsset'
+  $schema?: string
   schemaVersion: 1
   id: string
   units: 'm'
@@ -54,4 +67,5 @@ export interface KnotAsset {
   representations: Representation[]
   algorithms?: Algorithm[]
   variants?: Variant[]
+  diagrams?: GridDiagram[]
 }

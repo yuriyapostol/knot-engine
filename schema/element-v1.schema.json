@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://knot-engine.local/schema/element-v1.schema.json",
+  "title": "element v1",
+  "$ref": "knot-asset-v1.schema.json#/$defs/element"
+}

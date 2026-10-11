@@ -28,6 +28,11 @@ JSON є авторським джерелом даних. Three.js objects, mesh
 
 ```ts
 interface KnotAsset {
+  schema?: 'KnotAsset'
+  $schema?: string
+  name?: string
+  aliases?: string[]
+  diagrams?: GridDiagram[]
   schemaVersion: 1
   id: string
 
@@ -45,6 +50,7 @@ interface KnotAsset {
 
 ```json
 {
+  "schema": "KnotAsset",
   "schemaVersion": 1,
   "id": "bowline",
   "units": "m",
@@ -672,6 +678,7 @@ Presentation не змінює семантику geometry.
 
 ```json
 {
+  "schema": "KnotAsset",
   "schemaVersion": 1,
   "id": "bowline",
   "units": "m",
@@ -881,3 +888,35 @@ Viewer не є власником формату KnotAsset.
 Renderer не повинен мутувати авторські дані.
 
 Редактор у майбутньому працює з KnotAsset, а не з Three.js scene як джерелом істини.
+
+## Модульні assets і Grid diagram
+
+`schema: "KnotAsset"` визначає назву контракту, `schemaVersion` — його версію. Необов’язкове `$schema` вказує редактору на JSON Schema. Нові приклади містять обидва поля; для сумісності з початковими v1 документами вони залишаються необов’язковими. `name` та `aliases` — необов’язкові назви для відображення й каталогів; стабільною ідентичністю залишається `id`.
+
+Координатні `representations` зберігають свої геометричні правила. Окремий розділ `diagrams` містить комбінаторні представлення, спочатку `GridDiagram`:
+
+```ts
+interface GridDiagram {
+  id: string
+  type: 'grid'
+  size: number
+  x: number[]
+  o: number[]
+}
+```
+
+Рядки рахуються знизу, стовпці — зліва, від нуля. `x[row]` і `o[row]` задають стовпці маркерів. Кожен масив є перестановкою `0..size-1`; X та O не можуть займати одну клітинку. Горизонтальні дуги спрямовані O→X, вертикальні — X→O; вертикальні проходять над горизонтальними. Розмір обмежено 2–256. Координати клітинок цілочислові, а не в метрах. Grid може описувати кілька компонентів: валідатор не доводить ідентичність вузла або кількість компонентів.
+
+Компонент відображення Grid має приймати `GridDiagram`, за потреби разом із `KnotIdentity`. `validateGridDiagram(value, { strict: true })` перевіряє окрему діаграму. Окремі підсхеми доступні як `knot-engine/schema/grid-diagram-v1.schema.json`, `representation-2d-v1.schema.json`, `representation-3d-v1.schema.json` та `element-v1.schema.json`. Разом із ними потрібно зареєструвати або розв’язати `$ref` на кореневу схему. JSON Schema перевіряє структуру; runtime додатково перевіряє довжини Grid масивів, межі стовпців відносно size та розділення X/O.
+
+```ts
+const gridOnly = selectKnotAsset(asset, { diagrams: ['grid'] })
+const spatialOnly = selectKnotAsset(asset, { representations: ['view-3d'] })
+const combined = composeKnotAsset([gridOnly, spatialOnly])
+```
+
+Виділення зберігає ідентичність, вибрані представлення, потрібні фізичні елементи й алгоритми/варіанти цих координатних представлень. Результат є незалежною копією. Grid-only asset має порожні `elements` та `representations`; це валідні доменні дані, які поточний 3D viewer не відображає. Об’єднання приймає самодостатні валідні фрагменти з однаковими ID вузла та одиницями. Однакові ID колекцій дедуплікуються лише за однакового вмісту; конфлікти відхиляються. Часткові snapshots та відсутні залежності не допускаються. Об’єднання не змішує різні редакції представлення й не завантажує зовнішні дані.
+
+Колишні приклади overhand та twisted-loop з відносними одиницями тепер розташовані в `examples/assets`. Для них явно прийнято демонстраційний масштаб: **1 стара одиниця = 0.01 м**, застосований до точок, radius/diameter і координат камери. Це зберігає пропорції та не означає виміряну фізичну довжину. Оригінали залишені лише в `tests/fixtures/legacy` для перевірки сумісності.
+
+[Аналіз і план розширення](asset-evolution.uk.md) описує нотації, математичні презентації, інваріанти, джерела й інші діаграми. Це пропозиції, а не дозволені довільні поля v1.

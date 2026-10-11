@@ -25,7 +25,7 @@ npm run test:package
 npm pack --dry-run
 ```
 
-Generate a card PNG with `npm run preview:model -- --model examples/models/twisted-loop.json --out /tmp/knot-preview.png`. The script uses local Chrome (or `CHROME_PATH`) and caches output by model, size, browser and renderer version.
+Generate a card PNG with `npm run preview:model -- --model examples/assets/twisted-loop.json --out /tmp/knot-preview.png`. The script uses local Chrome (or `CHROME_PATH`) and caches output by model, size, browser and renderer version.
 
 The working package name is `knot-engine`; no npm release has been published. The library build is in `dist/`, and the demo build is in `demo-dist/`. To build the demo for a project subpath, set `BASE_PATH=/your-path/`.
 
@@ -44,13 +44,13 @@ If Actions are disabled, enable them in **Settings → Actions → General** and
 
 ```vue
 <script setup lang="ts">
-import { KnotViewer, type KnotModelV1 } from 'knot-engine'
+import { KnotViewer, type KnotAsset } from 'knot-engine'
 import 'knot-engine/styles.css'
-defineProps<{ model: KnotModelV1 }>()
+defineProps<{ asset: KnotAsset }>()
 </script>
 
 <template>
-  <KnotViewer :model="model" label="Rope model" locale="en" />
+  <KnotViewer :asset="asset" label="Rope model" locale="en" />
 </template>
 ```
 

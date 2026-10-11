@@ -29,7 +29,7 @@ src/
   components/KnotViewer.vue
   locales/                  uk/en, типізовані ключі
   styles/                   явний CSS export
-examples/models/            невеликі локальні fixture-моделі
+examples/assets/            невеликі локальні fixture-моделі
 demo/                       окремий Vue + Vite застосунок
 scripts/preview/            browser harness/CLI для CI-прев'ю
 tests/                      змістовні контрактні/інтеграційні/браузерні тести
@@ -142,6 +142,6 @@ CLI/harness запускає browser renderer у CI, чекає ready, викл�
 
 ## Приклад і технічні довідки
 
-Локальний fixture examples/models/twisted-loop.json містить замкнену криву з шести контрольних точок. Використовувати його для початкової перевірки форми й камери разом із прикладами відкритої кривої та кількох мотузок. closed застосовується узгоджено до кривої та її оболонки; frame loop і resize мають відповідати життєвому циклу компонента.
+Локальний fixture examples/assets/twisted-loop.json містить замкнену криву з шести контрольних точок. Використовувати його для початкової перевірки форми й камери разом із прикладами відкритої кривої та кількох мотузок. closed застосовується узгоджено до кривої та її оболонки; frame loop і resize мають відповідати життєвому циклу компонента.
 
 Первинні довідки: [CatmullRomCurve3](https://threejs.org/docs/pages/CatmullRomCurve3.html), [Vue SSR](https://vuejs.org/guide/scaling-up/ssr.html). Перед реалізацією перевірити API саме обраної версії залежностей.

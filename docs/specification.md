@@ -29,7 +29,7 @@ src/
   components/KnotViewer.vue
   locales/                  uk/en, typed keys
   styles/                   explicit CSS export
-examples/models/            small local fixture models
+examples/assets/            small local fixture models
 demo/                       separate Vue + Vite application
 scripts/preview/            browser harness/CLI for CI previews
 tests/                      meaningful contract/integration/browser tests
@@ -142,6 +142,6 @@ The release is ready when the tarball usage example works in two web consumers, 
 
 ## Example and technical references
 
-The local fixture examples/models/twisted-loop.json contains a closed curve with six control points. Use it for initial shape and camera checks alongside open-curve and multiple-rope examples. closed is applied consistently to the curve and its surface; the frame loop and resize behavior must follow the component lifecycle.
+The local fixture examples/assets/twisted-loop.json contains a closed curve with six control points. Use it for initial shape and camera checks alongside open-curve and multiple-rope examples. closed is applied consistently to the curve and its surface; the frame loop and resize behavior must follow the component lifecycle.
 
 Primary references: [CatmullRomCurve3](https://threejs.org/docs/pages/CatmullRomCurve3.html), [Vue SSR](https://vuejs.org/guide/scaling-up/ssr.html). Before implementation, check the API of the selected dependency versions.

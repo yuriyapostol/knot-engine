@@ -1,4 +1,6 @@
 {
+  "schema": "KnotAsset",
+  "$schema": "https://knot-engine.local/schema/knot-asset-v1.schema.json",
   "schemaVersion": 1,
   "id": "diagram-crossings",
   "units": "m",

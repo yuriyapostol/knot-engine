@@ -30,7 +30,7 @@ try {
     process.exitCode = 0
   } else {
     const page = await browser.newPage({ viewport: { width: Math.max(width, 320), height: Math.max(height, 320) }, deviceScaleFactor: 1 })
-    await page.addInitScript(value => { window.__previewModel = value }, model)
+    await page.addInitScript(value => { if (value.schema === 'KnotAsset' || 'representations' in value) window.__previewAsset = value; else window.__previewModel = value }, model)
     const address = server.httpServer.address()
     await page.goto(`http://127.0.0.1:${address.port}/preview.html`, { waitUntil: 'load' })
     await page.waitForFunction(() => window.__previewReady || window.__previewError, null, { timeout: 15000 })

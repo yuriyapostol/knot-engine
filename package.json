@@ -25,7 +25,8 @@
     },
     "./styles.css": "./dist/style.css",
     "./schema/knot-model-v1.schema.json": "./schema/knot-model-v1.schema.json",
-    "./schema/knot-asset-v1.schema.json": "./schema/knot-asset-v1.schema.json"
+    "./schema/knot-asset-v1.schema.json": "./schema/knot-asset-v1.schema.json",
+    "./schema/*": "./schema/*"
   },
   "scripts": {
     "dev:demo": "vite --config demo/vite.config.ts",
