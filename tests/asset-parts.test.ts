@@ -1,46 +1,44 @@
-import { describe, expect, it } from 'vitest'
-import Ajv2020 from 'ajv/dist/2020'
-import schema from '../v1/spec/schema/knot-asset.schema.json'
-import gridSchema from '../v1/spec/schema/grid-diagram.schema.json'
+import { expect, it } from 'vitest'
+import multi from '../v1/spec/examples/assets/procedures.json'
 import grid from '../v1/spec/examples/assets/grid-diagram.json'
-import open from '../v1/spec/examples/assets/open-rope.json'
-import { composeKnotAsset, selectKnotAsset, validateKnotAsset, validateGridDiagram, resolveKnotAsset } from '../src/core'
-
-describe('asset fragments and grid diagrams', () => {
-  it('validates a standalone grid subschema', () => {
-    const ajv = new Ajv2020({ strictTypes: false }).addSchema(schema)
-    expect(ajv.compile(gridSchema)(grid.diagrams[0])).toBe(true)
-    expect(validateGridDiagram(grid.diagrams[0], { strict: true }).valid).toBe(true)
-  })
-  it('rejects grid permutations, bounds, lengths and overlapping markers', () => {
-    for (const change of [{ x: [0, 0, 2, 3, 4] }, { o: [2, 3, 4, 0, 5] }, { x: [0, 1] }, { o: [0, 3, 4, 1, 2] }]) {
-      const value = structuredClone(grid)
-      Object.assign(value.diagrams[0], change)
-      expect(validateKnotAsset(value, { strict: true }).valid).toBe(false)
-      const standalone = validateGridDiagram(value.diagrams[0], { strict: true })
-      expect(standalone.valid).toBe(false)
-      if (!standalone.valid) expect(standalone.issues.every(issue => !issue.path.startsWith('diagrams'))).toBe(true)
-    }
-    expect(() => resolveKnotAsset(grid)).toThrow()
-  })
-  it('selects dependency-complete views and composes without sharing mutable data', () => {
-    const source = { ...open, diagrams: grid.diagrams }
-    const geometry = selectKnotAsset(source, { representations: [open.representations[0].id] })
-    const diagram = selectKnotAsset(source, { diagrams: ['grid'] })
-    expect(diagram.elements).toEqual([])
-    expect(diagram.representations).toEqual([])
-    const combined = composeKnotAsset([geometry, diagram])
-    expect(validateKnotAsset(combined, { strict: true }).valid).toBe(true)
-    expect(combined.diagrams).toEqual(grid.diagrams)
-    combined.diagrams![0].x[0] = 4
-    expect(grid.diagrams[0].x[0]).toBe(0)
-    expect(resolveKnotAsset(geometry).curves.length).toBe(1)
-  })
-  it('rejects unknown selections, mixed knots and conflicting IDs', () => {
-    expect(() => selectKnotAsset(grid, { diagrams: ['missing'] })).toThrow()
-    expect(() => composeKnotAsset([grid, open])).toThrow()
-    expect(() => composeKnotAsset([grid, { ...grid, diagrams: [{ ...grid.diagrams[0], o: [1, 2, 3, 4, 0] }] }])).toThrow()
-    expect(() => composeKnotAsset([])).toThrow()
-    expect(composeKnotAsset([grid, grid]).diagrams).toHaveLength(1)
-  })
+import { selectKnotAsset, composeKnotAsset, validateKnotAsset, STANDARD_RESOURCES } from '../src/core'
+it('extracts a procedure with its representations, construction and type definitions',()=>{
+  const source=structuredClone(multi)
+  const part=selectKnotAsset(source,{procedures:['sequence-b']})
+  expect(part.representations).toHaveLength(2)
+  expect(part.procedures).toHaveLength(1)
+  expect(part.constructions).toHaveLength(1)
+  expect(part.objectTypes).toHaveLength(1)
+  expect(validateKnotAsset(part)).toMatchObject({valid:true,complete:true})
+  part.subject.id='different';expect(source.subject.id).not.toBe('different')
+})
+it('composes fragments of the same document and detects conflicts',()=>{
+  const a=selectKnotAsset(multi,{representations:[multi.representations[0].id]})
+  const b=selectKnotAsset(multi,{representations:[multi.representations[1].id]})
+  expect(composeKnotAsset([a,b]).representations).toHaveLength(2)
+  expect(composeKnotAsset([a,a]).representations).toHaveLength(1)
+  expect(()=>composeKnotAsset([a,grid])).toThrow()
+  const conflict=structuredClone(a);conflict.representations![0].preferredView={direction:[1,0,0],up:[0,1,0]}
+  expect(()=>composeKnotAsset([a,conflict])).toThrow(/Conflicting/)
+  expect(()=>selectKnotAsset(a,{representations:['missing']})).toThrow()
+})
+it('includes externally supplied type definitions and no unrelated registry entries',()=>{
+  const a=structuredClone(grid);a.representationTypes=[]
+  const part=selectKnotAsset(a,{representations:['grid']},{registries:[STANDARD_RESOURCES]})
+  expect(part.representationTypes).toHaveLength(1)
+  expect(part.objectTypes).toBeUndefined()
+  expect(validateKnotAsset(part)).toMatchObject({valid:true,complete:true})
+})
+it('closes external construction and view dependencies without copying the registry',()=>{
+  const a=structuredClone(multi)
+  const construction={...a.constructions[0],id:'urn:example:setup'}
+  const view={id:'urn:example:front',name:'Front',space:'space' as const,camera:{mode:'fit' as const,direction:[0,0,1] as [number,number,number],up:[0,1,0] as [number,number,number],projection:{kind:'orthographic' as const}}}
+  const rep={...a.representations[0],target:{kind:'state' as const,construction:{ref:construction.id},id:a.representations[0].target.id},views:[{ref:view.id}],defaultView:{ref:view.id}}
+  const asset={schema:'KnotAsset',schemaVersion:1,id:'external',subject:{id:'s'},representations:[rep]}
+  const registry:import('../src/core').KnotResourceRegistry={schema:'KnotResourceRegistry',schemaVersion:1,resources:[...STANDARD_RESOURCES.resources,{kind:'construction',resource:construction},{kind:'view',resource:view}]}
+  const part=selectKnotAsset(asset,{representations:[rep.id]},{registries:[registry]})
+  expect(validateKnotAsset(part)).toMatchObject({valid:true,complete:true})
+  expect(part.constructions).toHaveLength(1)
+  expect(part.representations![0].views![0]).toEqual(view)
+  expect(part.objectTypes).toHaveLength(1)
 })

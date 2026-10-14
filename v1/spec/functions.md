@@ -1,17 +1,24 @@
-# Public core functions
+# Functions
 
-Import from `knot-engine/core` to use data operations without Vue, Three.js or browser globals. The root entry also exports them. This is the implemented API, not the proposed namespace/resource resolver.
+Import core APIs from `knot-engine/core`; this entry point uses no Vue, Three.js or DOM. Inputs are immutable to the library. URI references never trigger network access.
 
-| Function | Input | Result |
-| --- | --- | --- |
-| validateKnotAsset | unknown, optional `{strict?: boolean}` | `{valid: true, asset, warnings}` or `{valid: false, issues}` |
-| validateGridDiagram | unknown, optional `{strict?: boolean}` | `{valid: true, diagram, warnings}` or `{valid: false, issues}` |
-| resolveKnotAsset | unknown, optional `{representationId?, snapshotId?}` | RenderableModel; throws ViewerError on invalid or unsupported selection |
-| selectKnotAsset | unknown, `{representations?: string[], diagrams?: string[]}` | Validated, cloned reduced asset with dependencies |
-| composeKnotAsset | readonly unknown[] | Validated merged asset; rejects empty input and identity, unit or record conflicts |
+| Function | Result |
+| --- | --- |
+| `validateKnotAsset(value, options?)` | `{valid:true,asset,warnings,complete,missingDependencies,uncheckedTypes}` or `{valid:false,issues}` |
+| `validateGridDiagram(value)` | `{valid:true,data,diagram,warnings}` or issues; independent Grid X/O validation |
+| `validateSpatialCurve(value)` | `{valid:true,data,warnings}` or issues |
+| `validateView(value)` | `{valid:true,data,warnings}` or issues |
+| `validateResourceDocument(value)` | Validated resource envelope or issues; does not establish dependency closure |
+| `validateResourceRegistry(value)` | Validated registry and conflict check or issues; does not establish dependency closure |
+| `validateRepresentationDocument(value, options?)` | Standalone representation validation report |
+| `resolveKnotAsset(value, {representationId?,view?}?, options?)` | Internal `RenderableModel`; throws `ViewerError` on invalid, unresolved or unsupported data |
+| `resolveRepresentation(representation, options?)` | Standalone subject-level spatial representation to rendering data; explicit resource context required |
+| `selectKnotAsset(value, {representations?,procedures?}, options?)` | Cloned self-contained fragment with dependencies |
+| `composeKnotAsset(values, options?)` | Cloned merged fragments of the same document; conflicts are errors |
+| `expandURI(value, namespaces?)` | Exact expanded URI; undeclared prefixes throw |
 
-Strict validation rejects unknown fields. Issues have path, code and message. Validation does not prove knot equivalence. See the [asset contract](knot-asset.md) and [schema](schema/knot-asset.schema.json).
+Validation options accept `registries` (array of `KnotResourceRegistry`) and `schemas` (explicit JSON Schema objects). Known objects are always closed; the retained `strict` option does not relax validation. `STANDARD_RESOURCES` provides the built-in representation and object type definitions when passed explicitly. Type definitions, `ViewerError`, `KNOT_ASSET_LIMITS`, namespace and type URI constants are exported.
 
-The resolver chooses a 3D representation and snapshot, defaulting to the first available choices. Unsupported 2D rendering, missing selections and empty geometry are errors. It returns copied curves and optional camera/warnings, not a Three.js scene. Selection and composition operate in memory without fetching references.
+The renderer currently supports only `spatial-curve`. `valid:true` alone is insufficient to render or extract: these operations also require `complete:true`. Unknown type data can be preserved with an incomplete report. No operation proves the mathematical identity of a knot.
 
-Legacy validateKnotModelV1 and resolveKnotModelV1 remain exported until the planned full migration; see their [input contract](model-format.md). TypeScript types, limits and ViewerError are also public exports. This API does not imply an HTTP server.
+See [data semantics](knot-asset.md) and [component API](components.md).

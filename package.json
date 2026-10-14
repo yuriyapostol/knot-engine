@@ -23,7 +23,6 @@
       "import": "./dist/core/index.js"
     },
     "./styles.css": "./dist/style.css",
-    "./schema/knot-model.schema.json": "./v1/spec/schema/knot-model.schema.json",
     "./schema/knot-asset.schema.json": "./v1/spec/schema/knot-asset.schema.json",
     "./schema/*": "./v1/spec/schema/*"
   },
@@ -39,19 +38,20 @@
     "test:site": "node scripts/site/test.mjs",
     "preview:site": "npm run build:site && vite preview --config site/vite.config.ts",
     "build:example": "vite build --config site/runtime/vite.config.ts",
-    "dev": "node scripts/site/dev.mjs"
+    "dev": "node scripts/site/dev.mjs",
+    "build:schemas": "node scripts/generate-schemas.mjs"
   },
   "peerDependencies": {
     "vue": "^3.5.0"
   },
   "dependencies": {
-    "three": "^0.186.1"
+    "three": "^0.186.1",
+    "ajv": "^8.17.1"
   },
   "devDependencies": {
     "@types/node": "^24.19.0",
     "@types/three": "^0.186.0",
     "@vitejs/plugin-vue": "^6.0.0",
-    "ajv": "^8.17.1",
     "jsdom": "^26.1.0",
     "marked": "^18.1.1",
     "playwright-core": "^1.63.0",

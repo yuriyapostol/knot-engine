@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import type { CameraView, KnotModelV1, KnotAsset, RenderableModel, ViewerErrorCode, ValidationIssue } from '../core'
-import { resolveKnotAsset, resolveKnotModelV1, ViewerError } from '../core'
+import type { CameraView, Camera3D, KnotAsset, KnotResourceRegistry, Reference, ViewDefinition, RenderableModel, ViewerErrorCode, ValidationIssue } from '../core'
+import { resolveKnotAsset, validateView, ViewerError } from '../core'
 import type { Quality } from '../geometry/build'
 import { ViewerEngine, type CaptureOptions } from '../renderer/ViewerEngine'
 import { messages as builtInMessages, type ViewerMessages } from '../locales'
 
 export interface ViewerErrorEvent { code: ViewerErrorCode; message: string; issues?: ValidationIssue[]; recoverable: boolean }
 const props = withDefaults(defineProps<{
-  model?: KnotModelV1 | null; asset?: KnotAsset | null; representationId?: string; snapshotId?: string; label: string; description?: string; poster?: string
+  asset?: KnotAsset | null; representationId?: string; view?: Reference | ViewDefinition; registries?: KnotResourceRegistry[]; label: string; description?: string; poster?: string
   locale?: 'uk' | 'en'; messages?: Partial<ViewerMessages>; theme?: 'light' | 'dark'
-  quality?: Quality; active?: boolean; interactive?: boolean; showControls?: boolean; initialCamera?: CameraView
+  quality?: Quality; active?: boolean; interactive?: boolean; showControls?: boolean; initialCamera?: Camera3D
 }>(), { locale: 'uk', theme: 'light', quality: 'medium', active: true, interactive: true, showControls: true })
 const emit = defineEmits<{
-  ready: [payload: { modelId?: string; schemaVersion: 1; warnings: string[] }]
+  ready: [payload: { assetId?: string; schemaVersion: 1; warnings: string[] }]
   error: [payload: ViewerErrorEvent]
   'camera-change': [view: CameraView]
 }>()
@@ -43,10 +43,10 @@ function ensureEngine() {
   try {
     engine = new ViewerEngine(surface.value)
     engine.onReady = warnings => {
-      if ((!props.model && !props.asset) || !engine) return
+      if ((!props.asset) || !engine) return
       state.value = 'ready'
       error.value = null
-      emit('ready', { modelId: (props.asset ?? props.model)?.id, schemaVersion: 1, warnings })
+      emit('ready', { assetId: props.asset?.id, schemaVersion: 1, warnings })
     }
     engine.onError = report
     engine.onCameraChange = view => emit('camera-change', view)
@@ -63,13 +63,14 @@ function ensureEngine() {
 function onVisibility() { if (!document.hidden) engine?.resize() }
 async function loadModel() {
   const current = ++generation
-  if (!props.model && !props.asset) { engine?.clear(); state.value = 'empty'; error.value = null; return }
+  if (!props.asset) { engine?.clear(); state.value = 'empty'; error.value = null; return }
   let resolved: RenderableModel
   try {
-    if (props.model && props.asset) throw new ViewerError('INVALID_MODEL', 'Supply either model or asset, not both', undefined, false)
-    resolved = props.asset
-      ? resolveKnotAsset(props.asset, { representationId: props.representationId, snapshotId: props.snapshotId })
-      : resolveKnotModelV1(props.model)
+    if (props.initialCamera) {
+      const result = validateView({ id: 'application', name: 'Application', space: 'space', camera: props.initialCamera })
+      if (!result.valid) throw new ViewerError('INVALID_MODEL', 'Invalid application camera', result.issues, false)
+    }
+    resolved = resolveKnotAsset(props.asset, { representationId: props.representationId, view: props.view }, { registries: props.registries })
   } catch (cause) {
     engine?.clear()
     report(cause instanceof ViewerError ? cause : new ViewerError('INVALID_MODEL', 'Unable to resolve input', undefined, false))
@@ -100,9 +101,9 @@ function onKeydown(event: KeyboardEvent) {
   const action = actions[event.key]
   if (action) { event.preventDefault(); action() }
 }
-watch(() => [props.model, props.asset, props.representationId, props.snapshotId], loadModel)
+watch(() => [props.asset, props.representationId, props.view, props.registries], loadModel)
 watch(() => props.quality, loadModel)
-watch(() => props.initialCamera, value => engine?.setInitialCamera(value))
+watch(() => props.initialCamera, loadModel)
 watch(() => props.theme, value => engine?.setTheme(value))
 watch(() => props.active, value => engine?.setActive(value))
 watch(() => props.interactive, value => engine?.setInteractive(value))

@@ -23,11 +23,11 @@ import asset from './open-rope.json'
 </script>
 
 <template>
-  <KnotViewer :asset="asset" locale="uk" />
+  <KnotViewer :asset="asset" locale="uk" label="Мотузка" />
 </template>
 ```
 
-Використайте [asset відкритої мотузки](../spec/examples/assets/open-rope.json) як `open-rope.json`. Параметри вибору, події та методи знімків описані в [контракті компонента](../spec/components.uk.md). Поточний пакет підтримує наявні legacy-входи; їхнє видалення — проєктне рішення, а не вже завершений перехід runtime.
+Використайте [asset відкритої мотузки](../spec/examples/assets/open-rope.json) як `open-rope.json`. Параметри вибору, події та методи знімків описані в [контракті компонента](../spec/components.uk.md). Пакет використовує лише поточний контракт KnotAsset. Статичне представлення вибирається через `representation-id`.
 
 ## Редагування даних
 

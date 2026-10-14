@@ -2,7 +2,7 @@
 
 [English](README.md) | [Українська](README.uk.md)
 
-Пакет для моделювання й рендерингу вузлів із Vue 3 компонентом `KnotViewer`. KnotAsset v1 є авторитетним доменним форматом; legacy KnotModelV1 підтримується протягом міграції. Пакет містить валідацію, рендеринг статичних 3D-станів, керування камерою, резервне відображення для SSR, захоплення PNG і локальний демонстраційний застосунок.
+Пакет для моделювання та рендерингу вузлів із Vue 3 компонентом `KnotViewer`. Поточний KnotAsset підтримує просторові криві, Grid X/O, конструкції, стани, процедури й явні реєстри ресурсів. Компонент відображає статичні 3D-представлення, має перспективну/ортографічну камеру, SSR fallback та PNG.
 
 ## Локальний запуск
 
@@ -53,31 +53,13 @@ defineProps<{ asset: KnotAsset }>()
 </template>
 ```
 
-Імпортуйте `validateKnotAsset`, `validateKnotModelV1` (legacy-псевдонім: `validateModel`) і типи з `knot-engine/core`, щоб перевіряти авторські дані без завантаження viewer. Нове посилання на об'єкт моделі спричиняє перебудову; зміна масивів точок на місці не підтримується. Компонент ніколи самостійно не завантажує дані моделі.
+Імпортуйте `validateKnotAsset`, `resolveKnotAsset` і типи з `knot-engine/core`: ця точка входу не завантажує Vue, Three.js або DOM. Валідація повертає окремі `valid`, `complete`, `missingDependencies`, `uncheckedTypes`; показ вимагає повної перевірки. Невідомі поля відхиляються. Реєстри передаються явно, мережевого завантаження за URI немає.
 
-Відкриті методи: `resetView()`, `fitToView()` і `capture({ width, height, view, transparent })`, який повертає PNG `Blob` через Promise. `view` має значення `current` (за замовчуванням) або `model-preview`; стандартний розмір — 512×512, максимальний — 2048×2048. Події: `ready`, `error` і `camera-change`. Див. [специфікацію API](v1/spec/components.uk.md), [формат моделі](v1/spec/model-format.uk.md) та [JSON Schema](v1/spec/schema/knot-model.schema.json).
+`representation-id` вибирає статичне представлення; без нього використовується перше spatial-curve. Конструкція містить предмети й стани, а процедура посилається на представлення. Анімації немає. Для оновлення геометрії замініть об’єкт asset.
 
-За замовчуванням viewer має співвідношення сторін 4:3 і мінімальну висоту 260px. Ці значення можна перевизначити на елементі компонента. Кольори панелі інструментів налаштовуються через CSS-властивості `--knot-viewer-*` із `src/styles.css`. На сенсорному екрані перетягування обертає модель, а жест двома пальцями змінює масштаб. Вертикальне перетягування за межі кутів обертання прокручує сторінку; зміна напрямку відновлює обертання.
+Методи: `resetView()`, `fitToView()`, `capture({width,height,view,transparent})`. PNG має типовий розмір 512×512 і максимум 2048×2048. Режими знімка — `current` і `model-preview`. Події: `ready({assetId,schemaVersion,warnings})`, `error`, `camera-change`. `initialCamera` приймає повний fit/fixed режим із перспективною або ортографічною проєкцією; FOV у радіанах.
 
-## KnotAsset v1
-
-```vue
-<script setup lang="ts">
-import { KnotViewer, type KnotAsset } from 'knot-engine'
-import 'knot-engine/styles.css'
-defineProps<{ asset: KnotAsset }>()
-</script>
-
-<template>
-  <KnotViewer :asset="asset" representation-id="view-3d" snapshot-id="rest" label="Rope snapshot" />
-</template>
-```
-
-Передавайте або `asset`, або legacy `model`. Якщо ID вибору не задані, використовується перше 3D-представлення та його перший snapshot. Зміна вибору перебудовує статичний вид, а не анімує кроки. Валідація завершується до виділення пам'яті під геометрію. Діаметр мотузки визначає товщину трубки; за відсутності розмірів і для кривих інших типів елементів використовується задокументований радіус відображення з попередженням.
-
-[**Специфікація KnotAsset v1**](v1/spec/knot-asset.uk.md) · [JSON Schema KnotAsset](v1/spec/schema/knot-asset.schema.json) · [Архітектура, міграція та політики реалізації](design/architecture.uk.md) · [Технічні приклади](v1/spec/examples/assets)
-
-Доменна модель підтримує 2D-представлення, перехрещення, алгоритми й варіанти. Перший шлях рендерингу показує один 3D snapshot. Імпорт `knot-engine/core` не завантажує Vue, Three.js або код DOM. `validateKnotAsset(value, { strict: true })` перевіряє авторські дані за структурним і семантичним контрактом, не змінюючи їх. `resolveKnotAsset` і `resolveKnotModelV1` надають явні адаптери до внутрішніх даних рендерингу. Спільний номер версії ніколи не використовується для визначення формату.
+[Контракт даних](v1/spec/knot-asset.uk.md) · [Функції](v1/spec/functions.uk.md) · [Компонент](v1/spec/components.uk.md) · [JSON Schema](v1/spec/schema/knot-asset.schema.json) · [Приклади](v1/spec/examples/assets)
 
 ## Документація
 
@@ -88,7 +70,6 @@ defineProps<{ asset: KnotAsset }>()
 | [KnotAsset v1](v1/spec/knot-asset.uk.md) | Авторитетна специфікація доменних даних |
 | [Архітектура та міграція](design/architecture.uk.md) | Політики реалізації, сумісність і поточні обмеження |
 | [Специфікація KnotViewer](v1/spec/components.uk.md) | API компонента та збережені критерії приймання |
-| [Legacy-формат моделі](v1/spec/model-format.uk.md) | Контракт статичної геометрії KnotModelV1 для рендерингу |
 | [Демонстраційний застосунок](design/interactive-example-requirements.uk.md) | Поведінка демо та план приймання |
 
 ## Поточні обмеження

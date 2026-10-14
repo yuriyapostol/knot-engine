@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuriyapostol.github.io/knot-engine/v1/schema/rope-object.schema.json",
+  "$ref": "#/$defs/rope",
+  "$defs": {
+    "rope": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "topology": {
+          "enum": [
+            "open",
+            "closed"
+          ]
+        },
+        "ends": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0,
+          "maxItems": 2
+        },
+        "length": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "diameter": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "topology",
+        "ends"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "topology": {
+                "const": "open"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "ends": {
+                "minItems": 2
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "ends": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

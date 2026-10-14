@@ -1,60 +1,28 @@
-import { describe, expect, it } from 'vitest'
+import { expect, it } from 'vitest'
 import Ajv2020 from 'ajv/dist/2020'
-import { readFileSync, readdirSync } from 'node:fs'
-import schema from '../v1/spec/schema/knot-asset.schema.json'
+import { readFileSync,readdirSync } from 'node:fs'
+import assetSchema from '../v1/spec/schema/knot-asset.schema.json'
+import spatialSchema from '../v1/spec/schema/spatial-curve.schema.json'
+import gridSchema from '../v1/spec/schema/grid-diagram.schema.json'
 import { validateKnotAsset } from '../src/core'
-import open from '../v1/spec/examples/assets/open-rope.json'
-import diagram from '../v1/spec/examples/assets/diagram-crossings.json'
-
-const ajv = new Ajv2020({ allErrors: true, strictTypes: false })
-const validate = ajv.compile(schema)
-
-describe('KnotAsset JSON Schema and runtime alignment', () => {
-  for (const file of readdirSync('v1/spec/examples/assets').filter(f => f.endsWith('.json'))) {
-    it(`accepts ${file} in both validators`, () => {
-      const data = JSON.parse(readFileSync(`v1/spec/examples/assets/${file}`, 'utf8'))
-      expect(validate(data), JSON.stringify(validate.errors)).toBe(true)
-      expect(validateKnotAsset(data, { strict: true }).valid).toBe(true)
-    })
+const ajv=new Ajv2020({strict:false}),asset=ajv.compile(assetSchema),spatial=ajv.compile(spatialSchema),grid=ajv.compile(gridSchema)
+for(const f of readdirSync('v1/spec/examples/assets').filter(f=>f.endsWith('.json')))it(`schema/runtime align for ${f}`,()=>{
+  const data=JSON.parse(readFileSync(`v1/spec/examples/assets/${f}`,'utf8'))
+  expect(asset(data),JSON.stringify(asset.errors)).toBe(true)
+  for(const rep of data.representations){const validate=rep.type.endsWith('spatial-curve')?spatial:grid;expect(validate(rep.data),JSON.stringify(validate.errors)).toBe(true)}
+  expect(validateKnotAsset(data).valid).toBe(true)
+})
+it('schemas reject old envelope, unknown fields and invalid standalone data',()=>{
+  expect(asset({schemaVersion:1,units:'m',elements:[],representations:[]})).toBe(false)
+  expect(grid({encoding:'xo',size:2,x:[0,1],o:[1,0],extra:1})).toBe(false)
+  expect(grid({encoding:'xo',size:2,x:[0.5,1],o:[1,0]})).toBe(false)
+})
+it('publishes independent compilable schemas and exact resource-kind dispatch',()=>{
+  for(const file of readdirSync('v1/spec/schema').filter(f=>f.endsWith('.json'))) {
+    const schema=JSON.parse(readFileSync(`v1/spec/schema/${file}`,'utf8'))
+    expect(()=>new Ajv2020({strict:false}).compile(schema),file).not.toThrow()
   }
-  it('enforces dimension-specific points and forbids 3D crossings', () => {
-    const wrong3 = structuredClone(open); wrong3.representations[0].snapshots[0].elements[0].geometry.points[0].pop()
-    const wrong2 = structuredClone(diagram); wrong2.representations[0].snapshots[0].elements[0].geometry.points[0].push(0)
-    const crossings3 = structuredClone(open); Object.assign(crossings3.representations[0].snapshots[0], { crossings: [] })
-    for (const value of [wrong3, wrong2, crossings3]) {
-      expect(validate(value)).toBe(false); expect(validateKnotAsset(value, { strict: true }).valid).toBe(false)
-    }
-  })
-  it('rejects missing required fields, unknown fields, unsupported types, invalid scalars and curve limits', () => {
-    const cases: unknown[] = [
-      { ...open, units: 'relative' }, { ...open, schemaVersion: 2 }, { ...open, id: '' },
-      { ...open, properties: {} }, { ...open, elements: [{ id: 's', type: 'mesh' }] },
-      { ...open, representations: [{ ...open.representations[0], dimension: 4 }] }
-    ]
-    for (const key of ['schemaVersion', 'id', 'units', 'elements', 'representations']) {
-      const a: Record<string, unknown> = structuredClone(open); delete a[key]; cases.push(a)
-    }
-    for (const length of [0, 1, 4097]) {
-      const a = structuredClone(open)
-      a.representations[0].snapshots[0].elements[0].geometry.points = Array.from({ length }, (_, i) => [i, 0, 0]); cases.push(a)
-    }
-    const closed = structuredClone(open); closed.representations[0].snapshots[0].elements[0].geometry.closed = true
-    closed.representations[0].snapshots[0].elements[0].geometry.points.pop(); cases.push(closed)
-    const ends = structuredClone(open); ends.elements[0].topology = 'closed'; cases.push(ends)
-    for (const value of cases) {
-      expect(validate(value), JSON.stringify(value).slice(0, 200)).toBe(false)
-      expect(validateKnotAsset(value, { strict: true }).valid).toBe(false)
-    }
-  })
-  it('documents semantic-only failures that require runtime validation', () => {
-    for (const file of ['duplicate-element', 'broken-element', 'broken-variant', 'point-count']) {
-      const data = JSON.parse(readFileSync(`v1/spec/examples/assets/invalid/${file}.json`, 'utf8'))
-      expect(validate(data), JSON.stringify(validate.errors)).toBe(true)
-      expect(validateKnotAsset(data, { strict: true }).valid).toBe(false)
-    }
-    const a = structuredClone(open)
-    a.representations[0].snapshots[0].elements[0].geometry.points[1] = [0, 0, 0]
-    expect(validate(a)).toBe(true)
-    expect(validateKnotAsset(a).valid).toBe(false)
-  })
+  const schema=JSON.parse(readFileSync('v1/spec/schema/knot-resource.schema.json','utf8'))
+  const check=new Ajv2020({strict:false}).compile(schema)
+  expect(check({schema:'KnotResourceDocument',schemaVersion:1,kind:'view',resource:{id:'urn:example:bad'}})).toBe(false)
 })

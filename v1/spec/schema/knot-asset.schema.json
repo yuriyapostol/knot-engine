@@ -1,118 +1,467 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://yuriyapostol.github.io/knot-engine/v1/schema/knot-asset.schema.json",
-  "title": "KnotAsset v1",
-  "description": "Domain contract in v1/spec/knot-asset.md; implementation policy in design/architecture.md. Runtime additionally checks ID uniqueness, references, repeated points, camera separation, algorithm point correspondence and aggregate resource budgets. Runtime also checks grid lengths, column bounds relative to size and distinct X/O cells.",
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "schemaVersion",
-    "id",
-    "units",
-    "elements",
-    "representations"
-  ],
-  "properties": {
-    "schemaVersion": {
-      "const": 1
-    },
-    "id": {
-      "type": "string",
-      "minLength": 1
-    },
-    "units": {
-      "const": "m"
-    },
-    "elements": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/element"
-      },
-      "maxItems": 256
-    },
-    "representations": {
-      "type": "array",
-      "items": {
-        "oneOf": [
-          {
-            "$ref": "#/$defs/representation2"
-          },
-          {
-            "$ref": "#/$defs/representation3"
-          }
-        ]
-      },
-      "maxItems": 32
-    },
-    "algorithms": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/algorithm"
-      },
-      "maxItems": 256
-    },
-    "variants": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/variant"
-      },
-      "maxItems": 1024
-    },
-    "schema": {
-      "const": "KnotAsset"
-    },
-    "$schema": {
-      "type": "string"
-    },
-    "name": {
-      "type": "string"
-    },
-    "aliases": {
-      "type": "array",
-      "maxItems": 256,
-      "items": {
-        "type": "string",
-        "minLength": 1
-      }
-    },
-    "diagrams": {
-      "type": "array",
-      "maxItems": 32,
-      "items": {
-        "$ref": "#/$defs/gridDiagram"
-      }
-    }
-  },
+  "$ref": "#/$defs/asset",
   "$defs": {
-    "ropeEnd": {
+    "asset": {
       "type": "object",
-      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "const": "KnotAsset"
+        },
+        "schemaVersion": {
+          "const": 1
+        },
+        "$schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "namespaces": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dependency"
+          },
+          "minItems": 0,
+          "maxItems": 2048
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subject": {
+          "$ref": "#/$defs/subject"
+        },
+        "catalogs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/catalog"
+          },
+          "minItems": 0,
+          "maxItems": 256
+        },
+        "representationTypes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/representationType"
+          },
+          "minItems": 0,
+          "maxItems": 256
+        },
+        "objectTypes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/objectType"
+          },
+          "minItems": 0,
+          "maxItems": 256
+        },
+        "constructions": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/construction"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "ref": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "ref"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 256
+        },
+        "representations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/representation"
+          },
+          "minItems": 0,
+          "maxItems": 1024
+        },
+        "procedures": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/procedure"
+          },
+          "minItems": 0,
+          "maxItems": 256
+        }
+      },
       "required": [
-        "id"
+        "schema",
+        "schemaVersion",
+        "id",
+        "subject"
       ],
+      "additionalProperties": false
+    },
+    "dependency": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "catalog",
+            "representation-type",
+            "object-type",
+            "view",
+            "construction"
+          ]
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "kind",
+        "ref"
+      ],
+      "additionalProperties": false
+    },
+    "subject": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "string",
           "minLength": 1
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "identifiers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "catalog": {
+                "type": "string",
+                "minLength": 1
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "catalog",
+              "value"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0,
+          "maxItems": 1024
         }
-      }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
     },
-    "rope": {
+    "name": {
       "type": "object",
-      "additionalProperties": false,
+      "properties": {
+        "language": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "language",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "catalog": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "homepage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "edition": {
+          "type": "string",
+          "minLength": 1
+        },
+        "identifierRules": {
+          "type": "object",
+          "properties": {
+            "caseSensitive": {
+              "type": "boolean"
+            },
+            "pattern": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        }
+      },
       "required": [
         "id",
-        "type",
-        "topology",
-        "ends"
+        "name",
+        "description"
       ],
+      "additionalProperties": false
+    },
+    "representationType": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataSchema": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "ref": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "ref"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "inline": {
+                  "type": "object"
+                }
+              },
+              "required": [
+                "inline"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "specification": {
+          "type": "string",
+          "minLength": 1
+        },
+        "viewSpace": {
+          "enum": [
+            "none",
+            "plane",
+            "space"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "dataSchema",
+        "specification"
+      ],
+      "additionalProperties": false
+    },
+    "objectType": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataSchema": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "ref": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "ref"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "inline": {
+                  "type": "object"
+                }
+              },
+              "required": [
+                "inline"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "specification": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "dataSchema",
+        "specification"
+      ],
+      "additionalProperties": false
+    },
+    "construction": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "objects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/object"
+          },
+          "minItems": 1,
+          "maxItems": 256
+        },
+        "states": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/state"
+          },
+          "minItems": 0,
+          "maxItems": 256
+        }
+      },
+      "required": [
+        "id",
+        "objects"
+      ],
+      "additionalProperties": false
+    },
+    "object": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "string",
           "minLength": 1
         },
         "type": {
-          "const": "rope"
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "https://yuriyapostol.github.io/knot-engine/v1/object-types/rope"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/rope"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "https://yuriyapostol.github.io/knot-engine/v1/object-types/support",
+                  "https://yuriyapostol.github.io/knot-engine/v1/object-types/carabiner"
+                ]
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/equipment"
+          }
+        }
+      ]
+    },
+    "rope": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
         },
         "topology": {
           "enum": [
@@ -123,8 +472,19 @@
         "ends": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/ropeEnd"
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "additionalProperties": false
           },
+          "minItems": 0,
           "maxItems": 2
         },
         "length": {
@@ -134,21 +494,32 @@
         "diameter": {
           "type": "number",
           "exclusiveMinimum": 0
-        },
-        "subtype": {
-          "type": "string"
         }
       },
+      "required": [
+        "id",
+        "type",
+        "topology",
+        "ends"
+      ],
+      "additionalProperties": false,
       "allOf": [
         {
           "if": {
             "properties": {
               "topology": {
-                "const": "closed"
+                "const": "open"
               }
             }
           },
           "then": {
+            "properties": {
+              "ends": {
+                "minItems": 2
+              }
+            }
+          },
+          "else": {
             "properties": {
               "ends": {
                 "maxItems": 0
@@ -158,170 +529,575 @@
         }
       ]
     },
-    "support": {
+    "equipment": {
       "type": "object",
-      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
       "required": [
         "id",
         "type"
       ],
+      "additionalProperties": false
+    },
+    "state": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "representation": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "string",
           "minLength": 1
         },
         "type": {
-          "const": "support"
-        },
-        "subtype": {
-          "type": "string"
-        }
-      }
-    },
-    "carabiner": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "id",
-        "type"
-      ],
-      "properties": {
-        "id": {
           "type": "string",
           "minLength": 1
-        },
-        "type": {
-          "const": "carabiner"
-        },
-        "subtype": {
-          "type": "string"
-        }
-      }
-    },
-    "element": {
-      "oneOf": [
-        {
-          "$ref": "#/$defs/rope"
-        },
-        {
-          "$ref": "#/$defs/support"
-        },
-        {
-          "$ref": "#/$defs/carabiner"
-        }
-      ]
-    },
-    "crossingPoint": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "element",
-        "u"
-      ],
-      "properties": {
-        "element": {
-          "type": "string",
-          "minLength": 1
-        },
-        "u": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1
-        }
-      }
-    },
-    "crossing": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "over",
-        "under"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1
-        },
-        "over": {
-          "$ref": "#/$defs/crossingPoint"
-        },
-        "under": {
-          "$ref": "#/$defs/crossingPoint"
-        }
-      }
-    },
-    "interpolation": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "type",
-        "tension"
-      ],
-      "properties": {
-        "type": {
-          "const": "catmullrom"
-        },
-        "tension": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1
-        }
-      }
-    },
-    "camera": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "position",
-        "target"
-      ],
-      "properties": {
-        "position": {
-          "$ref": "#/$defs/point3"
         },
         "target": {
-          "$ref": "#/$defs/point3"
+          "$ref": "#/$defs/target"
         },
-        "fov": {
-          "type": "number",
-          "exclusiveMinimum": 0,
-          "exclusiveMaximum": 180
-        }
-      }
-    },
-    "presentation": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [],
-      "properties": {
-        "camera": {
-          "$ref": "#/$defs/camera"
+        "data": {},
+        "views": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/view"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "ref": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "ref"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 128
         },
-        "preset": {
-          "type": "string"
+        "defaultView": {
+          "$ref": "#/$defs/reference"
+        },
+        "preferredView": {
+          "$ref": "#/$defs/orientation"
         }
-      }
-    },
-    "point2": {
-      "type": "array",
-      "items": {
-        "type": "number"
       },
-      "maxItems": 2,
-      "minItems": 2
-    },
-    "curve2": {
-      "type": "object",
-      "additionalProperties": false,
       "required": [
+        "id",
         "type",
-        "closed",
-        "interpolation",
-        "points"
+        "data"
       ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/spatial-curve"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/spatial"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/grid"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "target": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "subject"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "construction"
+            },
+            "construction": {
+              "$ref": "#/$defs/reference"
+            }
+          },
+          "required": [
+            "kind",
+            "construction"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "state",
+                "object"
+              ]
+            },
+            "construction": {
+              "$ref": "#/$defs/reference"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "kind",
+            "construction",
+            "id"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "reference": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "ref"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "view": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": {
+              "type": "string",
+              "minLength": 1
+            },
+            "space": {
+              "const": "space"
+            },
+            "camera": {
+              "$ref": "#/$defs/camera3"
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "space",
+            "camera"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": {
+              "type": "string",
+              "minLength": 1
+            },
+            "space": {
+              "const": "plane"
+            },
+            "camera": {
+              "type": "object",
+              "properties": {
+                "mode": {
+                  "const": "plane"
+                },
+                "center": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "height": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "rotation": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "mode",
+                "center",
+                "height",
+                "rotation"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "space",
+            "camera"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "camera3": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "const": "fit"
+            },
+            "direction": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "up": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "projection": {
+              "$ref": "#/$defs/projection"
+            },
+            "padding": {
+              "type": "number",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "mode",
+            "direction",
+            "up",
+            "projection"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "const": "fixed"
+            },
+            "position": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "target": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "up": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "projection": {
+              "$ref": "#/$defs/fixedProjection"
+            }
+          },
+          "required": [
+            "mode",
+            "position",
+            "target",
+            "up",
+            "projection"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "projection": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "perspective"
+            },
+            "fovY": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "exclusiveMaximum": 3.141592653589793
+            }
+          },
+          "required": [
+            "kind",
+            "fovY"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "orthographic"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "fixedProjection": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "perspective"
+            },
+            "fovY": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "exclusiveMaximum": 3.141592653589793
+            }
+          },
+          "required": [
+            "kind",
+            "fovY"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "orthographic"
+            },
+            "height": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "height"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "orientation": {
+      "type": "object",
       "properties": {
-        "type": {
-          "const": "curve"
+        "direction": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "up": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      },
+      "required": [
+        "direction",
+        "up"
+      ],
+      "additionalProperties": false
+    },
+    "spatial": {
+      "type": "object",
+      "properties": {
+        "coordinateSystem": {
+          "type": "object",
+          "properties": {
+            "handedness": {
+              "const": "right"
+            },
+            "upAxis": {
+              "const": "y"
+            },
+            "scale": {
+              "$ref": "#/$defs/scale"
+            }
+          },
+          "required": [
+            "handedness",
+            "upAxis",
+            "scale"
+          ],
+          "additionalProperties": false
+        },
+        "curves": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/curve"
+          },
+          "minItems": 1,
+          "maxItems": 256
+        }
+      },
+      "required": [
+        "coordinateSystem",
+        "curves"
+      ],
+      "additionalProperties": false
+    },
+    "scale": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "relative"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "physical"
+            },
+            "metersPerUnit": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "metersPerUnit"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "curve": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "object": {
+          "type": "string",
+          "minLength": 1
         },
         "closed": {
           "type": "boolean"
@@ -332,140 +1108,24 @@
         "points": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/point2"
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
           },
-          "maxItems": 4096,
-          "minItems": 2
-        }
-      },
-      "allOf": [
-        {
-          "if": {
-            "properties": {
-              "closed": {
-                "const": true
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "points": {
-                "minItems": 3
-              }
-            }
-          }
-        }
-      ]
-    },
-    "snapshotElement2": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "id",
-        "geometry"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1
-        },
-        "geometry": {
-          "$ref": "#/$defs/curve2"
-        }
-      }
-    },
-    "snapshot2": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "id",
-        "elements"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1
-        },
-        "elements": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/snapshotElement2"
-          },
-          "maxItems": 256
-        },
-        "crossings": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/crossing"
-          },
+          "minItems": 2,
           "maxItems": 4096
         }
-      }
-    },
-    "representation2": {
-      "type": "object",
-      "additionalProperties": false,
+      },
       "required": [
         "id",
-        "dimension",
-        "snapshots"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1
-        },
-        "dimension": {
-          "const": 2
-        },
-        "snapshots": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/snapshot2"
-          },
-          "maxItems": 256
-        },
-        "presentation": {
-          "$ref": "#/$defs/presentation"
-        }
-      }
-    },
-    "point3": {
-      "type": "array",
-      "items": {
-        "type": "number"
-      },
-      "maxItems": 3,
-      "minItems": 3
-    },
-    "curve3": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "type",
         "closed",
         "interpolation",
         "points"
       ],
-      "properties": {
-        "type": {
-          "const": "curve"
-        },
-        "closed": {
-          "type": "boolean"
-        },
-        "interpolation": {
-          "$ref": "#/$defs/interpolation"
-        },
-        "points": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/point3"
-          },
-          "maxItems": 4096,
-          "minItems": 2
-        }
-      },
+      "additionalProperties": false,
       "allOf": [
         {
           "if": {
@@ -485,185 +1145,157 @@
         }
       ]
     },
-    "snapshotElement3": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "id",
-        "geometry"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1
+    "interpolation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "polyline"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
         },
-        "geometry": {
-          "$ref": "#/$defs/curve3"
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "catmull-rom"
+            },
+            "parameterization": {
+              "const": "uniform"
+            },
+            "tension": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "type",
+            "parameterization",
+            "tension"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "catmull-rom"
+            },
+            "parameterization": {
+              "enum": [
+                "centripetal",
+                "chordal"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "parameterization"
+          ],
+          "additionalProperties": false
         }
-      }
+      ]
     },
-    "snapshot3": {
+    "grid": {
       "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "id",
-        "elements"
-      ],
       "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1
+        "encoding": {
+          "const": "xo"
         },
-        "elements": {
+        "size": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 512
+        },
+        "x": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/snapshotElement3"
+            "type": "integer",
+            "minimum": 0
           },
-          "maxItems": 256
-        }
-      }
-    },
-    "representation3": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "id",
-        "dimension",
-        "snapshots"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1
+          "minItems": 2,
+          "maxItems": 512
         },
-        "dimension": {
-          "const": 3
-        },
-        "snapshots": {
+        "o": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/snapshot3"
+            "type": "integer",
+            "minimum": 0
           },
-          "maxItems": 256
-        },
-        "presentation": {
-          "$ref": "#/$defs/presentation"
+          "minItems": 2,
+          "maxItems": 512
         }
-      }
-    },
-    "step": {
-      "type": "object",
-      "additionalProperties": false,
+      },
       "required": [
-        "id",
-        "snapshot"
+        "encoding",
+        "size",
+        "x",
+        "o"
       ],
+      "additionalProperties": false
+    },
+    "procedure": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "string",
           "minLength": 1
         },
-        "snapshot": {
-          "type": "string",
-          "minLength": 1
-        }
-      }
-    },
-    "algorithm": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "id",
-        "representation",
-        "steps"
-      ],
-      "properties": {
-        "id": {
+        "name": {
           "type": "string",
           "minLength": 1
         },
-        "representation": {
-          "type": "string",
-          "minLength": 1
+        "construction": {
+          "$ref": "#/$defs/reference"
         },
         "steps": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/step"
           },
+          "minItems": 1,
           "maxItems": 1024
         }
-      }
-    },
-    "variant": {
-      "type": "object",
-      "additionalProperties": false,
+      },
       "required": [
         "id",
-        "representation",
-        "snapshot"
+        "steps"
       ],
+      "additionalProperties": false
+    },
+    "step": {
+      "type": "object",
       "properties": {
         "id": {
           "type": "string",
           "minLength": 1
         },
-        "representation": {
-          "type": "string",
-          "minLength": 1
+        "instructions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
         },
-        "snapshot": {
-          "type": "string",
-          "minLength": 1
+        "representations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/reference"
+          },
+          "minItems": 0,
+          "maxItems": 256
         }
-      }
-    },
-    "gridDiagram": {
-      "type": "object",
-      "additionalProperties": false,
+      },
       "required": [
-        "id",
-        "type",
-        "size",
-        "x",
-        "o"
+        "id"
       ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1
-        },
-        "type": {
-          "const": "grid"
-        },
-        "size": {
-          "type": "integer",
-          "minimum": 2,
-          "maximum": 256
-        },
-        "x": {
-          "type": "array",
-          "minItems": 2,
-          "maxItems": 256,
-          "uniqueItems": true,
-          "items": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 255
-          }
-        },
-        "o": {
-          "type": "array",
-          "minItems": 2,
-          "maxItems": 256,
-          "uniqueItems": true,
-          "items": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 255
-          }
-        }
-      }
+      "additionalProperties": false
     }
   }
 }

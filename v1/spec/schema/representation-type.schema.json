@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuriyapostol.github.io/knot-engine/v1/schema/representation-type.schema.json",
+  "$ref": "#/$defs/representationType",
+  "$defs": {
+    "representationType": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataSchema": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "ref": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "ref"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "inline": {
+                  "type": "object"
+                }
+              },
+              "required": [
+                "inline"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "specification": {
+          "type": "string",
+          "minLength": 1
+        },
+        "viewSpace": {
+          "enum": [
+            "none",
+            "plane",
+            "space"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "dataSchema",
+        "specification"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

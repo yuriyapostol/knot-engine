@@ -1,20 +1,13 @@
 import type { GridDiagram } from './asset'
-import type { ValidationIssue } from './legacy'
-import { validateKnotAsset } from './validateAsset'
-
-export type GridDiagramValidationResult =
-  | { valid: true; diagram: GridDiagram; warnings: string[] }
-  | { valid: false; issues: ValidationIssue[] }
-
-/** Validates a standalone grid with the same structural and semantic rules as the asset. */
-export function validateGridDiagram(value: unknown, options: { strict?: boolean } = {}): GridDiagramValidationResult {
-  const result = validateKnotAsset({
-    schema: 'KnotAsset', schemaVersion: 1, id: 'standalone-grid', units: 'm',
-    elements: [], representations: [], diagrams: [value]
-  }, options)
-  if (!result.valid) return {
-    valid: false,
-    issues: result.issues.map(issue => ({ ...issue, path: issue.path.replace(/^diagrams\[0\]\.?/, '') }))
-  }
-  return { valid: true, diagram: value as GridDiagram, warnings: result.warnings }
+import { issue, standalone } from './validation'
+export function validateGridDiagram(value: unknown, _options: { strict?: boolean } = {}) {
+  const result = standalone<GridDiagram>('grid', value, grid => {
+    const issues = []
+    for (const key of ['x', 'o'] as const) {
+      if (grid[key].length !== grid.size || new Set(grid[key]).size !== grid.size || grid[key].some(n => n >= grid.size)) issues.push(issue(key, 'Expected a permutation of row indices'))
+    }
+    if (grid.x.some((n, i) => grid.o[i] === n)) issues.push(issue('o', 'X and O cannot overlap'))
+    return issues
+  })
+  return result.valid ? { ...result, diagram: result.data } : result
 }

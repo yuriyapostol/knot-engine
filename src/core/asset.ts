@@ -1,71 +1,47 @@
-/** Authoritative domain contract: v1/spec/knot-asset.md. Coordinates are meters. */
-export type Point2D = [number, number]
+/** KnotAsset contracts, generation 1. See v1/spec/knot-asset.md. */
+export const KNOT_NAMESPACE = 'https://yuriyapostol.github.io/knot-engine/v1/'
+export const SPATIAL_CURVE = `${KNOT_NAMESPACE}representation-types/spatial-curve`
+export const GRID_DIAGRAM = `${KNOT_NAMESPACE}representation-types/grid-diagram`
+export const ROPE_TYPE = `${KNOT_NAMESPACE}object-types/rope`
 export type Point3D = [number, number, number]
-export type Dimension = 2 | 3
-export type Point<D extends Dimension = Dimension> = D extends 2 ? Point2D : Point3D
-
-export interface RopeEnd { id: string }
-export interface RopeElement {
-  id: string
-  type: 'rope'
-  topology: 'open' | 'closed'
-  ends: RopeEnd[]
-  length?: number
-  diameter?: number
-  subtype?: string
+export type Reference = { id: string; ref?: never } | { ref: string; id?: never }
+export type Namespaces = Record<string, string>
+export interface Subject { id: string; names?: { language: string; value: string }[]; identifiers?: { catalog: string; value: string }[] }
+export type Target = { kind: 'subject' } | { kind: 'construction'; construction: Reference } | { kind: 'state' | 'object'; construction: Reference; id: string }
+export type Interpolation = { type: 'polyline' } | { type: 'catmull-rom'; parameterization: 'uniform'; tension: number } | { type: 'catmull-rom'; parameterization: 'centripetal' | 'chordal' }
+export interface SpatialCurve { id: string; object?: string; closed: boolean; interpolation: Interpolation; points: Point3D[] }
+export interface SpatialCurveData {
+  coordinateSystem: { handedness: 'right'; upAxis: 'y'; scale: { kind: 'relative' } | { kind: 'physical'; metersPerUnit: number } }
+  curves: SpatialCurve[]
 }
-export interface SupportElement { id: string; type: 'support'; subtype?: string }
-export interface CarabinerElement { id: string; type: 'carabiner'; subtype?: string }
-export type KnotElement = RopeElement | SupportElement | CarabinerElement
-
-export interface CurveGeometry<D extends Dimension = Dimension> {
-  type: 'curve'
-  closed: boolean
-  interpolation: { type: 'catmullrom'; tension: number }
-  points: Point<D>[]
+/** Row 0 is bottom; arrays indexed by column. Horizontal O→X; vertical X→O passes over. */
+export interface GridDiagram { encoding: 'xo'; size: number; x: number[]; o: number[] }
+export type Projection = { kind: 'perspective'; fovY: number } | { kind: 'orthographic' }
+export type Camera3D =
+  | { mode: 'fit'; direction: Point3D; up: Point3D; projection: Projection; padding?: number }
+  | { mode: 'fixed'; position: Point3D; target: Point3D; up: Point3D; projection: { kind: 'perspective'; fovY: number } | { kind: 'orthographic'; height: number } }
+export type ViewDefinition = { id: string; name: string; description?: string } & (
+  { space: 'space'; camera: Camera3D } | { space: 'plane'; camera: { mode: 'plane'; center: [number, number]; height: number; rotation: number } }
+)
+export interface CatalogDefinition { id: string; name: string; description: string; homepage?: string; edition?: string; identifierRules?: { caseSensitive?: boolean; pattern?: string } }
+export type DataSchema = { ref: string; inline?: never } | { inline: Record<string, unknown>; ref?: never }
+export interface ObjectTypeDefinition { id: string; name: string; description: string; dataSchema: DataSchema; specification: string }
+export interface RepresentationTypeDefinition extends ObjectTypeDefinition { viewSpace?: 'none' | 'plane' | 'space' }
+export interface ConstructionObject { id: string; type: string; [key: string]: unknown }
+export interface RopeObject extends ConstructionObject { topology: 'open' | 'closed'; ends: { id: string }[]; length?: number; diameter?: number }
+export interface Construction { id: string; name?: string; description?: string; objects: ConstructionObject[]; states?: { id: string; name?: string; description?: string }[] }
+export interface Representation { id: string; type: string; target?: Target; data: unknown; views?: (ViewDefinition | { ref: string })[]; defaultView?: Reference; preferredView?: { direction: Point3D; up: Point3D } }
+export interface Step { id: string; instructions?: Record<string, string>; representations?: Reference[] }
+export interface Procedure { id: string; name?: string; construction?: Reference; steps: Step[] }
+export type ResourceEntry = { kind: 'catalog'; resource: CatalogDefinition } | { kind: 'representation-type'; resource: RepresentationTypeDefinition } | { kind: 'object-type'; resource: ObjectTypeDefinition } | { kind: 'construction'; resource: Construction } | { kind: 'view'; resource: ViewDefinition }
+export type ResourceKind = ResourceEntry['kind']
+export interface Dependency { kind: ResourceKind; ref: string }
+export interface DocumentContext { schemaVersion: 1; $schema?: string; namespaces?: Namespaces; dependencies?: Dependency[] }
+export interface KnotAsset extends DocumentContext {
+  schema: 'KnotAsset'; id: string; subject: Subject
+  catalogs?: CatalogDefinition[]; representationTypes?: RepresentationTypeDefinition[]; objectTypes?: ObjectTypeDefinition[]
+  constructions?: (Construction | { ref: string })[]; representations?: Representation[]; procedures?: Procedure[]
 }
-/** Extend this union when another geometry contract is standardized. */
-export type Geometry<D extends Dimension = Dimension> = CurveGeometry<D>
-export interface SnapshotElement<D extends Dimension = Dimension> { id: string; geometry: Geometry<D> }
-export interface CrossingPoint { element: string; u: number }
-export interface Crossing { id?: string; over: CrossingPoint; under: CrossingPoint }
-export type Snapshot<D extends Dimension = Dimension> = D extends Dimension ? {
-  id: string
-  elements: SnapshotElement<D>[]
-  crossings?: D extends 2 ? Crossing[] : never
-} : never
-/** Distinct from the legacy viewer CameraView, whose fov remains required. */
-export interface AssetCameraView { position: Point3D; target: Point3D; fov?: number }
-export interface Presentation { camera?: AssetCameraView; preset?: string }
-export type Representation<D extends Dimension = Dimension> = D extends Dimension ? {
-  id: string
-  dimension: D
-  snapshots: Snapshot<D>[]
-  presentation?: Presentation
-} : never
-export interface Step { id: string; snapshot: string }
-export interface Algorithm { id: string; representation: string; steps: Step[] }
-export interface Variant { id: string; representation: string; snapshot: string }
-/** Combinatorial grid: row 0 is the bottom row; columns increase to the right.
- * Horizontal arcs run O→X, vertical arcs X→O and pass over horizontal arcs. */
-export interface GridDiagram {
-  id: string
-  type: 'grid'
-  size: number
-  x: number[]
-  o: number[]
-}
-export interface KnotIdentity { id: string; name?: string; aliases?: string[] }
-export interface KnotAsset extends KnotIdentity {
-  /** Optional only for compatibility with the initial v1 documents. */
-  schema?: 'KnotAsset'
-  $schema?: string
-  schemaVersion: 1
-  id: string
-  units: 'm'
-  elements: KnotElement[]
-  representations: Representation[]
-  algorithms?: Algorithm[]
-  variants?: Variant[]
-  diagrams?: GridDiagram[]
-}
+export type KnotResourceDocument = DocumentContext & ResourceEntry & { schema: 'KnotResourceDocument' }
+export interface KnotResourceRegistry extends Omit<DocumentContext, 'dependencies'> { schema: 'KnotResourceRegistry'; id?: string; resources: ResourceEntry[] }
+export interface KnotRepresentationDocument extends DocumentContext { schema: 'KnotRepresentationDocument'; subject?: Subject; representation: Representation }

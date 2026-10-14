@@ -1,922 +1,97 @@
-# Knot Engine — KnotAsset v1
+# KnotAsset v1
 
-[English](knot-asset.md) | [Українська](knot-asset.uk.md) · [Документація](../../README.uk.md)
+[English](knot-asset.md) | [Українська](knot-asset.uk.md)
 
-Це авторитетна специфікація доменних даних knot-engine. [Політики реалізації та архітектура міграції](../../design/architecture.uk.md) окремо документують числові ліміти, невизначені деталі та межі першого renderer.
+Реалізований початковий профіль [перегляду контракту](../../design/knot-asset-draft.uk.md). Версія пакета залишається 0.1.0, schemaVersion — 1. Попередні контракти й API видалено. Цей профіль підтримує просторові криві, Grid X/O, конструкції, іменовані стани, процедури та спільні ресурси. Інші формати представлень, анімація, характеристики, зв’язки й класифікації залишаються окремими наступними роботами; довільні нетипізовані поля для них не приймаються.
 
-## 1. Призначення
+## Документи та ідентичність
 
-`KnotAsset` — еталонний машинний опис одного вузла в широкому розумінні.
+KnotAsset вимагає `schema: "KnotAsset"`, `schemaVersion: 1`, `id` і `subject: {id}`. Необов’язкові колекції: `catalogs`, `representationTypes`, `objectTypes`, `constructions`, `representations`, `procedures`, `dependencies`. Необов’язкове `$schema`, якщо задане, має ідентифікувати відповідну опубліковану JSON Schema. `namespaces` оголошує префікси компактних URI. Відомі об’єкти закриті: невідомі поля є помилками навіть при переданому `strict: false`.
 
-Один asset може містити:
+`asset.id` ідентифікує документ, `subject.id` — предмет опису. У початковому профілі ID можуть бути локальними рядками або абсолютними/компактними URI. Незалежні документи не об’єднуються за ідентичністю subject. `subject.names` містить записи `{language,value}`, `subject.identifiers` — `{catalog,value}`. Каталог є системою позначень, а не колекцією всіх її записів. Правила перевіряють форму позначення, а не істинність авторської ідентифікації.
 
-- один або кілька фізичних елементів;
-- кілька незалежних 2D- і 3D-представлень;
-- статичні та покрокові представлення;
-- кілька алгоритмів зав'язування;
-- альтернативні кінцеві форми та художні варіанти;
-- представлення замкнених мотузок для теорії вузлів;
-- рекомендовані параметри перегляду.
+Відсутні та порожні колекції не встановлюють повноти знань. Asset лише з описом предмета валідний; для 3D-показу потрібне придатне представлення.
 
-Формат описує дані вузла незалежно від Vue, Three.js, конкретного renderer, UI, локалізації та способу зберігання.
+## Простори імен та посилання
 
-JSON є авторським джерелом даних. Three.js objects, meshes, textures, previews та інші render-specific результати є похідними даними.
+Глобальні ідентифікатори — абсолютні URI `http`, `https`, `urn` або оголошені `prefix:suffix`. Розгортання з’єднує URI простору й суфікс. Префікси `http`, `https`, `urn` зарезервовані без урахування регістру. Неоголошений префікс є помилкою. Розгорнуті URI порівнюються точно; завантаження, зміни регістру чи канонізації URL немає. Вбудований простір: `https://yuriyapostol.github.io/knot-engine/v1/`.
 
----
+Локальні посилання мають форму `{id: string}`, зовнішні ресурсні — `{ref: URI}`. Форми взаємовиключні. Локальні посилання розв’язуються тільки у визначеній області; глобальний ресурс можна включити в asset і адресувати через `{ref}`. `$id`/`$ref` JSON Schema та редакторський `$schema` зберігають стандартну семантику URI без компактних префіксів.
 
-# 2. Коренева структура
+Реєстри передаються явно через `options.registries`. Core експортує зручний реєстр `STANDARD_RESOURCES`, але не підставляє його приховано. Приклади включають потрібні визначення. Різні визначення з однаковим глобальним ID спричиняють помилку; однакові JSON-об’єкти без урахування порядку ключів можна дедуплікувати. Порядок масивів значущий. Дані невідомих представлень зберігаються без переписування довільних полів.
 
-```ts
-interface KnotAsset {
-  schema?: 'KnotAsset'
-  $schema?: string
-  name?: string
-  aliases?: string[]
-  diagrams?: GridDiagram[]
-  schemaVersion: 1
-  id: string
+## Конструкції та процедури
 
-  units: 'm'
+Конструкція вимагає `id` і непорожній `objects`; необов’язкові поля — `name`, `description`, `states`. Предмети вимагають локальний `id` і URI `type`. ID унікальні в межах конструкції; однакові локальні ID в різних конструкціях означають різні предмети. Іменовані стани вимагають `id`, можуть містити `name` та `description`. ID станів локальні до конструкції.
 
-  elements: KnotElement[]
-  representations: Representation[]
+Вбудований тип мотузки має `topology: open | closed` і `ends`. Відкрита мотузка має два кінці з різними ID, замкнена — жодного. Необов’язкові `length` і `diameter` — додатні скінченні метри. Профілі опори й карабіна поки містять тільки `id` і `type`; їхні криві не визначають стандартизовану форму спорядження. Додаткові типи потребують визначення та схеми й залишаються семантично неперевіреними без підтримуваного validator.
 
-  algorithms?: Algorithm[]
-  variants?: Variant[]
-}
-```
+Відсутній `target` представлення означає subject документа. Явні форми: `{kind:"subject"}`, `{kind:"construction",construction:Reference}`, `{kind:"state"|"object",construction:Reference,id:string}`. Стани й предмети шукаються в указаній конструкції.
 
-Приклад:
+Процедура вимагає `id` і непорожній `steps`; необов’язкові `name` та `construction` задають контекст. Крок має унікальний локальний `id`, необов’язкові `instructions` (мова → рядок) і `representations` (локальні посилання `{id}` у цьому профілі). Крок може не мати ілюстрацій або мати декілька. Процедура не вимагає однакової кількості точок, інтерполяції чи часу анімації. Стан може використовуватися кількома процедурами й представленнями.
 
-```json
-{
-  "schema": "KnotAsset",
-  "schemaVersion": 1,
-  "id": "bowline",
-  "units": "m",
+## Представлення
 
-  "elements": [],
-  "representations": [],
-  "algorithms": [],
-  "variants": []
-}
-```
+Представлення вимагає `id`, URI `type` і `data`; необов’язкові поля — `target`, `views`, `defaultView`, `preferredView`. ID унікальні в asset. Визначення типу вимагає `id`, `name`, `description`, `dataSchema`, `specification`; необов’язкове `viewSpace` — `none` (типово), `plane` або `space`. Визначення типів предметів мають ті самі поля, крім `viewSpace`.
 
-`id` є непрозорим стабільним ідентифікатором вузла. Він не є URL, шляхом до файла або локалізованою назвою.
+`dataSchema` — `{ref: абсолютний-URI-схеми}` або `{inline: об’єкт-JSON-Schema}` з явним діалектом `$schema`. Зовнішні схеми передаються через `options.schemas`; мережевого resolver немає. Поточний рушій користувацьких схем підтримує draft 2020-12. Схема не доводить доменну семантику. Невідомий тип може пройти структурну перевірку, залишившись у `uncheckedTypes`; його не можна відрендерити або експортувати як перевірений самодостатній фрагмент.
 
-`schemaVersion` версіонує саме контракт `KnotAsset`.
+### Просторові криві
 
-Версія npm-пакета `knot-engine`, версія renderer та версії presentation presets є незалежними від `schemaVersion`.
+Тип: `https://yuriyapostol.github.io/knot-engine/v1/representation-types/spatial-curve`.
 
----
+`data` містить `coordinateSystem` і непорожній `curves`. Початковий профіль — права система з Y угору: `{handedness:"right",upAxis:"y",scale}`. Масштаб: `{kind:"relative"}` або `{kind:"physical",metersPerUnit: додатне-число}`. Імпорт не виводить фізичний масштаб і не пересуває точки приховано.
 
-# 3. Елементи (Elements)
+Крива вимагає `id`, `closed`, `interpolation`, `points`; необов’язкове `object` ідентифікує предмет цільової конструкції. Без посилання на предмет крива може описувати subject без фізичної конструкції. Точки — скінченні XYZ-трійки, щонайменше дві для відкритої кривої та три для замкненої. Послідовні дублікати й повторена кінцева точка замкненої кривої відхиляються за точною рівністю координат. Геометричне замикання відокремлене від топології мотузки.
 
-`Element` — фізичний або концептуальний об'єкт, що входить до композиції вузла.
+Інтерполяція має одну з форм:
 
-Початково визначаються три типи:
+- `{type:"polyline"}`;
+- `{type:"catmull-rom",parameterization:"uniform",tension: число-в-[0,1]}`;
+- `{type:"catmull-rom",parameterization:"centripetal"}`;
+- `{type:"catmull-rom",parameterization:"chordal"}`.
 
-```ts
-type KnotElement =
-  | RopeElement
-  | SupportElement
-  | CarabinerElement
-```
+Renderer працює в координатах даних. Фізичний діаметр мотузки перетворюється на радіус `diameter / (2 * metersPerUnit)`. Інакше радіус показу дорівнює 0.006 найбільшого розмаху контрольних точок і супроводжується попередженням; це не фізичний вимір. Renderer відхиляє компоненти координат/камери поза ±1,000,000 та недодатні або більші за 1,000,000 радіуси. Це обмеження рендерингу, відокремлені від доменної валідації. Трубчаста сітка наближує криву й не доводить топології вузла або відсутності зіткнень.
 
-У майбутньому список може бути розширений.
+### Grid X/O
 
-## 3.1 Мотузка (Rope)
+Тип: `https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram`.
 
-```ts
-interface RopeElement {
-  id: string
-  type: 'rope'
+`data` має форму `{encoding:"xo",size,x,o}`. Розмір — ціле число від 2 до 512; обидва масиви є перестановками індексів рядків `0..size-1`, індексованими за стовпцем. X та O у кожному стовпці різні. Нульовий рядок нижній, стовпці зростають праворуч. Горизонтальні дуги йдуть O→X; вертикальні X→O і проходять над горизонтальними. Профіль підтримує кілька компонентів і не визначає тотожності вузла. Реалізовано дані та валідацію; поточний KnotViewer відображає лише просторові криві. Grid vertex-pairs — наступний профіль.
 
-  topology: 'open' | 'closed'
+## Ракурси
 
-  ends: RopeEnd[]
+Ракурси вкладаються в `representation.views` або включаються через `{ref}`. Обов’язкові `id`, `name`, `space`, `camera`; `description` необов’язкове. `defaultView` — `{id}` або `{ref}` на елемент цього списку. `preferredView: {direction,up}` доступне лише для 3D.
 
-  length?: number
-  diameter?: number
+При `space:"space"` камера має форму:
 
-  subtype?: string
-}
-```
+- `mode:"fit"`, `direction`, `up`, `projection`, необов’язкове `padding >= 1` (типово 1.1);
+- `mode:"fixed"`, `position`, `target`, `up`, `projection`.
 
-Приклад звичайної мотузки:
+Direction спрямовано від фокуса до камери. Direction/up мають бути скінченними, ненульовими й неколінеарними (довжина векторного добутку нормованих векторів щонайменше 1e-12); fixed position відрізняється від target. Проєкція — `{kind:"perspective",fovY}` у радіанах, `0 < fovY < π`, або `{kind:"orthographic"}`. Ортографічна fixed-проєкція додатково вимагає додатну `height`. Fit використовує центр bounding box і сферу, яка охоплює геометрію, для повного вміщення. Viewport задає пропорції, renderer обчислює площини відсікання. Fixed-кадрування зберігається навіть якщо обрізає геометрію.
 
-```json
-{
-  "id": "rope-1",
-  "type": "rope",
+При `space:"plane"` камера має форму `{mode:"plane",center:[x,y],height:додатне,rotation:радіани}`; додатний поворот — проти годинникової стрілки. Перевіряються дані; 3D viewer не відображає цей режим. Простір ракурсу має відповідати типу представлення.
 
-  "topology": "open",
+Початковий вибір: `initialCamera` застосунку → вибраний застосунком `view` → `defaultView` → `preferredView` із вміщенням → типовий ракурс компонента. Режими вибираються повністю; поля не змішуються. Взаємодія користувача змінює стан viewer, а не asset. PNG `model-preview` використовує вибраний/типовий/рекомендований авторський ракурс незалежно від поточної камери та `initialCamera` застосунку.
 
-  "ends": [
-    { "id": "a" },
-    { "id": "b" }
-  ],
+## Самостійні контракти й ресурси
 
-  "length": 2.0,
-  "diameter": 0.01
-}
-```
+Незалежні схеми існують для Grid, просторових кривих, представлення, конструкції, ракурсу, каталогу, типу представлення, типу предмета, мотузки й спорядження. Кожна опублікована схема включає тільки потрібні визначення й компілюється без кореневої схеми asset. Схеми генеруються з `src/core/contracts.json` командою `npm run build:schemas`.
 
-### topology
+`KnotResourceDocument` вимагає `schema`, `schemaVersion`, `kind`, `resource`; необов’язкові `$schema`, `namespaces`, `dependencies`. Види: `catalog`, `representation-type`, `object-type`, `view`, `construction`. Самостійний ресурс вимагає глобальний ID. `KnotResourceRegistry` вимагає `schema`, `schemaVersion`, `resources:[{kind,resource}]`, може містити `$schema`, `namespaces`, `id`. Реєстр — звичайний документ, не сервер чи singleton. `KnotRepresentationDocument` вимагає `schema`, `schemaVersion`, `representation`, може містити `$schema`, `namespaces`, `dependencies`, `subject`.
 
-`topology` описує фізичну структуру мотузки, а не геометричну форму конкретного representation.
+Визначення каталогу вимагає глобальні `id`, `name`, `description`; необов’язкові `homepage`, `edition`, `identifierRules`. Правила підтримують `pattern` (ECMA-262 без прапорців) і `caseSensitive` (типово true). Порівняння ідентичності без урахування регістру, коли воно потрібне споживачу, зводить регістр лише ASCII A–Z; записані значення не змінюються. Runtime перевіряє шаблони як записано, не шукає записи каталогу й не виводить тотожності. Для всього позначення шаблон обмежується `^`/`$`.
 
-```text
-open
-```
+Залежності — записи `{kind,ref}`. Валідація asset повідомляє нерозв’язані ресурсні потреби; перевірка оболонки реєстру/ресурсу не заявляє замкненості залежностей. Залежності користувацьких схем додатково відображаються неперевіреним статусом типу до підтримки його семантики.
 
-означає фізично відкриту мотузку.
+## Валідація та виділення
 
-```text
-closed
-```
+`validateKnotAsset` повертає `{valid:false,issues}` або `{valid:true,asset,warnings,complete,missingDependencies,uncheckedTypes}`. `valid` означає узгодженість відомих структур і розв’язуваних посилань; `complete` додатково вимагає всіх потрібних визначень та підтримуваної доменної семантики. Рендеринг і виділення вимагають `complete`. Валідація не змінює вхід і не завантажує дані. JSON Schema перевіряє структуру; runtime додатково перевіряє області, унікальність, неперервність кривих, вектори камери, перестановки Grid і сукупні бюджети. Це не доводить математичної тотожності чи практичної безпеки.
 
-означає замкнений шнур/петлю без фізичних кінців.
+До обходу ресурсний профіль обмежує вкладеність до 64, кількість відвіданих значень до 262144, окремий рядок до 1048576 символів. Значення поза JSON, розріджені масиви, аксесори й цикли відхиляються. Додаткові структурні ліміти: 1024 представлення, 256 конструкцій/предметів/станів, 256 процедур, 1024 кроки на процедуру, 4096 точок на криву та 65536 точок у всьому asset. Це захист реалізації, а не визначення всіх можливих доменних об’єктів.
 
-Це поняття не слід змішувати з `geometry.closed`.
+`selectKnotAsset(asset,{representations?,procedures?},options?)` повертає клонований самодостатній asset із вибраними процедурами, їхніми представленнями, потрібними повними конструкціями, ракурсами та визначеннями типів/каталогів. Сторонні процедури й представлення не включаються. Після вкладення зовнішніх ресурсів глобальні посилання залишаються чинними. Виділяються лише підтримувані типи: невідомі URI-поля не можна безпечно переписати. Твердження поза початковим профілем, тому прихованого обходу зв’язків або пропусків тверджень немає.
 
-### ends
+`composeKnotAsset(parts,options?)` об’єднує фрагменти з однаковими ID документа й однаковими subjects після розгортання просторів імен. Конфлікти ID колекцій є помилками; пропущені поля не видаляють дані. Це не patch-формат і не об’єднання незалежних документів. Обидві операції повертають незалежні копії та повторно перевіряють результат.
 
-`ends` містить кінці, доступні для маніпуляцій у межах описуваної задачі.
-
-Відкрита мотузка може мати:
-
-```text
-2 accessible ends
-1 accessible end
-0 accessible ends
-```
-
-Наприклад:
-
-```json
-{
-  "topology": "open",
-  "ends": [
-    { "id": "a" },
-    { "id": "b" }
-  ]
-}
-```
-
-— доступні обидва кінці.
-
-```json
-{
-  "topology": "open",
-  "ends": [
-    { "id": "a" }
-  ]
-}
-```
-
-— доступний один кінець; інший може бути закріплений, приєднаний до вантажу, людини тощо.
-
-```json
-{
-  "topology": "open",
-  "ends": []
-}
-```
-
-— доступна лише частина мотузки, але жоден фізичний кінець недоступний.
-
-Для:
-
-```json
-{
-  "topology": "closed",
-  "ends": []
-}
-```
-
-мотузка фізично замкнена.
-
-Для `topology: "closed"` непорожній `ends` є помилкою validation.
-
-`ends` не описує connections з іншими об'єктами.
-
-Connections у KnotAsset v1 не визначаються.
-
-### length і diameter
-
-Фізичні розміри задаються в метрах.
-
-```json
-{
-  "length": 1.5,
-  "diameter": 0.01
-}
-```
-
-означає 1,5 м і 10 мм.
-
-Обидва поля optional.
-
-Довжина `geometry` не зобов'язана точно дорівнювати `length`.
-
----
-
-## 3.2 Опора (Support)
-
-```ts
-interface SupportElement {
-  id: string
-  type: 'support'
-  subtype?: string
-}
-```
-
-`support` представляє опору, навколо або відносно якої формується вузол.
-
-Конкретні конструктивні параметри додаються лише за реальною потребою.
-
----
-
-## 3.3 Карабін (Carabiner)
-
-```ts
-interface CarabinerElement {
-  id: string
-  type: 'carabiner'
-  subtype?: string
-}
-```
-
-Конструктивні параметри карабіна не стандартизуються в KnotAsset v1.
-
----
-
-# 4. Представлення (Representations)
-
-`Representation` — конкретне координатне представлення вузла.
-
-Один KnotAsset може містити довільну кількість незалежних representations.
-
-```ts
-interface Representation {
-  id: string
-  dimension: 2 | 3
-
-  snapshots: Snapshot[]
-
-  presentation?: Presentation
-}
-```
-
-Наприклад:
-
-```json
-{
-  "id": "primary-3d",
-  "dimension": 3,
-  "snapshots": []
-}
-```
-
-або:
-
-```json
-{
-  "id": "instruction-diagram",
-  "dimension": 2,
-  "snapshots": []
-}
-```
-
-`id` не має прихованої семантики. Не слід визначати тип representation за значеннями на кшталт `spatial`, `diagram` тощо.
-
-Формальну dimensionality задає `dimension`.
-
-Один asset може містити кілька representations з однаковою dimensionality.
-
----
-
-# 5. Стани геометрії (Snapshots)
-
-`Snapshot` — стан геометрії representation у певний момент або логічний етап.
-
-```ts
-interface Snapshot {
-  id: string
-  elements: SnapshotElement[]
-
-  crossings?: Crossing[]
-}
-```
-
-Приклад:
-
-```json
-{
-  "id": "finished",
-
-  "elements": [
-    {
-      "id": "rope-1",
-      "geometry": {
-        "type": "curve",
-        "closed": false,
-        "interpolation": {
-          "type": "catmullrom",
-          "tension": 0.7
-        },
-        "points": [
-          [0, 0, 0],
-          [0.1, 0.2, 0.1],
-          [0.3, 0.4, 0.2]
-        ]
-      }
-    }
-  ]
-}
-```
-
-Snapshots належать конкретному Representation.
-
-2D- і 3D-representations не зобов'язані мати однаковий набір snapshots.
-
-Наприклад:
-
-```text
-primary-3d
-├── start
-├── loop
-├── pass-through
-├── wrap
-└── finished
-
-instruction-2d
-├── start
-├── loop
-├── wrap
-└── finished
-```
-
-Вони можуть описувати той самий процес із різною кількістю логічних станів.
-
-Representation може містити лише один Snapshot. Наявність Algorithm для статичного representation не вимагається.
-
----
-
-# 6. Елемент стану (SnapshotElement)
-
-```ts
-interface SnapshotElement {
-  id: string
-  geometry: Geometry
-}
-```
-
-`id` посилається на `KnotAsset.elements[].id`.
-
-Фізичні властивості Element не дублюються в Snapshot.
-
-Snapshot містить лише стан, який може змінюватися між snapshots.
-
----
-
-# 7. Геометрія (Geometry)
-
-`geometry` — універсальна назва координатної геометрії Element.
-
-У KnotAsset v1 визначається:
-
-```ts
-type Geometry = CurveGeometry
-```
-
-Архітектура повинна дозволяти в майбутньому додати інші типи:
-
-```text
-curve
-mesh
-primitive
-...
-```
-
-без зміни семантики поля `geometry`.
-
-## 7.1 Геометрія кривої (CurveGeometry)
-
-```ts
-interface CurveGeometry {
-  type: 'curve'
-
-  closed: boolean
-
-  interpolation: {
-    type: 'catmullrom'
-    tension: number
-  }
-
-  points: Point[]
-}
-```
-
-`Point` залежить від `Representation.dimension`.
-
-Для 3D:
-
-```ts
-type Point3D = [number, number, number]
-```
-
-Для 2D:
-
-```ts
-type Point2D = [number, number]
-```
-
-Усі coordinates використовують `KnotAsset.units`.
-
-### geometry.closed
-
-`geometry.closed` означає лише геометричне замикання конкретної кривої.
-
-Воно не визначає фізичну topology Element.
-
-Наприклад, відкрита фізична мотузка може мати спеціальне теоретичне representation із замкненою geometry.
-
-Перша точка не дублюється як остання. Замикання задається через `closed: true`.
-
----
-
-# 8. Стабільна параметризація Element
-
-Положення вздовж rope адресується нормалізованою координатою:
-
-```text
-u ∈ [0, 1]
-```
-
-Для відкритої мотузки:
-
-```text
-u = 0   → один край параметризованого Element
-u = 1   → другий край
-```
-
-`u` описує стабільне положення вздовж самого Element, а не індекс конкретної контрольної точки і не частку довжини поточної spline.
-
-Це дозволяє використовувати `u` після resampling geometry.
-
-Ідентичність напрямку параметризації Element повинна залишатися стабільною між snapshots.
-
----
-
-# 9. Відповідність контрольних точок
-
-Для snapshots, що використовуються послідовно одним Algorithm для анімації, відповідний Element повинен мати однакову кількість контрольних точок та стабільний порядок цих точок.
-
-Таким чином:
-
-```text
-snapshot A points[i]
-```
-
-відповідає:
-
-```text
-snapshot B points[i]
-```
-
-для того самого Element.
-
-Це дозволяє renderer інтерполювати координати контрольних точок.
-
-Формат KnotAsset v1 не гарантує, що проста лінійна інтерполяція створить фізично правильний рух мотузки.
-
-Transitions та trajectories в KnotAsset v1 не специфікуються.
-
----
-
-# 10. Перехрещення (Crossings)
-
-`crossings` застосовуються лише до 2D Representation.
-
-Вони не є частиною `Geometry`, оскільки описують відношення між двома ділянками geometry.
-
-```ts
-interface CrossingPoint {
-  element: string
-  u: number
-}
-
-interface Crossing {
-  id?: string
-  over: CrossingPoint
-  under: CrossingPoint
-}
-```
-
-Приклад:
-
-```json
-{
-  "over": {
-    "element": "rope-1",
-    "u": 0.27
-  },
-
-  "under": {
-    "element": "rope-1",
-    "u": 0.73
-  }
-}
-```
-
-Crossings зберігаються в конкретному Snapshot 2D Representation, оскільки взаємне проходження ділянок може змінюватися між snapshots.
-
-Для `dimension: 3` наявність `crossings` є validation error.
-
-У 3D взаємне просторове положення визначається координатами geometry.
-
----
-
-# 11. Алгоритми (Algorithms)
-
-`Algorithm` описує один спосіб зав'язування вузла.
-
-```ts
-interface Algorithm {
-  id: string
-  representation: string
-  steps: Step[]
-}
-```
-
-Algorithm працює в межах одного Representation.
-
-Це дозволяє мати незалежні алгоритми/послідовності для 3D та 2D:
-
-```text
-algorithm: standard-3d
-representation: primary-3d
-
-algorithm: standard-diagram
-representation: instruction-2d
-```
-
-Вони не зобов'язані мати однакову кількість Steps.
-
-## Крок (Step)
-
-```ts
-interface Step {
-  id: string
-  snapshot: string
-}
-```
-
-`snapshot` посилається на Snapshot у Representation, визначеному через `Algorithm.representation`.
-
-`Step` не є Snapshot.
-
-Step є семантичним елементом алгоритму, а Snapshot — станом геометрії.
-
-Це дозволяє надалі додавати до Step:
-
-- локалізовані instructions;
-- annotations;
-- active elements/ends;
-- hints;
-- timing;
-- інші навчальні metadata,
-
-не змінюючи геометричну модель Snapshot.
-
-У KnotAsset v1 Algorithm є лінійною послідовністю Steps.
-
-Branching не визначається. Альтернативний спосіб зав'язування описується окремим Algorithm.
-
-Transitions між Steps у KnotAsset v1 не описуються.
-
-Їхня runtime-реалізація залишається відповідальністю knot-engine/viewer.
-
----
-
-# 12. Варіанти (Variants)
-
-`Variant` — іменоване посилання на конкретний Snapshot конкретного Representation.
-
-```ts
-interface Variant {
-  id: string
-  representation: string
-  snapshot: string
-}
-```
-
-Наприклад:
-
-```json
-{
-  "id": "standard",
-  "representation": "primary-3d",
-  "snapshot": "finished"
-}
-```
-
-або:
-
-```json
-{
-  "id": "decorative-spread",
-  "representation": "primary-3d",
-  "snapshot": "decorative-spread"
-}
-```
-
-Один Snapshot може одночасно:
-
-- бути Variant;
-- бути Step одного Algorithm;
-- бути Step кількох Algorithms.
-
-Variant не дублює geometry.
-
----
-
-# 13. Параметри відображення (Presentation)
-
-Presentation-параметри належать Representation, а не Snapshot.
-
-Початково допускається:
-
-```ts
-interface Presentation {
-  camera?: CameraView
-  preset?: string
-}
-```
-
-Для 3D:
-
-```ts
-interface CameraView {
-  position: [number, number, number]
-  target: [number, number, number]
-  fov?: number
-}
-```
-
-Presentation не змінює семантику geometry.
-
-Одна й та сама geometry може бути відображена різними renderer/presentation presets.
-
-У майбутньому за потреби може бути додано кілька іменованих camera views.
-
----
-
-# 14. Приклад мінімального KnotAsset
-
-```json
-{
-  "schema": "KnotAsset",
-  "schemaVersion": 1,
-  "id": "bowline",
-  "units": "m",
-
-  "elements": [
-    {
-      "id": "rope-1",
-      "type": "rope",
-      "topology": "open",
-      "ends": [
-        { "id": "a" },
-        { "id": "b" }
-      ],
-      "length": 2,
-      "diameter": 0.01
-    }
-  ],
-
-  "representations": [
-    {
-      "id": "primary-3d",
-      "dimension": 3,
-
-      "snapshots": [
-        {
-          "id": "start",
-          "elements": [
-            {
-              "id": "rope-1",
-              "geometry": {
-                "type": "curve",
-                "closed": false,
-                "interpolation": {
-                  "type": "catmullrom",
-                  "tension": 0.7
-                },
-                "points": [
-                  [0, 0, 0],
-                  [0.5, 0, 0],
-                  [1, 0, 0]
-                ]
-              }
-            }
-          ]
-        },
-
-        {
-          "id": "finished",
-          "elements": [
-            {
-              "id": "rope-1",
-              "geometry": {
-                "type": "curve",
-                "closed": false,
-                "interpolation": {
-                  "type": "catmullrom",
-                  "tension": 0.7
-                },
-                "points": [
-                  [0, 0, 0],
-                  [0.4, 0.3, 0.1],
-                  [1, 0, 0]
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    }
-  ],
-
-  "algorithms": [
-    {
-      "id": "standard",
-      "representation": "primary-3d",
-
-      "steps": [
-        {
-          "id": "start",
-          "snapshot": "start"
-        },
-        {
-          "id": "finished",
-          "snapshot": "finished"
-        }
-      ]
-    }
-  ],
-
-  "variants": [
-    {
-      "id": "standard",
-      "representation": "primary-3d",
-      "snapshot": "finished"
-    }
-  ]
-}
-```
-
----
-
-# 15. Валідація
-
-Validator повинен щонайменше перевіряти:
-
-- підтримуваний `schemaVersion`;
-- унікальність Element IDs;
-- унікальність Representation IDs;
-- унікальність Snapshot IDs у межах Representation;
-- унікальність Algorithm IDs;
-- унікальність Variant IDs;
-- існування всіх referenced IDs;
-- `units === "m"` для v1;
-- finite coordinates;
-- правильну dimensionality points;
-- допустимий `tension`;
-- мінімальну кількість points;
-- відсутність послідовних однакових points;
-- відсутність дублювання першої точки в кінці closed curve;
-- `u ∈ [0,1]`;
-- crossings тільки для dimension=2;
-- `topology:"closed"` → `ends.length === 0`;
-- для `topology:"open"` не більше двох accessible ends;
-- унікальність RopeEnd IDs;
-- однакову кількість відповідних control points у snapshots, які послідовно використовуються Algorithm для анімації.
-
-Resource limits мають бути окремо визначені й протестовані, а не неявно успадковані зі старого KnotModelV1.
-
----
-
-# 16. Що навмисно не входить до KnotAsset v1
-
-KnotAsset v1 не визначає:
-
-- transitions;
-- easing;
-- trajectories;
-- фізичну симуляцію;
-- collision/contact model;
-- connections між Elements;
-- автоматичне визначення правильності вузла;
-- механічну міцність;
-- навантаження;
-- довільний executable code;
-- Three.js objects;
-- shaders;
-- зовнішні URL;
-- спосіб завантаження asset;
-- локалізовані навчальні тексти.
-
-Ці можливості можуть бути додані окремими versioned capabilities після появи конкретних вимог.
-
----
-
-# 17. Відношення до legacy KnotModelV1
-
-Існуючий `KnotModelV1` не є KnotAsset v1.
-
-Він розглядається як legacy/render-oriented формат статичної геометрії.
-
-Під час міграції knot-engine може тимчасово підтримувати:
-
-```text
-KnotModelV1
-      ↓
-legacy adapter
-      ↓
-KnotAsset v1
-```
-
-або безпосередньо перетворювати legacy model у внутрішній renderable representation.
-
-Не слід змінювати значення старого `schemaVersion: 1`, щоб воно мовчки означало новий KnotAsset.
-
-`KnotAsset.schemaVersion: 1` належить новому окремому schema contract.
-
-Тип root object повинен визначатися явним validator/entry point, а не вгадуватися лише за числом `schemaVersion`.
-
----
-
-# 18. Архітектурний принцип knot-engine
-
-Рекомендована залежність:
-
-```text
-KnotAsset
-   │
-   ▼
-core / validation
-   │
-   ▼
-representation resolver
-   │
-   ▼
-geometry builder
-   │
-   ▼
-renderer
-   │
-   ├── viewer
-   ├── preview
-   └── future editor
-```
-
-Viewer не є власником формату KnotAsset.
-
-Renderer не повинен мутувати авторські дані.
-
-Редактор у майбутньому працює з KnotAsset, а не з Three.js scene як джерелом істини.
-
-## Модульні assets і Grid diagram
-
-`schema: "KnotAsset"` визначає назву контракту, `schemaVersion` — його версію. Необов’язкове `$schema` вказує редактору на JSON Schema. Нові приклади містять обидва поля; для сумісності з початковими v1 документами вони залишаються необов’язковими. `name` та `aliases` — необов’язкові назви для відображення й каталогів; стабільною ідентичністю залишається `id`.
-
-Координатні `representations` зберігають свої геометричні правила. Окремий розділ `diagrams` містить комбінаторні представлення, спочатку `GridDiagram`:
-
-```ts
-interface GridDiagram {
-  id: string
-  type: 'grid'
-  size: number
-  x: number[]
-  o: number[]
-}
-```
-
-Рядки рахуються знизу, стовпці — зліва, від нуля. `x[row]` і `o[row]` задають стовпці маркерів. Кожен масив є перестановкою `0..size-1`; X та O не можуть займати одну клітинку. Горизонтальні дуги спрямовані O→X, вертикальні — X→O; вертикальні проходять над горизонтальними. Розмір обмежено 2–256. Координати клітинок цілочислові, а не в метрах. Grid може описувати кілька компонентів: валідатор не доводить ідентичність вузла або кількість компонентів.
-
-Компонент відображення Grid має приймати `GridDiagram`, за потреби разом із `KnotIdentity`. `validateGridDiagram(value, { strict: true })` перевіряє окрему діаграму. Окремі підсхеми доступні як `knot-engine/schema/grid-diagram.schema.json`, `representation-2d.schema.json`, `representation-3d.schema.json` та `element.schema.json`. Разом із ними потрібно зареєструвати або розв’язати `$ref` на кореневу схему. JSON Schema перевіряє структуру; runtime додатково перевіряє довжини Grid масивів, межі стовпців відносно size та розділення X/O.
-
-```ts
-const gridOnly = selectKnotAsset(asset, { diagrams: ['grid'] })
-const spatialOnly = selectKnotAsset(asset, { representations: ['view-3d'] })
-const combined = composeKnotAsset([gridOnly, spatialOnly])
-```
-
-Виділення зберігає ідентичність, вибрані представлення, потрібні фізичні елементи й алгоритми/варіанти цих координатних представлень. Результат є незалежною копією. Grid-only asset має порожні `elements` та `representations`; це валідні доменні дані, які поточний 3D viewer не відображає. Об’єднання приймає самодостатні валідні фрагменти з однаковими ID вузла та одиницями. Однакові ID колекцій дедуплікуються лише за однакового вмісту; конфлікти відхиляються. Часткові snapshots та відсутні залежності не допускаються. Об’єднання не змішує різні редакції представлення й не завантажує зовнішні дані.
-
-Колишні приклади overhand та twisted-loop з відносними одиницями тепер розташовані в `examples/assets`. Для них явно прийнято демонстраційний масштаб: **1 стара одиниця = 0.01 м**, застосований до точок, radius/diameter і координат камери. Це зберігає пропорції та не означає виміряну фізичну довжину. Оригінали залишені лише в `tests/fixtures/legacy` для перевірки сумісності.
-
-[Аналіз і план розширення](../../design/asset-evolution.uk.md) описує нотації, математичні презентації, інваріанти, джерела й інші діаграми. Це пропозиції, а не дозволені довільні поля v1.
+[Відкрита мотузка](examples/assets/open-rope.json) · [Дві процедури зі спільними станами](examples/assets/procedures.json) · [Grid](examples/assets/grid-diagram.json) · [API](functions.uk.md)

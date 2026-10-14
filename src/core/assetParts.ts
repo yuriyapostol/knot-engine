@@ -1,56 +1,65 @@
-import type { KnotAsset } from './asset'
-import { validateKnotAsset } from './validateAsset'
-import { ViewerError } from './legacy'
-
-function checked(value: unknown): KnotAsset {
-  const result = validateKnotAsset(value, { strict: true })
-  if (!result.valid) throw new ViewerError(result.issues[0].code, 'Invalid KnotAsset part', result.issues, false)
-  return result.asset
+import { type KnotAsset, type Construction, type Reference } from './asset'
+import { validateKnotAsset, normalizeAsset, indexAsset, constructionFor, type ValidationOptions } from './validateAsset'
+import { canonical } from './validation'
+import { ViewerError } from './errors'
+function checked(value: unknown, options: ValidationOptions): KnotAsset {
+  const result = validateKnotAsset(value, options)
+  if(!result.valid) throw new ViewerError('INVALID_MODEL','Invalid KnotAsset',result.issues,false)
+  if(!result.complete) throw new ViewerError('UNSUPPORTED_SCHEMA','Operation requires resolved dependencies and supported semantics',undefined,false)
+  return normalizeAsset(result.asset)
 }
-
-/** Produces an independent asset containing only requested views and their dependencies. */
-export function selectKnotAsset(value: unknown, selection: { representations?: string[]; diagrams?: string[] }): KnotAsset {
-  const asset = checked(value)
-  const reps = new Set(selection.representations ?? [])
-  const diagrams = new Set(selection.diagrams ?? [])
-  for (const id of reps) if (!asset.representations.some(r => r.id === id)) throw new ViewerError('INVALID_MODEL', `Unknown representation: ${id}`, undefined, false)
-  for (const id of diagrams) if (!asset.diagrams?.some(d => d.id === id)) throw new ViewerError('INVALID_MODEL', `Unknown diagram: ${id}`, undefined, false)
-  const representations = asset.representations.filter(r => reps.has(r.id))
-  const elements = new Set(representations.flatMap(r => r.snapshots.flatMap(s => s.elements.map(e => e.id))))
-  return structuredClone({
-    ...asset,
-    elements: asset.elements.filter(e => elements.has(e.id)),
-    representations,
-    diagrams: asset.diagrams?.filter(d => diagrams.has(d.id)),
-    algorithms: asset.algorithms?.filter(a => reps.has(a.representation)),
-    variants: asset.variants?.filter(v => reps.has(v.representation))
-  })
+/** Extracts a self-contained fragment; only explicitly selected procedures and representations. */
+export function selectKnotAsset(value: unknown, selection: { representations?: string[]; procedures?: string[] }, options: ValidationOptions = {}): KnotAsset {
+  const asset = checked(value,options), index = indexAsset(asset,options.registries)
+  const reps = new Set(selection.representations ?? []), procs = new Set(selection.procedures ?? [])
+  for(const id of procs) if(!asset.procedures?.some(p=>p.id === id)) throw new ViewerError('INVALID_MODEL',`Unknown procedure: ${id}`,undefined,false)
+  const procedures = asset.procedures?.filter(p=>procs.has(p.id)) ?? []
+  for(const p of procedures) for(const step of p.steps) for(const r of step.representations ?? []) if(r.id) reps.add(r.id)
+  for(const id of reps) if(!asset.representations?.some(r=>r.id === id)) throw new ViewerError('INVALID_MODEL',`Unknown representation: ${id}`,undefined,false)
+  const representations = asset.representations?.filter(r=>reps.has(r.id)) ?? []
+  const constructions = new Map<string,Construction>()
+  const includeConstruction = (r: Reference) => { const c=constructionFor(asset,index,r); if(c) constructions.set(c.id,c) }
+  for(const r of representations) if(r.target && r.target.kind !== 'subject') includeConstruction(r.target.construction)
+  for(const p of procedures) if(p.construction) includeConstruction(p.construction)
+  const output: KnotAsset = { schema:'KnotAsset',schemaVersion:1,id:asset.id,subject:asset.subject,representations,procedures,constructions:[...constructions.values()] }
+  const included = new Set<string>()
+  function include(ref: string) {
+    if(included.has(ref)) return
+    included.add(ref)
+    const entry = index.get(ref)
+    if(!entry) throw new ViewerError('INVALID_MODEL',`Unresolved resource: ${ref}`,undefined,false)
+    if(entry.kind === 'catalog') (output.catalogs ??= []).push(entry.resource)
+    if(entry.kind === 'representation-type') (output.representationTypes ??= []).push(entry.resource)
+    if(entry.kind === 'object-type') (output.objectTypes ??= []).push(entry.resource)
+  }
+  for(const ident of output.subject.identifiers ?? []) include(ident.catalog)
+  for(const c of constructions.values()) for(const o of c.objects) include(o.type)
+  for(const rep of representations) {
+    include(rep.type)
+    if(rep.views) rep.views=rep.views.map(v=> {
+      if(!('ref' in v)) return v
+      const e=index.get(v.ref)
+      if(e?.kind !== 'view') throw new ViewerError('INVALID_MODEL','Missing view',undefined,false)
+      return e.resource
+    })
+  }
+  return structuredClone(checked(output,{}))
 }
-
-/** Joins fragments of the same knot. Equal IDs must have equal content; conflicts are errors. */
-export function composeKnotAsset(values: readonly unknown[]): KnotAsset {
-  if (!values.length) throw new ViewerError('INVALID_MODEL', 'Expected at least one asset part', undefined, false)
-  const parts = values.map(checked)
-  const output = structuredClone(parts[0])
-  // Compare JSON content independent of object key insertion order.
-  const canonical = (value: unknown): string => JSON.stringify(value, (_, v) => v && typeof v === 'object' && !Array.isArray(v)
-    ? Object.fromEntries(Object.keys(v).sort().map(k => [k, v[k]])) : v)
-  for (const part of parts.slice(1)) {
-    if (part.id !== output.id || part.units !== output.units) throw new ViewerError('INVALID_MODEL', 'Asset parts must describe the same knot and units', undefined, false)
-    for (const key of ['schema', '$schema', 'name', 'aliases'] as const) {
-      if (part[key] === undefined) continue
-      if (output[key] !== undefined && canonical(output[key]) !== canonical(part[key])) throw new ViewerError('INVALID_MODEL', `Conflicting identity field: ${key}`, undefined, false)
-      Object.assign(output, { [key]: structuredClone(part[key]) })
-    }
-    for (const key of ['elements', 'representations', 'diagrams', 'algorithms', 'variants'] as const) {
-      const merged = new Map((output[key] ?? []).map(item => [item.id, item]))
-      for (const item of part[key] ?? []) {
-        const previous = merged.get(item.id)
-        if (previous && canonical(previous) !== canonical(item)) throw new ViewerError('INVALID_MODEL', `Conflicting ${key} ID: ${item.id}`, undefined, false)
-        merged.set(item.id, structuredClone(item))
+/** Joins fragments of one document. Order-insensitive object equality; array order is significant. */
+export function composeKnotAsset(values: readonly unknown[], options: ValidationOptions = {}): KnotAsset {
+  if(!values.length) throw new ViewerError('INVALID_MODEL','Expected at least one asset',undefined,false)
+  const parts=values.map(v=>checked(v,options)), out=structuredClone(parts[0])
+  for(const p of parts.slice(1)) {
+    if(p.id !== out.id || canonical(p.subject) !== canonical(out.subject)) throw new ViewerError('INVALID_MODEL','Fragments must have the same document and subject',undefined,false)
+    for(const key of ['catalogs','representationTypes','objectTypes','constructions','representations','procedures','dependencies'] as const) {
+      const merged=new Map<string,unknown>()
+      for(const item of [...(out[key] ?? []),...(p[key] ?? [])]) {
+        const id='id' in item ? item.id : item.ref
+        if(merged.has(id) && canonical(merged.get(id)) !== canonical(item)) throw new ViewerError('INVALID_MODEL',`Conflicting ${key}: ${id}`,undefined,false)
+        merged.set(id,item)
       }
-      if (output[key] !== undefined || part[key] !== undefined) Object.assign(output, { [key]: [...merged.values()] })
+      if(out[key] || p[key]) Object.assign(out,{[key]:[...merged.values()]})
     }
   }
-  return checked(output)
+  return structuredClone(checked(out,options))
 }

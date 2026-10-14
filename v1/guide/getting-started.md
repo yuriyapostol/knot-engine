@@ -23,11 +23,11 @@ import asset from './open-rope.json'
 </script>
 
 <template>
-  <KnotViewer :asset="asset" locale="en" />
+  <KnotViewer :asset="asset" locale="en" label="Rope" />
 </template>
 ```
 
-Use the [open-rope asset](../spec/examples/assets/open-rope.json) as `open-rope.json`. Read the [component contract](../spec/components.md) for selection parameters, events and capture methods. The current package supports existing legacy inputs; their removal is a design decision, not an already completed runtime migration.
+Use the [open-rope asset](../spec/examples/assets/open-rope.json) as `open-rope.json`. Read the [component contract](../spec/components.md) for selection parameters, events and capture methods. The package uses only the current KnotAsset contract. Select a static representation with `representation-id`.
 
 ## Edit the data
 

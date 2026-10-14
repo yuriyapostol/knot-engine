@@ -1,8 +1,9 @@
 import * as THREE from 'three'
 import { verticalDrag } from './touchGesture'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import type { CameraView, RenderableModel } from '../core'
-import { ViewerError } from '../core'
+import type { CameraView, Camera3D, RenderableModel } from '../core'
+import { ViewerError, validateView } from '../core'
+import { prepareCamera, cameraView, resizeCamera, DEFAULT_CAMERA, type RenderCamera } from './camera'
 import { buildGeometry, type BuiltModel, type Quality } from '../geometry/build'
 
 export interface CaptureOptions { width?: number; height?: number; format?: 'image/png'; view?: 'current' | 'model-preview'; transparent?: boolean }
@@ -11,12 +12,12 @@ export class ViewerEngine {
   readonly canvas: HTMLCanvasElement
   private renderer: THREE.WebGLRenderer
   private scene = new THREE.Scene()
-  private camera = new THREE.PerspectiveCamera(55, 1, 0.01, 10000)
+  private camera: RenderCamera = new THREE.PerspectiveCamera(55, 1, 0.01, 10000)
   private controls: OrbitControls
   private touches = new Map<number, { x: number; y: number }>()
   private built?: BuiltModel
   private model?: RenderableModel
-  private initial?: CameraView
+  private initial?: Camera3D
   private frame = 0
   private alive = true
   private visible = true
@@ -93,7 +94,7 @@ export class ViewerEngine {
   }
   private contextRestored = () => { this.ready = false; this.requestRender() }
 
-  view(): CameraView { return { position: this.camera.position.toArray() as CameraView['position'], target: this.controls.target.toArray() as CameraView['target'], fov: this.camera.fov } }
+  view(): CameraView { return cameraView(this.camera,this.controls.target) }
   setActive(active: boolean) { this.active = active; if (!active) { cancelAnimationFrame(this.frame); this.frame = 0 } else this.requestRender() }
   setVisible(visible: boolean) { this.visible = visible; if (visible) this.requestRender() }
   setInteractive(interactive: boolean) {
@@ -156,7 +157,7 @@ export class ViewerEngine {
     this.requestRender()
   }
   private quality: Quality = 'medium'
-  setModel(model: RenderableModel, quality: Quality, initial?: CameraView) {
+  setModel(model: RenderableModel, quality: Quality, initial?: Camera3D) {
     this.operation++
     this.ready = false
     this.quality = quality
@@ -180,55 +181,39 @@ export class ViewerEngine {
     const { width, height } = this.container.getBoundingClientRect()
     if (width <= 0 || height <= 0) return
     this.renderer.setSize(width, height, false)
-    this.camera.aspect = width / height
-    this.camera.updateProjectionMatrix()
+    resizeCamera(this.camera, width / height)
     this.requestRender()
   }
-  private applyView(view: CameraView) {
-    this.camera.position.set(...view.position)
-    this.controls.target.set(...view.target)
-    this.camera.fov = view.fov
-    this.camera.updateProjectionMatrix()
+  private applyView(view: Camera3D) {
+    if (!this.built) return
+    const validation=validateView({id:'application',name:'Application',space:'space',camera:view})
+    if(!validation.valid) throw new ViewerError('INVALID_MODEL','Invalid application camera',validation.issues,false)
+    const rect=this.container.getBoundingClientRect()
+    const prepared=prepareCamera(view,this.built.bounds,rect.height > 0 ? rect.width/rect.height : 1)
+    this.camera=prepared.camera
+    this.controls.object=this.camera
+    this.controls.target.copy(prepared.target)
+    const radius=Math.max(this.built.bounds.getBoundingSphere(new THREE.Sphere()).radius,1e-8)
+    this.controls.minDistance=radius/100
+    this.controls.maxDistance=Math.max(radius*100,this.camera.position.distanceTo(prepared.target)*10)
     this.controls.update()
     this.requestRender()
   }
-  fitToView() {
-    if (!this.built) return
-    const sphere = this.built.bounds.getBoundingSphere(new THREE.Sphere())
-    const radius = Math.max(sphere.radius, 0.01)
-    const aspect = Math.max(this.camera.aspect, 0.1)
-    const halfFov = THREE.MathUtils.degToRad(this.camera.fov / 2)
-    const distance = radius * 1.25 / Math.sin(Math.atan(Math.tan(halfFov) * Math.min(aspect, 1)))
-    this.camera.near = Math.max(radius / 1000, 0.0001)
-    this.camera.far = Math.max(distance + radius * 8, 10)
-    this.controls.minDistance = radius * 1.05
-    this.controls.maxDistance = Math.max(distance * 8, radius * 4)
-    this.applyView({ position: [sphere.center.x + distance * 0.38, sphere.center.y + distance * 0.25, sphere.center.z + distance], target: sphere.center.toArray() as CameraView['target'], fov: this.camera.fov })
-  }
-  setInitialCamera(initial?: CameraView) { this.initial = initial; this.resetView() }
-  resetView() {
-    if (!this.built) return
-    const view = this.initial ?? this.model?.camera
-    if (!view) { this.camera.fov = 55; this.fitToView(); return }
-    const radius = Math.max(this.built.bounds.getBoundingSphere(new THREE.Sphere()).radius, 0.01)
-    const distance = new THREE.Vector3(...view.position).distanceTo(new THREE.Vector3(...view.target))
-    this.controls.minDistance = radius * 1.05
-    this.controls.maxDistance = Math.max(radius * 12, distance * 5)
-    this.camera.near = Math.max(radius / 1000, 0.0001)
-    this.camera.far = Math.max(distance + radius * 8, 10)
-    if (distance < this.controls.minDistance || !this.built.bounds.containsPoint(new THREE.Vector3(...view.target))) { this.fitToView(); return }
-    this.applyView(view)
-  }
+  fitToView() { this.applyView(DEFAULT_CAMERA) }
+  setInitialCamera(initial?: Camera3D) { this.initial=initial; this.resetView() }
+  resetView() { this.applyView(this.initial ?? this.model?.camera ?? DEFAULT_CAMERA) }
   orbit(dx: number, dy: number) {
     if (!this.built) return
     const offset = this.camera.position.clone().sub(this.controls.target)
-    const spherical = new THREE.Spherical().setFromVector3(offset)
+    const toY = new THREE.Quaternion().setFromUnitVectors(this.camera.up.clone().normalize(), new THREE.Vector3(0,1,0))
+    const spherical = new THREE.Spherical().setFromVector3(offset.applyQuaternion(toY))
     spherical.theta += dx; spherical.phi = THREE.MathUtils.clamp(spherical.phi + dy, this.controls.minPolarAngle, this.controls.maxPolarAngle)
-    this.camera.position.copy(this.controls.target).add(new THREE.Vector3().setFromSpherical(spherical))
+    this.camera.position.copy(this.controls.target).add(new THREE.Vector3().setFromSpherical(spherical).applyQuaternion(toY.invert()))
     this.controls.update(); this.emitCamera()
   }
   zoom(factor: number) {
     if (!this.built) return
+    if(this.camera instanceof THREE.OrthographicCamera) { this.camera.zoom=THREE.MathUtils.clamp(this.camera.zoom/factor,0.01,100); this.camera.updateProjectionMatrix(); this.requestRender(); this.emitCamera(); return }
     const offset = this.camera.position.clone().sub(this.controls.target)
     offset.setLength(THREE.MathUtils.clamp(offset.length() * factor, this.controls.minDistance, this.controls.maxDistance))
     this.camera.position.copy(this.controls.target).add(offset)
@@ -239,21 +224,15 @@ export class ViewerEngine {
     const width = options.width ?? 512, height = options.height ?? 512
     if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 || width > 2048 || height > 2048 || (options.format && options.format !== 'image/png')) throw new ViewerError('CAPTURE_FAILED', 'Invalid capture dimensions or format')
     const operation = this.operation
-    const camera = this.camera.clone()
-    camera.aspect = width / height
-    if (options.view !== 'model-preview' && camera.aspect < this.camera.aspect) {
-      camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * this.camera.aspect / camera.aspect))
-    }
-    if (options.view === 'model-preview') {
-      const p = this.model?.camera
-      if (p) { camera.position.set(...p.position); camera.lookAt(...p.target); camera.fov = p.fov }
-      else {
-        const sphere = this.built.bounds.getBoundingSphere(new THREE.Sphere())
-        const distance = sphere.radius * 1.25 / Math.sin(Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * Math.min(camera.aspect, 1)))
-        camera.position.copy(sphere.center).add(new THREE.Vector3(distance * 0.38, distance * 0.25, distance)); camera.lookAt(sphere.center)
+    const camera = options.view === 'model-preview'
+      ? prepareCamera(this.model?.camera ?? DEFAULT_CAMERA,this.built.bounds,width/height).camera
+      : this.camera.clone()
+    if (options.view !== 'model-preview') {
+      if(camera instanceof THREE.PerspectiveCamera && this.camera instanceof THREE.PerspectiveCamera && width/height < this.camera.aspect) {
+        camera.fov=THREE.MathUtils.radToDeg(2*Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*this.camera.aspect/(width/height)))
       }
+      resizeCamera(camera,width/height)
     }
-    camera.updateProjectionMatrix()
     const target = new THREE.WebGLRenderTarget(width, height, { format: THREE.RGBAFormat })
     const pixels = new Uint8Array(width * height * 4)
     const previousTarget = this.renderer.getRenderTarget()

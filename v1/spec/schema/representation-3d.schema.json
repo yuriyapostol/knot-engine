@@ -1,6 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://yuriyapostol.github.io/knot-engine/v1/schema/representation-3d.schema.json",
-  "title": "representation-3d v1",
-  "$ref": "knot-asset.schema.json#/$defs/representation3"
-}

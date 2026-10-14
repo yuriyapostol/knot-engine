@@ -1,6 +1,45 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://yuriyapostol.github.io/knot-engine/v1/schema/grid-diagram.schema.json",
-  "title": "grid-diagram v1",
-  "$ref": "knot-asset.schema.json#/$defs/gridDiagram"
+  "$ref": "#/$defs/grid",
+  "$defs": {
+    "grid": {
+      "type": "object",
+      "properties": {
+        "encoding": {
+          "const": "xo"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 512
+        },
+        "x": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 512
+        },
+        "o": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 512
+        }
+      },
+      "required": [
+        "encoding",
+        "size",
+        "x",
+        "o"
+      ],
+      "additionalProperties": false
+    }
+  }
 }

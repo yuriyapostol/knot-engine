@@ -31,9 +31,8 @@ try {
   assert.match(await setInput({ asset: invalid }), /INVALID_MODEL/)
   assert.equal(await page.evaluate(() => window.__webglContexts), 0, 'Malformed asset must fail before WebGL allocation')
 
-  for (const kind of ['legacy', 'asset']) for (const model of ['overhand', 'twisted-loop']) {
-    const path = kind === 'legacy' ? `tests/fixtures/legacy/${model}.json` : `v1/spec/examples/assets/${model}.json`
-    assert.equal(await setInput({ [kind === 'legacy' ? 'model' : 'asset']: fixture(path) }), undefined)
+  for (const model of ['overhand', 'twisted-loop']) {
+    assert.equal(await setInput({ asset: fixture(`v1/spec/examples/assets/${model}.json`) }), undefined)
     const capture = await page.evaluate(async () => {
       const blob = await window.__previewCapture(240, 180)
       const bitmap = await createImageBitmap(blob)
@@ -46,36 +45,40 @@ try {
       return { size: blob.size, width: canvas.width, height: canvas.height, colored }
     })
     assert.ok(capture.size > 1000 && capture.colored > 100, `${model}: capture must contain rendered geometry`)
-    console.log(`${kind} ${model}: render and 240×180 PNG capture passed`)
+    console.log(`${model}: render and 240×180 PNG capture passed`)
   }
-  const asset = fixture('v1/spec/examples/assets/variants.json')
-  assert.equal(await setInput({ asset, selection: { representationId: 'view-3d', snapshotId: 'rest' } }), undefined)
+  const orthographic = fixture('v1/spec/examples/assets/open-rope.json')
+  orthographic.representations[0].views = [{ id: 'ortho', name: 'Orthographic', space: 'space', camera: { mode: 'fit', direction: [0,0,1], up: [0,1,0], projection: { kind: 'orthographic' } } }]
+  orthographic.representations[0].defaultView = { id: 'ortho' }
+  assert.equal(await setInput({ asset: orthographic }), undefined)
+  assert.ok(await page.evaluate(async () => (await window.__previewCapture(320,180)).size) > 1000)
+  const asset = fixture('v1/spec/examples/assets/procedures.json')
+  assert.equal(await setInput({ asset, selection: { representationId: 'view-3d-rest' } }), undefined)
   const capturePixels = () => page.evaluate(async () => {
     const blob = await window.__previewCapture(240, 180)
     return Array.from(new Uint8Array(await blob.arrayBuffer()))
   })
   const before = await capturePixels()
-  assert.equal(await setInput({ asset, selection: { representationId: 'view-3d', snapshotId: 'finish' } }), undefined)
+  assert.equal(await setInput({ asset, selection: { representationId: 'view-3d-finish' } }), undefined)
   const after = await capturePixels()
   assert.ok(before.length > 1000 && after.length > 1000)
-  assert.notDeepEqual(before, after, 'Snapshot selection must change the captured geometry')
-  assert.match(await setInput({ asset, selection: { snapshotId: 'missing' } }), /INVALID_MODEL/)
+  assert.notDeepEqual(before, after, 'Representation selection must change the captured geometry')
+  assert.match(await setInput({ asset, selection: { representationId: 'missing' } }), /INVALID_MODEL/)
   assert.equal(await page.locator('.knot-viewer').getAttribute('data-state'), 'error')
-  assert.match(await setInput({ asset, model: fixture('tests/fixtures/legacy/overhand.json') }), /INVALID_MODEL/)
   assert.equal(await setInput({ asset }), undefined)
   assert.deepEqual(failures, [])
-  console.log('KnotAsset: render, snapshot replacement, PNG capture, invalid selection, input conflict, and recovery passed')
+  console.log('KnotAsset: render, representation replacement, PNG capture, invalid selection, and recovery passed')
   await page.setViewportSize({ width: 1280, height: 1000 })
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/?lang=uk`)
   await page.waitForSelector('.knot-viewer[data-state="ready"]')
   await page.locator('.model-select select').selectOption('asset')
   await page.waitForSelector('.knot-viewer[data-state="ready"]')
-  await page.locator('.snapshot-select').selectOption('finish')
+  await page.locator('.representation-select').selectOption('view-3d-finish')
   await page.waitForSelector('.knot-viewer[data-state="ready"]')
   assert.deepEqual(failures, [])
   const editor = page.locator('.editor textarea')
   assert.ok(await editor.isVisible(), 'KnotAsset must use the same visible JSON editor')
-  assert.equal(JSON.parse(await editor.inputValue()).representations[0].snapshots.length, 3)
+  assert.equal(JSON.parse(await editor.inputValue()).representations.length, 3)
   const waitForModel = async id => {
     // Filling the editor scrolls the narrow layout; hidden viewers intentionally pause rendering.
     await page.locator('.knot-viewer').scrollIntoViewIfNeeded()
@@ -91,10 +94,10 @@ try {
   }
   const edited = structuredClone(asset)
   edited.id = 'edited-asset'
-  edited.representations[0].snapshots[2].elements[0].geometry.points[1][1] += 0.1
+  edited.representations[2].data.curves[0].points[1][1] += 0.1
   await editor.fill(JSON.stringify(edited))
   await waitForModel('edited-asset')
-  assert.equal(await page.locator('.snapshot-select').inputValue(), 'finish', 'Editing must preserve selected snapshot')
+  assert.equal(await page.locator('.representation-select').inputValue(), 'view-3d-finish', 'Editing must preserve selected representation')
   assert.equal(await page.locator('.model-select select').inputValue(), 'custom')
   const invalidDraft = structuredClone(edited); invalidDraft.units = 'relative'
   await editor.fill(JSON.stringify(invalidDraft))
@@ -116,29 +119,17 @@ try {
   const imported = fixture('v1/spec/examples/assets/open-rope.json')
   imported.id = 'imported-asset'
   imported.representations[0].id = 'import-view'
-  imported.representations[0].snapshots[0].id = 'import-state'
   imported.representations.push({ ...structuredClone(imported.representations[0]), id: 'second-view' })
   await page.locator('input[type="file"]').setInputFiles({ name: 'asset.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(imported)) })
   await waitForModel('imported-asset')
-  assert.equal(await page.locator('.snapshot-select').inputValue(), 'import-state')
   assert.equal(await page.locator('.representation-select').inputValue(), 'import-view')
   await page.locator('.representation-select').selectOption('second-view')
   await page.waitForSelector('.knot-viewer[data-state="ready"]')
-  assert.equal(await page.locator('.snapshot-select').inputValue(), 'import-state')
   await page.locator('.model-select select').selectOption('loop')
   await waitForModel('twisted-loop')
-  assert.equal(await page.locator('.snapshot-select').count(), 1)
+  assert.equal(await page.locator('.snapshot-select').count(), 0)
   assert.equal(JSON.parse(await editor.inputValue()).schema, 'KnotAsset')
-  assert.equal(JSON.parse(await editor.inputValue()).units, 'm')
-  const legacyEdit = fixture('tests/fixtures/legacy/twisted-loop.json'); legacyEdit.id = 'edited-legacy'
-  await editor.fill(JSON.stringify(legacyEdit))
-  await waitForModel('edited-legacy')
-  await saveJSON('knot-model.json')
-  // Importing the other contract uses the same file control and restores its selection UI.
-  await page.locator('input[type="file"]').setInputFiles({ name: 'asset.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(imported)) })
-  await waitForModel('imported-asset')
-  await page.locator('input[type="file"]').setInputFiles({ name: 'legacy.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(legacyEdit)) })
-  await waitForModel('edited-legacy')
+  assert.ok(JSON.parse(await editor.inputValue()).subject)
   assert.deepEqual(failures, [])
   assert.equal(await page.getByRole('button', { name: 'Експорт в PNG', exact: true }).count(), 1)
   assert.equal(await page.getByRole('button', { name: 'Експорт прев’ю в PNG', exact: true }).count(), 0)
@@ -161,7 +152,7 @@ try {
   assert.ok(Math.abs(square.width - square.height) < 1, 'Viewer must remain square')
   assert.deepEqual(failures, [])
   console.log('Demo: current-image PNG export and square viewer passed')
-  console.log('Demo: shared legacy/asset JSON editing, validation recovery, snapshot preservation, representation selection, import and save passed')
+  console.log('Demo: asset JSON editing, validation recovery, representation preservation, representation selection, import and save passed')
 } finally {
   await browser?.close()
   await server.close()

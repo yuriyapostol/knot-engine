@@ -21,14 +21,13 @@ try {
   assert.ok(pack.files.some(f => f.path.startsWith('v1/spec/schema/')))
   assert.ok(pack.files.every(f => !/^v(?!1\/)[0-9]+\//.test(f.path)))
   assert.ok(pack.files.every(f => !f.path.startsWith('site/')))
-  for (const schema of ['knot-model', 'knot-asset']) assert.ok(JSON.parse(readFileSync(join(installed, 'v1', 'spec', 'schema', `${schema}.schema.json`), 'utf8')).$id)
+  for (const schema of ['knot-asset', 'spatial-curve', 'grid-diagram', 'knot-resource-registry']) assert.ok(JSON.parse(readFileSync(join(installed, 'v1', 'spec', 'schema', `${schema}.schema.json`), 'utf8')).$id)
   writeFileSync(join(temp, 'core-loader.mjs'), `export async function resolve(id, context, next) { if (['vue', 'three'].some(name => id === name || id.startsWith(name + '/'))) throw new Error('Core imported '+id); return next(id, context) }`)
   writeFileSync(join(temp, 'core.mjs'), `
     import assert from 'node:assert/strict'
     for (const key of ['window','document','WebGLRenderingContext']) Object.defineProperty(globalThis, key, { get() { throw new Error('DOM access: '+key) } })
     const core = await import('knot-engine/core')
     assert.equal(core.validateKnotAsset(${readFileSync('v1/spec/examples/assets/open-rope.json', 'utf8')}).valid, true)
-    assert.equal(core.validateKnotModelV1(${readFileSync('tests/fixtures/legacy/twisted-loop.json', 'utf8')}).valid, true)
     assert.equal(core.resolveKnotAsset(${readFileSync('v1/spec/examples/assets/open-rope.json', 'utf8')}).curves.length, 1)
   `)
   execFileSync(process.execPath, ['--no-warnings', '--experimental-loader', join(temp, 'core-loader.mjs'), join(temp, 'core.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
@@ -43,17 +42,17 @@ try {
   execFileSync(process.execPath, [join(temp, 'ssr.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
   writeFileSync(join(temp, 'check.ts'), `
     import { KnotViewer, type KnotAsset, type CameraView } from 'knot-engine'
-    import { validateKnotAsset, resolveKnotAsset, validateKnotModelV1, type Representation } from 'knot-engine/core'
-    const representation: Representation<3> = { id: 'r', dimension: 3, snapshots: [] }
-    const asset: KnotAsset = { schemaVersion: 1, id: 'a', units: 'm', elements: [], representations: [representation] }
-    const camera: CameraView = { position: [0,0,1], target: [0,0,0], fov: 55 }
+    import { validateKnotAsset, resolveKnotAsset, type Representation } from 'knot-engine/core'
+    const representation: Representation = { id: 'r', type: 'urn:example:representation', data: {} }
+    const asset: KnotAsset = { schema: 'KnotAsset', schemaVersion: 1, id: 'a', subject: { id: 's' }, representations: [representation] }
+    const camera: CameraView = { mode: 'fixed', position: [0,0,1], target: [0,0,0], up: [0,1,0], projection: { kind: 'perspective', fovY: 1 } }
     type Props = InstanceType<typeof KnotViewer>['$props']
-    const props: Props = { asset, representationId: 'r', snapshotId: 's', label: 'a', initialCamera: camera }
-    validateKnotAsset(props.asset); validateKnotModelV1(null); resolveKnotAsset(asset)
+    const props: Props = { asset, representationId: 'r', label: 'a', initialCamera: camera }
+    validateKnotAsset(props.asset); resolveKnotAsset(asset)
   `)
   execFileSync(process.execPath, [resolve('node_modules/typescript/bin/tsc'), '--noEmit', '--strict', '--skipLibCheck', '--module', 'ESNext', '--moduleResolution', 'Bundler', '--target', 'ES2022', join(temp, 'check.ts')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
   writeFileSync(join(temp, 'index.html'), '<div id="app"></div><script type="module" src="/client.js"></script>')
-  writeFileSync(join(temp, 'client.js'), `import { createApp, h } from 'vue'; import { KnotViewer } from 'knot-engine'; import 'knot-engine/styles.css'; createApp({render:()=>h(KnotViewer,{model:null,label:'Tarball viewer'})}).mount('#app')`)
+  writeFileSync(join(temp, 'client.js'), `import { createApp, h } from 'vue'; import { KnotViewer } from 'knot-engine'; import 'knot-engine/styles.css'; createApp({render:()=>h(KnotViewer,{asset:null,label:'Tarball viewer'})}).mount('#app')`)
   await build({ configFile: false, root: temp, logLevel: 'warn', build: { outDir: join(temp, 'build'), minify: false } })
-  console.log('Tarball: package identity, both schemas, core without Vue/Three/DOM, SSR, public declarations, and client CSS/build passed')
+  console.log('Tarball: package identity, independent schemas, core without Vue/Three/DOM, SSR, public declarations, and client CSS/build passed')
 } finally { rmSync(temp, { recursive: true, force: true }) }

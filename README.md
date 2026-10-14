@@ -2,7 +2,7 @@
 
 [English](README.md) | [Українська](README.uk.md)
 
-Knot modeling and rendering package with a Vue 3 `KnotViewer` component. KnotAsset v1 is the authoritative domain format; legacy KnotModelV1 remains supported during migration. Includes validation, static 3D snapshot rendering, camera controls, SSR fallback, PNG capture and a local demo.
+Knot modeling and rendering package with Vue 3 `KnotViewer`. The current KnotAsset supports spatial curves, Grid X/O, constructions, states, procedures and explicit resource registries. The component renders static 3D representations with perspective/orthographic cameras, SSR fallback and PNG capture.
 
 ## Run locally
 
@@ -53,31 +53,13 @@ defineProps<{ asset: KnotAsset }>()
 </template>
 ```
 
-Import `validateKnotAsset`, `validateKnotModelV1` (legacy alias: `validateModel`) and types from `knot-engine/core` to check author data without loading the viewer. A new model object reference triggers a rebuild; mutating point arrays in place is unsupported. The component never fetches model data.
+Import `validateKnotAsset`, `resolveKnotAsset` and types from `knot-engine/core`: this entry point loads no Vue, Three.js or DOM. Validation separately reports `valid`, `complete`, `missingDependencies` and `uncheckedTypes`; rendering requires complete validation. Unknown fields are rejected. Registries are passed explicitly; URI references do not fetch data.
 
-The exposed methods are `resetView()`, `fitToView()` and `capture({ width, height, view, transparent })`, which resolves to a PNG `Blob`. `view` is `current` (default) or `model-preview`; dimensions default to 512×512 and are capped at 2048×2048. Events are `ready`, `error` and `camera-change`. See [the API specification](v1/spec/components.md), [model format](v1/spec/model-format.md), and [JSON Schema](v1/spec/schema/knot-model.schema.json).
+`representation-id` selects one static representation; by default the first spatial-curve is selected. Constructions contain objects and states; procedures reference representations. There is no animation. Replace the asset object to update geometry.
 
-The viewer has a 4:3 aspect ratio and a 260px minimum height by default. Override these on the host element. Toolbar colors can be changed with the `--knot-viewer-*` CSS properties in `src/styles.css`. On touch screens, drag to orbit and pinch to zoom. Vertical dragging beyond the orbit angle limits scrolls the page; reversing direction resumes rotation.
+Methods: `resetView()`, `fitToView()`, `capture({width,height,view,transparent})`. PNG defaults to 512×512 with a 2048×2048 maximum. Capture modes are `current` and `model-preview`. Events: `ready({assetId,schemaVersion,warnings})`, `error`, `camera-change`. `initialCamera` accepts complete fit/fixed modes with perspective or orthographic projection; FOV is in radians.
 
-## KnotAsset v1
-
-```vue
-<script setup lang="ts">
-import { KnotViewer, type KnotAsset } from 'knot-engine'
-import 'knot-engine/styles.css'
-defineProps<{ asset: KnotAsset }>()
-</script>
-
-<template>
-  <KnotViewer :asset="asset" representation-id="view-3d" snapshot-id="rest" label="Rope snapshot" />
-</template>
-```
-
-Supply either `asset` or legacy `model`. Omitted selection IDs choose the first 3D representation and its first snapshot. Selection changes rebuild a static view; they do not animate steps. Validation completes before geometry allocation. Rope diameter determines tube thickness; missing dimensions and non-rope curves use a documented display radius with a warning.
-
-[**KnotAsset v1 specification**](v1/spec/knot-asset.md) · [KnotAsset JSON Schema](v1/spec/schema/knot-asset.schema.json) · [Architecture, migration and implementation policies](design/architecture.md) · [Technical fixtures](v1/spec/examples/assets)
-
-The domain supports 2D representations, crossings, algorithms and variants. This first rendering path displays one 3D snapshot. Importing `knot-engine/core` loads neither Vue nor Three.js/DOM code. `validateKnotAsset(value, { strict: true })` checks authoring data against the structural and semantic contract without mutating it. `resolveKnotAsset` and `resolveKnotModelV1` provide explicit adapters to internal rendering data. The two formats are never inferred from their shared version number.
+[Data contract](v1/spec/knot-asset.md) · [Functions](v1/spec/functions.md) · [Component](v1/spec/components.md) · [JSON Schema](v1/spec/schema/knot-asset.schema.json) · [Examples](v1/spec/examples/assets)
 
 ## Documentation
 
@@ -88,7 +70,6 @@ The domain supports 2D representations, crossings, algorithms and variants. This
 | [KnotAsset v1](v1/spec/knot-asset.md) | Authoritative domain-data specification |
 | [Architecture and migration](design/architecture.md) | Implementation policies, compatibility and current limits |
 | [KnotViewer specification](v1/spec/components.md) | Component API and retained acceptance criteria |
-| [Legacy model format](v1/spec/model-format.md) | KnotModelV1 static rendering contract |
 | [Demo application](design/interactive-example-requirements.md) | Demo behavior and acceptance plan |
 
 ## Current limits

@@ -1,0 +1,68 @@
+{
+  "schema": "KnotResourceRegistry",
+  "schemaVersion": 1,
+  "resources": [
+    {
+      "kind": "representation-type",
+      "resource": {
+        "id": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/spatial-curve",
+        "name": "spatial-curve",
+        "description": "spatial-curve contract, generation 1",
+        "dataSchema": {
+          "ref": "https://yuriyapostol.github.io/knot-engine/v1/schema/spatial-curve.schema.json"
+        },
+        "specification": "https://yuriyapostol.github.io/knot-engine/v1/spec/knot-asset/",
+        "viewSpace": "space"
+      }
+    },
+    {
+      "kind": "object-type",
+      "resource": {
+        "id": "https://yuriyapostol.github.io/knot-engine/v1/object-types/rope",
+        "name": "rope",
+        "description": "rope contract, generation 1",
+        "dataSchema": {
+          "ref": "https://yuriyapostol.github.io/knot-engine/v1/schema/rope-object.schema.json"
+        },
+        "specification": "https://yuriyapostol.github.io/knot-engine/v1/spec/knot-asset/"
+      }
+    },
+    {
+      "kind": "object-type",
+      "resource": {
+        "id": "https://yuriyapostol.github.io/knot-engine/v1/object-types/carabiner",
+        "name": "carabiner",
+        "description": "carabiner contract, generation 1",
+        "dataSchema": {
+          "ref": "https://yuriyapostol.github.io/knot-engine/v1/schema/equipment-object.schema.json"
+        },
+        "specification": "https://yuriyapostol.github.io/knot-engine/v1/spec/knot-asset/"
+      }
+    },
+    {
+      "kind": "representation-type",
+      "resource": {
+        "id": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram",
+        "name": "grid-diagram",
+        "description": "grid-diagram contract, generation 1",
+        "dataSchema": {
+          "ref": "https://yuriyapostol.github.io/knot-engine/v1/schema/grid-diagram.schema.json"
+        },
+        "specification": "https://yuriyapostol.github.io/knot-engine/v1/spec/knot-asset/",
+        "viewSpace": "plane"
+      }
+    },
+    {
+      "kind": "object-type",
+      "resource": {
+        "id": "https://yuriyapostol.github.io/knot-engine/v1/object-types/support",
+        "name": "support",
+        "description": "support contract, generation 1",
+        "dataSchema": {
+          "ref": "https://yuriyapostol.github.io/knot-engine/v1/schema/equipment-object.schema.json"
+        },
+        "specification": "https://yuriyapostol.github.io/knot-engine/v1/spec/knot-asset/"
+      }
+    }
+  ]
+}

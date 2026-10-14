@@ -1,255 +1,131 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync, readdirSync } from 'node:fs'
-import { createSSRApp } from 'vue'
-import { renderToString } from 'vue/server-renderer'
-import { KnotViewer } from '../src'
-import { KNOT_ASSET_LIMITS, resolveKnotAsset, resolveKnotModelV1, validateKnotAsset, validateKnotModelV1, validateModel, ViewerError, type KnotAsset, type Representation, type Snapshot, type CurveGeometry } from '../src/core'
-import { buildGeometry } from '../src/geometry/build'
 import open from '../v1/spec/examples/assets/open-rope.json'
-import sequence from '../v1/spec/examples/assets/variants.json'
-import diagram from '../v1/spec/examples/assets/diagram-crossings.json'
-import legacy from './fixtures/legacy/twisted-loop.json'
-
-const asset = () => structuredClone(sequence) as KnotAsset
-const first = (a: KnotAsset) => a.representations[0].snapshots[0] as Snapshot<3>
-const geometry = (a: KnotAsset): CurveGeometry => first(a).elements[0].geometry
-const issues = (a: unknown) => {
-  const result = validateKnotAsset(a, { strict: true })
-  expect(result.valid).toBe(false)
-  if (result.valid) throw new Error('Expected invalid asset')
-  return result.issues
-}
-
-describe('KnotAsset validation', () => {
-  for (const file of readdirSync('v1/spec/examples/assets').filter(f => f.endsWith('.json'))) {
-    it(`accepts ${file} without mutation`, () => {
-      const value = JSON.parse(readFileSync(`v1/spec/examples/assets/${file}`, 'utf8'))
-      const before = JSON.stringify(value)
-      expect(validateKnotAsset(value, { strict: true }).valid).toBe(true)
-      expect(JSON.stringify(value)).toBe(before)
-    })
-  }
-  for (const file of readdirSync('v1/spec/examples/assets/invalid')) {
-    it(`rejects invalid fixture ${file}`, () => { issues(JSON.parse(readFileSync(`v1/spec/examples/assets/invalid/${file}`, 'utf8'))) })
-  }
-  it.each([
-    ['element', (a: KnotAsset) => a.elements.push(a.elements[0]), 'elements[1].id'],
-    ['representation', (a: KnotAsset) => a.representations.push(a.representations[0]), 'representations[1].id'],
-    ['snapshot', (a: KnotAsset) => a.representations[0].snapshots.push(first(a) as never), 'representations[0].snapshots[3].id'],
-    ['snapshot element', (a: KnotAsset) => first(a).elements.push(first(a).elements[0] as never), 'representations[0].snapshots[0].elements[1].id'],
-    ['algorithm', (a: KnotAsset) => a.algorithms!.push(a.algorithms![0]), 'algorithms[2].id'],
-    ['variant', (a: KnotAsset) => a.variants!.push(a.variants![0]), 'variants[2].id'],
-    ['step', (a: KnotAsset) => a.algorithms![0].steps.push(a.algorithms![0].steps[0]), 'algorithms[0].steps[3].id'],
-    ['end', (a: KnotAsset) => { if (a.elements[0].type === 'rope') a.elements[0].ends[1].id = 'a' }, 'elements[0].ends[1].id']
-  ])('rejects duplicate %s IDs', (_name, mutate, path) => {
-    const a = asset(); mutate(a)
-    expect(issues(a).map(i => i.path)).toContain(path)
+import multi from '../v1/spec/examples/assets/procedures.json'
+import { validateKnotAsset, resolveKnotAsset, validateGridDiagram, validateSpatialCurve, validateView, STANDARD_RESOURCES, expandURI, validateResourceRegistry, validateResourceDocument, validateRepresentationDocument, SPATIAL_CURVE, type KnotAsset } from '../src/core'
+const copy = () => structuredClone(open)
+describe('KnotAsset generation 1', () => {
+  for(const file of readdirSync('v1/spec/examples/assets').filter(f=>f.endsWith('.json'))) it(`validates ${file}`,()=>{
+    const value=JSON.parse(readFileSync(`v1/spec/examples/assets/${file}`,'utf8'))
+    const result=validateKnotAsset(value)
+    expect(result,JSON.stringify(result)).toMatchObject({valid:true,complete:true})
   })
-  it.each([
-    ['snapshot element', (a: KnotAsset) => { first(a).elements[0].id = 'missing' }],
-    ['algorithm representation', (a: KnotAsset) => { a.algorithms![0].representation = 'missing' }],
-    ['algorithm snapshot', (a: KnotAsset) => { a.algorithms![0].steps[0].snapshot = 'missing' }],
-    ['variant representation', (a: KnotAsset) => { a.variants![0].representation = 'missing' }],
-    ['variant snapshot', (a: KnotAsset) => { a.variants![0].snapshot = 'missing' }]
-  ])('rejects broken %s references', (_name, mutate) => { const a = asset(); mutate(a); issues(a) })
-  it('scopes snapshot IDs and references to each representation', () => {
-    const a = asset()
-    const other = structuredClone(a.representations[0]); other.id = 'other'
-    a.representations.push(other)
+  for(const file of readdirSync('v1/spec/examples/assets/invalid')) it(`rejects ${file}`,()=>expect(validateKnotAsset(JSON.parse(readFileSync(`v1/spec/examples/assets/invalid/${file}`,'utf8'))).valid).toBe(false))
+  it('accepts metadata-only documents and rejects old roots',()=>{
+    expect(validateKnotAsset({schema:'KnotAsset',schemaVersion:1,id:'document',subject:{id:'subject'}})).toMatchObject({valid:true,complete:true})
+    expect(validateKnotAsset({schemaVersion:1,curves:[]} ).valid).toBe(false)
+    expect(validateKnotAsset({...open,units:'m'}).valid).toBe(false)
+  })
+  it('does not mutate frozen input and copies resolved geometry',()=>{
+    const a=copy(), before=JSON.stringify(a)
+    const freeze=(v:unknown)=>{if(v && typeof v==='object'){Object.values(v).forEach(freeze);Object.freeze(v)}}
+    freeze(a)
+    const r=resolveKnotAsset(a);r.curves[0].points[0][0]=123
+    expect(JSON.stringify(a)).toBe(before)
+  })
+  it('keeps procedures independent of interpolation point counts',()=>{
+    const a=structuredClone(multi)
+    a.representations[1].data.curves[0].points.push([2,3,4])
+    expect(validateKnotAsset(a)).toMatchObject({valid:true,complete:true})
+    a.procedures[0].steps[0].representations[0].id='missing'
+    expect(validateKnotAsset(a).valid).toBe(false)
+  })
+  it('reports missing dependencies separately from validity',()=>{
+    const a=copy();a.representationTypes=[]
+    expect(validateKnotAsset(a)).toMatchObject({valid:true,complete:false,missingDependencies:[{kind:'representation-type',ref:SPATIAL_CURVE}]})
+    expect(validateKnotAsset(a,{registries:[STANDARD_RESOURCES]})).toMatchObject({valid:true,complete:true})
+    expect(()=>resolveKnotAsset(a)).toThrow(/Incomplete/)
+  })
+  it('retains unknown extensions as unchecked, never claims renderer support',()=>{
+    const a={schema:'KnotAsset',schemaVersion:1,id:'a',subject:{id:'s'},representations:[{id:'r',type:'urn:example:custom',data:{x:1}}]}
+    expect(validateKnotAsset(a)).toMatchObject({valid:true,complete:false,uncheckedTypes:['urn:example:custom']})
+  })
+  it('validates supplied inline schemas without loading URI references',()=>{
+    const definition={id:'urn:example:custom',name:'Custom',description:'Custom data',specification:'urn:example:spec',dataSchema:{inline:{$schema:'https://json-schema.org/draft/2020-12/schema',type:'integer'}}}
+    const a={schema:'KnotAsset',schemaVersion:1,id:'a',subject:{id:'s'},representationTypes:[definition],representations:[{id:'r',type:definition.id,data:'bad'}]}
+    expect(validateKnotAsset(a).valid).toBe(false)
+    expect(validateKnotAsset({...a,representations:[{...a.representations[0],data:3}]})).toMatchObject({valid:true,complete:false})
+  })
+  it('rejects conflicts between embedded and explicitly provided resources',()=>{
+    const a=copy();a.representationTypes[0].description='conflict'
+    expect(validateKnotAsset(a,{registries:[STANDARD_RESOURCES]}).valid).toBe(false)
+  })
+  it('expands only declared prefixes and rejects reserved names',()=>{
+    expect(expandURI('k:thing',{k:'urn:example:'})).toBe('urn:example:thing')
+    expect(()=>expandURI('typo:thing')).toThrow()
+    expect(validateKnotAsset({...open,namespaces:{https:'urn:example:'}}).valid).toBe(false)
+    const a=copy();a.representations[0].type='k:representation-types/spatial-curve'
+    expect(validateKnotAsset({...a,namespaces:{k:'https://yuriyapostol.github.io/knot-engine/v1/'}}).valid).toBe(true)
+  })
+  it('checks all representations, object and state scopes',()=>{
+    const a=copy();a.representations[0].target.id='missing'
+    expect(validateKnotAsset(a).valid).toBe(false)
+    const b=copy();b.constructions[0].objects.push(structuredClone(b.constructions[0].objects[0]))
+    expect(validateKnotAsset(b).valid).toBe(false)
+    const c=copy();c.constructions[0].objects[0].ends[1].id=c.constructions[0].objects[0].ends[0].id
+    expect(validateKnotAsset(c).valid).toBe(false)
+  })
+  it('rejects cycles, nonfinite numbers, deep/oversized arrays and accessors before validation',()=>{
+    for(const n of [NaN,Infinity,-Infinity]) {const a=copy();a.representations[0].data.curves[0].points[0][0]=n;expect(validateKnotAsset(a).valid).toBe(false)}
+    const cyclic:Record<string,unknown>={};cyclic.self=cyclic
+    expect(validateKnotAsset(cyclic).valid).toBe(false)
+    let deep:unknown={};for(let i=0;i<70;i++)deep={deep}
+    expect(validateKnotAsset(deep)).toMatchObject({valid:false,issues:[{code:'LIMIT_EXCEEDED'}]})
+    expect(validateKnotAsset(new Array(300000).fill(null))).toMatchObject({valid:false,issues:[{code:'LIMIT_EXCEEDED'}]})
+    expect(validateKnotAsset({get schema(){throw new Error('must not run')}}).valid).toBe(false)
+  })
+  it('separates domain coordinates from renderer limits',()=>{
+    const a=copy();a.representations[0].data.curves[0].points[0][0]=2e6
     expect(validateKnotAsset(a).valid).toBe(true)
-    other.snapshots[0].id = 'elsewhere'
-    a.algorithms![0].steps[0].snapshot = 'elsewhere'
-    issues(a)
-    a.algorithms![0].representation = 'other'
-    expect(validateKnotAsset(a).valid).toBe(true)
+    expect(()=>resolveKnotAsset(a)).toThrow(/1000000/)
   })
-  it('permits zero or one accessible end, local end IDs, and independent topology/closure', () => {
-    const a = asset(), rope = a.elements[0]
-    if (rope.type !== 'rope') throw new Error('Expected rope')
-    for (const ends of [[], [{ id: 'a' }], [{ id: 'a' }, { id: 'b' }]]) {
-      rope.ends = ends
-      geometry(a).closed = true
-      expect(validateKnotAsset(a).valid).toBe(true)
-    }
-    rope.ends.push({ id: 'c' }); issues(a)
-    rope.topology = 'closed'; rope.ends = []; geometry(a).closed = false
-    expect(validateKnotAsset(a).valid).toBe(true)
-    rope.ends = [{ id: 'a' }]; issues(a)
-  })
-  it.each([null, [], 1, {}, { ...open, units: 'relative' }, { ...open, schemaVersion: 2 }])('rejects malformed roots %j', value => { issues(value) })
-  it.each([NaN, Infinity, -Infinity, '0', null])('rejects nonfinite/non-numeric coordinates %s', n => {
-    const a = asset(); (geometry(a).points[0] as unknown[])[0] = n; issues(a)
-  })
-  it('requires the representation dimensionality without inferring it from IDs', () => {
-    const a = asset(); geometry(a).points[0] = [0, 0]; issues(a)
-    const d = structuredClone(diagram); d.representations[0].snapshots[0].elements[0].geometry.points[0].push(0); issues(d)
-    const b = asset(); b.representations[0].id = 'diagram'; b.algorithms = []; b.variants = []
-    expect(validateKnotAsset(b).valid).toBe(true)
-  })
-  it.each([-0.1, 1.1, NaN, Infinity])('rejects invalid tension %s', tension => { const a = asset(); geometry(a).interpolation.tension = tension; issues(a) })
-  it('rejects bad curve types, short curves and duplicate points', () => {
-    for (const change of [
-      (g: ReturnType<typeof geometry>) => { (g as { type: string }).type = 'mesh' },
-      (g: ReturnType<typeof geometry>) => { g.points = g.points.slice(0, 1) },
-      (g: ReturnType<typeof geometry>) => { g.closed = true; g.points = g.points.slice(0, 2) },
-      (g: ReturnType<typeof geometry>) => { g.points[1] = g.points[0] },
-      (g: ReturnType<typeof geometry>) => { g.closed = true; g.points.push(g.points[0]) }
-    ]) { const a = asset(); change(geometry(a)); issues(a) }
-  })
-  it('uses exact duplicate comparison without legacy coordinate/epsilon limits', () => {
-    const a = structuredClone(open)
-    a.representations[0].snapshots[0].elements[0].geometry.points = [[0, 0, 0], [1e-15, 0, 0], [2e6, 0, 0]]
-    expect(validateKnotAsset(a).valid).toBe(true)
-    expect(() => resolveKnotAsset(a)).toThrowError(expect.objectContaining({ code: 'LIMIT_EXCEEDED' }))
-  })
-  it('rejects even empty crossings in 3D and requires snapshot-local crossing references', () => {
-    const a = asset(); Object.assign(first(a), { crossings: [] }); issues(a)
-    const d = structuredClone(diagram)
-    d.elements.push({ ...d.elements[0], id: 'absent' })
-    d.representations[0].snapshots[0].crossings[0].over.element = 'absent'; issues(d)
-  })
-  it.each([-0.01, 1.01, NaN])('rejects crossing u %s', u => {
-    const d = structuredClone(diagram); d.representations[0].snapshots[0].crossings[0].under.u = u; issues(d)
-  })
-  it('checks consecutive steps, not all unrelated snapshots', () => {
-    const a = asset(); (a.representations[0].snapshots[1].elements[0].geometry as CurveGeometry).points.push([1, 1, 1])
-    expect(issues(a).some(i => i.message.includes('Control-point count'))).toBe(true)
-    a.algorithms = a.algorithms!.slice(1)
-    expect(validateKnotAsset(a).valid).toBe(true)
-    // An element absent from either adjacent snapshot is not an animated pair.
-    a.algorithms = [{ id: 'a', representation: 'view-3d', steps: [{ id: 'a', snapshot: 'rest' }, { id: 'b', snapshot: 'bend' }] }]
-    first(a).elements = []
-    expect(validateKnotAsset(a).valid).toBe(true)
-  })
-  it('validates optional presentation without imposing a preset registry', () => {
-    const a = asset()
-    a.representations[0].presentation = { preset: 'future-style', camera: { position: [0, 0, 2], target: [0, 0, 0] } }
-    expect(validateKnotAsset(a).valid).toBe(true)
-    expect(resolveKnotAsset(a).camera?.fov).toBe(55)
-    expect(resolveKnotAsset(a).warnings.join()).toContain('future-style')
-    a.representations[0].presentation.camera!.fov = 180; issues(a)
-    a.representations[0].presentation.camera!.fov = 55
-    a.representations[0].presentation.camera!.position = [0, 0, 0]; issues(a)
-  })
-  it('keeps the two schemaVersion:1 contracts explicit', () => {
-    expect(validateKnotAsset(legacy).valid).toBe(false)
-    expect(validateKnotModelV1(open).valid).toBe(false)
-    expect(validateModel).toBe(validateKnotModelV1)
-    expect(() => resolveKnotModelV1(open)).toThrow(ViewerError)
-    expect(() => resolveKnotAsset(legacy)).toThrow(ViewerError)
-  })
-  it('enforces strict unknown keys at nested boundaries', () => {
-    const a = asset(); Object.assign(geometry(a), { properties: {} })
-    expect(validateKnotAsset(a).valid).toBe(true)
-    expect(issues(a).at(-1)?.path).toContain('.properties')
-  })
-  it('is deterministic on deeply frozen data', () => {
-    const freeze = (v: unknown): void => { if (v && typeof v === 'object') { Object.values(v).forEach(freeze); Object.freeze(v) } }
-    const a = asset(); freeze(a)
-    expect(validateKnotAsset(a)).toEqual(validateKnotAsset(a))
-    expect(resolveKnotAsset(a)).toEqual(resolveKnotAsset(a))
+  it('converts physical diameter into data units, relative coordinates use display thickness',()=>{
+    const a=copy();a.representations[0].data.coordinateSystem.scale.metersPerUnit=0.01
+    expect(resolveKnotAsset(a).curves[0].radius).toBe(a.constructions[0].objects[0].diameter/0.02)
+    const b=copy() as unknown as KnotAsset
+    const data=b.representations![0].data as import('../src/core').SpatialCurveData
+    data.coordinateSystem.scale={kind:'relative'}
+    expect(resolveKnotAsset(b).warnings.length).toBeGreaterThan(0)
   })
 })
-
-describe('independent resource budgets', () => {
-  it('accepts more than eight curves and 512 points per curve', () => {
-    const a = structuredClone(open) as KnotAsset
-    geometry(a).points = Array.from({ length: 513 }, (_, i) => [i / 1000, 0, 0])
-    for (let i = 1; i < 9; i++) {
-      a.elements.push({ ...a.elements[0], id: `rope-${i + 1}` })
-      first(a).elements.push({ ...first(a).elements[0], id: `rope-${i + 1}` } as never)
-    }
-    expect(validateKnotAsset(a).valid).toBe(true)
-    const built = buildGeometry(resolveKnotAsset(a), 'high', 'light')
-    expect(built.warnings.some(w => w.includes('reduced'))).toBe(true)
-    built.dispose()
+describe('independent contracts',()=>{
+  it('validates Grid X/O without an asset',()=>{
+    const grid={encoding:'xo',size:2,x:[0,1],o:[1,0]}
+    expect(validateGridDiagram(grid).valid).toBe(true)
+    for(const change of [{x:[0,0]},{o:[0,1]},{x:[0,2]},{size:3}])expect(validateGridDiagram({...grid,...change}).valid).toBe(false)
   })
-  it('enforces points per curve and aggregate point limits', () => {
-    const a = structuredClone(open) as KnotAsset
-    geometry(a).points = Array.from({ length: KNOT_ASSET_LIMITS.pointsPerCurve }, (_, i) => [i, 0, 0])
-    expect(validateKnotAsset(a).valid).toBe(true)
-    geometry(a).points.push([5000, 0, 0]); expect(issues(a).some(i => i.code === 'LIMIT_EXCEEDED')).toBe(true)
-    geometry(a).points.pop()
-    a.representations[0].snapshots = Array.from({ length: 17 }, (_, i) => ({ ...first(a), id: `s${i}` })) as never
-    expect(issues(a).some(i => i.message.includes('total point'))).toBe(true)
+  it('checks curve closure and exact repeated points for each interpolation',()=>{
+    const data=copy().representations[0].data
+    expect(validateSpatialCurve(data).valid).toBe(true)
+    data.curves[0].points[1]=data.curves[0].points[0]
+    expect(validateSpatialCurve(data).valid).toBe(false)
+    const closed=copy().representations[0].data;closed.curves[0].closed=true;closed.curves[0].points=[ [0,0,0],[1,0,0] ]
+    expect(validateSpatialCurve(closed).valid).toBe(false)
   })
-  it.each(['elements', 'representations', 'algorithms', 'variants'] as const)('bounds root collection %s before traversing it', key => {
-    const a = asset(); Object.assign(a, { [key]: Array(KNOT_ASSET_LIMITS[key] + 1).fill(null) })
-    expect(issues(a)).toContainEqual(expect.objectContaining({ path: key, code: 'LIMIT_EXCEEDED' }))
+  it('validates camera modes and vector/projection constraints',()=>{
+    const view={id:'front',name:'Front',space:'space',camera:{mode:'fit',direction:[0,0,1],up:[0,1,0],projection:{kind:'orthographic'}}}
+    expect(validateView(view).valid).toBe(true)
+    expect(validateView({...view,camera:{...view.camera,up:[0,0,2]}}).valid).toBe(false)
+    expect(validateView({...view,camera:{...view.camera,projection:{kind:'perspective',fovY:180}}}).valid).toBe(false)
   })
-  it('enforces aggregate entries, independent of point counts', () => {
-    const a = asset()
-    a.algorithms = Array.from({ length: 256 }, (_, i) => ({ id: `a${i}`, representation: 'view-3d', steps: Array.from({ length: 1024 }, (_, j) => ({ id: `s${j}`, snapshot: 'rest' })) }))
-    expect(issues(a).some(i => i.message.includes('total entry'))).toBe(true)
-  })
-  it.each([
-    ['snapshots', (a: KnotAsset) => { a.representations[0].snapshots = Array(KNOT_ASSET_LIMITS.snapshots + 1).fill(null) }],
-    ['snapshotElements', (a: KnotAsset) => { first(a).elements = Array(KNOT_ASSET_LIMITS.snapshotElements + 1).fill(null) }],
-    ['steps', (a: KnotAsset) => { a.algorithms![0].steps = Array(KNOT_ASSET_LIMITS.steps + 1).fill(null) }],
-    ['crossings', (a: KnotAsset) => { Object.assign(first(a), { crossings: Array(KNOT_ASSET_LIMITS.crossings + 1).fill(null) }) }]
-  ])('bounds nested collection %s before traversing it', (_name, mutate) => {
-    const a = asset(); mutate(a)
-    expect(issues(a).some(i => i.code === 'LIMIT_EXCEEDED')).toBe(true)
-  })
-  it('rejects a valid asset that exceeds the lowest rendering triangle budget', () => {
-    const a = structuredClone(open) as KnotAsset
-    a.elements = Array.from({ length: 49 }, (_, i) => ({ ...a.elements[0], id: `rope-${i}` }))
-    first(a).elements = a.elements.map(e => ({ ...first(a).elements[0], id: e.id }))
-    expect(validateKnotAsset(a).valid).toBe(true)
-    expect(() => buildGeometry(resolveKnotAsset(a), 'high', 'light')).toThrowError(expect.objectContaining({ code: 'LIMIT_EXCEEDED' }))
+  it('validates resource registry/document and standalone representation',()=>{
+    expect(validateResourceRegistry(STANDARD_RESOURCES).valid).toBe(true)
+    expect(validateResourceDocument({schema:'KnotResourceDocument',schemaVersion:1,...STANDARD_RESOURCES.resources[0]}).valid).toBe(true)
+    const rep={id:'grid',type:'https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram',data:{encoding:'xo',size:2,x:[0,1],o:[1,0]}}
+    expect(validateRepresentationDocument({schema:'KnotRepresentationDocument',schemaVersion:1,representation:rep},{registries:[STANDARD_RESOURCES]})).toMatchObject({valid:true,complete:true})
   })
 })
-
-describe('snapshot resolution and rendering', () => {
-  it('uses physical diameter only when supplied and explains display thickness otherwise', () => {
-    const a = asset(), rope = a.elements[0]
-    if (rope.type !== 'rope') throw new Error('Expected rope')
-    rope.diameter = 0.04
-    expect(resolveKnotAsset(a).curves[0].radius).toBe(0.02)
-    expect(resolveKnotAsset(a).warnings).toEqual([])
-    delete rope.diameter
-    expect(resolveKnotAsset(a).curves[0].radius).toBe(0.005)
-    expect(resolveKnotAsset(a).warnings).toHaveLength(1)
-    for (const diameter of [0, -1, NaN, Infinity]) { rope.diameter = diameter; issues(a) }
-  })
-  it('selects explicitly and clones source arrays', () => {
-    const a = asset(), resolved = resolveKnotAsset(a, { representationId: 'view-3d', snapshotId: 'finish' })
-    expect(resolved.curves[0].radius).toBe(0.005)
-    expect(resolved.curves[0].points).toEqual(a.representations[0].snapshots[2].elements[0].geometry.points)
-    resolved.curves[0].points[0][0] = 99
-    expect(a.representations[0].snapshots[2].elements[0].geometry.points[0][0]).toBe(0)
-  })
-  it('uses the first 3D representation and its first snapshot by default', () => {
-    const a = asset(); a.representations.unshift((diagram as unknown as KnotAsset).representations[0])
-    expect(resolveKnotAsset(a).curves[0].points).toEqual(open.representations[0].snapshots[0].elements[0].geometry.points)
-  })
-  it('rejects missing selection, 2D rendering, empty snapshots, and malformed unselected snapshots', () => {
-    expect(() => resolveKnotAsset(open, { representationId: 'missing' })).toThrow(ViewerError)
-    expect(() => resolveKnotAsset(open, { snapshotId: 'missing' })).toThrow(ViewerError)
-    expect(() => resolveKnotAsset(diagram, { representationId: 'diagram' })).toThrowError(expect.objectContaining({ code: 'UNSUPPORTED_SCHEMA' }))
-    const a = asset(); first(a).elements = []; expect(() => resolveKnotAsset(a)).toThrow(ViewerError)
-    const b = asset(); b.representations[0].snapshots[2].elements[0].geometry.points[0][0] = NaN
-    expect(() => resolveKnotAsset(b, { snapshotId: 'rest' })).toThrow(ViewerError)
-  })
-  for (const file of readdirSync('v1/spec/examples/assets').filter(f => f.endsWith('.json') && !f.startsWith('diagram') && !f.startsWith('grid'))) {
-    it(`builds finite 3D geometry for ${file}`, () => {
-      const a = JSON.parse(readFileSync(`v1/spec/examples/assets/${file}`, 'utf8'))
-      const built = buildGeometry(resolveKnotAsset(a), 'low', 'light')
-      expect(built.bounds.isEmpty()).toBe(false)
-      for (const mesh of built.group.children) if ('geometry' in mesh) {
-        for (const attr of Object.values((mesh.geometry as import('three').BufferGeometry).attributes)) expect(Array.from(attr.array).every(Number.isFinite)).toBe(true)
-      }
-      built.dispose()
-    })
-  }
-  it('server renders an asset without DOM access', async () => {
-    const html = await renderToString(createSSRApp(KnotViewer, { asset: open as KnotAsset, label: 'Asset snapshot' }))
-    expect(html).toContain('Asset snapshot'); expect(html).not.toContain('<canvas')
-  })
-  it('encodes dimension and element discrimination in public types', () => {
-    const valid: Representation<2> = { id: 'd', dimension: 2, snapshots: [{ id: 's', elements: [], crossings: [] }] }
-    // @ts-expect-error 3D snapshots cannot have crossings
-    const invalid: Representation<3> = { id: 'd', dimension: 3, snapshots: [{ id: 's', elements: [], crossings: [] }] }
-    expect(valid.dimension).toBe(2); expect(invalid.dimension).toBe(3)
-  })
+it('validates all schema wrappers and dependency scopes without network access',()=>{
+  const resource={schema:'KnotResourceDocument',schemaVersion:1,kind:'catalog',resource:{id:'urn:test:catalog',name:'Catalog',description:'Test'}}
+  expect(validateResourceDocument({...resource,resource:{...resource.resource,unexpected:true}}).valid).toBe(false)
+  expect(validateResourceDocument({...resource,resource:{...resource.resource,id:'local-only'}}).valid).toBe(false)
+  const a=copy();a.constructions[0].objects[0].ends[0].id='a';a.constructions[0].objects[0].ends[1].id='b'
+  const second=structuredClone(a.constructions[0]);second.id='second'
+  a.constructions.push(second)
+  expect(validateKnotAsset(a).valid).toBe(true)
+})
+it('keeps missing custom schema references incomplete without fetching',()=>{
+  const type={id:'urn:example:custom',name:'Custom',description:'Test',specification:'urn:example:spec',dataSchema:{inline:{$schema:'https://json-schema.org/draft/2020-12/schema',$ref:'https://example.invalid/unavailable.schema.json'}}}
+  const a={schema:'KnotAsset',schemaVersion:1,id:'a',subject:{id:'s'},representationTypes:[type],representations:[{id:'r',type:type.id,data:{}}]}
+  expect(validateKnotAsset(a)).toMatchObject({valid:true,complete:false,uncheckedTypes:[type.id]})
 })
