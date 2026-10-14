@@ -10,7 +10,7 @@
 
 ```sh
 npm ci
-npm run dev:demo
+npm run dev
 ```
 
 Відкрийте URL, який виведе Vite. Команди перевірки:
@@ -19,26 +19,25 @@ npm run dev:demo
 npm run typecheck
 npm test
 npm run build
-npm run build:demo
+npm run build:example
 npm run test:browser
 npm run test:package
 npm pack --dry-run
 ```
 
-Щоб згенерувати PNG для картки, виконайте `npm run preview:model -- --model examples/assets/twisted-loop.json --out /tmp/knot-preview.png`. Скрипт використовує локальний Chrome (або `CHROME_PATH`) і кешує результат за моделлю, розміром, браузером та версією renderer.
+Щоб згенерувати PNG для картки, виконайте `npm run preview:model -- --model v1/spec/examples/assets/twisted-loop.json --out /tmp/knot-preview.png`. Скрипт використовує локальний Chrome (або `CHROME_PATH`) і кешує результат за моделлю, розміром, браузером та версією renderer.
 
-Робоча назва пакета — `knot-engine`; реліз у npm ще не публікувався. Збірка бібліотеки міститься в `dist/`, а збірка демо — у `demo-dist/`. Для збірки демо за підшляхом проєкту задайте `BASE_PATH=/your-path/`.
+Робоча назва пакета — `knot-engine`; реліз у npm ще не публікувався. Збірка бібліотеки міститься в `dist/`, а збірка демо — у `site-runtime-dist/`. Для збірки демо за підшляхом проєкту задайте `BASE_PATH=/your-path/`.
 
-## Демо на GitHub Pages
+## Сайт GitHub Pages
 
-[Workflow Pages](.github/workflows/pages.yml) збирає й публікує `demo-dist/` після push у `main` або ручного запуску на `main`. Перед цим мають пройти typecheck і модульні тести. Базовий шлях Vite береться з метаданих GitHub Pages: `/knot-engine/` для цього репозиторію та `/` для налаштованого власного домену. Особистий токен доступу або додаткові secrets не потрібні.
+Для локального перегляду всього сайту виконайте `npm run preview:site` та відкрийте `http://localhost:5174/`. Команда спочатку перебудовує сайт. `npm run dev` на порту `5173` запускає весь сайт і автоматично перебудовує його після змін.
 
-1. У репозиторії відкрийте **Settings → Pages → Build and deployment** і виберіть **GitHub Actions** у полі **Source**. Див. [інструкції GitHub щодо джерела публікації](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
-2. Зробіть коміт і push workflow та змін демо в `main`.
-3. Відкрийте **Actions → Deploy demo to GitHub Pages** і перевірте успішне завершення обох jobs: `build` та `deploy`. Для ручного повторного запуску виберіть **Run workflow** і гілку `main`.
-4. Відкрийте URL із deployment `github-pages`. Очікувана стандартна адреса — [yuriyapostol.github.io/knot-engine/](https://yuriyapostol.github.io/knot-engine/).
+`npm run build:site` збирає `site-dist/`: посібник `/v1/guide/`, специфікації `/v1/spec/` зі схемами та прикладами, ресурси `/v1/resources/` і проєктні матеріали `/design/`. Інтерактивний редактор вбудовано у головну сторінку версії та посібник. Англійська — основна мова; українські сторінки доступні під `/v1/uk/` і `/design/uk/`. Лінійка `v1` включає версії `0.x`. Архіви з `site/releases/` публікуються в `/releases/<версія-пакета>/`.
 
-Якщо Actions вимкнено, увімкніть їх у **Settings → Actions → General** і дозвольте офіційні actions `actions/*`, які використовує workflow. Якщо середовище `github-pages` обмежує гілки публікації, дозвольте `main` у **Settings → Environments → github-pages**. Workflow сам задає потрібні права токена. Згенеровані файли не потрібно комітити в гілку `gh-pages`. Локальна перевірка не означає, що сайт уже опубліковано.
+[Workflow Pages](.github/workflows/pages.yml) публікує весь сайт після push у `main` або ручного запуску на `main`, після перевірки типів і тестів. У **Settings → Pages** виберіть **GitHub Actions**. Стандартна адреса — [Knot Engine](https://yuriyapostol.github.io/knot-engine/).
+
+`npm run site:archive` явно створює знімок поточної версії пакета. Перевірте та додайте його до релізного коміту; команда відмовляється перезаписувати наявний знімок. Звичайні збірки не створюють релізи й не змінюють версії. Докладніше: [архівування](site/README.uk.md), [політика публікації](design/publication.uk.md). Локальна збірка не розгортає сайт.
 
 ## Використання
 
@@ -56,7 +55,7 @@ defineProps<{ asset: KnotAsset }>()
 
 Імпортуйте `validateKnotAsset`, `validateKnotModelV1` (legacy-псевдонім: `validateModel`) і типи з `knot-engine/core`, щоб перевіряти авторські дані без завантаження viewer. Нове посилання на об'єкт моделі спричиняє перебудову; зміна масивів точок на місці не підтримується. Компонент ніколи самостійно не завантажує дані моделі.
 
-Відкриті методи: `resetView()`, `fitToView()` і `capture({ width, height, view, transparent })`, який повертає PNG `Blob` через Promise. `view` має значення `current` (за замовчуванням) або `model-preview`; стандартний розмір — 512×512, максимальний — 2048×2048. Події: `ready`, `error` і `camera-change`. Див. [специфікацію API](docs/specification.uk.md), [формат моделі](docs/model-format.uk.md) та [JSON Schema](schema/knot-model-v1.schema.json).
+Відкриті методи: `resetView()`, `fitToView()` і `capture({ width, height, view, transparent })`, який повертає PNG `Blob` через Promise. `view` має значення `current` (за замовчуванням) або `model-preview`; стандартний розмір — 512×512, максимальний — 2048×2048. Події: `ready`, `error` і `camera-change`. Див. [специфікацію API](v1/spec/components.uk.md), [формат моделі](v1/spec/model-format.uk.md) та [JSON Schema](v1/spec/schema/knot-model.schema.json).
 
 За замовчуванням viewer має співвідношення сторін 4:3 і мінімальну висоту 260px. Ці значення можна перевизначити на елементі компонента. Кольори панелі інструментів налаштовуються через CSS-властивості `--knot-viewer-*` із `src/styles.css`. На сенсорному екрані перетягування обертає модель, а жест двома пальцями змінює масштаб. Вертикальне перетягування за межі кутів обертання прокручує сторінку; зміна напрямку відновлює обертання.
 
@@ -76,7 +75,7 @@ defineProps<{ asset: KnotAsset }>()
 
 Передавайте або `asset`, або legacy `model`. Якщо ID вибору не задані, використовується перше 3D-представлення та його перший snapshot. Зміна вибору перебудовує статичний вид, а не анімує кроки. Валідація завершується до виділення пам'яті під геометрію. Діаметр мотузки визначає товщину трубки; за відсутності розмірів і для кривих інших типів елементів використовується задокументований радіус відображення з попередженням.
 
-[**Специфікація KnotAsset v1**](docs/knot-asset-v1.uk.md) · [JSON Schema KnotAsset](schema/knot-asset-v1.schema.json) · [Архітектура, міграція та політики реалізації](docs/architecture.uk.md) · [Технічні приклади](examples/assets/)
+[**Специфікація KnotAsset v1**](v1/spec/knot-asset.uk.md) · [JSON Schema KnotAsset](v1/spec/schema/knot-asset.schema.json) · [Архітектура, міграція та політики реалізації](design/architecture.uk.md) · [Технічні приклади](v1/spec/examples/assets)
 
 Доменна модель підтримує 2D-представлення, перехрещення, алгоритми й варіанти. Перший шлях рендерингу показує один 3D snapshot. Імпорт `knot-engine/core` не завантажує Vue, Three.js або код DOM. `validateKnotAsset(value, { strict: true })` перевіряє авторські дані за структурним і семантичним контрактом, не змінюючи їх. `resolveKnotAsset` і `resolveKnotModelV1` надають явні адаптери до внутрішніх даних рендерингу. Спільний номер версії ніколи не використовується для визначення формату.
 
@@ -86,14 +85,16 @@ defineProps<{ asset: KnotAsset }>()
 
 | Документ | Зміст |
 | --- | --- |
-| [KnotAsset v1](docs/knot-asset-v1.uk.md) | Авторитетна специфікація доменних даних |
-| [Архітектура та міграція](docs/architecture.uk.md) | Політики реалізації, сумісність і поточні обмеження |
-| [Специфікація KnotViewer](docs/specification.uk.md) | API компонента та збережені критерії приймання |
-| [Legacy-формат моделі](docs/model-format.uk.md) | Контракт статичної геометрії KnotModelV1 для рендерингу |
-| [Демонстраційний застосунок](docs/demo.uk.md) | Поведінка демо та план приймання |
+| [KnotAsset v1](v1/spec/knot-asset.uk.md) | Авторитетна специфікація доменних даних |
+| [Архітектура та міграція](design/architecture.uk.md) | Політики реалізації, сумісність і поточні обмеження |
+| [Специфікація KnotViewer](v1/spec/components.uk.md) | API компонента та збережені критерії приймання |
+| [Legacy-формат моделі](v1/spec/model-format.uk.md) | Контракт статичної геометрії KnotModelV1 для рендерингу |
+| [Демонстраційний застосунок](design/interactive-example-requirements.uk.md) | Поведінка демо та план приймання |
 
 ## Поточні обмеження
 
 Автоматизовані перевірки охоплюють валідацію, геометрію, SSR/hydration, браузерне захоплення зображень і споживача tarball. Поведінка на реальних сенсорних пристроях та у WebView, мінімальні підтримувані версії peer-залежностей і генерація зображень на CI runner ще потребують перевірки. Браузерне захоплення використовує GPU-рендеринг, тому пікселі можуть відрізнятися між пристроями. Геометрія має просту поверхню мотузки та контур; вона не перевіряє фізичну правильність вузла.
 
 Ліцензія репозиторію міститься у [LICENSE](LICENSE).
+
+Вихідні матеріали кожного покоління контрактів розміщуються в кореневих `vN/`. Сайт публікує всі покоління одночасно. `package.json#knotEngine.resourceDirectory` вибирає поточне покоління пакета; `files` і `exports` включають лише його ресурси. Кожне покоління має власний `version.json`.

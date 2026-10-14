@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import Ajv2020 from 'ajv/dist/2020'
-import schema from '../schema/knot-asset-v1.schema.json'
-import gridSchema from '../schema/grid-diagram-v1.schema.json'
-import grid from '../examples/assets/grid-diagram.json'
-import open from '../examples/assets/open-rope.json'
+import schema from '../v1/spec/schema/knot-asset.schema.json'
+import gridSchema from '../v1/spec/schema/grid-diagram.schema.json'
+import grid from '../v1/spec/examples/assets/grid-diagram.json'
+import open from '../v1/spec/examples/assets/open-rope.json'
 import { composeKnotAsset, selectKnotAsset, validateKnotAsset, validateGridDiagram, resolveKnotAsset } from '../src/core'
 
 describe('asset fragments and grid diagrams', () => {

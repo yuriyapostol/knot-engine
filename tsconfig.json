@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "strict": true,
@@ -9,8 +13,22 @@
     "noEmit": true,
     "declaration": true,
     "jsx": "preserve",
-    "types": ["vite/client", "vitest/globals", "node"],
-    "resolveJsonModule": true
+    "types": [
+      "vite/client",
+      "vitest/globals",
+      "node"
+    ],
+    "resolveJsonModule": true,
+    "paths": {
+      "knot-engine": [
+        "./src/index.ts"
+      ]
+    }
   },
-  "include": ["src", "demo", "tests", "vite.config.ts"]
+  "include": [
+    "src",
+    "tests",
+    "vite.config.ts",
+    "site"
+  ]
 }

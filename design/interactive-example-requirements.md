@@ -1,0 +1,53 @@
+# knot-engine demo application
+
+[English](interactive-example-requirements.md) | [Українська](interactive-example-requirements.uk.md) · [Documentation](../README.md)
+
+The demo is a required v1 development deliverable. The local application is implemented in site/runtime/; this document remains an acceptance plan, and unverified scenarios are listed in README. Technology: a separate Vue 3 + TypeScript + Vite project in site/runtime/ that uses the package's public API.
+
+## Purpose
+
+Present the component as a standalone product and provide reproducible scenarios for model authors and integrators. All basic fixtures are supplied locally; once assets/the build are loaded, working with models requires no network. This is not a promise of a PWA/installable offline cache: a service worker is outside the demo scope.
+
+The “Rope with multiple snapshots” option is a neutral technical KnotAsset fixture, not another rendering mode for the selected legacy knot. Its snapshots contain different control-point coordinates, so choosing the fixture or a different snapshot changes the shape. All fixtures use the same camera framing, JSON editor, file import/save and PNG export controls. Algorithm animation is not implemented.
+
+## Main screen
+
+- Responsive layout: a large viewer, fixture selection, a short name/description and a controls panel. On phones, the panel sits below the viewer and page scrolling is unrestricted until 3D is activated.
+- The site header controls uk/en and light/dark for the entire UI. The embedded example inherits these settings and has no separate title, description or switches. Labels are accessible by keyboard and screen reader.
+- Fixtures: a simple knot with a symmetric loop, a closed curve from the local fixture, an open rope, two separate ropes and a more complex curve for inspecting geometry. The demo's initial camera looks along the z axis at the x-y plane and adjusts its distance to the model's bounds. Other examples remain technical models until an editor confirms a particular knot.
+- An interaction button and camera controls in the viewer; current model ID/schema version/state in the side panel without overloading the main view.
+- Exporting a PNG of the current view and a PNG of the model preview are separate actions; download the Blob locally and revoke object URLs after use.
+
+## Checking a custom model
+
+The JSON open/save buttons and textarea are available for both legacy KnotModelV1 and KnotAsset in the side column below model selection. The editor displays the selected preset's JSON and automatically applies valid changes after a short typing pause. The save button downloads the current editor text as a JSON file. Files are read locally and are not sent to a server. The file limit is 1 MiB before parsing; geometry limits are additionally checked by the core validator. An invalid draft remains in the editor with an error path, while the viewer retains the previous valid model. This is demo behavior, not the viewer's own contract for an invalid model or asset prop. The host selects the explicit validator from the root structure (`curves` or `representations`), never from `schemaVersion` alone; ambiguous roots are rejected. For assets, selection controls remain available after editing/import, retain existing representation/snapshot IDs where possible, and fall back to the first 3D representation/snapshot when IDs change. The editor and saved JSON contain the complete asset, including every snapshot.
+
+Errors, such as curves[0].points[2], have understandable text and a code, not just a stack trace. There is no eval, HTML insertion from JSON or automatic navigation to model.id. Import works when the same file is selected again. Selecting a preset in the list restores its fixture.
+
+## Integration examples
+
+Show a copyable minimal Vue snippet with the actual npm name once chosen, explicit CSS import and props. Separate sections show a model in an article with long text, two independent models side by side and a narrow container. The component works in differently sized containers independently of page structure.
+
+Fallback page/section: null model, invalid model, missing poster and simulated renderer unavailability through a demo test adapter. Do not add a production simulateWebGLFailure prop to the public component just for the demo. Real context loss is checked in a browser test where the relevant extension is available, with an explicit skip in environments without it.
+
+## Build and hosting
+
+Current npm scripts: dev, build:example, build, typecheck, test, test:browser, test:package preview:model, build:site, site:archive and test:site. There are no preview:example, lint or format scripts. Development uses the source package; a separate CI smoke test checks an installed npm pack tarball so that an alias to src cannot hide broken exports/styles/types.
+
+The demo builds to its own output directory, separate from library dist; it is not included in the package's npm files. The base path is configurable for a GitHub Pages project path; /knot-engine/ is not hardcoded in components. All fixture/poster URLs work under a nonempty base; use no browser history routes or use consistent hash routing for static hosting. A custom domain or deployment is not required for a local acceptance build.
+
+The [Pages workflow](../.github/workflows/pages.yml) publishes the complete `site-dist/`, including the demo at `/v1/site/runtime/`, on pushes to `main` and manual runs on `main`, after typecheck and unit tests. The site build uses relative asset paths and the `github-pages` environment for deployment. Select GitHub Actions as the Pages source and follow the [setup instructions](../README.md#github-pages-site). No additional secrets or `gh-pages` branch are required. A written workflow and local build are not evidence of successful hosting. There is no third-party analytics, external fonts or advertising SDKs.
+
+## Readiness criteria
+
+1. Local startup from README using documented commands and a production build/preview.
+2. The default fixture displays; switching fixtures and the host page language/theme works without stale rendering or loss of controls.
+3. An open curve has caps; a closed curve has a correct seam; two curves display simultaneously.
+4. Touch page scrolling is not blocked until viewer activation; buttons/keyboard provide accessible alternatives.
+5. Invalid/oversized JSON does not hang and shows the problem path; all examples are available locally.
+6. Export produces a nonempty PNG of the required size; current/model-preview are not confused; capture does not change the current camera.
+7. Scrolling the viewer out of the viewport and active=false stop rendering; returning restores the current model.
+8. Two instances are independent; repeated mount/unmount does not accumulate listeners/RAF/GPU resources.
+9. The build works at / and a project base; the library tarball passes a separate consumer smoke test.
+
+The demo does not replace the Vue SSR, touch-device and WebView checks in specification.md.

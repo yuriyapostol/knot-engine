@@ -5,9 +5,9 @@ import { renderToString } from 'vue/server-renderer'
 import { KnotViewer } from '../src'
 import { KNOT_ASSET_LIMITS, resolveKnotAsset, resolveKnotModelV1, validateKnotAsset, validateKnotModelV1, validateModel, ViewerError, type KnotAsset, type Representation, type Snapshot, type CurveGeometry } from '../src/core'
 import { buildGeometry } from '../src/geometry/build'
-import open from '../examples/assets/open-rope.json'
-import sequence from '../examples/assets/variants.json'
-import diagram from '../examples/assets/diagram-crossings.json'
+import open from '../v1/spec/examples/assets/open-rope.json'
+import sequence from '../v1/spec/examples/assets/variants.json'
+import diagram from '../v1/spec/examples/assets/diagram-crossings.json'
 import legacy from './fixtures/legacy/twisted-loop.json'
 
 const asset = () => structuredClone(sequence) as KnotAsset
@@ -21,16 +21,16 @@ const issues = (a: unknown) => {
 }
 
 describe('KnotAsset validation', () => {
-  for (const file of readdirSync('examples/assets').filter(f => f.endsWith('.json'))) {
+  for (const file of readdirSync('v1/spec/examples/assets').filter(f => f.endsWith('.json'))) {
     it(`accepts ${file} without mutation`, () => {
-      const value = JSON.parse(readFileSync(`examples/assets/${file}`, 'utf8'))
+      const value = JSON.parse(readFileSync(`v1/spec/examples/assets/${file}`, 'utf8'))
       const before = JSON.stringify(value)
       expect(validateKnotAsset(value, { strict: true }).valid).toBe(true)
       expect(JSON.stringify(value)).toBe(before)
     })
   }
-  for (const file of readdirSync('examples/assets/invalid')) {
-    it(`rejects invalid fixture ${file}`, () => { issues(JSON.parse(readFileSync(`examples/assets/invalid/${file}`, 'utf8'))) })
+  for (const file of readdirSync('v1/spec/examples/assets/invalid')) {
+    it(`rejects invalid fixture ${file}`, () => { issues(JSON.parse(readFileSync(`v1/spec/examples/assets/invalid/${file}`, 'utf8'))) })
   }
   it.each([
     ['element', (a: KnotAsset) => a.elements.push(a.elements[0]), 'elements[1].id'],
@@ -231,9 +231,9 @@ describe('snapshot resolution and rendering', () => {
     const b = asset(); b.representations[0].snapshots[2].elements[0].geometry.points[0][0] = NaN
     expect(() => resolveKnotAsset(b, { snapshotId: 'rest' })).toThrow(ViewerError)
   })
-  for (const file of readdirSync('examples/assets').filter(f => f.endsWith('.json') && !f.startsWith('diagram') && !f.startsWith('grid'))) {
+  for (const file of readdirSync('v1/spec/examples/assets').filter(f => f.endsWith('.json') && !f.startsWith('diagram') && !f.startsWith('grid'))) {
     it(`builds finite 3D geometry for ${file}`, () => {
-      const a = JSON.parse(readFileSync(`examples/assets/${file}`, 'utf8'))
+      const a = JSON.parse(readFileSync(`v1/spec/examples/assets/${file}`, 'utf8'))
       const built = buildGeometry(resolveKnotAsset(a), 'low', 'light')
       expect(built.bounds.isEmpty()).toBe(false)
       for (const mesh of built.group.children) if ('geometry' in mesh) {

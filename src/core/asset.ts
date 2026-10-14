@@ -1,4 +1,4 @@
-/** Authoritative domain contract: docs/knot-asset-v1.md. Coordinates are meters. */
+/** Authoritative domain contract: v1/spec/knot-asset.md. Coordinates are meters. */
 export type Point2D = [number, number]
 export type Point3D = [number, number, number]
 export type Dimension = 2 | 3

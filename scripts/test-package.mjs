@@ -18,15 +18,18 @@ try {
   writeFileSync(join(temp, 'package.json'), '{"type":"module"}')
   const metadata = JSON.parse(readFileSync(join(installed, 'package.json'), 'utf8'))
   assert.equal(metadata.name, 'knot-engine')
-  for (const schema of ['knot-model-v1', 'knot-asset-v1']) assert.ok(JSON.parse(readFileSync(join(installed, 'schema', `${schema}.schema.json`), 'utf8')).$id)
+  assert.ok(pack.files.some(f => f.path.startsWith('v1/spec/schema/')))
+  assert.ok(pack.files.every(f => !/^v(?!1\/)[0-9]+\//.test(f.path)))
+  assert.ok(pack.files.every(f => !f.path.startsWith('site/')))
+  for (const schema of ['knot-model', 'knot-asset']) assert.ok(JSON.parse(readFileSync(join(installed, 'v1', 'spec', 'schema', `${schema}.schema.json`), 'utf8')).$id)
   writeFileSync(join(temp, 'core-loader.mjs'), `export async function resolve(id, context, next) { if (['vue', 'three'].some(name => id === name || id.startsWith(name + '/'))) throw new Error('Core imported '+id); return next(id, context) }`)
   writeFileSync(join(temp, 'core.mjs'), `
     import assert from 'node:assert/strict'
     for (const key of ['window','document','WebGLRenderingContext']) Object.defineProperty(globalThis, key, { get() { throw new Error('DOM access: '+key) } })
     const core = await import('knot-engine/core')
-    assert.equal(core.validateKnotAsset(${readFileSync('examples/assets/open-rope.json', 'utf8')}).valid, true)
+    assert.equal(core.validateKnotAsset(${readFileSync('v1/spec/examples/assets/open-rope.json', 'utf8')}).valid, true)
     assert.equal(core.validateKnotModelV1(${readFileSync('tests/fixtures/legacy/twisted-loop.json', 'utf8')}).valid, true)
-    assert.equal(core.resolveKnotAsset(${readFileSync('examples/assets/open-rope.json', 'utf8')}).curves.length, 1)
+    assert.equal(core.resolveKnotAsset(${readFileSync('v1/spec/examples/assets/open-rope.json', 'utf8')}).curves.length, 1)
   `)
   execFileSync(process.execPath, ['--no-warnings', '--experimental-loader', join(temp, 'core-loader.mjs'), join(temp, 'core.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
   writeFileSync(join(temp, 'ssr.mjs'), `
@@ -34,7 +37,7 @@ try {
     import { createSSRApp } from 'vue'
     import { renderToString } from 'vue/server-renderer'
     import { KnotViewer } from 'knot-engine'
-    const html = await renderToString(createSSRApp(KnotViewer, { asset: ${readFileSync('examples/assets/open-rope.json', 'utf8')}, label: 'Tarball asset' }))
+    const html = await renderToString(createSSRApp(KnotViewer, { asset: ${readFileSync('v1/spec/examples/assets/open-rope.json', 'utf8')}, label: 'Tarball asset' }))
     assert.ok(html.includes('Tarball asset') && !html.includes('<canvas'))
   `)
   execFileSync(process.execPath, [join(temp, 'ssr.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })

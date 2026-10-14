@@ -1,18 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import Ajv2020 from 'ajv/dist/2020'
 import { readFileSync, readdirSync } from 'node:fs'
-import schema from '../schema/knot-asset-v1.schema.json'
+import schema from '../v1/spec/schema/knot-asset.schema.json'
 import { validateKnotAsset } from '../src/core'
-import open from '../examples/assets/open-rope.json'
-import diagram from '../examples/assets/diagram-crossings.json'
+import open from '../v1/spec/examples/assets/open-rope.json'
+import diagram from '../v1/spec/examples/assets/diagram-crossings.json'
 
 const ajv = new Ajv2020({ allErrors: true, strictTypes: false })
 const validate = ajv.compile(schema)
 
 describe('KnotAsset JSON Schema and runtime alignment', () => {
-  for (const file of readdirSync('examples/assets').filter(f => f.endsWith('.json'))) {
+  for (const file of readdirSync('v1/spec/examples/assets').filter(f => f.endsWith('.json'))) {
     it(`accepts ${file} in both validators`, () => {
-      const data = JSON.parse(readFileSync(`examples/assets/${file}`, 'utf8'))
+      const data = JSON.parse(readFileSync(`v1/spec/examples/assets/${file}`, 'utf8'))
       expect(validate(data), JSON.stringify(validate.errors)).toBe(true)
       expect(validateKnotAsset(data, { strict: true }).valid).toBe(true)
     })
@@ -48,7 +48,7 @@ describe('KnotAsset JSON Schema and runtime alignment', () => {
   })
   it('documents semantic-only failures that require runtime validation', () => {
     for (const file of ['duplicate-element', 'broken-element', 'broken-variant', 'point-count']) {
-      const data = JSON.parse(readFileSync(`examples/assets/invalid/${file}.json`, 'utf8'))
+      const data = JSON.parse(readFileSync(`v1/spec/examples/assets/invalid/${file}.json`, 'utf8'))
       expect(validate(data), JSON.stringify(validate.errors)).toBe(true)
       expect(validateKnotAsset(data, { strict: true }).valid).toBe(false)
     }

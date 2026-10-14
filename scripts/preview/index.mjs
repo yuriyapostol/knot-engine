@@ -17,7 +17,7 @@ if (!modelPath || !outputPath || !Number.isInteger(width) || !Number.isInteger(h
 const source = readFileSync(resolve(modelPath), 'utf8')
 if (Buffer.byteLength(source) > 1024 * 1024) throw new Error('Model file exceeds 1 MiB')
 const model = JSON.parse(source)
-const server = await createServer({ configFile: resolve('demo/vite.config.ts'), server: { host: '127.0.0.1', port: 0 } })
+const server = await createServer({ configFile: resolve('site/runtime/vite.config.ts'), server: { host: '127.0.0.1', port: 0 } })
 let browser
 try {
   await server.listen()

@@ -1,0 +1,13 @@
+{
+  "schema": "KnotAsset",
+  "$schema": "https://yuriyapostol.github.io/knot-engine/v1/schema/knot-asset.schema.json",
+  "schemaVersion": 1,
+  "id": "grid-example",
+  "name": "Grid diagram example",
+  "units": "m",
+  "elements": [],
+  "representations": [],
+  "diagrams": [
+    { "id": "grid", "type": "grid", "size": 5, "x": [0, 1, 2, 3, 4], "o": [2, 3, 4, 0, 1] }
+  ]
+}

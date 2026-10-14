@@ -5,8 +5,7 @@
   "type": "module",
   "files": [
     "dist",
-    "schema",
-    "docs",
+    "v1",
     "README.md",
     "README.uk.md",
     "LICENSE"
@@ -24,19 +23,23 @@
       "import": "./dist/core/index.js"
     },
     "./styles.css": "./dist/style.css",
-    "./schema/knot-model-v1.schema.json": "./schema/knot-model-v1.schema.json",
-    "./schema/knot-asset-v1.schema.json": "./schema/knot-asset-v1.schema.json",
-    "./schema/*": "./schema/*"
+    "./schema/knot-model.schema.json": "./v1/spec/schema/knot-model.schema.json",
+    "./schema/knot-asset.schema.json": "./v1/spec/schema/knot-asset.schema.json",
+    "./schema/*": "./v1/spec/schema/*"
   },
   "scripts": {
-    "dev:demo": "vite --config demo/vite.config.ts",
     "build": "vue-tsc --noEmit && vite build && vue-tsc -p tsconfig.build.json",
-    "build:demo": "vite build --config demo/vite.config.ts",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
     "preview:model": "node scripts/preview/index.mjs",
     "test:browser": "node scripts/test-browser.mjs",
-    "test:package": "node scripts/test-package.mjs"
+    "test:package": "node scripts/test-package.mjs",
+    "build:site": "node scripts/site/build.mjs",
+    "site:archive": "node scripts/site/archive.mjs",
+    "test:site": "node scripts/site/test.mjs",
+    "preview:site": "npm run build:site && vite preview --config site/vite.config.ts",
+    "build:example": "vite build --config site/runtime/vite.config.ts",
+    "dev": "node scripts/site/dev.mjs"
   },
   "peerDependencies": {
     "vue": "^3.5.0"
@@ -50,11 +53,15 @@
     "@vitejs/plugin-vue": "^6.0.0",
     "ajv": "^8.17.1",
     "jsdom": "^26.1.0",
+    "marked": "^18.1.1",
     "playwright-core": "^1.63.0",
     "typescript": "^5.9.3",
     "vite": "^8.3.1",
     "vitest": "^3.2.4",
     "vue": "^3.5.43",
     "vue-tsc": "^3.1.0"
+  },
+  "knotEngine": {
+    "resourceDirectory": "v1"
   }
 }

@@ -5,7 +5,7 @@ import { createServer } from 'vite'
 import { chromium } from 'playwright-core'
 
 const fixture = path => JSON.parse(readFileSync(path, 'utf8'))
-const server = await createServer({ configFile: resolve('demo/vite.config.ts'), server: { host: '127.0.0.1', port: 0 } })
+const server = await createServer({ configFile: resolve('site/runtime/vite.config.ts'), server: { host: '127.0.0.1', port: 0 } })
 let browser
 try {
   await server.listen()
@@ -27,12 +27,12 @@ try {
     await page.waitForFunction(() => window.__previewReady || window.__previewError)
     return page.evaluate(() => window.__previewError)
   }
-  const invalid = fixture('examples/assets/invalid/dimension.json')
+  const invalid = fixture('v1/spec/examples/assets/invalid/dimension.json')
   assert.match(await setInput({ asset: invalid }), /INVALID_MODEL/)
   assert.equal(await page.evaluate(() => window.__webglContexts), 0, 'Malformed asset must fail before WebGL allocation')
 
   for (const kind of ['legacy', 'asset']) for (const model of ['overhand', 'twisted-loop']) {
-    const path = kind === 'legacy' ? `tests/fixtures/legacy/${model}.json` : `examples/assets/${model}.json`
+    const path = kind === 'legacy' ? `tests/fixtures/legacy/${model}.json` : `v1/spec/examples/assets/${model}.json`
     assert.equal(await setInput({ [kind === 'legacy' ? 'model' : 'asset']: fixture(path) }), undefined)
     const capture = await page.evaluate(async () => {
       const blob = await window.__previewCapture(240, 180)
@@ -48,7 +48,7 @@ try {
     assert.ok(capture.size > 1000 && capture.colored > 100, `${model}: capture must contain rendered geometry`)
     console.log(`${kind} ${model}: render and 240×180 PNG capture passed`)
   }
-  const asset = fixture('examples/assets/variants.json')
+  const asset = fixture('v1/spec/examples/assets/variants.json')
   assert.equal(await setInput({ asset, selection: { representationId: 'view-3d', snapshotId: 'rest' } }), undefined)
   const capturePixels = () => page.evaluate(async () => {
     const blob = await window.__previewCapture(240, 180)
@@ -66,7 +66,7 @@ try {
   assert.deepEqual(failures, [])
   console.log('KnotAsset: render, snapshot replacement, PNG capture, invalid selection, input conflict, and recovery passed')
   await page.setViewportSize({ width: 1280, height: 1000 })
-  await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/`)
+  await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/?lang=uk`)
   await page.waitForSelector('.knot-viewer[data-state="ready"]')
   await page.locator('.model-select select').selectOption('asset')
   await page.waitForSelector('.knot-viewer[data-state="ready"]')
@@ -113,7 +113,7 @@ try {
     assert.deepEqual(JSON.parse(Buffer.concat(chunks).toString()), JSON.parse(await editor.inputValue()))
   }
   await saveJSON('knot-asset.json')
-  const imported = fixture('examples/assets/open-rope.json')
+  const imported = fixture('v1/spec/examples/assets/open-rope.json')
   imported.id = 'imported-asset'
   imported.representations[0].id = 'import-view'
   imported.representations[0].snapshots[0].id = 'import-state'

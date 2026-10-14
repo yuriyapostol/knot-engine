@@ -4,7 +4,7 @@ import { createSSRApp, nextTick } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import { KnotViewer, type KnotModelV1, type KnotAsset } from '../src'
 import loop from './fixtures/legacy/twisted-loop.json'
-import open from '../examples/assets/open-rope.json'
+import open from '../v1/spec/examples/assets/open-rope.json'
 
 afterEach(() => { document.body.innerHTML = ''; vi.restoreAllMocks() })
 

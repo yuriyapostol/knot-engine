@@ -1,0 +1,7 @@
+export const locales = {
+  en: { intro: 'A system for modeling and visualizing knots and rope structures.', theme: 'Toggle color theme', name: 'English', home: 'Home', guide: 'Guide', spec: 'Specifications', resources: 'Resources', design: 'Design notes', versions: 'Versions', package: 'Package', contract: 'Contract', development: 'In development', release: 'Release', example: 'Interactive example', schemas: 'JSON Schemas', examples: 'Format examples', archives: 'Release archives', noArchives: 'No release snapshots have been published.', proposed: 'Design material — not an implemented contract', language: 'Language', empty: 'No published entries yet.' },
+  uk: { intro: 'Система моделювання та візуалізації вузлів і мотузкових конструкцій.', theme: 'Перемкнути тему', name: 'Українська', home: 'Головна', guide: 'Посібник', spec: 'Специфікації', resources: 'Ресурси', design: 'Проєктування', versions: 'Версії', package: 'Пакет', contract: 'Контракт', development: 'У розробці', release: 'Випуск', example: 'Інтерактивний приклад', schemas: 'JSON-схеми', examples: 'Приклади форматів', archives: 'Архіви випусків', noArchives: 'Знімків випусків ще не опубліковано.', proposed: 'Матеріал проєктування — не реалізований контракт', language: 'Мова', empty: 'Опублікованих записів поки немає.' }
+}
+export const defaultLocale = 'en'
+export const localeOf = file => file.endsWith('.uk.md') ? 'uk' : 'en'
+export const pageKey = file => file.replace(/(?:\.uk)?\.md$/, '')

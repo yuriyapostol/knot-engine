@@ -1,5 +1,6 @@
 node_modules/
 dist/
-demo-dist/
+site-runtime-dist/
 coverage/
 *.tgz
+site-dist/
