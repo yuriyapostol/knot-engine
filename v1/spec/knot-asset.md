@@ -1,7 +1,5 @@
 # KnotAsset v1
 
-[English](knot-asset.md) | [Українська](knot-asset.uk.md)
-
 Implemented initial profile of the [contract redesign](../../design/knot-asset-draft.md). Package version remains 0.1.0; schemaVersion remains 1. The previous contracts and APIs have been removed. This profile supports spatial curves, Grid X/O, constructions, named states, procedures and reusable resources. Other representation formats, animation, properties, relations and classifications remain separate future work; they are not accepted as untyped fields.
 
 ## Documents and identity
