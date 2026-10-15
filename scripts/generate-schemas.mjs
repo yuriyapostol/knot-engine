@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 const contracts=JSON.parse(readFileSync('src/core/contracts.json','utf8'))
-const entries={'knot-asset':'asset','grid-diagram':'grid','spatial-curve':'spatial','representation':'representation','construction':'construction','view':'view','catalog':'catalog','representation-type':'representationType','object-type':'objectType','rope-object':'rope','equipment-object':'equipment','knot-resource':'resourceDocument','knot-resource-registry':'registry','knot-representation':'representationDocument'}
+const entries={'knot-asset':'asset','mosaic-diagram':'mosaic','grid-diagram':'grid','spatial-curve':'spatial','representation':'representation','construction':'construction','view':'view','catalog':'catalog','representation-type':'representationType','object-type':'objectType','rope-object':'rope','equipment-object':'equipment','knot-resource':'resourceDocument','knot-resource-registry':'registry','knot-representation':'representationDocument'}
 for(const [name,key] of Object.entries(entries)) {
   const defs={}
   function include(k) {

@@ -63,6 +63,19 @@
         },
         "specification": "https://yuriyapostol.github.io/knot-engine/v1/spec/knot-asset/"
       }
+    },
+    {
+      "kind": "representation-type",
+      "resource": {
+        "id": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/mosaic-diagram",
+        "name": "mosaic-diagram",
+        "description": "mosaic-diagram contract, generation 1",
+        "dataSchema": {
+          "ref": "https://yuriyapostol.github.io/knot-engine/v1/schema/mosaic-diagram.schema.json"
+        },
+        "specification": "https://yuriyapostol.github.io/knot-engine/v1/spec/mosaic-diagram/",
+        "viewSpace": "plane"
+      }
     }
   ]
 }

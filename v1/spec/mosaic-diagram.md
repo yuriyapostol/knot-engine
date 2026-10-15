@@ -1,6 +1,6 @@
 # Mosaic diagram
 
-**Specification-first extension.** This document defines the proposed next supported `mosaic-diagram` profile. Runtime types, validators, generated schemas, standard resource registry entries and rendering are not implemented yet. Until that implementation lands, the current [KnotAsset contract](knot-asset.md) and its validation completeness rules continue to apply; this document does not make mosaic data semantically checked by the current runtime.
+**Data support implemented.** Types, semantic validation, JSON Schema and the standard registry entry are available. Rendering is deferred.
 
 ## Identity and scope
 
@@ -8,7 +8,7 @@ Representation type: `https://yuriyapostol.github.io/knot-engine/v1/representati
 
 The profile describes an unoriented closed knot or link diagram on a square array of tiles. Multiple closed components are allowed. Open ends, tangles, virtual crossings, physical lengths, component orientations and arbitrary tile sets are outside this profile. Neither one component nor a catalog identity is inferred from the representation type.
 
-The standard type definition shall use `viewSpace: "plane"`. It shall refer to the future standalone `mosaic-diagram.schema.json` and this specification. These are implementation requirements, not existing schema exports or registry entries.
+The standard type uses `viewSpace: "plane"` and references the standalone [JSON Schema](schema/mosaic-diagram.schema.json) and this specification.
 
 ## Data contract
 
@@ -59,7 +59,7 @@ A complete validator shall perform these checks in addition to the existing boun
 
 Occupied tile count is the number of nonzero cells. Diagram crossing count is the number of cells with code 9 or 10. Component count comes from tracing, not from counting crossings. These are derived values, not fields accepted in `data`. They are not minimum crossing number, mosaic number or tile number invariants, and validation does not prove the subject's knot type or equivalence to another representation.
 
-Validation must not recurse once per tile or require network access. A future implementation shall bound matrix size and aggregate cell counts before allocation/tracing, consistently with the existing resource-budget policy; exact implementation limits must be documented and tested when the validator is added. The mathematical data contract itself imposes no arbitrary maximum size.
+Traversal is iterative. `KNOT_ASSET_LIMITS.mosaicCells` limits each document (or standalone diagram) to 65,536 aggregate cells before tracing, allowing squares up to 256×256. General JSON budgets also apply: 262,144 entries and depth 64. The mathematical contract itself imposes no maximum size.
 
 ## KnotAsset integration
 
@@ -69,13 +69,13 @@ Views must have `space: "plane"`. `preferredView` is a 3D hint and is not accept
 
 Extraction shall retain the representation, its view/type resources and any target dependencies under the ordinary rules, preserving the matrix exactly. The fixed tile-set convention needs no new dependency kind or hidden registry. Composition follows the existing same-document identity and conflict rules; visually equivalent rotated matrices are not automatically deduplicated.
 
-A future standalone validator shall accept `data` directly. A future standalone JSON Schema shall check fields, tile-set identity and tile-code bounds; runtime checks shall additionally enforce square shape, port matching, closed boundary and component existence. Structural schema success alone must not yield complete semantic validation. No new public function is introduced by this documentation change.
+`validateMosaicDiagram(data)` checks structure and semantics. Success returns `diagram`, `data`, `componentCount`, `occupiedTileCount` and `crossingCount`. JSON Schema checks structure; square shape, port matching, boundaries and components are runtime checks.
 
-Until a supported semantic validator is implemented, supplying a custom type definition/schema cannot make the current runtime's `uncheckedTypes` report disappear. The current 3D resolver and KnotViewer remain spatial-curve-only. A future mosaic viewer is separate implementation work.
+The type is semantically checked without `uncheckedTypes`; completeness still requires its resources, for example via `STANDARD_RESOURCES`. The 3D resolver and KnotViewer remain spatial-curve-only. Mosaic rendering is deferred.
 
 ## Examples and acceptance cases
 
-The following is a representation fragment, not a self-contained asset or a claim of current runtime support:
+The following is a representation fragment; see also the self-contained [mosaic-diagram.json](examples/assets/mosaic-diagram.json) asset.
 
 ```json
 {
@@ -167,7 +167,7 @@ The researched 4×4 source example is:
 
 It has 12 occupied tiles, three diagram crossings and one component. Source: [allKnots.csv](https://github.com/amheap/knot-mosaics/blob/4d1c78ea5a1e8cf4783806f822c63e9bf3c1aaac/websiteFunctions/flaskApp/allKnots.csv), record 3_1. That designation records source attribution; this specification does not independently prove identity, chirality or minimality. CSV vectors using layout templates must be expanded with their original template; arbitrary vectors must not simply be reshaped into squares.
 
-Required future acceptance cases:
+Acceptance cases:
 
 | Case | Expected result |
 | --- | --- |
