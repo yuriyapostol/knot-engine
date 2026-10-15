@@ -2,9 +2,9 @@
 
 **Implementation status:** the initial profile (spatial-curve, Grid X/O, constructions, procedures, resources and cameras) is described in the [current specification](../v1/spec/knot-asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
 
-**Status: architectural draft for discussion.** This records agreed principles and a possible structure. It does not replace the [implemented contract](../v1/spec/knot-asset.md) or claim that the proposed API exists. The complete transition to KnotAsset is agreed; structural details remain under design.
+**Status: architectural draft for discussion.** This records agreed principles and a possible structure. It does not replace the [implemented contract](../v1/spec/knot-asset.md) or claim that the proposed API exists. The transition from KnotModelV1 is complete for the initial profile. Features beyond the current specification remain under design.
 
-**Current policy: keep version numbers unchanged and do not preserve compatibility with old contracts.** The project has no external users yet. Revisions remain within `schemaVersion: 1` and package `0.1.0`. This includes eventual removal of KnotModelV1 APIs, schemas, adapters and dual-format support. Field names and example shapes are proposals except where explicitly agreed.
+**Current policy: keep version numbers unchanged and do not preserve compatibility with old contracts.** The project has no external users yet. Revisions remain within `schemaVersion: 1` and package `0.1.0`. KnotModelV1 APIs, schemas, adapters and dual-format support have been removed. Field names and example shapes are proposals except where explicitly agreed.
 
 ## 1. Agreed decisions
 
@@ -25,7 +25,7 @@
 | 13 | 3D representations may contain an optional initial orientation hint. |
 | 14 | Properties, relations and classifications may target inner entities. Shared assertion collections with explicit references are the working direction, subject to extraction scenarios. |
 | 15 | No version bumps or backward compatibility requirements during initial development. |
-| 16 | Fully replace KnotModelV1 eventually; permanent adapters, duplicate inputs and compatibility tests are not target requirements. |
+| 16 | The initial profile fully replaces KnotModelV1; legacy APIs, adapters, duplicate inputs and compatibility tests have been removed. |
 | 17 | Catalogs, representation type definitions, constructions and views have standalone contracts; registries or inline definitions can supply them. Views are embedded in representations. |
 | 18 | Project global identifiers use `https://yuriyapostol.github.io/knot-engine/v1/`; this does not imply that every proposed resource is published. |
 | 19 | Use `namespaces` and `knot-engine:name`. This replaces the proposed `base`. Keep field names: local identifiers remain `id`, not `local`. |
@@ -443,7 +443,7 @@ No claim is made about physical length, length preservation or valid interpolati
 
 ## 11. Versions, extensions and validation
 
-See [publication policy](publication.md). Until stabilization, keep package and schema versions unchanged, allow structural/API changes, update examples and tests together, and ultimately remove KnotModelV1 runtime, schema, API and demo support. One-time data conversion does not require permanent compatibility adapters. That removal is a plan, not a completed implementation.
+See [publication policy](publication.md). Until stabilization, keep package and schema versions unchanged, allow structural/API changes, update examples and tests together, and keep examples and tools on the current KnotAsset contract. KnotModelV1 runtime, schemas, APIs, adapters and demo support have been removed. One-time data conversion does not require permanent compatibility adapters.
 
 Shared contract generations do not require a monolithic schema. Fragment entry points remain separate. `schema`, `schemaVersion` and editor `$schema` have defined roles in the resource proposal. Contract generation and package release number differ, but documentation, specifications, schemas and data are published as one package release.
 
@@ -462,10 +462,10 @@ Namespace expansion produces absolute global identities. Definitions are not com
 | Representation conventions and parameterization | Interoperable import and implementation |
 | Typed properties, conditions and provenance | Distinguish exact results, estimates and measurements |
 | preferredView and standalone viewer settings | Orientation, focus, fitting and overrides |
-| Complete KnotAsset migration | Replace legacy code and data after design, without compatibility constraints or version bumps |
+| Extensions beyond the initial profile | Define contracts and tests for additional representations, assertions and animation; legacy removal is complete |
 
 Next scenarios: a practical knot with two procedures, changing end accessibility, a decorative mixed-material construction, a mathematical subject with Grid/PD/properties, and procedure/representation exports with their required assertions.
 
 ## 13. Earlier material
 
-The [earlier evolution note](asset-evolution.md) proposed separate diagrams and notations. That organization is superseded by unified representations. Current runtime documentation still describes implemented behavior. This draft does not make its proposals implemented, and the earlier requirement to retain KnotModelV1 compatibility has been withdrawn.
+The [earlier evolution note](asset-evolution.md) proposed separate diagrams and notations. That organization is superseded by unified representations. Current runtime documentation still describes implemented behavior. The initial profile is implemented and KnotModelV1 support has been removed. Proposals beyond the current specification remain future work; the earlier requirement to retain KnotModelV1 compatibility has been withdrawn.

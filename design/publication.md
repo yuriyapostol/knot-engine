@@ -34,7 +34,7 @@ Design materials have the same two-language coverage under /design/ and /design/
 
 ## One release and stable identities
 
-Package, documentation, specifications, schemas and available data form one release with the package version. v1 includes pre-1.0 packages and later 1.x. Before stabilization, incompatible changes are allowed without bumping the current numbers. No compatibility obligation requires keeping KnotModelV1 in the final architecture.
+Package, documentation, specifications, schemas and available data form one release with the package version. v1 includes pre-1.0 packages and later 1.x. Before stabilization, incompatible changes are allowed without bumping the current numbers. KnotModelV1 support has been removed; the current package uses KnotAsset exclusively.
 
 /v1/ is the current first-generation material. /releases/<package-version>/ is an explicitly created immutable snapshot of that generation. Other vN directories are published concurrently; no independent specification-release or data-release numbering is introduced. Current documentation has a visible development label; no /next/ is needed.
 
