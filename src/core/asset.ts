@@ -2,6 +2,11 @@
 export const KNOT_NAMESPACE = 'https://yuriyapostol.github.io/knot-engine/v1/'
 export const SPATIAL_CURVE = `${KNOT_NAMESPACE}representation-types/spatial-curve`
 export const GRID_DIAGRAM = `${KNOT_NAMESPACE}representation-types/grid-diagram`
+export const MOSAIC_DIAGRAM = `${KNOT_NAMESPACE}representation-types/mosaic-diagram`
+export const LOMONACO_KAUFFMAN_11 = `${KNOT_NAMESPACE}tile-sets/lomonaco-kauffman-11`
+export type MosaicTile = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
+/** Row-major square matrix; row 0 is top. */
+export interface MosaicDiagram { tileSet: typeof LOMONACO_KAUFFMAN_11; tiles: MosaicTile[][] }
 export const ROPE_TYPE = `${KNOT_NAMESPACE}object-types/rope`
 export type Point3D = [number, number, number]
 export type Reference = { id: string; ref?: never } | { ref: string; id?: never }

@@ -653,6 +653,22 @@
               }
             }
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/mosaic-diagram"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/mosaic"
+              }
+            }
+          }
         }
       ]
     },
@@ -1237,6 +1253,32 @@
         "size",
         "x",
         "o"
+      ],
+      "additionalProperties": false
+    },
+    "mosaic": {
+      "type": "object",
+      "properties": {
+        "tileSet": {
+          "const": "https://yuriyapostol.github.io/knot-engine/v1/tile-sets/lomonaco-kauffman-11"
+        },
+        "tiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10
+            }
+          }
+        }
+      },
+      "required": [
+        "tileSet",
+        "tiles"
       ],
       "additionalProperties": false
     },
