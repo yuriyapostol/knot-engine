@@ -2,7 +2,7 @@
 
 **Implementation status:** the initial profile (spatial-curve, Grid X/O, constructions, procedures, resources and cameras) is described in the [current specification](../v1/spec/knot-asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
 
-Status: elaboration of the [architectural draft](knot-asset-draft.md), not implemented API. Standalone resources and optional embedding are agreed; the detailed fields below remain proposals. Package version and `schemaVersion: 1` stay unchanged; compatibility with the previous structure is not required. See [publication](publication.md).
+Status: design reference elaborating the [architectural draft](knot-asset-draft.md). Standalone resources and optional embedding are implemented in the initial profile. The [current specification](../v1/spec/knot-asset.md) defines their supported fields; additional details below remain proposals. Package version and `schemaVersion: 1` stay unchanged; compatibility with the previous structure is not required. See [publication](publication.md).
 
 ## 1. Namespace
 
