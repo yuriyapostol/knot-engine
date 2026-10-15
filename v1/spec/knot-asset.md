@@ -57,6 +57,10 @@ Type: `https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-d
 
 `data` is `{encoding:"xo",size,x,o}`. Size is an integer from 2 to 512; both arrays are permutations of row indices `0..size-1`, indexed by column. X and O must differ in each column. Row zero is the bottom row, columns increase rightward. Horizontal arcs run O→X; vertical arcs run X→O and pass over horizontal arcs. This profile supports multiple components and does not infer knot identity. It is data/validation support; the current KnotViewer renders only spatial curves. Grid vertex-pairs is a future profile.
 
+### Mosaic diagram (specified; not implemented)
+
+The next mosaic-diagram profile is defined in the [mosaic specification](mosaic-diagram.md): a square matrix using an explicit 11-tile convention for closed unoriented knots and links. Its runtime validator, JSON Schema, standard registry entry and viewer are future implementation work. This does not extend the current runtime's complete-validation support.
+
 ## Views
 
 Views can be embedded in `representation.views` or included using `{ref}`. Each requires `id`, `name`, `space`, `camera`; `description` is optional. `defaultView` is an `{id}` or `{ref}` selecting a member of that list. `preferredView: {direction,up}` is available only for 3D.
