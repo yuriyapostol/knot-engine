@@ -4,7 +4,7 @@ Implemented initial profile of the [contract redesign](../../design/knot-asset-d
 
 ## Terminology
 
-Use descriptive concepts in prose. Name `KnotAsset` explicitly when referring to that data object; use “document” for serialized documents or documentation rather than as a blanket replacement for the type name. Format exact type, function and field names and code values as code; retain product and source names such as KnotInfo and Gridlink. X/O names a marking system; `xo` and `vertex-pairs` are exact `encoding` values. Do not substitute file or type identifiers for descriptive concepts in feature lists.
+Use descriptive concepts in prose. Name `KnotAsset` explicitly when referring to that data object; use “document” for serialized documents or documentation rather than as a blanket replacement for the type name. Use the same code formatting at corresponding locations in both language editions. Headings use plain text, including technical names. Format exact type, function and field names and code values in body text as code; retain product and source names such as KnotInfo and Gridlink. X/O names a marking system; `xo` and `vertex-pairs` are exact `encoding` values. Do not substitute file or type identifiers for descriptive concepts in feature lists.
 
 | Concept | Technical identifier |
 | --- | --- |
@@ -25,7 +25,7 @@ Use descriptive concepts in prose. Name `KnotAsset` explicitly when referring to
 
 ## Documents and identity
 
-KnotAsset requires `schema: "KnotAsset"`, `schemaVersion: 1`, `id` and `subject: {id}`. Optional collections are `catalogs`, `representationTypes`, `objectTypes`, `constructions`, `representations`, `procedures`, `dependencies`. `$schema` is optional and, when present, must identify the corresponding published JSON Schema. `namespaces` declares compact URI prefixes. Known objects are closed: unknown fields are errors even if a caller passes `strict: false`.
+`KnotAsset` requires `schema: "KnotAsset"`, `schemaVersion: 1`, `id` and `subject: {id}`. Optional collections are `catalogs`, `representationTypes`, `objectTypes`, `constructions`, `representations`, `procedures`, `dependencies`. `$schema` is optional and, when present, must identify the corresponding published JSON Schema. `namespaces` declares compact URI prefixes. Known objects are closed: unknown fields are errors even if a caller passes `strict: false`.
 
 `asset.id` identifies the document; `subject.id` identifies its subject. Initial-profile IDs may be local strings or absolute/compact URIs. Independent documents are not merged by subject identity. `subject.names` contains `{language,value}` records; `subject.identifiers` contains `{catalog,value}`. A catalog is an identification system, not a collection of all its entries. Its rules validate a designation, not the truth of the author's identification.
 
@@ -72,11 +72,11 @@ Interpolation is one of:
 
 The renderer uses data coordinates. A physical rope diameter becomes radius `diameter / (2 * metersPerUnit)`. Otherwise display radius is 0.006 times the largest control-point span, with a warning; it is not a physical measurement. The renderer rejects coordinate/camera components above ±1,000,000 and nonpositive or greater-than-1,000,000 radii. These are rendering limits, separate from domain validation. Tube meshes approximate curves and do not prove knot topology or collision freedom.
 
-### Grid diagrams (`xo`, `vertex-pairs`)
+### Grid diagrams (xo, vertex-pairs)
 
 Type: `https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram`.
 
-`data` is `{encoding:"xo",size,x,o}`. Size is an integer from 2 to 512; both arrays are permutations of row indices `0..size-1`, indexed by column. X and O must differ in each column. Row zero is the bottom row, columns increase rightward. Horizontal arcs run O→X; vertical arcs run X→O and pass over horizontal arcs. This profile supports multiple components and does not infer knot identity. It is data/validation support; the current KnotViewer renders only spatial curves. The alternative `{encoding:"vertex-pairs",size,vertices}` profile stores unoriented distinct `[column,row]` pairs indexed from 0, exactly two per row and column.
+`data` is `{encoding:"xo",size,x,o}`. Size is an integer from 2 to 512; both arrays are permutations of row indices `0..size-1`, indexed by column. X and O must differ in each column. Row zero is the bottom row, columns increase rightward. Horizontal arcs run O→X; vertical arcs run X→O and pass over horizontal arcs. This profile supports multiple components and does not infer knot identity. It is data/validation support; the current `KnotViewer` renders only spatial curves. The alternative `{encoding:"vertex-pairs",size,vertices}` profile stores unoriented distinct `[column,row]` pairs indexed from 0, exactly two per row and column.
 
 See the detailed [grid diagram specification](grid-diagram.md) for derived counts, coordinates and KnotInfo interoperability.
 
@@ -93,7 +93,7 @@ For `space:"space"`, `camera` is:
 - `mode:"fit"`, `direction`, `up`, `projection`, optional `padding >= 1` (default 1.1);
 - `mode:"fixed"`, `position`, `target`, `up`, `projection`.
 
-Direction points from focus to camera. Direction/up must be finite, nonzero and noncollinear (normalized cross-product magnitude at least 1e-12); fixed position must differ from target. Projection is `{kind:"perspective",fovY}` in radians, `0 < fovY < π`, or `{kind:"orthographic"}`. Fixed orthographic projection also requires a positive `height`. Fit uses the bounding-box center and a containing sphere to fit the complete rendered geometry. Viewport sets aspect; renderer computes clipping planes. Fixed framing is respected even when it crops geometry.
+`direction` points from focus to camera. `direction`/`up` must be finite, nonzero and noncollinear (normalized cross-product magnitude at least 1e-12); fixed `position` must differ from `target`. Projection is `{kind:"perspective",fovY}` in radians, `0 < fovY < π`, or `{kind:"orthographic"}`. Fixed orthographic projection also requires a positive `height`. Fit uses the bounding-box center and a containing sphere to fit the complete rendered geometry. Viewport sets aspect; renderer computes clipping planes. Fixed framing is respected even when it crops geometry.
 
 For `space:"plane"`, camera is `{mode:"plane",center:[x,y],height:positive,rotation:radians}`; positive rotation is counterclockwise. It is validated as data, not rendered by the 3D viewer. View space must match the representation type.
 

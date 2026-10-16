@@ -1,6 +1,6 @@
 # knot-engine architecture
 
-The initial KnotAsset redesign profile is implemented. The authoritative current contracts are [data](../v1/spec/knot-asset.md), [functions](../v1/spec/functions.md) and [component](../v1/spec/components.md). The [broader design](knot-asset-draft.md) still contains future work; it does not mean every proposed field is accepted.
+The initial `KnotAsset` redesign profile is implemented. The authoritative current contracts are [data](../v1/spec/knot-asset.md), [functions](../v1/spec/functions.md) and [component](../v1/spec/components.md). The [broader design](knot-asset-draft.md) still contains future work; it does not mean every proposed field is accepted.
 
 ```text
 KnotAsset / standalone data / explicitly provided registries
@@ -15,7 +15,7 @@ KnotAsset / standalone data / explicitly provided registries
 
 Core contains no Vue, Three.js, browser access or network resolver. JSON Schema contracts share one source, `src/core/contracts.json`; published independent schemas are generated using `npm run build:schemas`. Semantic validation handles cross-record references and geometric/combinatorial rules separately.
 
-KnotViewer accepts asset, representation selection and optional registry/view context. Old model inputs, adapters, schemas and compatibility tests have been removed. Shared errors and rendering types no longer belong to a legacy module. Geometry supports polyline and explicit uniform/centripetal/chordal Catmull–Rom. Perspective and orthographic cameras share preparation code between viewport and capture.
+`KnotViewer` accepts asset, representation selection and optional registry/view context. Old model inputs, adapters, schemas and compatibility tests have been removed. Shared errors and rendering types no longer belong to a legacy module. Geometry supports polyline and explicit uniform/centripetal/chordal Catmull–Rom. Perspective and orthographic cameras share preparation code between viewport and capture.
 
 The site demo uses only the public API. It edits the whole asset, preserves a still-existing representation selection, and retains the last valid rendered asset when an edit is invalid. Named states belong to constructions; each static representation identifies its state. Procedures select representations without imposing interpolation correspondence.
 

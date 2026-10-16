@@ -21,7 +21,7 @@ The standard type uses `viewSpace: "plane"` and references the standalone [JSON 
 
 Size is `tiles.length`; every row has that length. No duplicated `size`, per-tile rotation, scale or coordinate-system fields are stored. Only the tile set above is supported. Its URI identifies the fixed convention defined here; it is not a new registry resource kind and never triggers network access.
 
-The `tileSet` value is type-specific data, not a generic resource reference. This profile requires the absolute URI, even if the enclosing asset declares namespaces. Compact forms are not accepted or silently rewritten. Representation `type` still follows ordinary KnotAsset namespace expansion.
+The `tileSet` value is type-specific data, not a generic resource reference. This profile requires the absolute URI, even if the enclosing asset declares namespaces. Compact forms are not accepted or silently rewritten. Representation `type` still follows ordinary `KnotAsset` namespace expansion.
 
 A 1×1 blank matrix is structurally a square matrix but is semantically invalid: at least one closed component is required. Blank border tiles are allowed and preserved; no trimming, padding, rotation or reflection occurs during validation, extraction or composition.
 
@@ -71,7 +71,7 @@ Extraction shall retain the representation, its view/type resources and any targ
 
 `validateMosaicDiagram(data)` checks structure and semantics. Success returns `diagram`, `data`, `componentCount`, `occupiedTileCount` and `crossingCount`. JSON Schema checks structure; square shape, port matching, boundaries and components are runtime checks.
 
-The type is semantically checked without `uncheckedTypes`; completeness still requires its resources, for example via `STANDARD_RESOURCES`. The 3D resolver and KnotViewer remain spatial-curve-only. Mosaic rendering is deferred.
+The type is semantically checked without `uncheckedTypes`; completeness still requires its resources, for example via `STANDARD_RESOURCES`. The 3D resolver and `KnotViewer` remain spatial-curve-only. Mosaic rendering is deferred.
 
 ## Examples and acceptance cases
 

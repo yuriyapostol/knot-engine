@@ -17,7 +17,7 @@ const style = await readFile('site/style.css', 'utf8')
 const themeScript = await readFile('site/theme.js', 'utf8')
 const esc = s => String(s).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('"', '&quot;')
 const relative = (from, to) => path.posix.relative(path.posix.dirname(from), to) || './'
-const route = (scope, key, lang) => [scope, lang === 'uk' ? 'uk' : '', key.replace(/(^|\/)index$/, ''), 'index.html'].filter(Boolean).join('/').replaceAll('//', '/')
+const route = (scope, key, lang) => [scope, `${key}${lang === 'en' ? '' : '.' + lang}.html`].filter(Boolean).join('/')
 async function files(dir, prefix = '') {
   const entries = await readdir(dir, { withFileTypes: true })
   return (await Promise.all(entries.map(async e => e.isDirectory() ? files(path.join(dir, e.name), prefix + e.name + '/') : [prefix + e.name]))).flat()
@@ -51,7 +51,7 @@ function html(title, body, file, scope, lang, key) {
   const l = locales[lang], generation = metadata.has(scope) ? scope : current, meta = metadata.get(generation)
   const link = target => relative(file, target)
   const nav = [['home', generation, 'index'], ['guide', generation, 'guide'], ['spec', generation, 'spec'], ['resources', generation, 'resources'], ['design', 'design', 'index']]
-  return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)} · Knot Engine</title><script>${themeScript}</script><style>${style}</style></head><body class="shell"><header><div class="header-row"><div class="identity"><a class="brand" href="${link(route(generation, 'index', lang))}">Knot Engine</a> <span class="contract-version">${generation}</span> <span class="package-version">(${esc(meta.packageVersion)})</span></div><div class="header-controls"><nav class="languages" aria-label="${l.language}">${Object.entries(locales).map(([code, locale]) => `<a hreflang="${code}" lang="${code}" ${code === lang ? 'aria-current="page"' : ''} href="${link(route(scope,key,code))}">${locale.name}</a>`).join('')}</nav><button class="theme-toggle" type="button" aria-label="${l.theme}" title="${l.theme}" onclick="window.toggleSiteTheme()"><span class="moon" aria-hidden="true">☾</span><span class="sun" aria-hidden="true">☀</span></button></div></div><p class="intro">${l.intro}</p><nav class="sections">${nav.map(([label,s,k]) => `<a href="${link(route(s,k,lang))}">${l[label]}</a>`).join('')}</nav></header>${scope === 'design' ? `<aside class="notice">${l.proposed}</aside>` : ''}<main>${body}</main></body></html>`
+  return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)} · Knot Engine</title><script>${themeScript}</script><style>${style}</style></head><body class="shell"><header><div class="header-row"><div class="identity"><a class="brand" href="${link(route(generation, 'index', lang))}">Knot Engine</a> <span class="contract-version">${generation}</span> <span class="package-version">(${esc(meta.packageVersion)})</span></div><div class="header-controls"><nav class="languages" aria-label="${l.language}">${Object.entries(locales).map(([code, locale]) => `<a hreflang="${code}" lang="${code}" ${code === lang ? 'aria-current="page"' : ''} href="${link(route(scope,key,code))}">${locale.name}</a>`).join('')}</nav><button class="theme-toggle" type="button" aria-label="${l.theme}" title="${l.theme}" onclick="window.toggleSiteTheme()"><span class="moon" aria-hidden="true">☾</span><span class="sun" aria-hidden="true">☀</span></button></div></div><p class="intro">${l.intro}</p><nav class="sections">${nav.map(([label,s,k]) => `<a href="${link(route(s,k,lang))}">${l[label]}</a>`).join('')}</nav></header>${scope === 'design' ? `<aside class="notice">${l.proposed}</aside>` : ''}<main class="markdown-body">${body}</main></body></html>`
 }
 function resolveLink(href, source, file) {
   if (/^(?:[a-z][a-z\d+.-]*:|\/\/|#)/i.test(href)) return href
@@ -106,9 +106,20 @@ for (const scope of [...generations, 'design']) {
 await mkdir(archives,{recursive:true})
 await cp(archives,path.join(output,'releases'),{recursive:true})
 const releases = (await readdir(archives,{withFileTypes:true})).filter(e=>e.isDirectory()).map(e=>e.name).sort((a,b)=>b.localeCompare(a,undefined,{numeric:true}))
+const archiveHomes = new Map()
+for (const version of releases) for (const lang of Object.keys(locales)) {
+  const modern = `releases/${version}/index${lang === 'en' ? '' : '.' + lang}.html`
+  try {
+    await readFile(path.join(output, modern))
+    archiveHomes.set(`${version}/${lang}`, modern)
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error
+    archiveHomes.set(`${version}/${lang}`, `releases/${version}/${lang === 'uk' ? 'uk/' : ''}index.html`)
+  }
+}
 for (const lang of Object.keys(locales)) {
   const l=locales[lang], file=route('','index',lang)
-  await put(file,html(l.versions,`<h1>Knot Engine</h1><ul>${generations.map(g=>`<li><a href="${relative(file,route(g,'index',lang))}">${g} — ${esc(metadata.get(g).packageVersion)}</a></li>`).join('')}</ul><h2>${l.archives}</h2><ul>${releases.map(v=>`<li><a href="${relative(file,`releases/${v}/${lang === 'uk' ? 'uk/' : ''}index.html`)}">${esc(v)}</a></li>`).join('')}</ul>${releases.length ? '' : `<p>${l.noArchives}</p>`}`,file,'',lang,'index'))
+  await put(file,html(l.versions,`<h1>Knot Engine</h1><ul>${generations.map(g=>`<li><a href="${relative(file,route(g,'index',lang))}">${g} — ${esc(metadata.get(g).packageVersion)}</a></li>`).join('')}</ul><h2>${l.archives}</h2><ul>${releases.map(v=>`<li><a href="${relative(file,archiveHomes.get(`${v}/${lang}`))}">${esc(v)}</a></li>`).join('')}</ul>${releases.length ? '' : `<p>${l.noArchives}</p>`}`,file,'',lang,'index'))
 }
 await put('versions.json',JSON.stringify({current:{path:current+'/',version:pkg.version},locales:Object.keys(locales),generations:generations.map(g=>({path:g+'/',...metadata.get(g)})),releases:releases.map(version=>({version,path:`releases/${version}/`}))},null,2)+'\n')
 await put('.nojekyll','')

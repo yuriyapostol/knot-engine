@@ -4,11 +4,11 @@ A specification defines the meaning of data and implementation behavior. A JSON 
 
 ## What is implemented
 
-The [KnotAsset specification](../spec/knot-asset.md), its [schema](../spec/schema/knot-asset.schema.json), and the [component contract](../spec/components.md) describe the current package.
+The [`KnotAsset` specification](../spec/knot-asset.md), its [schema](../spec/schema/knot-asset.schema.json), and the [component contract](../spec/components.md) describe the current package.
 
 ## What is proposed
 
-The [broader KnotAsset design](../../design/knot-asset-draft.md) also contains future formats and assertions. Unified representations and standalone shared resources are implemented in the [initial profile](../spec/knot-asset.md). The current specification defines the exact supported fields.
+The [broader `KnotAsset` design](../../design/knot-asset-draft.md) also contains future formats and assertions. Unified representations and standalone shared resources are implemented in the [initial profile](../spec/knot-asset.md). The current specification defines the exact supported fields.
 
 A catalog defines a system of identifiers, such as a catalog name and its record notation. A registry of representation types contains concrete type definitions. A view stores camera settings. These are different kinds of resources, so `resources/catalogs/` is not an umbrella name for them all.
 

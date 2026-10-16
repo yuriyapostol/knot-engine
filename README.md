@@ -2,7 +2,7 @@
 
 [English](README.md) | [Українська](README.uk.md)
 
-Knot modeling and rendering package with Vue 3 `KnotViewer`. The current KnotAsset supports spatial curves, grid diagrams, mosaic diagrams, constructions, states, procedures and explicit resource registries. The component renders static 3D representations with perspective/orthographic cameras, SSR fallback and PNG capture.
+Knot modeling and rendering package with Vue 3 `KnotViewer`. The current `KnotAsset` supports spatial curves, grid diagrams, mosaic diagrams, constructions, states, procedures and explicit resource registries. The component renders static 3D representations with perspective/orthographic cameras, SSR fallback and PNG capture.
 
 ## Run locally
 
@@ -33,7 +33,7 @@ The working package name is `knot-engine`; no npm release has been published. Th
 
 To preview the complete site locally, run `npm run preview:site` and open `http://localhost:5174/`. This rebuilds the site before serving it. `npm run dev` on port `5173` serves the complete site and rebuilds it automatically after source changes.
 
-Run `npm run build:site` to build `site-dist/`. The site includes the guide at `/v1/guide/`, specifications with schemas and examples at `/v1/spec/`, resources at `/v1/resources/`, and design material at `/design/`. The interactive editor is embedded in the generation home page and guide. English is the default; Ukrainian pages live under `/v1/uk/` and `/design/uk/`. Version `v1` includes pre-1.0 packages. Existing snapshots from `site/releases/` are preserved under `/releases/<package-version>/`.
+Run `npm run build:site` to build `site-dist/`. The site includes the guide at `/v1/guide.html`, specifications with schemas and examples at `/v1/spec.html`, resources at `/v1/resources.html`, and design material at `/design/index.html`. The interactive editor is embedded in the generation home page and guide. English is the default; page URLs retain `.html`, and Ukrainian pages use `.uk.html`, for example `/v1/guide/getting-started.uk.html` and `/design/architecture.uk.html`. Version `v1` includes pre-1.0 packages. Existing snapshots from `site/releases/` are preserved under `/releases/<package-version>/`.
 
 The [Pages workflow](.github/workflows/pages.yml) publishes the complete site after a push to `main`, or a manual run on `main`, after typecheck and tests. In **Settings → Pages**, select **GitHub Actions**. The default site address is [Knot Engine](https://yuriyapostol.github.io/knot-engine/). Pages and demo assets use relative links and also work under a custom domain.
 
@@ -67,9 +67,9 @@ Methods: `resetView()`, `fitToView()`, `capture({width,height,view,transparent})
 
 | Document | Scope |
 | --- | --- |
-| [KnotAsset v1](v1/spec/knot-asset.md) | Authoritative domain-data specification |
+| [`KnotAsset` v1](v1/spec/knot-asset.md) | Authoritative domain-data specification |
 | [Architecture and migration](design/architecture.md) | Implementation policies, compatibility and current limits |
-| [KnotViewer specification](v1/spec/components.md) | Component API and retained acceptance criteria |
+| [`KnotViewer` specification](v1/spec/components.md) | Component API and retained acceptance criteria |
 | [Demo application](design/interactive-example-requirements.md) | Demo behavior and acceptance plan |
 
 ## Current limits

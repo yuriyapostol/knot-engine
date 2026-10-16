@@ -45,19 +45,38 @@ try {
  assert.deepEqual(versions.generations.map(g => g.schemaVersion), [1, 2])
  assert.equal(versions.current.path, 'v1/')
  assert.equal(JSON.parse(await readFile(path.join(output, 'v2/spec/schema/marker.json'), 'utf8')).generation, 2)
- assert.match(await readFile(path.join(output, 'v2/guide/future/index.html'), 'utf8'), /class="contract-version">v2/)
+ assert.match(await readFile(path.join(output, 'v2/guide/future.html'), 'utf8'), /class="contract-version">v2/)
  await assert.rejects(access(path.join(output, 'releases', version, 'v2')))
 
  for (const bundle of ['v1',`releases/${version}`]) {
-  await access(path.join(output,bundle,'spec/knot-asset/index.html'))
+  await access(path.join(output,bundle,'spec/knot-asset.html'))
   const schema=JSON.parse(await readFile(path.join(output,bundle,'schema/knot-asset.schema.json'),'utf8'))
   assert.equal(schema.$id,'https://yuriyapostol.github.io/knot-engine/v1/schema/knot-asset.schema.json')
  }
- const english = new JSDOM(await readFile(path.join(output,'v1/guide/getting-started/index.html'),'utf8'))
+ const english = new JSDOM(await readFile(path.join(output,'v1/guide/getting-started.html'),'utf8'))
  assert.equal(english.window.document.documentElement.lang, 'en')
- assert.match(english.window.document.querySelector('[hreflang="uk"]').getAttribute('href'), /guide\/getting-started/)
+ assert.match(english.window.document.querySelector('[hreflang="uk"]').getAttribute('href'), /^getting-started\.uk\.html$/)
  assert.match(english.window.document.querySelector('iframe').src, /lang=en/)
  english.window.close()
+ const ukrainian = new JSDOM(await readFile(path.join(output, 'design/architecture.uk.html'), 'utf8'))
+ assert.equal(ukrainian.window.document.documentElement.lang, 'uk')
+ assert.equal(ukrainian.window.document.querySelector('[hreflang="uk"]').getAttribute('href'), 'architecture.uk.html')
+ assert.equal(ukrainian.window.document.querySelector('[hreflang="en"]').getAttribute('href'), 'architecture.html')
+ ukrainian.window.close()
+ for (const key of ['index', 'guide', 'spec', 'resources', 'spec/schema', 'spec/examples']) {
+  for (const lang of ['en', 'uk']) {
+   const name = key + (lang === 'uk' ? '.uk' : '') + '.html'
+   const page = new JSDOM(await readFile(path.join(output, 'v1', name), 'utf8'))
+   for (const code of ['en', 'uk']) {
+    const counterpart = key + (code === 'uk' ? '.uk' : '') + '.html'
+    const href = page.window.document.querySelector(`[hreflang="${code}"]`).getAttribute('href')
+    assert.equal(path.posix.normalize(path.posix.join(path.posix.dirname(name), href)), counterpart)
+   }
+   page.window.close()
+  }
+ }
+ await assert.rejects(access(path.join(output, 'design/uk')))
+ await access(path.join(snapshot, 'index.uk.html'))
  await rm(path.join(sources,'v2/spec/format.md'))
  await assert.rejects(run('node',['scripts/site/build.mjs'],{env}),/Missing translation/)
  let count=0
@@ -69,7 +88,7 @@ try {
    if(!href || /^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(href)) continue
    assert.ok(!href.startsWith('/'),`Non-relocatable URL: ${file}: ${href}`)
    const target=path.resolve(path.dirname(file),decodeURIComponent(href.split(/[?#]/)[0]))
-   await access(target).catch(()=>{throw new Error(`Broken link: ${file}: ${href}`)})
+   await access(target).catch(() => { throw new Error(`Broken link: ${file}: ${href}`) })
    count++
   }
   dom.window.close()

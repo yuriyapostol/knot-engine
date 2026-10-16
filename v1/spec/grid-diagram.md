@@ -2,7 +2,7 @@
 
 Supported data and validation profile. Rendering is deferred.
 
-## `xo` encoding: contract and conventions
+## xo encoding: contract and conventions
 
 Type: `https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram`.
 
@@ -12,7 +12,7 @@ For `encoding:"xo"`, `data` is exactly `{encoding:"xo",size,x,o}`. Size is an in
 
 Horizontal segments run O→X; vertical segments run X→O and pass over horizontal segments. Connections are ordinary straight planar segments, without wrapping across boundaries. Several oriented closed components are allowed in X/O. Swapping X and O reverses every component's orientation without changing the underlying crossing diagram. Reflecting coordinates without changing crossing conventions can change chirality; it is not an identity-preserving normalization.
 
-For plane views, marker (column c, row r) has coordinates [c+0.5,r+0.5]. The grid occupies [0,n] × [0,n]. Center [n/2,n/2], height n, rotation 0 includes its full vertical extent. This is a display convention, not stored geometry. Views must use `space:"plane"`; `preferredView` is rejected. KnotViewer and the 3D resolver remain spatial-curve-only.
+For plane views, marker (column c, row r) has coordinates [c+0.5,r+0.5]. The grid occupies [0,n] × [0,n]. Center [n/2,n/2], height n, rotation 0 includes its full vertical extent. This is a display convention, not stored geometry. Views must use `space:"plane"`; `preferredView` is rejected. `KnotViewer` and the 3D resolver remain spatial-curve-only.
 
 ## Vertex-pairs encoding
 
@@ -36,7 +36,7 @@ Component count follows O→X in each row, then X→O in that column, iterativel
 
 Validation uses O(n) storage, O(n) component tracing and O(n²) crossing counting. Size is bounded at 512 before analysis. General bounded-JSON checks apply before schema validation: depth 64, 262,144 entries and strings up to 1,048,576 characters. Multiple representations share the document's JSON budget; there is no additional aggregate grid-area allocation.
 
-The [standalone schema](schema/grid-diagram.schema.json) checks fields, encoding, scalar bounds and array lengths. Runtime additionally checks permutations, agreement with size and non-overlap. Supported semantics do not produce `uncheckedTypes`; `complete` still requires available resources, such as `STANDARD_RESOURCES`. Standalone representation documents, extraction and same-document composition use ordinary KnotAsset rules, preserving arrays and orientation exactly.
+The [standalone schema](schema/grid-diagram.schema.json) checks fields, encoding, scalar bounds and array lengths. Runtime additionally checks permutations, agreement with size and non-overlap. Supported semantics do not produce `uncheckedTypes`; `complete` still requires available resources, such as `STANDARD_RESOURCES`. Standalone representation documents, extraction and same-document composition use ordinary `KnotAsset` rules, preserving arrays and orientation exactly.
 
 ## Standard conventions and KnotInfo interoperability
 

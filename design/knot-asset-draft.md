@@ -2,9 +2,9 @@
 
 **Implementation status:** the initial profile (spatial curves, grid diagrams, mosaic diagrams, constructions, procedures, resources and cameras) is described in the [current specification](../v1/spec/knot-asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
 
-**Status: architectural draft for discussion.** This records agreed principles and a possible structure. It does not replace the [implemented contract](../v1/spec/knot-asset.md) or claim that the proposed API exists. The transition from KnotModelV1 is complete for the initial profile. Features beyond the current specification remain under design.
+**Status: architectural draft for discussion.** This records agreed principles and a possible structure. It does not replace the [implemented contract](../v1/spec/knot-asset.md) or claim that the proposed API exists. The transition from `KnotModelV1` is complete for the initial profile. Features beyond the current specification remain under design.
 
-**Current policy: keep version numbers unchanged and do not preserve compatibility with old contracts.** The project has no external users yet. Revisions remain within `schemaVersion: 1` and package `0.1.0`. KnotModelV1 APIs, schemas, adapters and dual-format support have been removed. Field names and example shapes are proposals except where explicitly agreed.
+**Current policy: keep version numbers unchanged and do not preserve compatibility with old contracts.** The project has no external users yet. Revisions remain within `schemaVersion: 1` and package `0.1.0`. `KnotModelV1` APIs, schemas, adapters and dual-format support have been removed. Field names and example shapes are proposals except where explicitly agreed.
 
 ## 1. Agreed decisions
 
@@ -25,7 +25,7 @@
 | 13 | 3D representations may contain an optional initial orientation hint. |
 | 14 | Properties, relations and classifications may target inner entities. Shared assertion collections with explicit references are the working direction, subject to extraction scenarios. |
 | 15 | No version bumps or backward compatibility requirements during initial development. |
-| 16 | The initial profile fully replaces KnotModelV1; legacy APIs, adapters, duplicate inputs and compatibility tests have been removed. |
+| 16 | The initial profile fully replaces `KnotModelV1`; legacy APIs, adapters, duplicate inputs and compatibility tests have been removed. |
 | 17 | Catalogs, representation type definitions, constructions and views have standalone contracts; registries or inline definitions can supply them. Views are embedded in representations. |
 | 18 | Project global identifiers use `https://yuriyapostol.github.io/knot-engine/v1/`; this does not imply that every proposed resource is published. |
 | 19 | Use `namespaces` and `knot-engine:name`. This replaces the proposed `base`. Keep field names: local identifiers remain `id`, not `local`. |
@@ -167,9 +167,9 @@ Representation
 └── sources[]?
 ```
 
-`type` references a `RepresentationTypeDefinition` selecting the `data` contract, for example `knot-engine:representation-types/pd-code`. Candidate types include diagram-image, planar-diagram, `spatial-curve`, `mosaic-diagram`, `grid-diagram`, pd-code, dt-code and braid-word. Each needs its own orientation, indexing and other conventions; this is not a completed registry.
+`type` references a `RepresentationTypeDefinition` selecting the `data` contract, for example `knot-engine:representation-types/pd-code`. Candidate types include `diagram-image`, `planar-diagram`, `spatial-curve`, `mosaic-diagram`, `grid-diagram`, `pd-code`, `dt-code` and `braid-word`. Each needs its own orientation, indexing and other conventions; this is not a completed registry.
 
-Omitted `target` means the enclosing subject. An explicit target may be a construction or state. A standalone representation document supplies subject context in its envelope when required. There is no universal requirement for dimension, snapshots, units or elements. A pedagogical classification does not replace structural type.
+Omitted `target` means the enclosing subject. An explicit target may be a construction or state. A standalone representation document supplies subject context in its envelope when required. There is no universal requirement for `dimension`, `snapshots`, `units` or `elements`. A pedagogical classification does not replace structural type.
 
 ### Working state organization
 
@@ -185,7 +185,7 @@ Scale belongs where coordinates gain meaning. Do not infer physical scale during
 
 ## 6. Viewing and initial orientation
 
-Camera, projection, styling and user interaction state have a separate contract, supplied independently by an application. See the [ViewDefinition proposal](shared-resources.md#5-viewdefinition-and-preferredview). `Representation.views` may embed or reference such records; no root views collection is needed.
+Camera, projection, styling and user interaction state have a separate contract, supplied independently by an application. See the [`ViewDefinition` proposal](shared-resources.md#5-viewdefinition-and-preferredview). `Representation.views` may embed or reference such records; no root `views` collection is needed.
 
 ```json
 {
@@ -196,7 +196,7 @@ Camera, projection, styling and user interaction state have a separate contract,
 }
 ```
 
-`direction` points from subject to camera in the representation coordinate system. Both vectors are finite, nonzero and noncollinear, normalized when applied without changing stored data. Initial selection order is explicit application settings, defaultView, preferredView, then the component default. Fitting derives center and distance from bounds, projection and viewport; explicit framing may override fitting. User interaction changes viewing state, not authored geometry. Lighting and styling are not fully specified by this camera proposal.
+`direction` points from subject to camera in the representation coordinate system. Both vectors are finite, nonzero and noncollinear, normalized when applied without changing stored data. Initial selection order is explicit application settings, `defaultView`, `preferredView`, then the component default. Fitting derives center and distance from bounds, projection and viewport; explicit framing may override fitting. User interaction changes viewing state, not authored geometry. Lighting and styling are not fully specified by this camera proposal.
 
 ## 7. Procedures
 
@@ -210,9 +210,9 @@ The working direction uses shared assertion collections with typed references:
 
 | Collection | Subject field | Content |
 | --- | --- | --- |
-| properties | target | Property identity and typed value |
-| relations | from, to | Relation type, optional basis and sources |
-| classifications | subject | Category reference and optional sources |
+| `properties` | `target` | Property identity and typed value |
+| `relations` | `from`, `to` | Relation type, optional basis and sources |
+| `classifications` | `subject` | Category reference and optional sources |
 
 Target/subject naming is still subject to consistency review. Exact values, bounds, intervals, unknowns and physical quantities must not collapse into an ambiguous scalar. Methods, conditions and sources are necessary where they affect meaning. A relation type constrains participant kinds and direction; validating its structure does not prove it true. Do not materialize all property matches automatically.
 
@@ -229,7 +229,7 @@ Categories belong to vocabularies; a narrow viewer does not execute classificati
 }
 ```
 
-This states that diagram-a was derived from spatial-a. Both must exist or be declared external dependencies; it makes no assertion about the geometry in other examples.
+This states that `diagram-a` was derived from `spatial-a`. Both must exist or be declared external dependencies; it makes no assertion about the geometry in other examples.
 
 ```json
 {
@@ -443,7 +443,7 @@ No claim is made about physical length, length preservation or valid interpolati
 
 ## 11. Versions, extensions and validation
 
-See [publication policy](publication.md). Until stabilization, keep package and schema versions unchanged, allow structural/API changes, update examples and tests together, and keep examples and tools on the current KnotAsset contract. KnotModelV1 runtime, schemas, APIs, adapters and demo support have been removed. One-time data conversion does not require permanent compatibility adapters.
+See [publication policy](publication.md). Until stabilization, keep package and schema versions unchanged, allow structural/API changes, update examples and tests together, and keep examples and tools on the current `KnotAsset` contract. `KnotModelV1` runtime, schemas, APIs, adapters and demo support have been removed. One-time data conversion does not require permanent compatibility adapters.
 
 Shared contract generations do not require a monolithic schema. Fragment entry points remain separate. `schema`, `schemaVersion` and editor `$schema` have defined roles in the resource proposal. Contract generation and package release number differ, but documentation, specifications, schemas and data are published as one package release.
 
@@ -461,11 +461,11 @@ Namespace expansion produces absolute global identities. Definitions are not com
 | Physical conditions, end accessibility and roles | Distinguish object properties, initial conditions and step changes |
 | Representation conventions and parameterization | Interoperable import and implementation |
 | Typed properties, conditions and provenance | Distinguish exact results, estimates and measurements |
-| preferredView and standalone viewer settings | Orientation, focus, fitting and overrides |
+| `preferredView` and standalone viewer settings | Orientation, focus, fitting and overrides |
 | Extensions beyond the initial profile | Define contracts and tests for additional representations, assertions and animation; legacy removal is complete |
 
 Next scenarios: a practical knot with two procedures, changing end accessibility, a decorative mixed-material construction, a mathematical subject with Grid/PD/properties, and procedure/representation exports with their required assertions.
 
 ## 13. Earlier material
 
-The [earlier evolution note](asset-evolution.md) proposed separate diagrams and notations. That organization is superseded by unified representations. Current runtime documentation still describes implemented behavior. The initial profile is implemented and KnotModelV1 support has been removed. Proposals beyond the current specification remain future work; the earlier requirement to retain KnotModelV1 compatibility has been withdrawn.
+The [earlier evolution note](asset-evolution.md) proposed separate diagrams and notations. That organization is superseded by unified representations. Current runtime documentation still describes implemented behavior. The initial profile is implemented and `KnotModelV1` support has been removed. Proposals beyond the current specification remain future work; the earlier requirement to retain `KnotModelV1` compatibility has been withdrawn.

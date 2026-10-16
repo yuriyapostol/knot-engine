@@ -1,6 +1,6 @@
 # Interactive example acceptance
 
-The demo in `site/runtime/` uses the public package API and local KnotAsset fixtures. It edits the complete asset, including all representations and procedures. Selection uses representation IDs; changing a static state selects its representation. Animation is outside this profile.
+The demo in `site/runtime/` uses the public package API and local `KnotAsset` fixtures. It edits the complete asset, including all representations and procedures. Selection uses representation IDs; changing a static state selects its representation. Animation is outside this profile.
 
 The UI inherits English/Ukrainian and light/dark theme from the site. It provides fixture selection, JSON editor, local file import/save and current-view PNG export. Files are limited to 1 MiB before parsing. Editing applies after a short delay; invalid drafts display a diagnostic and preserve the previous valid asset. Existing representation selection is preserved when possible; otherwise the first spatial representation is selected. Imported content is never executed or uploaded.
 
