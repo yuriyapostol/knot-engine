@@ -1,6 +1,6 @@
 # KnotAsset: proposed contract revision
 
-**Implementation status:** the initial profile (spatial-curve, Grid X/O, constructions, procedures, resources and cameras) is described in the [current specification](../v1/spec/knot-asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
+**Implementation status:** the initial profile (spatial-curve, Grid (X/O, vertex-pairs), constructions, procedures, resources and cameras) is described in the [current specification](../v1/spec/knot-asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
 
 **Status: architectural draft for discussion.** This records agreed principles and a possible structure. It does not replace the [implemented contract](../v1/spec/knot-asset.md) or claim that the proposed API exists. The transition from KnotModelV1 is complete for the initial profile. Features beyond the current specification remain under design.
 

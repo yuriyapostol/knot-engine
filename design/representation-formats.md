@@ -126,7 +126,7 @@ KnotInfo provides a [Grid description](https://knotinfo.org/descriptions/grid_no
 
 These are ten endpoints on a 5×5 grid, two per row/column, not X/O arrays. Verticals pass over horizontals. The SVG maps the second coordinate downward. Conversion to upward mathematical coordinates must record the transform rather than silently mirror data.
 
-Propose one grid-diagram type with vertex-pairs and xo encoding profiles. The first preserves vertices and source index/axis/crossing conventions; the second stores size, x and o with orientation rules. Converting to X/O requires choosing each component's orientation; it is an adaptation, not renaming columns. Exact profile shapes still need agreement with the implemented Grid contract.
+One `grid-diagram` type now supports `xo` and `vertex-pairs`, both zero-based with fixed axis and crossing conventions. Source conventions are adapted during import. X/O specifies orientation; vertex-pairs does not. See the [Grid specification](../v1/spec/grid-diagram.md) for the implemented contracts.
 
 ## 6. Recommended order
 

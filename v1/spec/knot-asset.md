@@ -1,6 +1,6 @@
 # KnotAsset v1
 
-Implemented initial profile of the [contract redesign](../../design/knot-asset-draft.md). Package version remains 0.1.0; schemaVersion remains 1. The previous contracts and APIs have been removed. This profile supports spatial curves, Grid X/O, constructions, named states, procedures and reusable resources. Other representation formats, animation, properties, relations and classifications remain separate future work; they are not accepted as untyped fields.
+Implemented initial profile of the [contract redesign](../../design/knot-asset-draft.md). Package version remains 0.1.0; schemaVersion remains 1. The previous contracts and APIs have been removed. This profile supports spatial curves, Grid (X/O, vertex-pairs), constructions, named states, procedures and reusable resources. Other representation formats, animation, properties, relations and classifications remain separate future work; they are not accepted as untyped fields.
 
 ## Documents and identity
 
@@ -51,13 +51,13 @@ Interpolation is one of:
 
 The renderer uses data coordinates. A physical rope diameter becomes radius `diameter / (2 * metersPerUnit)`. Otherwise display radius is 0.006 times the largest control-point span, with a warning; it is not a physical measurement. The renderer rejects coordinate/camera components above ±1,000,000 and nonpositive or greater-than-1,000,000 radii. These are rendering limits, separate from domain validation. Tube meshes approximate curves and do not prove knot topology or collision freedom.
 
-### Grid X/O
+### Grid (X/O, vertex-pairs)
 
 Type: `https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram`.
 
-`data` is `{encoding:"xo",size,x,o}`. Size is an integer from 2 to 512; both arrays are permutations of row indices `0..size-1`, indexed by column. X and O must differ in each column. Row zero is the bottom row, columns increase rightward. Horizontal arcs run O→X; vertical arcs run X→O and pass over horizontal arcs. This profile supports multiple components and does not infer knot identity. It is data/validation support; the current KnotViewer renders only spatial curves. Grid vertex-pairs is a future profile.
+`data` is `{encoding:"xo",size,x,o}`. Size is an integer from 2 to 512; both arrays are permutations of row indices `0..size-1`, indexed by column. X and O must differ in each column. Row zero is the bottom row, columns increase rightward. Horizontal arcs run O→X; vertical arcs run X→O and pass over horizontal arcs. This profile supports multiple components and does not infer knot identity. It is data/validation support; the current KnotViewer renders only spatial curves. The alternative `{encoding:"vertex-pairs",size,vertices}` profile stores unoriented distinct `[column,row]` pairs indexed from 0, exactly two per row and column.
 
-See the detailed [Grid X/O specification](grid-diagram.md) for derived counts, coordinates and KnotInfo interoperability.
+See the detailed [Grid specification](grid-diagram.md) for derived counts, coordinates and KnotInfo interoperability.
 
 ### Mosaic diagram (data and validation)
 

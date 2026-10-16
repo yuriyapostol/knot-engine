@@ -20,7 +20,10 @@ export interface SpatialCurveData {
   curves: SpatialCurve[]
 }
 /** Row 0 is bottom; arrays indexed by column. Horizontal O→X; vertical X→O passes over. */
-export interface GridDiagram { encoding: 'xo'; size: number; x: number[]; o: number[] }
+export interface GridXODiagram { encoding: 'xo'; size: number; x: number[]; o: number[] }
+/** Unoriented vertices [column, row], both zero-based; array order is immaterial. */
+export interface GridVertexPairsDiagram { encoding: 'vertex-pairs'; size: number; vertices: [number, number][] }
+export type GridDiagram = GridXODiagram | GridVertexPairsDiagram
 export type Projection = { kind: 'perspective'; fovY: number } | { kind: 'orthographic' }
 export type Camera3D =
   | { mode: 'fit'; direction: Point3D; up: Point3D; projection: Projection; padding?: number }

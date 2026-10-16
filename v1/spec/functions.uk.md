@@ -5,7 +5,7 @@ Core API імпортується з `knot-engine/core`; ця точка вхо�
 | Функція | Результат |
 | --- | --- |
 | `validateKnotAsset(value, options?)` | `{valid:true,asset,warnings,complete,missingDependencies,uncheckedTypes}` або `{valid:false,issues}` |
-| `validateGridDiagram(value)` | `{valid:true,data,diagram,warnings}` або помилки; незалежна перевірка Grid X/O |
+| `validateGridDiagram(value)` | `{valid:true,data,diagram,warnings,componentCount,crossingCount}` або помилки; незалежна перевірка Grid X/O або vertex-pairs |
 | `validateSpatialCurve(value)` | `{valid:true,data,warnings}` або помилки |
 | `validateView(value)` | `{valid:true,data,warnings}` або помилки |
 | `validateResourceDocument(value)` | Перевірена оболонка ресурсу або помилки; не встановлює замкненості залежностей |
