@@ -84,14 +84,8 @@ The following is a representation fragment; see also the self-contained [mosaic-
   "data": {
     "tileSet": "https://yuriyapostol.github.io/knot-engine/v1/tile-sets/lomonaco-kauffman-11",
     "tiles": [
-      [
-        2,
-        1
-      ],
-      [
-        3,
-        4
-      ]
+      [2, 1],
+      [3, 4]
     ]
   }
 }
@@ -103,30 +97,10 @@ Its four occupied tiles form one component without crossings. A two-component ex
 {
   "tileSet": "https://yuriyapostol.github.io/knot-engine/v1/tile-sets/lomonaco-kauffman-11",
   "tiles": [
-    [
-      2,
-      1,
-      2,
-      1
-    ],
-    [
-      3,
-      4,
-      3,
-      4
-    ],
-    [
-      0,
-      0,
-      0,
-      0
-    ],
-    [
-      0,
-      0,
-      0,
-      0
-    ]
+    [2, 1, 2, 1],
+    [3, 4, 3, 4],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0]
   ]
 }
 ```
@@ -137,30 +111,10 @@ The researched 4×4 source example is:
 {
   "tileSet": "https://yuriyapostol.github.io/knot-engine/v1/tile-sets/lomonaco-kauffman-11",
   "tiles": [
-    [
-      0,
-      2,
-      1,
-      0
-    ],
-    [
-      2,
-      9,
-      10,
-      1
-    ],
-    [
-      3,
-      10,
-      8,
-      4
-    ],
-    [
-      0,
-      3,
-      4,
-      0
-    ]
+    [0, 2, 1, 0],
+    [2, 9, 10, 1],
+    [3, 10, 8, 4],
+    [0, 3, 4, 0]
   ]
 }
 ```

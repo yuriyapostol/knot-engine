@@ -14,7 +14,7 @@ const representationId = ref(overhand.representations[0].id)
 function formatModel(value: unknown, level = 0): string {
   const indent = '  '.repeat(level)
   if (Array.isArray(value)) {
-    if ((value.length === 2 || value.length === 3) && value.every(item => typeof item === 'number')) return `[${value.join(', ')}]`
+    if (value.every(item => typeof item === 'number')) return `[${value.join(', ')}]`
     if (!value.length) return '[]'
     return `[\n${value.map(item => `${indent}  ${formatModel(item, level + 1)}`).join(',\n')}\n${indent}]`
   }
