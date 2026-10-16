@@ -1,6 +1,6 @@
 # KnotAsset v1
 
-Implemented initial profile of the [contract redesign](../../design/knot-asset-draft.md). Package version remains 0.1.0; schemaVersion remains 1. The previous contracts and APIs have been removed. This profile supports spatial curves, Grid (X/O, vertex-pairs), constructions, named states, procedures and reusable resources. Other representation formats, animation, properties, relations and classifications remain separate future work; they are not accepted as untyped fields.
+Implemented initial profile of the [contract redesign](../../design/knot-asset-draft.md). Package version remains 0.1.0; schemaVersion remains 1. The previous contracts and APIs have been removed. This profile supports spatial curves, Grid (X/O, vertex-pairs), mosaic-diagram, constructions, named states, procedures and reusable resources. Other representation formats, animation, properties, relations and classifications remain separate future work; they are not accepted as untyped fields.
 
 ## Documents and identity
 
