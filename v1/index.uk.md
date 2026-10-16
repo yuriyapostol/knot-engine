@@ -6,7 +6,7 @@
 
 - [Почніть використовувати пакет](guide/getting-started.uk.md).
 - [Розберіться з даними та ресурсами](guide/concepts.uk.md).
-- [Прочитайте чинний контракт KnotAsset](spec/knot-asset.uk.md).
+- [Прочитайте чинний контракт `KnotAsset`](spec/knot-asset.uk.md).
 - [Перегляньте запропоновані зміни](../design/knot-asset-draft.uk.md).
 
 ## Спробуйте

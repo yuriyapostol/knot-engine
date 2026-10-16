@@ -1,6 +1,6 @@
 # KnotAsset: proposed contract revision
 
-**Implementation status:** the initial profile (spatial-curve, Grid (X/O, vertex-pairs), mosaic-diagram, constructions, procedures, resources and cameras) is described in the [current specification](../v1/spec/knot-asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
+**Implementation status:** the initial profile (spatial curves, grid diagrams (X/O, `vertex-pairs`), mosaic diagrams, constructions, procedures, resources and cameras) is described in the [current specification](../v1/spec/knot-asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
 
 **Status: architectural draft for discussion.** This records agreed principles and a possible structure. It does not replace the [implemented contract](../v1/spec/knot-asset.md) or claim that the proposed API exists. The transition from KnotModelV1 is complete for the initial profile. Features beyond the current specification remain under design.
 
@@ -113,7 +113,7 @@ If a catalog ignores distinctions such as orientation or mirror forms, a matchin
 - `identifierRules` check syntax, not record existence. Existence requires catalog data or an integration.
 - Extraction retains required definitions; composition may deduplicate identical definitions but must resolve semantic conflicts explicitly.
 
-A changed description is different from an edition reusing a designation for another object. The latter needs a different catalog identity; it is not a schemaVersion or package-version question.
+A changed description is different from an edition reusing a designation for another object. The latter needs a different catalog identity; it is not a `schemaVersion` or package-version question.
 
 ### 3.4. Complete catalog example
 
@@ -167,7 +167,7 @@ Representation
 └── sources[]?
 ```
 
-`type` references a `RepresentationTypeDefinition` selecting the `data` contract, for example `knot-engine:representation-types/pd-code`. Candidate types include diagram-image, planar-diagram, spatial-curve, mosaic-diagram, grid-diagram, pd-code, dt-code and braid-word. Each needs its own orientation, indexing and other conventions; this is not a completed registry.
+`type` references a `RepresentationTypeDefinition` selecting the `data` contract, for example `knot-engine:representation-types/pd-code`. Candidate types include diagram-image, planar-diagram, `spatial-curve`, `mosaic-diagram`, `grid-diagram`, pd-code, dt-code and braid-word. Each needs its own orientation, indexing and other conventions; this is not a completed registry.
 
 Omitted `target` means the enclosing subject. An explicit target may be a construction or state. A standalone representation document supplies subject context in its envelope when required. There is no universal requirement for dimension, snapshots, units or elements. A pedagogical classification does not replace structural type.
 

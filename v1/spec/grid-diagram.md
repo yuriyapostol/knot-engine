@@ -1,4 +1,4 @@
-# Grid diagram (X/O, vertex-pairs)
+# Grid diagram (X/O, `vertex-pairs`)
 
 Supported data and validation profile. Rendering is deferred.
 
@@ -42,7 +42,7 @@ The X/O model and orientation agree with standard grid diagrams: see [Grid Homol
 
 [KnotInfo Grid Notation](https://linkinfo.knotinfo.org/descriptions/grid_notation.html) describes the same rectilinear geometry using 2n distinct coordinate pairs [column,row], indexed 1 through n, with two points per row and column and vertical overpasses. It does not label points X/O. Our JSON serialization is project-specific, not a verbatim KnotInfo format.
 
-Export geometry as the set of points [c+1,x[c]+1] and [c+1,o[c]+1]. Import requires validating two distinct points per row/column and choosing an orientation independently on each closed component, then alternating O/X along its vertices. For k components there are 2^k orientation choices; an unlabeled point list cannot recover the original choices. Do not transpose axes or reflect coordinates silently. For zero-based vertex-pairs, subtract 1 from both coordinates on import from KnotInfo and add 1 on export. No public converter is introduced here. Orientation choice may be fully automatic; it cannot recover a source orientation that was never specified.
+Export geometry as the set of points [c+1,x[c]+1] and [c+1,o[c]+1]. Import requires validating two distinct points per row/column and choosing an orientation independently on each closed component, then alternating O/X along its vertices. For k components there are 2^k orientation choices; an unlabeled point list cannot recover the original choices. Do not transpose axes or reflect coordinates silently. For zero-based `vertex-pairs`, subtract 1 from both coordinates on import from KnotInfo and add 1 on export. No public converter is introduced here. Orientation choice may be fully automatic; it cannot recover a source orientation that was never specified.
 
 KnotInfo's documented 6_2 example is:
 

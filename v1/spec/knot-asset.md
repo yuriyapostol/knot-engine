@@ -1,6 +1,27 @@
 # KnotAsset v1
 
-Implemented initial profile of the [contract redesign](../../design/knot-asset-draft.md). Package version remains 0.1.0; schemaVersion remains 1. The previous contracts and APIs have been removed. This profile supports spatial curves, Grid (X/O, vertex-pairs), mosaic-diagram, constructions, named states, procedures and reusable resources. Other representation formats, animation, properties, relations and classifications remain separate future work; they are not accepted as untyped fields.
+Implemented initial profile of the [contract redesign](../../design/knot-asset-draft.md). Package version remains 0.1.0; `schemaVersion` remains 1. The previous contracts and APIs have been removed. This profile supports spatial curves, grid diagrams (X/O, `vertex-pairs`), mosaic diagrams, constructions, named states, procedures and reusable resources. Other representation formats, animation, properties, relations and classifications remain separate future work; they are not accepted as untyped fields.
+
+## Terminology
+
+Use descriptive concepts in prose. Format exact type, function and field names and code values as code; retain product and source names such as KnotInfo and Gridlink. X/O names a marking system; `xo` and `vertex-pairs` are exact `encoding` values. Do not substitute file or type identifiers for descriptive concepts in feature lists.
+
+| Concept | Technical identifier |
+| --- | --- |
+| Knot document | `KnotAsset` |
+| Subject | `subject` |
+| Representation | `Representation`, `representations` |
+| Spatial curves | `spatial-curve` |
+| Grid diagrams | `grid-diagram` |
+| Mosaic diagrams | `mosaic-diagram` |
+| Construction | `Construction`, `constructions` |
+| Construction object | `ConstructionObject`, `objects` |
+| Named state | `states` |
+| Procedure and step | `Procedure`, `procedures`, `Step`, `steps` |
+| View and camera | `ViewDefinition`, `views`, `camera` |
+| Catalog definition | `CatalogDefinition`, `catalogs` |
+| Resource registry | `KnotResourceRegistry` |
+| Viewer component | `KnotViewer` |
 
 ## Documents and identity
 
@@ -51,13 +72,13 @@ Interpolation is one of:
 
 The renderer uses data coordinates. A physical rope diameter becomes radius `diameter / (2 * metersPerUnit)`. Otherwise display radius is 0.006 times the largest control-point span, with a warning; it is not a physical measurement. The renderer rejects coordinate/camera components above ±1,000,000 and nonpositive or greater-than-1,000,000 radii. These are rendering limits, separate from domain validation. Tube meshes approximate curves and do not prove knot topology or collision freedom.
 
-### Grid (X/O, vertex-pairs)
+### Grid diagrams (X/O, `vertex-pairs`)
 
 Type: `https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram`.
 
 `data` is `{encoding:"xo",size,x,o}`. Size is an integer from 2 to 512; both arrays are permutations of row indices `0..size-1`, indexed by column. X and O must differ in each column. Row zero is the bottom row, columns increase rightward. Horizontal arcs run O→X; vertical arcs run X→O and pass over horizontal arcs. This profile supports multiple components and does not infer knot identity. It is data/validation support; the current KnotViewer renders only spatial curves. The alternative `{encoding:"vertex-pairs",size,vertices}` profile stores unoriented distinct `[column,row]` pairs indexed from 0, exactly two per row and column.
 
-See the detailed [Grid specification](grid-diagram.md) for derived counts, coordinates and KnotInfo interoperability.
+See the detailed [grid diagram specification](grid-diagram.md) for derived counts, coordinates and KnotInfo interoperability.
 
 ### Mosaic diagram (data and validation)
 
@@ -80,7 +101,7 @@ Initial choice: application `initialCamera` → application-selected `view` → 
 
 ## Standalone contracts and resources
 
-Independent schemas are available for Grid, spatial curves, representation, construction, view, catalog, representation type, object type and rope/equipment objects. Each published schema includes only its needed definitions and can be compiled without the root asset schema. Generated schemas come from `src/core/contracts.json` via `npm run build:schemas`.
+Independent schemas are available for grid diagrams, mosaic diagrams, spatial curves, representation, construction, view, catalog, representation type, object type and rope/equipment objects. Each published schema includes only its needed definitions and can be compiled without the root asset schema. Generated schemas come from `src/core/contracts.json` via `npm run build:schemas`.
 
 `KnotResourceDocument` requires `schema`, `schemaVersion`, `kind`, `resource`; optional `$schema`, `namespaces`, `dependencies`. Kinds: `catalog`, `representation-type`, `object-type`, `view`, `construction`. A standalone resource requires a global ID. `KnotResourceRegistry` requires `schema`, `schemaVersion`, `resources:[{kind,resource}]`, with optional `$schema`, `namespaces`, `id`. A registry is an ordinary document, not a server or singleton. `KnotRepresentationDocument` requires `schema`, `schemaVersion`, `representation`, with optional `$schema`, `namespaces`, `dependencies`, `subject`.
 
@@ -90,7 +111,7 @@ Dependencies are `{kind,ref}` records. Asset validation reports unresolved resou
 
 ## Validation and extraction
 
-`validateKnotAsset` returns either `{valid:false,issues}` or `{valid:true,asset,warnings,complete,missingDependencies,uncheckedTypes}`. `valid` means known structures and resolvable references are consistent; `complete` additionally requires all required definitions and supported domain semantics. Rendering and extraction require `complete`. Validation never mutates input or fetches data. JSON Schema is structural; runtime additionally checks scopes, uniqueness, curve continuity, camera vectors, Grid permutations and aggregate budgets. It does not prove mathematical identity or practical safety.
+`validateKnotAsset` returns either `{valid:false,issues}` or `{valid:true,asset,warnings,complete,missingDependencies,uncheckedTypes}`. `valid` means known structures and resolvable references are consistent; `complete` additionally requires all required definitions and supported domain semantics. Rendering and extraction require `complete`. Validation never mutates input or fetches data. JSON Schema is structural; runtime additionally checks scopes, uniqueness, curve continuity, camera vectors, grid diagram permutations and aggregate budgets. It does not prove mathematical identity or practical safety.
 
 Before traversal, a resource profile bounds nesting at 64, total visited values at 262144 and individual strings at 1048576 characters. Non-JSON values, sparse arrays, accessors and cycles are rejected. Additional structural limits include 1024 representations, 256 constructions/objects/states, 256 procedures, 1024 steps per procedure, 4096 points per curve, and 65536 points across the asset. Limits protect this implementation and do not define every possible domain object.
 

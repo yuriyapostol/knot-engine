@@ -1,6 +1,6 @@
 # Publication, generations and language editions
 
-Status: implemented site organization and release workflow. A local build does not deploy the website or publish an npm release. Package 0.1.0 and schemaVersion 1 remain unchanged.
+Status: implemented site organization and release workflow. A local build does not deploy the website or publish an npm release. Package 0.1.0 and `schemaVersion` 1 remain unchanged.
 
 ## Source organization
 
@@ -46,7 +46,7 @@ Archives preserve canonical IDs. Reproducible validation supplies the chosen sna
 
 package.json selects the current generation through knotEngine.resourceDirectory, currently v1. Its files and exports include only that generation, dist, README and LICENSE; other generations, design notes and website archives are excluded. Public imports remain knot-engine/schema/.... Update selection, files and exports together when the package changes generation. Git branches do not determine package versions.
 
-Each vN/version.json records packageVersion, schemaVersion and status. The current generation's packageVersion must match package.json. Other generations retain their own metadata. Source code, tests and site implementation remain outside vN.
+Each vN/version.json records packageVersion, `schemaVersion` and status. The current generation's packageVersion must match package.json. Other generations retain their own metadata. Source code, tests and site implementation remain outside vN.
 
 ## Commands and archive policy
 

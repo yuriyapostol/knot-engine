@@ -1,6 +1,6 @@
 # Shared and inline KnotAsset resources
 
-**Implementation status:** the initial profile (spatial-curve, Grid (X/O, vertex-pairs), mosaic-diagram, constructions, procedures, resources and cameras) is described in the [current specification](../v1/spec/knot-asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
+**Implementation status:** the initial profile (spatial curves, grid diagrams (X/O, `vertex-pairs`), mosaic diagrams, constructions, procedures, resources and cameras) is described in the [current specification](../v1/spec/knot-asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
 
 Status: design reference elaborating the [architectural draft](knot-asset-draft.md). Standalone resources and optional embedding are implemented in the initial profile. The [current specification](../v1/spec/knot-asset.md) defines their supported fields; additional details below remain proposals. Package version and `schemaVersion: 1` stay unchanged; compatibility with the previous structure is not required. See [publication](publication.md).
 
@@ -54,7 +54,7 @@ CatalogDefinition, RepresentationTypeDefinition, ViewDefinition and Construction
 
 `KnotResourceDocument` requires `schema`, `schemaVersion`, `kind`, `resource`; optional fields are `$schema`, `namespaces`, `dependencies`. Kind selects catalog, representation-type, view or construction. Dependencies are `{kind, ref}` records with global references. The envelope is not repeated inside every embedded value.
 
-`KnotResourceRegistry` has schema, schemaVersion, optional $schema/namespaces/id, and resources containing kind/resource pairs. It may be a file or explicit application object; no server or singleton is required.
+`KnotResourceRegistry` has schema, `schemaVersion`, optional $schema/namespaces/id, and resources containing kind/resource pairs. It may be a file or explicit application object; no server or singleton is required.
 
 | Asset field | Content |
 | --- | --- |
