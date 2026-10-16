@@ -10,9 +10,9 @@ The [3_1 diagrams page](https://knotinfo.org/diagram_display.php?3_1) provides:
 | --- | --- | --- |
 | KnotScape | PNG | diagram-image; structural diagram separately if original data can be obtained |
 | SnapPy | SVG with cubic Bezier paths | diagram-image; SnapPea/PLink projection for editable diagrams |
-| 3D | JavaScript XYZ array and curve construction settings | spatial-curve with explicit interpolation |
-| Grid | SVG and a coordinate list in the knot record | grid-diagram with encoding profiles |
-| Minimal mosaic and tile diagrams | PNG; structured mosaics in the author's repository | mosaic-diagram with a defined tile set |
+| 3D | JavaScript XYZ array and curve construction settings | `spatial-curve` with explicit interpolation |
+| Grid | SVG and a coordinate list in the knot record | `grid-diagram` with encoding profiles |
+| Minimal mosaic and tile diagrams | PNG; structured mosaics in the author's repository | `mosaic-diagram` with a defined tile set |
 
 Type identities use `https://yuriyapostol.github.io/knot-engine/v1/representation-types/<name>`. Images preserve appearance but do not guarantee topology data. Software names describe provenance. Minimum mosaic dimensions and minimum occupied tile count are distinct properties, not necessarily distinct representation types.
 
@@ -70,7 +70,7 @@ DT needs convention and code, with signs/orientation/reconstruction tied to the 
 
 The [page HTML](https://knotinfo.org/diagram_display.php?3_1) contains 79 XYZ points. The first, `[0.9008,-0.1947,0.0825]`, is not repeated at the end. The page subtracts the mean, constructs THREE.CatmullRomCurve3 and sets closed true. The [Three.js version loaded by the page](https://knotinfo.org/Diagrams_All_Folders/diagrams_3d/three.js) defaults to centripetal interpolation (r132).
 
-The spatial-curve adaptation must preserve points, closure and exact parameterization, for example `{type: "catmull-rom", parameterization: "centripetal"}`. Uniform and chordal require different explicit values. Uniform Catmull–Rom with tension 0.5 is not an interchangeable substitute.
+The `spatial-curve` adaptation must preserve points, closure and exact parameterization, for example `{type: "catmull-rom", parameterization: "centripetal"}`. Uniform and chordal require different explicit values. Uniform Catmull–Rom with tension 0.5 is not an interchangeable substitute.
 
 Source coordinates have no physical units and remain relative. Centering should remain a viewing operation or be recorded as an import transform. Tube radius 0.02 and tessellation are display settings, not verified physical diameter. Camera settings belong to ViewDefinition. The page credits Se-Goo Kim and Jaehyun Park for the geometry.
 
@@ -126,14 +126,14 @@ KnotInfo provides a [Grid description](https://knotinfo.org/descriptions/grid_no
 
 These are ten endpoints on a 5×5 grid, two per row/column, not X/O arrays. Verticals pass over horizontals. The SVG maps the second coordinate downward. Conversion to upward mathematical coordinates must record the transform rather than silently mirror data.
 
-Propose one grid-diagram type with vertex-pairs and xo encoding profiles. The first preserves vertices and source index/axis/crossing conventions; the second stores size, x and o with orientation rules. Converting to X/O requires choosing each component's orientation; it is an adaptation, not renaming columns. Exact profile shapes still need agreement with the implemented Grid contract.
+One `grid-diagram` type now supports `xo` and `vertex-pairs`, both zero-based with fixed axis and crossing conventions. Source conventions are adapted during import. X/O specifies orientation; `vertex-pairs` does not. See the [grid diagram specification](../v1/spec/grid-diagram.md) for the implemented contracts.
 
 ## 6. Recommended order
 
 1. diagram-image for source appearance and planar-diagram for editable geometry with explicit crossings.
 2. pd-code for layout-independent combinatorial diagrams; generated layout is not an original source image.
-3. spatial-curve with exact closure and parameterization.
-4. mosaic-diagram backed by mathematical definitions and real structured fixtures.
+3. `spatial-curve` with exact closure and parameterization.
+4. `mosaic-diagram` backed by mathematical definitions and real structured fixtures.
 5. Extend Grid with source encoding, then add DT/other notations after checking conventions.
 
 This is a proposed order, not a universal user priority. Practical users may favor geometry and illustrated procedures; researchers may favor combinatorial codes and mosaics. None requires a separate root diagrams collection. Each import needs primary-source fixtures and preservation checks for geometry, closure, components, crossings, orientation and provenance. Mathematical equivalence remains a separate task.

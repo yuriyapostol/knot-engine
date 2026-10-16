@@ -784,6 +784,16 @@
       ]
     },
     "grid": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/gridXO"
+        },
+        {
+          "$ref": "#/$defs/gridVertexPairs"
+        }
+      ]
+    },
+    "gridXO": {
       "type": "object",
       "properties": {
         "encoding": {
@@ -818,6 +828,47 @@
         "size",
         "x",
         "o"
+      ],
+      "additionalProperties": false
+    },
+    "gridVertexPairs": {
+      "type": "object",
+      "properties": {
+        "encoding": {
+          "const": "vertex-pairs"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 512
+        },
+        "vertices": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "integer",
+                "minimum": 0
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          }
+        }
+      },
+      "required": [
+        "encoding",
+        "size",
+        "vertices"
       ],
       "additionalProperties": false
     },

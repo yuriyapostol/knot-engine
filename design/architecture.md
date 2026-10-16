@@ -21,4 +21,4 @@ The site demo uses only the public API. It edits the whole asset, preserves a st
 
 Extraction includes required constructions and resources. Composition is limited to fragments of the same document; independent-author merges are not inferred. Unknown type data is structurally readable but does not receive a complete semantic report. Additional formats, assertions and animation need their own contracts and tests.
 
-Verification: typecheck, unit/schema tests, library/example builds, browser tests, tarball consumer and site/link tests. Hardware touch, WebView and physical knot correctness are not established by these checks. Versions remain package 0.1.0 and schemaVersion 1.
+Verification: typecheck, unit/schema tests, library/example builds, browser tests, tarball consumer and site/link tests. Hardware touch, WebView and physical knot correctness are not established by these checks. Versions remain package 0.1.0 and `schemaVersion` 1.

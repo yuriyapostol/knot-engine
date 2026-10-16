@@ -6,7 +6,7 @@ Vue 3 component for one static spatial representation of a [KnotAsset](knot-asse
 | --- | --- |
 | `asset?: KnotAsset \| null` | Input; null/omitted displays the empty state |
 | `label: string` | Required accessible label |
-| `representationId?: string` | Selected representation; defaults to first spatial-curve |
+| `representationId?: string` | Selected representation; defaults to first `spatial-curve` |
 | `view?: Reference \| ViewDefinition` | Select a listed view or supply an explicit complete view |
 | `registries?: KnotResourceRegistry[]` | Explicit external resource definitions |
 | `initialCamera?: Camera3D` | Application camera override |

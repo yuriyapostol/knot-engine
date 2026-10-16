@@ -35,3 +35,32 @@ it('preserves plane views and complete standalone and composed assets',()=>{
   expect(validateKnotAsset(part)).toMatchObject({valid:true,complete:true})
   expect(JSON.parse(JSON.stringify(composeKnotAsset([part,part]))).representations[0].data).toEqual(rep.data)
 })
+it('validates zero-based unoriented vertex pairs and preserves input order',()=>{
+  const vertices:[[number,number],[number,number],[number,number],[number,number]]=[[1,1],[0,0],[1,0],[0,1]]
+  const d={encoding:'vertex-pairs',size:2,vertices}
+  expect(validateGridDiagram(d)).toMatchObject({valid:true,componentCount:1,crossingCount:0,data:d})
+  const asset={schema:'KnotAsset',schemaVersion:1,id:'v',subject:{id:'s'},representations:[{id:'v',type:GRID_DIAGRAM,data:d}]}
+  const options={registries:[STANDARD_RESOURCES]}
+  expect(validateKnotAsset(asset,options)).toMatchObject({valid:true,complete:true})
+  const part=selectKnotAsset(asset,{representations:['v']},options)
+  expect(composeKnotAsset([part,part]).representations![0].data).toEqual(d)
+  for(const change of [{vertices:[[0,0],[0,0],[1,0],[1,1]]},{vertices:[[0,0],[0,1],[1,0]]},{vertices:[[0,0],[0,1],[1,0],[2,1]]},{vertices:[[0,0],[0,1],[1,0],[1,-1]]},{vertices:[[0,0],[0,1],[1,0],[1,0.5]]},{vertices:[[0,0],[0,1],[1,0],[1,1,2]]},{x:[0,1]},{size:3}])expect(validateGridDiagram({...d,...change}).valid).toBe(false)
+  const pairs=(x:number[],o:number[])=>({encoding:'vertex-pairs',size:x.length,vertices:x.flatMap((r,c)=>[[c,r],[c,o[c]]])})
+  for(const [x,o] of [[[0,1,2,3],[1,0,3,2]],[[0,1,2,3],[2,3,0,1]],[[0,1,2,3,4],[2,3,4,0,1]]]) {
+    const xo=validateGridDiagram(grid(x,o)), vp=validateGridDiagram(pairs(x,o))
+    expect(xo.valid && vp.valid && [vp.componentCount,vp.crossingCount]).toEqual(xo.valid && [xo.componentCount,xo.crossingCount])
+    expect(validateGridDiagram({...pairs(x,o),vertices:pairs(x,o).vertices.reverse()})).toMatchObject({valid:true,...(xo.valid?{componentCount:xo.componentCount,crossingCount:xo.crossingCount}:{})})
+  }
+  const n=512,x=Array.from({length:n},(_,i)=>i)
+  expect(validateGridDiagram(pairs(x,x.map(i=>(i+1)%n)))).toMatchObject({valid:true,componentCount:1})
+})
+it('checks vertex distribution, JSON structure, plane views and standalone documents',()=>{
+  const d={encoding:'vertex-pairs',size:3,vertices:[[0,0],[0,1],[1,1],[1,2],[2,2],[2,0]]}
+  const rep={id:'v',type:GRID_DIAGRAM,data:d,views:[{id:'front',name:'Front',space:'plane',camera:{mode:'plane',center:[1.5,1.5],height:3,rotation:0}}]}
+  expect(validateRepresentationDocument({schema:'KnotRepresentationDocument',schemaVersion:1,representation:rep},{registries:[STANDARD_RESOURCES]})).toMatchObject({valid:true,complete:true})
+  for(const vertices of [[[0,0],[0,1],[0,2],[1,0],[1,1],[2,2]],[[0,0],[0,1],[1,0],[1,1],[2,0],[2,2]],[[0,0],[0,1],[1,1],[1,2],[2,2],[2,NaN]],Array(6)])expect(validateGridDiagram({...d,vertices}).valid).toBe(false)
+  const before=JSON.stringify(d)
+  Object.freeze(d.vertices);Object.freeze(d)
+  expect(validateGridDiagram(d).valid).toBe(true)
+  expect(JSON.stringify(d)).toBe(before)
+})

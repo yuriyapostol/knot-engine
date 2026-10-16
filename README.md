@@ -2,7 +2,7 @@
 
 [English](README.md) | [Українська](README.uk.md)
 
-Knot modeling and rendering package with Vue 3 `KnotViewer`. The current KnotAsset supports spatial curves, Grid X/O, constructions, states, procedures and explicit resource registries. The component renders static 3D representations with perspective/orthographic cameras, SSR fallback and PNG capture.
+Knot modeling and rendering package with Vue 3 `KnotViewer`. The current KnotAsset supports spatial curves, grid diagrams, mosaic diagrams, constructions, states, procedures and explicit resource registries. The component renders static 3D representations with perspective/orthographic cameras, SSR fallback and PNG capture.
 
 ## Run locally
 
@@ -55,7 +55,7 @@ defineProps<{ asset: KnotAsset }>()
 
 Import `validateKnotAsset`, `resolveKnotAsset` and types from `knot-engine/core`: this entry point loads no Vue, Three.js or DOM. Validation separately reports `valid`, `complete`, `missingDependencies` and `uncheckedTypes`; rendering requires complete validation. Unknown fields are rejected. Registries are passed explicitly; URI references do not fetch data.
 
-`representation-id` selects one static representation; by default the first spatial-curve is selected. Constructions contain objects and states; procedures reference representations. There is no animation. Replace the asset object to update geometry.
+`representation-id` selects one static representation; by default the first `spatial-curve` is selected. Constructions contain objects and states; procedures reference representations. There is no animation. Replace the asset object to update geometry.
 
 Methods: `resetView()`, `fitToView()`, `capture({width,height,view,transparent})`. PNG defaults to 512×512 with a 2048×2048 maximum. Capture modes are `current` and `model-preview`. Events: `ready({assetId,schemaVersion,warnings})`, `error`, `camera-change`. `initialCamera` accepts complete fit/fixed modes with perspective or orthographic projection; FOV is in radians.
 

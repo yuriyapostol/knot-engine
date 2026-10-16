@@ -1,0 +1,36 @@
+{
+  "schema": "KnotAsset",
+  "schemaVersion": 1,
+  "id": "grid-vertex-pairs-example",
+  "subject": {
+    "id": "grid-vertex-pairs-example"
+  },
+  "representations": [
+    {
+      "id": "grid",
+      "type": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram",
+      "data": {
+        "encoding": "vertex-pairs",
+        "size": 2,
+        "vertices": [
+          [0, 0],
+          [0, 1],
+          [1, 0],
+          [1, 1]
+        ]
+      }
+    }
+  ],
+  "representationTypes": [
+    {
+      "id": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram",
+      "name": "grid-diagram",
+      "description": "grid-diagram contract, generation 1",
+      "dataSchema": {
+        "ref": "https://yuriyapostol.github.io/knot-engine/v1/schema/grid-diagram.schema.json"
+      },
+      "specification": "https://yuriyapostol.github.io/knot-engine/v1/spec/knot-asset/",
+      "viewSpace": "plane"
+    }
+  ]
+}
