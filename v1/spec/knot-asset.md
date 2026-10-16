@@ -1,14 +1,14 @@
 # KnotAsset v1
 
-Implemented initial profile of the [contract redesign](../../design/knot-asset-draft.md). Package version remains 0.1.0; `schemaVersion` remains 1. The previous contracts and APIs have been removed. This profile supports spatial curves, grid diagrams (X/O, `vertex-pairs`), mosaic diagrams, constructions, named states, procedures and reusable resources. Other representation formats, animation, properties, relations and classifications remain separate future work; they are not accepted as untyped fields.
+Implemented initial profile of the [contract redesign](../../design/knot-asset-draft.md). Package version remains 0.1.0; `schemaVersion` remains 1. The previous contracts and APIs have been removed. This profile supports spatial curves, grid diagrams, mosaic diagrams, constructions, named states, procedures and reusable resources. Other representation formats, animation, properties, relations and classifications remain separate future work; they are not accepted as untyped fields.
 
 ## Terminology
 
-Use descriptive concepts in prose. Format exact type, function and field names and code values as code; retain product and source names such as KnotInfo and Gridlink. X/O names a marking system; `xo` and `vertex-pairs` are exact `encoding` values. Do not substitute file or type identifiers for descriptive concepts in feature lists.
+Use descriptive concepts in prose. Name `KnotAsset` explicitly when referring to that data object; use “document” for serialized documents or documentation rather than as a blanket replacement for the type name. Format exact type, function and field names and code values as code; retain product and source names such as KnotInfo and Gridlink. X/O names a marking system; `xo` and `vertex-pairs` are exact `encoding` values. Do not substitute file or type identifiers for descriptive concepts in feature lists.
 
 | Concept | Technical identifier |
 | --- | --- |
-| Knot document | `KnotAsset` |
+| Knot data object | `KnotAsset` |
 | Subject | `subject` |
 | Representation | `Representation`, `representations` |
 | Spatial curves | `spatial-curve` |

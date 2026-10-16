@@ -2,7 +2,7 @@
 
 [English](README.md) | [Українська](README.uk.md)
 
-Knot modeling and rendering package with Vue 3 `KnotViewer`. The current KnotAsset supports spatial curves, grid diagrams (X/O, `vertex-pairs`), mosaic diagrams, constructions, states, procedures and explicit resource registries. The component renders static 3D representations with perspective/orthographic cameras, SSR fallback and PNG capture.
+Knot modeling and rendering package with Vue 3 `KnotViewer`. The current KnotAsset supports spatial curves, grid diagrams, mosaic diagrams, constructions, states, procedures and explicit resource registries. The component renders static 3D representations with perspective/orthographic cameras, SSR fallback and PNG capture.
 
 ## Run locally
 

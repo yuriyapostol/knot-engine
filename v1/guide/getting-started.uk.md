@@ -27,7 +27,7 @@ import asset from './open-rope.json'
 </template>
 ```
 
-Використайте [asset відкритої мотузки](../spec/examples/assets/open-rope.json) як `open-rope.json`. Параметри вибору, події та методи знімків описані в [контракті компонента](../spec/components.uk.md). Пакет використовує лише поточний контракт KnotAsset. Статичне представлення вибирається через `representation-id`.
+Використайте [`KnotAsset` відкритої мотузки](../spec/examples/assets/open-rope.json) як `open-rope.json`. Параметри вибору, події та методи знімків описані в [контракті компонента](../spec/components.uk.md). Пакет використовує лише поточний контракт KnotAsset. Статичне представлення вибирається через `representation-id`.
 
 ## Редагування даних
 

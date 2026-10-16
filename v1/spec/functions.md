@@ -5,7 +5,7 @@ Import core APIs from `knot-engine/core`; this entry point uses no Vue, Three.js
 | Function | Result |
 | --- | --- |
 | `validateKnotAsset(value, options?)` | `{valid:true,asset,warnings,complete,missingDependencies,uncheckedTypes}` or `{valid:false,issues}` |
-| `validateGridDiagram(value)` | `{valid:true,data,diagram,warnings,componentCount,crossingCount}` or issues; independent grid diagram validation with X/O or `vertex-pairs` encoding |
+| `validateGridDiagram(value)` | `{valid:true,data,diagram,warnings,componentCount,crossingCount}` or issues; independent grid diagram validation with `xo` or `vertex-pairs` encoding |
 | `validateSpatialCurve(value)` | `{valid:true,data,warnings}` or issues |
 | `validateView(value)` | `{valid:true,data,warnings}` or issues |
 | `validateResourceDocument(value)` | Validated resource envelope or issues; does not establish dependency closure |
