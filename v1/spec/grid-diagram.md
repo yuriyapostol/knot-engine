@@ -1,10 +1,12 @@
-# Grid diagram (X/O, `vertex-pairs`)
+# Grid diagram
 
 Supported data and validation profile. Rendering is deferred.
 
-## Contract and conventions
+## `xo` encoding: contract and conventions
 
 Type: `https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram`.
+
+`xo` is the package's primary grid diagram encoding, corresponding to the standard model of grid diagrams with X/O markings. It is the default wherever a grid diagram's encoding is not specified.
 
 For `encoding:"xo"`, `data` is exactly `{encoding:"xo",size,x,o}`. Size is an integer from 2 through 512. Arrays `x` and `o` are permutations of `0..size-1`, indexed by column, and must differ at every column. Column zero is leftmost; row zero is bottommost. These conditions give one X and one O in every row and column, with no shared marker position, and guarantee closed components.
 

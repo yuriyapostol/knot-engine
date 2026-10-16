@@ -8,7 +8,7 @@ Use descriptive concepts in prose. Name `KnotAsset` explicitly when referring to
 
 | Concept | Technical identifier |
 | --- | --- |
-| Knot data object | `KnotAsset` |
+| Knot data object | `KnotAsset`, `asset` |
 | Subject | `subject` |
 | Representation | `Representation`, `representations` |
 | Spatial curves | `spatial-curve` |
@@ -72,7 +72,7 @@ Interpolation is one of:
 
 The renderer uses data coordinates. A physical rope diameter becomes radius `diameter / (2 * metersPerUnit)`. Otherwise display radius is 0.006 times the largest control-point span, with a warning; it is not a physical measurement. The renderer rejects coordinate/camera components above ±1,000,000 and nonpositive or greater-than-1,000,000 radii. These are rendering limits, separate from domain validation. Tube meshes approximate curves and do not prove knot topology or collision freedom.
 
-### Grid diagrams (X/O, `vertex-pairs`)
+### Grid diagrams (`xo`, `vertex-pairs`)
 
 Type: `https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram`.
 

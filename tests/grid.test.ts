@@ -35,6 +35,22 @@ it('preserves plane views and complete standalone and composed assets',()=>{
   expect(validateKnotAsset(part)).toMatchObject({valid:true,complete:true})
   expect(JSON.parse(JSON.stringify(composeKnotAsset([part,part]))).representations[0].data).toEqual(rep.data)
 })
+it('preserves different grid encodings as separate representations of one subject',()=>{
+  const representations=[
+    {id:'xo',type:GRID_DIAGRAM,data:grid([0,1],[1,0])},
+    {id:'pairs',type:GRID_DIAGRAM,data:{encoding:'vertex-pairs',size:2,vertices:[[1,1],[0,0],[1,0],[0,1]]}},
+  ]
+  const asset={schema:'KnotAsset',schemaVersion:1,id:'mixed-grid',subject:{id:'s'},representations}
+  const options={registries:[STANDARD_RESOURCES]}
+  expect(validateKnotAsset(asset,options)).toMatchObject({valid:true,complete:true,uncheckedTypes:[]})
+  const selected=selectKnotAsset(asset,{representations:['xo','pairs']},options)
+  expect(selected.representations).toEqual(representations)
+  const parts=representations.map(rep=>selectKnotAsset(asset,{representations:[rep.id]},options))
+  const composed=composeKnotAsset(parts)
+  expect(composed.representations).toEqual(representations)
+  expect(validateKnotAsset(composed)).toMatchObject({valid:true,complete:true})
+  expect(validateKnotAsset({...asset,representations:representations.map(rep=>({...rep,id:'same'}))},options).valid).toBe(false)
+})
 it('validates zero-based unoriented vertex pairs and preserves input order',()=>{
   const vertices:[[number,number],[number,number],[number,number],[number,number]]=[[1,1],[0,0],[1,0],[0,1]]
   const d={encoding:'vertex-pairs',size:2,vertices}
