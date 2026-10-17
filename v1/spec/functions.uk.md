@@ -6,7 +6,9 @@ API ядра імпортується з `knot-engine/core`; ця точка в�
 | --- | --- |
 | `validateKnotAsset(value, options?)` | `{valid:true,asset,warnings,complete,missingDependencies,uncheckedTypes}` або `{valid:false,issues}` |
 | `validateGridDiagram(value)` | `{valid:true,data,diagram,warnings,componentCount,crossingCount}` або помилки; незалежна перевірка сіткових діаграм із кодуванням `xo` або `vertex-pairs` |
+| `validatePDCode(value)` | `{valid:true,data,code,warnings,componentCount,crossingCount}` або помилки; незалежна перевірка коду планарної діаграми |
 | `validateSpatialCurve(value)` | `{valid:true,data,warnings}` або помилки |
+| `validateMosaicDiagram(value)` | `{valid:true,data,diagram,warnings,componentCount,occupiedTileCount,crossingCount}` або помилки; незалежна перевірка мозаїчної діаграми |
 | `validateView(value)` | `{valid:true,data,warnings}` або помилки |
 | `validateResourceDocument(value)` | Перевірена оболонка ресурсу або помилки; не встановлює замкненості залежностей |
 | `validateResourceRegistry(value)` | Перевірений реєстр із перевіркою конфліктів або помилки; не встановлює замкненості залежностей |

@@ -1070,6 +1070,22 @@
               }
             }
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/pd-code"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/pd"
+              }
+            }
+          }
         }
       ]
     },
@@ -1689,6 +1705,38 @@
         "encoding",
         "size",
         "vertices"
+      ],
+      "additionalProperties": false
+    },
+    "pd": {
+      "type": "object",
+      "properties": {
+        "convention": {
+          "const": "https://yuriyapostol.github.io/knot-engine/v1/conventions/pd-ccw-under-first"
+        },
+        "crossings": {
+          "type": "array",
+          "maxItems": 16384,
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "minItems": 4,
+            "maxItems": 4
+          }
+        },
+        "unlinkedComponents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16384
+        }
+      },
+      "required": [
+        "convention",
+        "crossings"
       ],
       "additionalProperties": false
     }

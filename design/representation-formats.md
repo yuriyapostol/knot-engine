@@ -62,7 +62,7 @@ The [3_1 record](https://knotinfo.org/results.php?searchmode=singleknot&submitty
 }
 ```
 
-This extracts two original values; it does not propose putting both in one `representation.data`. Under the [KnotInfo PD convention](https://knotinfo.org/descriptions/pd_notation.html), four labels go counterclockwise starting at the incoming underpassing arc. Proposed `pd-code.data` has a `convention` URI and `crossings` as integer quadruples, preserving the source's one-based labels. It encodes a combinatorial diagram, not drawing coordinates; counting repeated labels alone is not full validation.
+This extracts two original values; it does not propose putting both in one `representation.data`. Under the [KnotInfo PD convention](https://knotinfo.org/descriptions/pd_notation.html), four labels go counterclockwise starting at the incoming underpassing arc. Implemented [PD data](../v1/spec/pd-code.md) has a fixed `convention` URI, `crossings` as positive-integer quadruples and optional `unlinkedComponents`, preserving source labels. It encodes a combinatorial diagram, not drawing coordinates; validation checks repeated labels, the planar rotation system and underpass direction consistency.
 
 DT needs `convention` and `code`, with signs/orientation/reconstruction tied to the [KnotInfo DT description](https://knotinfo.org/descriptions/dt_notation.html). Do not mix package conventions because their arrays look alike. [Spherogram](https://snappy.computop.org/spherogram.html) documents its own PD rules and orientation caveats. Completing DT is a separate step; `[4,6,2]` is not a universal context-free format.
 

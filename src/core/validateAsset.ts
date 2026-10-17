@@ -1,8 +1,9 @@
 import Ajv2020 from 'ajv/dist/2020.js'
-import { SPATIAL_CURVE, GRID_DIAGRAM, MOSAIC_DIAGRAM, ROPE_TYPE, type KnotAsset, type KnotResourceRegistry, type Reference, type Construction, type ResourceEntry, type Representation, type RepresentationTypeDefinition, type ViewDefinition, type Dependency, type SpatialCurveData, type KnotRepresentationDocument } from './asset'
+import { SPATIAL_CURVE, GRID_DIAGRAM, MOSAIC_DIAGRAM, PD_CODE, ROPE_TYPE, type KnotAsset, type KnotResourceRegistry, type Reference, type Construction, type ResourceEntry, type Representation, type RepresentationTypeDefinition, type ViewDefinition, type Dependency, type SpatialCurveData, type KnotRepresentationDocument } from './asset'
 import { createResourceIndex, expandURI, normalizeResource, addResource, namespaceIssues, resourceIssues, type ResourceIndex } from './resources'
 import { duplicates, issue, parallel, preflight, structure } from './validation'
 import { validateMosaicDiagram } from './validateMosaicDiagram'
+import { validatePDCode } from './validatePDCode'
 import { validateGridDiagram } from './validateGridDiagram'
 import { validateSpatialCurve, viewIssues } from './validateSpatial'
 import type { ValidationIssue } from './errors'
@@ -83,6 +84,7 @@ export function validateKnotAsset(value: unknown, options: ValidationOptions = {
   const checkData = (type: string, data: unknown, entry: ResourceEntry | undefined, path: string) => {
     if (type === SPATIAL_CURVE) { const r = validateSpatialCurve(data); if(!r.valid) issues.push(...r.issues.map(e=>({...e,path:`${path}.${e.path}`}))); return }
     if (type === MOSAIC_DIAGRAM) { const r = validateMosaicDiagram(data); if(!r.valid) issues.push(...r.issues.map(e=>({...e,path:`${path}.${e.path}`}))); return }
+    if (type === PD_CODE) { const r = validatePDCode(data); if(!r.valid) issues.push(...r.issues.map(e=>({...e,path:`${path}.${e.path}`}))); return }
     if (type === GRID_DIAGRAM) { const r = validateGridDiagram(data); if(!r.valid) issues.push(...r.issues.map(e=>({...e,path:`${path}.${e.path}`}))); return }
     if (!entry || (entry.kind !== 'representation-type' && entry.kind !== 'object-type')) { unchecked.add(type); return }
     unchecked.add(type) // JSON Schema cannot establish the type's domain semantics.
@@ -114,12 +116,17 @@ export function validateKnotAsset(value: unknown, options: ValidationOptions = {
     return sum + (Array.isArray(rows) ? rows.reduce((n, row) => n + (Array.isArray(row) ? row.length : 0), 0) : 0)
   }, 0)
   if (totalMosaicCells > 65536) return { valid: false, issues: [issue('representations', 'Total mosaic cell budget exceeded', 'LIMIT_EXCEEDED')] }
+  const totalPDCrossings = (asset.representations ?? []).filter(r => r.type === PD_CODE).reduce((sum, r) => {
+    const crossings = (r.data as { crossings?: unknown })?.crossings
+    return sum + (Array.isArray(crossings) ? crossings.length : 0)
+  }, 0)
+  if (totalPDCrossings > 16384) return { valid: false, issues: [issue('representations', 'Total PD crossing budget exceeded', 'LIMIT_EXCEEDED')] }
   let totalPoints = 0
   for (const rep of asset.representations ?? []) {
     const path = `representations.${rep.id}`, entry = need('representation-type',rep.type,`${path}.type`)
     const definition = entry?.resource as RepresentationTypeDefinition | undefined
     checkData(rep.type,rep.data,entry,`${path}.data`)
-    const space = rep.type === SPATIAL_CURVE ? 'space' : (rep.type === GRID_DIAGRAM || rep.type === MOSAIC_DIAGRAM) ? 'plane' : definition?.viewSpace ?? 'none'
+    const space = rep.type === SPATIAL_CURVE ? 'space' : (rep.type === GRID_DIAGRAM || rep.type === MOSAIC_DIAGRAM) ? 'plane' : rep.type === PD_CODE ? 'none' : definition?.viewSpace ?? 'none'
     if (rep.preferredView && (space !== 'space' || parallel(rep.preferredView.direction,rep.preferredView.up))) issues.push(issue(`${path}.preferredView`,'Expected noncollinear 3D orientation'))
     const views = new Map<string,ViewDefinition>()
     for(const v of rep.views ?? []) {
