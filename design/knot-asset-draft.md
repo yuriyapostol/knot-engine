@@ -2,6 +2,8 @@
 
 **Implementation status:** the initial profile (spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, constructions, procedures, resources and cameras) is described in the [current specification](../v1/spec/knot-asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
 
+Sources, flat contributions at asset/representation level and a global license are implemented under the [shared contract](../v1/spec/sources.md); the broader structure below also contains deferred features.
+
 **Status: architectural draft for discussion.** This records agreed principles and a possible structure. It does not replace the [implemented contract](../v1/spec/knot-asset.md) or claim that the proposed API exists. The transition from `KnotModelV1` is complete for the initial profile. Features beyond the current specification remain under design.
 
 **Current policy: keep version numbers unchanged and do not preserve compatibility with old contracts.** The project has no external users yet. Revisions remain within `schemaVersion: 1` and package `0.1.0`. `KnotModelV1` APIs, schemas, adapters and dual-format support have been removed. Field names and example shapes are proposals except where explicitly agreed.
@@ -67,7 +69,9 @@ KnotAsset
 ├── properties[]?
 ├── relations[]?
 ├── classifications[]?
-└── sources[]?
+├── sources[]?
+├── contributions[]?
+└── license?
 ```
 
 These sections are optional as appropriate. An asset need not have physical constructions, procedures or geometry. Document `id` and `subject.id` should be distinct so independent documents can describe one subject. Global identity, revision and merging rules still need decisions; matching IDs are not mathematical proofs.
@@ -164,7 +168,8 @@ Representation
 ├── views[]?         — inline views or references
 ├── defaultView?     — selection from views
 ├── preferredView?   — compact 3D orientation hint
-└── sources[]?
+├── sources[]?
+└── contributions[]?
 ```
 
 `type` references a `RepresentationTypeDefinition` selecting the `data` contract, for example `knot-engine:representation-types/pd-code`. Candidate types include `diagram-image`, `planar-diagram`, `spatial-curve`, `mosaic-diagram`, `grid-diagram`, `pd-code`, `dt-code` and `braid-word`. Each needs its own orientation, indexing and other conventions; this is not a completed registry.

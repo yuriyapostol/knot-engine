@@ -19,3 +19,7 @@ The package API consists of imports, functions, component props, events, methods
 ## Language and identity
 
 English and Ukrainian pages describe the same contracts and share machine-readable schemas and example data. Switching the documentation language does not rename fields or resource identifiers. A JSON record may itself contain names in several languages.
+
+## Sources and contributions
+
+A catalog defines an identifier system; a source records data origin; a contribution records work done by a person or team. These roles are distinct. All metadata is optional; the license is global to the KnotAsset. See the [contract](../spec/sources.md).

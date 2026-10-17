@@ -63,6 +63,8 @@ Methods: `resetView()`, `fitToView()`, `capture({width,height,view,transparent})
 
 ## Documentation
 
+Explain consequential contract decisions in the relevant specifications, with sources for definitions and implementations, checked examples and reasons for deviations from adopted conventions. Identify local project decisions as such rather than external standards. Data attribution, contributions and licensing follow the [metadata contract](v1/spec/sources.md).
+
 [English](README.md) and [Ukrainian](README.uk.md) are equivalent versions of the documentation. Update both versions together when changing a requirement, API or implementation policy. Keep technical identifiers, executable examples and numeric limits consistent; explanatory text and UI labels may be localized. Links within each version lead to documents in the same language.
 
 | Document | Scope |

@@ -1,3 +1,4 @@
+import { contributionIssues, licenseIssues, sourceIssues } from './metadata'
 import Ajv2020 from 'ajv/dist/2020.js'
 import { SPATIAL_CURVE, GRID_DIAGRAM, MOSAIC_DIAGRAM, PD_CODE, ROPE_TYPE, type KnotAsset, type KnotResourceRegistry, type Reference, type Construction, type ResourceEntry, type Representation, type RepresentationTypeDefinition, type ViewDefinition, type Dependency, type SpatialCurveData, type KnotRepresentationDocument } from './asset'
 import { createResourceIndex, expandURI, normalizeResource, addResource, namespaceIssues, resourceIssues, type ResourceIndex } from './resources'
@@ -24,7 +25,12 @@ export function normalizeAsset(asset: KnotAsset): KnotAsset {
     Object.assign(a, a[key] ? { [key]: a[key]!.map(resource => normalizeResource({ kind, resource } as ResourceEntry,ns).resource) } : {})
   }
   if (a.constructions) a.constructions = a.constructions.map(c => 'ref' in c ? { ref: uri(c.ref) } : normalizeResource({ kind: 'construction', resource: c },ns).resource as Construction)
+  for (const source of a.sources ?? []) if (source.id.includes(':')) source.id = uri(source.id)
   for (const rep of a.representations ?? []) {
+    for (const source of rep.sources ?? []) {
+      if ('ref' in source && source.ref) source.ref = uri(source.ref)
+      else if ('id' in source && source.id?.includes(':')) source.id = uri(source.id)
+    }
     rep.type = uri(rep.type)
     if (rep.target && rep.target.kind !== 'subject') reference(rep.target.construction)
     if (rep.views) rep.views = rep.views.map(v => 'ref' in v ? { ref: uri(v.ref) } : normalizeResource({ kind: 'view',resource:v },ns).resource as ViewDefinition)
@@ -39,6 +45,7 @@ export function normalizeAsset(asset: KnotAsset): KnotAsset {
 }
 export function indexAsset(asset: KnotAsset, registries: readonly KnotResourceRegistry[] = []): ResourceIndex {
   const index = createResourceIndex(registries)
+  for (const source of asset.sources ?? []) if (source.id.includes(':')) addResource(index,{kind:'source',resource:source})
   for (const c of asset.catalogs ?? []) addResource(index,{ kind:'catalog',resource:c })
   for (const r of asset.representationTypes ?? []) addResource(index,{ kind:'representation-type',resource:r })
   for (const o of asset.objectTypes ?? []) addResource(index,{ kind:'object-type',resource:o })
@@ -67,6 +74,9 @@ export function validateKnotAsset(value: unknown, options: ValidationOptions = {
     return found
   }
   for (const entry of index.values()) issues.push(...resourceIssues(entry).map(e => ({...e,path:`resources[${entry.resource.id}].${e.path}`})))
+  issues.push(...contributionIssues(asset.contributions,'contributions'), ...licenseIssues(asset.license,'license'))
+  issues.push(...duplicates(asset.sources ?? [],'sources'))
+  for (const source of asset.sources ?? []) issues.push(...sourceIssues(source,`sources.${source.id}`))
   for (const dep of asset.dependencies ?? []) need(dep.kind,dep.ref,'dependencies')
   const checkConstruction = (ref: Reference, path: string) => {
     if (ref.ref) need('construction',ref.ref,path)
@@ -124,6 +134,13 @@ export function validateKnotAsset(value: unknown, options: ValidationOptions = {
   let totalPoints = 0
   for (const rep of asset.representations ?? []) {
     const path = `representations.${rep.id}`, entry = need('representation-type',rep.type,`${path}.type`)
+    issues.push(...contributionIssues(rep.contributions,`${path}.contributions`))
+    for (const [i, source] of (rep.sources ?? []).entries()) {
+      const sourcePath = `${path}.sources.${i}`
+      issues.push(...sourceIssues(source,sourcePath))
+      if ('ref' in source && source.ref) need('source',source.ref,sourcePath)
+      else if ('id' in source && source.id && !asset.sources?.some(s=>s.id === source.id)) issues.push(issue(sourcePath,'Unknown local source'))
+    }
     const definition = entry?.resource as RepresentationTypeDefinition | undefined
     checkData(rep.type,rep.data,entry,`${path}.data`)
     const space = rep.type === SPATIAL_CURVE ? 'space' : (rep.type === GRID_DIAGRAM || rep.type === MOSAIC_DIAGRAM) ? 'plane' : rep.type === PD_CODE ? 'none' : definition?.viewSpace ?? 'none'
@@ -176,6 +193,6 @@ export function validateRepresentationDocument(value: unknown, options: Validati
   if(issues.length) return {valid:false as const,issues}
   const doc = value as KnotRepresentationDocument
   if (doc.$schema && doc.$schema !== 'https://yuriyapostol.github.io/knot-engine/v1/schema/knot-representation.schema.json') return { valid: false as const, issues: [issue('$schema','Schema URI contradicts document contract')] }
-  const result = validateKnotAsset({schema:'KnotAsset',schemaVersion:1,id:'standalone',subject:doc.subject ?? {id:'standalone'},...(doc.namespaces ? {namespaces:doc.namespaces}:{}),...(doc.dependencies ? {dependencies:doc.dependencies}:{}),representations:[doc.representation]},options)
+  const result = validateKnotAsset({schema:'KnotAsset',schemaVersion:1,id:'standalone',subject:doc.subject ?? {id:'standalone'},...(doc.namespaces ? {namespaces:doc.namespaces}:{}),...(doc.dependencies ? {dependencies:doc.dependencies}:{}),...(doc.sources ? {sources:doc.sources}:{}),representations:[doc.representation]},options)
   return result.valid ? {...result,document:doc} : result
 }
