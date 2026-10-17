@@ -1,0 +1,71 @@
+{
+  "schema": "KnotAsset",
+  "schemaVersion": 1,
+  "id": "sources-contributions-example",
+  "subject": {
+    "id": "pd-trefoil-subject"
+  },
+  "representationTypes": [
+    {
+      "id": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/pd-code",
+      "name": "pd-code",
+      "description": "Planar diagram code contract, generation 1",
+      "dataSchema": {
+        "ref": "https://yuriyapostol.github.io/knot-engine/v1/schema/pd-code.schema.json"
+      },
+      "specification": "https://yuriyapostol.github.io/knot-engine/v1/spec/pd-code.html",
+      "viewSpace": "none"
+    }
+  ],
+  "representations": [
+    {
+      "id": "pd",
+      "type": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/pd-code",
+      "data": {
+        "convention": "https://yuriyapostol.github.io/knot-engine/v1/conventions/pd-ccw-under-first",
+        "crossings": [
+          [1, 5, 2, 4],
+          [3, 1, 4, 6],
+          [5, 3, 6, 2]
+        ]
+      },
+      "sources": [
+        {
+          "id": "knotinfo",
+          "locator": "PD Notation",
+          "accessed": "2026-10-18",
+          "note": "Copied edge labels and crossing order without normalization."
+        }
+      ],
+      "contributions": [
+        {
+          "name": "Example importer",
+          "roles": [
+            "import",
+            "validation"
+          ],
+          "date": "2026-10-18",
+          "note": "Illustrative attribution record."
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "knotinfo",
+      "title": "KnotInfo: 3_1",
+      "url": "https://knotinfo.org/results.php?searchmode=singleknot&submittype=singleknot&singleknot=3_1",
+      "note": "Source description; no source license is inferred."
+    }
+  ],
+  "contributions": [
+    {
+      "name": "Example editor",
+      "note": "Illustrative attribution record, not a claim about the original dataset."
+    }
+  ],
+  "license": {
+    "name": "Illustrative license declaration",
+    "url": "https://example.org/license"
+  }
+}

@@ -22,12 +22,15 @@ export function selectKnotAsset(value: unknown, selection: { representations?: s
   for(const r of representations) if(r.target && r.target.kind !== 'subject') includeConstruction(r.target.construction)
   for(const p of procedures) if(p.construction) includeConstruction(p.construction)
   const output: KnotAsset = { schema:'KnotAsset',schemaVersion:1,id:asset.id,subject:asset.subject,representations,procedures,constructions:[...constructions.values()] }
+  if (asset.contributions) output.contributions = asset.contributions
+  if (asset.license) output.license = asset.license
   const included = new Set<string>()
   function include(ref: string) {
     if(included.has(ref)) return
     included.add(ref)
     const entry = index.get(ref)
     if(!entry) throw new ViewerError('INVALID_MODEL',`Unresolved resource: ${ref}`,undefined,false)
+    if(entry.kind === 'source' && !output.sources?.some(s=>s.id === entry.resource.id)) (output.sources ??= []).push(entry.resource)
     if(entry.kind === 'catalog') (output.catalogs ??= []).push(entry.resource)
     if(entry.kind === 'representation-type') (output.representationTypes ??= []).push(entry.resource)
     if(entry.kind === 'object-type') (output.objectTypes ??= []).push(entry.resource)
@@ -36,6 +39,13 @@ export function selectKnotAsset(value: unknown, selection: { representations?: s
   for(const c of constructions.values()) for(const o of c.objects) include(o.type)
   for(const rep of representations) {
     include(rep.type)
+    for (const source of rep.sources ?? []) {
+      if ('ref' in source && source.ref) include(source.ref)
+      else if ('id' in source && source.id) {
+        const found = asset.sources!.find(s=>s.id === source.id)!
+        if (!output.sources?.some(s=>s.id === found.id)) (output.sources ??= []).push(found)
+      }
+    }
     if(rep.views) rep.views=rep.views.map(v=> {
       if(!('ref' in v)) return v
       const e=index.get(v.ref)
@@ -51,7 +61,10 @@ export function composeKnotAsset(values: readonly unknown[], options: Validation
   const parts=values.map(v=>checked(v,options)), out=structuredClone(parts[0])
   for(const p of parts.slice(1)) {
     if(p.id !== out.id || canonical(p.subject) !== canonical(out.subject)) throw new ViewerError('INVALID_MODEL','Fragments must have the same document and subject',undefined,false)
-    for(const key of ['catalogs','representationTypes','objectTypes','constructions','representations','procedures','dependencies'] as const) {
+    if (p.license && out.license && canonical(p.license) !== canonical(out.license)) throw new ViewerError('INVALID_MODEL','Conflicting license',undefined,false)
+    if (p.license) out.license = structuredClone(p.license)
+    if (p.contributions) out.contributions = [...new Map([...(out.contributions ?? []),...p.contributions].map(c=>[canonical(c),c])).values()]
+    for(const key of ['catalogs','representationTypes','objectTypes','constructions','representations','procedures','dependencies','sources'] as const) {
       const merged=new Map<string,unknown>()
       for(const item of [...(out[key] ?? []),...(p[key] ?? [])]) {
         const id='id' in item ? item.id : item.ref

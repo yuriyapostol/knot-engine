@@ -63,3 +63,7 @@ Tests check exact point-set recovery and one component. The catalog label is sou
 ## Acceptance cases
 
 Tests include a 2×2 loop, separate loops, a two-crossing/two-component diagram, a three-crossing/one-component diagram, the KnotInfo geometry, reversal of all orientations, sizes 2 and 512, invalid indices/permutations/overlaps, sparse arrays, non-JSON numbers, unsupported encodings, unknown fields, plane views, standalone documents and extraction/composition round trips.
+
+## Attribution of concrete data
+
+Optional `sources` and `contributions` belong to the `Representation` envelope, outside `data`. Shared source definitions and the global license belong to the KnotAsset. Convention references in this specification explain the contract; representation sources identify where its concrete data came from. See the [shared metadata specification](sources.md).

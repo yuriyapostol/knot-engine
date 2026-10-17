@@ -43,18 +43,28 @@ export interface RepresentationTypeDefinition extends ObjectTypeDefinition { vie
 export interface ConstructionObject { id: string; type: string; [key: string]: unknown }
 export interface RopeObject extends ConstructionObject { topology: 'open' | 'closed'; ends: { id: string }[]; length?: number; diameter?: number }
 export interface Construction { id: string; name?: string; description?: string; objects: ConstructionObject[]; states?: { id: string; name?: string; description?: string }[] }
-export interface Representation { id: string; type: string; target?: Target; data: unknown; views?: (ViewDefinition | { ref: string })[]; defaultView?: Reference; preferredView?: { direction: Point3D; up: Point3D } }
+export interface License { name: string; url?: string }
+export interface SourceAuthor { name: string; email?: string; url?: string }
+export type ContributionRole = 'creation' | 'import' | 'conversion' | 'editing' | 'validation'
+export interface Contribution extends SourceAuthor { roles?: ContributionRole[]; date?: string; note?: string }
+export interface SourceFields { title?: string; url?: string; authors?: SourceAuthor[]; version?: string; license?: License; locator?: string; accessed?: string; note?: string }
+export type Source = SourceFields & ({ title: string } | { url: string })
+export type SourceDefinition = Source & { id: string }
+export type SourceReference = Reference & { locator?: string; accessed?: string; note?: string }
+export type SourceUse = Source | SourceReference
+export interface Representation { sources?: SourceUse[]; contributions?: Contribution[]; id: string; type: string; target?: Target; data: unknown; views?: (ViewDefinition | { ref: string })[]; defaultView?: Reference; preferredView?: { direction: Point3D; up: Point3D } }
 export interface Step { id: string; instructions?: Record<string, string>; representations?: Reference[] }
 export interface Procedure { id: string; name?: string; construction?: Reference; steps: Step[] }
-export type ResourceEntry = { kind: 'catalog'; resource: CatalogDefinition } | { kind: 'representation-type'; resource: RepresentationTypeDefinition } | { kind: 'object-type'; resource: ObjectTypeDefinition } | { kind: 'construction'; resource: Construction } | { kind: 'view'; resource: ViewDefinition }
+export type ResourceEntry = { kind: 'source'; resource: SourceDefinition } | { kind: 'catalog'; resource: CatalogDefinition } | { kind: 'representation-type'; resource: RepresentationTypeDefinition } | { kind: 'object-type'; resource: ObjectTypeDefinition } | { kind: 'construction'; resource: Construction } | { kind: 'view'; resource: ViewDefinition }
 export type ResourceKind = ResourceEntry['kind']
 export interface Dependency { kind: ResourceKind; ref: string }
 export interface DocumentContext { schemaVersion: 1; $schema?: string; namespaces?: Namespaces; dependencies?: Dependency[] }
 export interface KnotAsset extends DocumentContext {
   schema: 'KnotAsset'; id: string; subject: Subject
+  sources?: SourceDefinition[]; contributions?: Contribution[]; license?: License
   catalogs?: CatalogDefinition[]; representationTypes?: RepresentationTypeDefinition[]; objectTypes?: ObjectTypeDefinition[]
   constructions?: (Construction | { ref: string })[]; representations?: Representation[]; procedures?: Procedure[]
 }
 export type KnotResourceDocument = DocumentContext & ResourceEntry & { schema: 'KnotResourceDocument' }
 export interface KnotResourceRegistry extends Omit<DocumentContext, 'dependencies'> { schema: 'KnotResourceRegistry'; id?: string; resources: ResourceEntry[] }
-export interface KnotRepresentationDocument extends DocumentContext { schema: 'KnotRepresentationDocument'; subject?: Subject; representation: Representation }
+export interface KnotRepresentationDocument extends DocumentContext { schema: 'KnotRepresentationDocument'; subject?: Subject; representation: Representation; sources?: SourceDefinition[] }

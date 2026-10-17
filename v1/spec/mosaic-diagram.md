@@ -136,3 +136,7 @@ Acceptance cases:
 | Excessive input | Fail before expensive traversal under documented implementation limits |
 
 A rotation or reflection must remap tile codes as well as matrix positions. Swapping over/under at all crossings gives a mirror diagram; it is not an ordinary camera change. Neither transform may silently change the stored representation or reuse a subject identity as a proved mathematical conclusion.
+
+## Attribution of concrete data
+
+Optional `sources` and `contributions` belong to the `Representation` envelope, outside `data`. Shared source definitions and the global license belong to the KnotAsset. Convention references in this specification explain the contract; representation sources identify where its concrete data came from. See the [shared metadata specification](sources.md).

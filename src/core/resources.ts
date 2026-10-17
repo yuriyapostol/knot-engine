@@ -1,3 +1,4 @@
+import { sourceIssues } from './metadata'
 import standardResources from '../../v1/resources/standard.json'
 import { KNOT_NAMESPACE, type Namespaces, type ResourceEntry, type KnotResourceRegistry, type KnotResourceDocument } from './asset'
 import { canonical, issue, preflight, structure } from './validation'
@@ -32,9 +33,10 @@ export function normalizeResource(entry: ResourceEntry, namespaces: Namespaces):
   return e
 }
 export function resourceIssues(e: ResourceEntry): ValidationIssue[] {
-  const key = { catalog: 'catalog', 'representation-type': 'representationType', 'object-type': 'objectType', view: 'view', construction: 'construction' }[e.kind]
+  const key = { catalog: 'catalog', 'representation-type': 'representationType', 'object-type': 'objectType', view: 'view', construction: 'construction', source: 'sourceDefinition' }[e.kind]
   const errors = structure(key, e.resource)
   if (errors.length) return errors
+  if (e.kind === 'source') return sourceIssues(e.resource, 'resource')
   if (e.kind === 'construction') return constructionIssues(e.resource)
   if (e.kind === 'view') return viewIssues(e.resource)
   if (e.kind === 'catalog' && e.resource.homepage && !/^https?:\/\/[^\s]+$/.test(e.resource.homepage)) return [issue('homepage', 'Expected a full HTTP(S) URL')]

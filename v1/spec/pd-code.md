@@ -61,3 +61,7 @@ The [trefoil example](examples/assets/pd-trefoil.json) uses the PD value recorde
 KnotInfo's documented two-component L4a1{0} example is `[[6,1,7,2],[8,3,5,4],[2,5,3,6],[4,7,1,8]]`. Both examples are checked for planarity and component counts. Catalog labels are source attribution, not independent recognition. The [unlink example](examples/assets/pd-unlink.json) has `crossings:[]` and `unlinkedComponents:2`.
 
 Acceptance tests include sourced knots and links, reflections with corresponding cyclic-order changes, split crossing graphs, Reidemeister-I loops, crossing-free components, arbitrary positive relabeling, invalid multiplicities and nonplanar rotation systems, inconsistent directions, malformed JSON, limits, resource completeness, namespace expansion, unsupported views, extraction and composition.
+
+## Attribution of concrete data
+
+Optional `sources` and `contributions` belong to the `Representation` envelope, outside `data`. Shared source definitions and the global license belong to the KnotAsset. Convention references in this specification explain the contract; representation sources identify where its concrete data came from. See the [shared metadata specification](sources.md).

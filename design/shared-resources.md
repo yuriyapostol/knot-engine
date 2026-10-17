@@ -162,3 +162,7 @@ Standalone catalog definition:
 ```
 
 The unchanged resource can be placed in `asset.catalogs`. The localized sample names are the same data in both language editions. An actual KnotInfo integration still needs verified record semantics; the training catalog does not claim to be that definition.
+
+## Sources as shared resources
+
+The additional `source` resource kind holds a shared description with an ID, at least a title or URL and optional authors, version, license and note. Local and external references use ordinary rules; see the [metadata specification](../v1/spec/sources.md) for the implemented contract and limits. Contributions remain flat lists on their owners rather than a new agent registry.

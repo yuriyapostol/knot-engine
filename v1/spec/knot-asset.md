@@ -21,6 +21,8 @@ Use descriptive concepts in prose. Name `KnotAsset` explicitly when referring to
 | Procedure and step | `Procedure`, `procedures`, `Step`, `steps` |
 | View and camera | `ViewDefinition`, `views`, `camera` |
 | Catalog definition | `CatalogDefinition`, `catalogs` |
+| Source and contribution | `SourceDefinition`, `SourceUse`, `Contribution` |
+| License | `License` |
 | Resource registry | `KnotResourceRegistry` |
 | Viewer component | `KnotViewer` |
 
@@ -108,11 +110,17 @@ Initial choice: application `initialCamera` → application-selected `view` → 
 
 Independent schemas are available for grid diagrams, mosaic diagrams, planar diagram codes, spatial curves, representation, construction, view, catalog, representation type, object type and rope/equipment objects. Each published schema includes only its needed definitions and can be compiled without the root asset schema. Generated schemas come from `src/core/contracts.json` via `npm run build:schemas`.
 
-`KnotResourceDocument` requires `schema`, `schemaVersion`, `kind`, `resource`; optional `$schema`, `namespaces`, `dependencies`. Kinds: `catalog`, `representation-type`, `object-type`, `view`, `construction`. A standalone resource requires a global ID. `KnotResourceRegistry` requires `schema`, `schemaVersion`, `resources:[{kind,resource}]`, with optional `$schema`, `namespaces`, `id`. A registry is an ordinary document, not a server or singleton. `KnotRepresentationDocument` requires `schema`, `schemaVersion`, `representation`, with optional `$schema`, `namespaces`, `dependencies`, `subject`.
+`KnotResourceDocument` requires `schema`, `schemaVersion`, `kind`, `resource`; optional `$schema`, `namespaces`, `dependencies`. Kinds: `catalog`, `representation-type`, `object-type`, `view`, `construction`, `source`. A standalone resource requires a global ID. `KnotResourceRegistry` requires `schema`, `schemaVersion`, `resources:[{kind,resource}]`, with optional `$schema`, `namespaces`, `id`. A registry is an ordinary document, not a server or singleton. `KnotRepresentationDocument` requires `schema`, `schemaVersion`, `representation`, with optional `$schema`, `namespaces`, `dependencies`, `subject`, `sources`.
 
 Catalog definitions require global `id`, `name`, `description`; optional `homepage`, `edition`, `identifierRules`. Rules support `pattern` (ECMA-262 without flags) and `caseSensitive` (default true). Case-insensitive identity comparison, when needed by a consumer, folds only ASCII A–Z; stored values remain unchanged. The runtime checks patterns as written and does not perform catalog lookup or infer identity. Anchor a pattern with `^`/`$` to match the whole designation.
 
 Dependencies are `{kind,ref}` records. Asset validation reports unresolved resource needs; envelope-only registry/resource validation does not claim dependency closure. URI schema dependencies for custom types are additionally represented by unchecked type status until semantics are supported.
+
+## Sources, contributions and license
+
+Optional `KnotAsset.sources` stores shared source definitions with IDs; `Representation.sources` stores inline descriptions or references with use-specific notes. Optional flat `contributions` are available at both levels. Optional `license` belongs only to the KnotAsset; source licenses stay in their descriptions. A standalone representation document may include `sources` for local references. Resources support the additional `source` kind.
+
+The [shared metadata contract](sources.md) defines fields, roles, validation, extraction preservation and composition conflicts. Absent metadata does not affect validity; declared references require resolution. URLs are never fetched automatically. A source definition is neither an identifier catalog nor proof of knot identity.
 
 ## Validation and extraction
 

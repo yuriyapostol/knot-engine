@@ -21,12 +21,14 @@
 | Процедура та крок | `Procedure`, `procedures`, `Step`, `steps` |
 | Ракурс і камера | `ViewDefinition`, `views`, `camera` |
 | Визначення каталогу | `CatalogDefinition`, `catalogs` |
+| Джерело та внесок | `SourceDefinition`, `SourceUse`, `Contribution` |
+| Ліцензія | `License` |
 | Реєстр ресурсів | `KnotResourceRegistry` |
 | Компонент перегляду | `KnotViewer` |
 
 ## Документи та ідентичність
 
-`KnotAsset` вимагає `schema: "KnotAsset"`, `schemaVersion: 1`, `id` і `subject: {id}`. Необов’язкові колекції: `catalogs`, `representationTypes`, `objectTypes`, `constructions`, `representations`, `procedures`, `dependencies`. Необов’язкове `$schema`, якщо задане, має ідентифікувати відповідну опубліковану JSON Schema. `namespaces` оголошує префікси компактних URI. Відомі об’єкти закриті: невідомі поля є помилками навіть при переданому `strict: false`.
+`KnotAsset` вимагає `schema: "KnotAsset"`, `schemaVersion: 1`, `id` і `subject: {id}`. Необов’язкові колекції: `sources`, `contributions`, `catalogs`, `representationTypes`, `objectTypes`, `constructions`, `representations`, `procedures`, `dependencies`. Необов’язкове `$schema`, якщо задане, має ідентифікувати відповідну опубліковану JSON Schema. `namespaces` оголошує префікси компактних URI. Відомі об’єкти закриті: невідомі поля є помилками навіть при переданому `strict: false`.
 
 `asset.id` ідентифікує документ, `subject.id` — предмет опису. У початковому профілі ID можуть бути локальними рядками або абсолютними/компактними URI. Незалежні документи не об’єднуються за ідентичністю предмета опису. `subject.names` містить записи `{language,value}`, `subject.identifiers` — `{catalog,value}`. Каталог є системою позначень, а не колекцією всіх її записів. Правила перевіряють форму позначення, а не істинність авторської ідентифікації.
 
@@ -108,11 +110,17 @@
 
 Незалежні схеми існують для сіткових і мозаїчних діаграм, кодів планарних діаграм, просторових кривих, представлення, конструкції, ракурсу, каталогу, типу представлення, типу предмета, мотузки й спорядження. Кожна опублікована схема включає тільки потрібні визначення й компілюється без кореневої схеми документа. Схеми генеруються з `src/core/contracts.json` командою `npm run build:schemas`.
 
-`KnotResourceDocument` вимагає `schema`, `schemaVersion`, `kind`, `resource`; необов’язкові `$schema`, `namespaces`, `dependencies`. Види: `catalog`, `representation-type`, `object-type`, `view`, `construction`. Самостійний ресурс вимагає глобальний ID. `KnotResourceRegistry` вимагає `schema`, `schemaVersion`, `resources:[{kind,resource}]`, може містити `$schema`, `namespaces`, `id`. Реєстр — звичайний документ, не сервер чи singleton. `KnotRepresentationDocument` вимагає `schema`, `schemaVersion`, `representation`, може містити `$schema`, `namespaces`, `dependencies`, `subject`.
+`KnotResourceDocument` вимагає `schema`, `schemaVersion`, `kind`, `resource`; необов’язкові `$schema`, `namespaces`, `dependencies`. Види: `catalog`, `representation-type`, `object-type`, `view`, `construction`, `source`. Самостійний ресурс вимагає глобальний ID. `KnotResourceRegistry` вимагає `schema`, `schemaVersion`, `resources:[{kind,resource}]`, може містити `$schema`, `namespaces`, `id`. Реєстр — звичайний документ, не сервер чи singleton. `KnotRepresentationDocument` вимагає `schema`, `schemaVersion`, `representation`, може містити `$schema`, `namespaces`, `dependencies`, `subject`, `sources`.
 
 Визначення каталогу вимагає глобальні `id`, `name`, `description`; необов’язкові `homepage`, `edition`, `identifierRules`. Правила підтримують `pattern` (ECMA-262 без прапорців) і `caseSensitive` (типово true). Порівняння ідентичності без урахування регістру, коли воно потрібне споживачу, зводить регістр лише ASCII A–Z; записані значення не змінюються. Валідатор перевіряє шаблони як записано, не шукає записи каталогу й не виводить тотожності. Для всього позначення шаблон обмежується `^`/`$`.
 
 Залежності — записи `{kind,ref}`. Валідація `KnotAsset` повідомляє нерозв’язані ресурсні потреби; перевірка оболонки реєстру/ресурсу не заявляє замкненості залежностей. Залежності користувацьких схем додатково відображаються неперевіреним статусом типу до підтримки його семантики.
+
+## Джерела, внесок і ліцензія
+
+Необов’язкові `KnotAsset.sources` містять спільні визначення джерел із `id`; `Representation.sources` — вкладені описи або посилання з примітками конкретного використання. Необов’язкові плоскі `contributions` доступні на обох рівнях. Необов’язкова `license` належить тільки об’єкту `KnotAsset`; ліцензія джерела залишається в його описі. Самостійний документ представлення може включати `sources` для локальних посилань. Ресурси підтримують додатковий вид `source`.
+
+[Спільний контракт метаданих](sources.uk.md) визначає поля, ролі, перевірку, збереження при виділенні та конфлікти композиції. Відсутність метаданих не впливає на коректність; наявні посилання потребують розв’язання. Посилання не завантажуються автоматично. Визначення джерела не є каталогом ідентифікаторів або доказом тотожності вузла.
 
 ## Валідація та виділення
 

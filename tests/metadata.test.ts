@@ -1,0 +1,76 @@
+import { expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { validateKnotAsset, validateRepresentationDocument, validateResourceDocument, validateResourceRegistry, selectKnotAsset, composeKnotAsset, STANDARD_RESOURCES, type KnotAsset, type KnotResourceRegistry } from '../src/core'
+const source={id:'book',title:'Example publication',authors:[{name:'Original Author',email:'author@example.org'}],license:{name:'Source terms',url:'https://example.org/terms'},note:'Source-level note'}
+const contribution={name:'Editor',email:'editor@example.org',url:'https://example.org/editor',roles:['editing','validation'],date:'2026-10-18',note:'Corrected and checked data'}
+function asset(): KnotAsset {
+  const a=JSON.parse(readFileSync('v1/spec/examples/assets/pd-trefoil.json','utf8'))
+  a.sources=[source,{id:'unused',title:'Unused'}];a.contributions=[contribution];a.license={name:'Example license',url:'https://example.org/license'}
+  a.representations[0].sources=[{id:'book',locator:'Page 12',accessed:'2026-10-18',note:'Imported this table'}]
+  a.representations[0].contributions=[contribution]
+  return a
+}
+it('keeps optional metadata separate from geometric data and accepts it for every representation type',()=>{
+  for(const name of ['open-rope','grid-diagram','grid-vertex-pairs','mosaic-diagram','pd-trefoil']) {
+    const a=JSON.parse(readFileSync(`v1/spec/examples/assets/${name}.json`,'utf8'))
+    a.representations[0].sources=[{title:'Own measurements',authors:[{name:'Team'}],note:'Measured by the author'}]
+    a.representations[0].contributions=[{name:'Team',note:'Created data'}]
+    expect(validateKnotAsset(a)).toMatchObject({valid:true,complete:true})
+  }
+  expect(validateKnotAsset(asset())).toMatchObject({valid:true,complete:true})
+  const a=asset();a.representations![0].sources=[{url:'https://example.org/data'}]
+  expect(validateKnotAsset(a)).toMatchObject({valid:true,complete:true})
+})
+it('retains required sources and both contribution levels and license in selected/composed fragments',()=>{
+  const a=asset(),before=JSON.stringify(a)
+  const part=selectKnotAsset(a,{representations:['pd']})
+  expect(part.sources).toEqual([source]);expect(part.license).toEqual(a.license);expect(part.contributions).toEqual(a.contributions)
+  expect(part.representations![0].contributions).toEqual(a.representations![0].contributions)
+  expect(part.representations![0].sources).toEqual(a.representations![0].sources)
+  expect(JSON.stringify(a)).toBe(before)
+  expect(composeKnotAsset([part,part]).contributions).toHaveLength(1)
+  const second=structuredClone(part);second.representations=[];second.contributions=[{name:'Another editor',roles:['editing']}]
+  expect(composeKnotAsset([part,second]).contributions).toHaveLength(2)
+  const conflict=structuredClone(second);conflict.license={name:'Different license'}
+  expect(()=>composeKnotAsset([part,conflict])).toThrow(/license/)
+  const sourceConflict=structuredClone(second);sourceConflict.sources![0].title='Different source'
+  expect(()=>composeKnotAsset([part,sourceConflict])).toThrow(/sources/)
+  const absent=structuredClone(second);delete absent.license
+  expect(composeKnotAsset([absent,part]).license).toEqual(part.license)
+})
+it('supports standalone representation documents with source definitions',()=>{
+  const a=asset()
+  expect(validateRepresentationDocument({schema:'KnotRepresentationDocument',schemaVersion:1,sources:a.sources,representation:a.representations![0]}, {registries:[STANDARD_RESOURCES]})).toMatchObject({valid:true,complete:true})
+})
+it('resolves only explicit source resource references and normalizes IDs without rewriting URLs',()=>{
+  const a=asset(),global={...source,id:'https://example.org/sources/book'}
+  a.sources=[global];a.namespaces={ex:'https://example.org/sources/'}
+  a.representations![0].sources=[{id:'ex:book'},{ref:'ex:book',note:'Local context'}]
+  expect(validateKnotAsset(a)).toMatchObject({valid:true,complete:true})
+  expect(selectKnotAsset(a,{representations:['pd']}).sources).toHaveLength(1)
+  a.sources=[]
+  a.representations![0].sources=[{ref:'ex:book'}]
+  expect(validateKnotAsset(a)).toMatchObject({valid:true,complete:false,missingDependencies:[{kind:'source',ref:global.id}]})
+  const registry: KnotResourceRegistry={schema:'KnotResourceRegistry',schemaVersion:1,resources:[{kind:'source',resource:global}]}
+  const options={registries:[registry]}
+  expect(validateResourceRegistry(registry).valid).toBe(true)
+  expect(validateResourceDocument({schema:'KnotResourceDocument',schemaVersion:1,kind:'source',resource:global}).valid).toBe(true)
+  const selected=selectKnotAsset(a,{representations:['pd']},options)
+  expect(selected.sources).toEqual([global]);expect(validateKnotAsset(selected)).toMatchObject({valid:true,complete:true})
+  a.representations![0].sources=[{id:'missing'}]
+  expect(validateKnotAsset(a).valid).toBe(false)
+  a.representations![0].sources=[{ref:a.representations![0].type}]
+  expect(validateKnotAsset(a).valid).toBe(false)
+})
+it('rejects malformed metadata, impossible dates, conflicts and fields at unsupported levels',()=>{
+  const changes=[{sources:[{id:'s'}]},{sources:[{id:'s',title:' '}]},{sources:[source,source]},{contributions:[{name:' '}]},{contributions:[{name:'Editor',roles:[]}]},{contributions:[{name:'Editor',roles:['unknown']}]},{contributions:[{name:'Editor',roles:['editing','editing']}]},{contributions:[{name:'Editor',date:'2026-02-30'}]},{contributions:[{name:'Editor',email:'invalid'}]},{license:{name:' '}},{license:{name:'License',url:'javascript:alert(1)'}}]
+  for(const change of changes)expect(validateKnotAsset({...asset(),...change}).valid).toBe(false)
+  for(const sources of [[{title:'A',accessed:'2026-02-29'}],[{id:'book',title:'Mixed reference'}],[{ref:'urn:a',id:'b'}],[{title:'A',url:'https://['}],[{title:'A',url:'relative/path'}]]) {
+    const a=asset();a.representations![0].sources=sources as never
+    expect(validateKnotAsset(a).valid).toBe(false)
+  }
+  const leap=asset();leap.contributions=[{name:'Editor',date:'2024-02-29'}]
+  expect(validateKnotAsset(leap).valid).toBe(true)
+  const a=asset();Object.assign(a.representations![0],{license:{name:'Not supported'}})
+  expect(validateKnotAsset(a).valid).toBe(false)
+})
