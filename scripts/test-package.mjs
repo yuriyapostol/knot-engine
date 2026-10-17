@@ -21,13 +21,14 @@ try {
   assert.ok(pack.files.some(f => f.path.startsWith('v1/spec/schema/')))
   assert.ok(pack.files.every(f => !/^v(?!1\/)[0-9]+\//.test(f.path)))
   assert.ok(pack.files.every(f => !f.path.startsWith('site/')))
-  for (const schema of ['knot-asset', 'spatial-curve', 'grid-diagram', 'knot-resource-registry']) assert.ok(JSON.parse(readFileSync(join(installed, 'v1', 'spec', 'schema', `${schema}.schema.json`), 'utf8')).$id)
+  for (const schema of ['knot-asset', 'spatial-curve', 'grid-diagram', 'pd-code', 'knot-resource-registry']) assert.ok(JSON.parse(readFileSync(join(installed, 'v1', 'spec', 'schema', `${schema}.schema.json`), 'utf8')).$id)
   writeFileSync(join(temp, 'core-loader.mjs'), `export async function resolve(id, context, next) { if (['vue', 'three'].some(name => id === name || id.startsWith(name + '/'))) throw new Error('Core imported '+id); return next(id, context) }`)
   writeFileSync(join(temp, 'core.mjs'), `
     import assert from 'node:assert/strict'
     for (const key of ['window','document','WebGLRenderingContext']) Object.defineProperty(globalThis, key, { get() { throw new Error('DOM access: '+key) } })
     const core = await import('knot-engine/core')
     assert.equal(core.validateKnotAsset(${readFileSync('v1/spec/examples/assets/open-rope.json', 'utf8')}).valid, true)
+    assert.equal(core.validatePDCode({convention: core.PD_CCW_UNDER_FIRST, crossings: [], unlinkedComponents: 1}).componentCount, 1)
     assert.equal(core.resolveKnotAsset(${readFileSync('v1/spec/examples/assets/open-rope.json', 'utf8')}).curves.length, 1)
   `)
   execFileSync(process.execPath, ['--no-warnings', '--experimental-loader', join(temp, 'core-loader.mjs'), join(temp, 'core.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
@@ -42,12 +43,14 @@ try {
   execFileSync(process.execPath, [join(temp, 'ssr.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
   writeFileSync(join(temp, 'check.ts'), `
     import { KnotViewer, type KnotAsset, type CameraView } from 'knot-engine'
-    import { validateKnotAsset, resolveKnotAsset, type Representation } from 'knot-engine/core'
+    import { validateKnotAsset, resolveKnotAsset, type Representation, type PDCode, validatePDCode, PD_CCW_UNDER_FIRST } from 'knot-engine/core'
     const representation: Representation = { id: 'r', type: 'urn:example:representation', data: {} }
     const asset: KnotAsset = { schema: 'KnotAsset', schemaVersion: 1, id: 'a', subject: { id: 's' }, representations: [representation] }
     const camera: CameraView = { mode: 'fixed', position: [0,0,1], target: [0,0,0], up: [0,1,0], projection: { kind: 'perspective', fovY: 1 } }
     type Props = InstanceType<typeof KnotViewer>['$props']
     const props: Props = { asset, representationId: 'r', label: 'a', initialCamera: camera }
+    const pd: PDCode = { convention: PD_CCW_UNDER_FIRST, crossings: [[1,1,2,2]] }
+    validatePDCode(pd)
     validateKnotAsset(props.asset); resolveKnotAsset(asset)
   `)
   execFileSync(process.execPath, [resolve('node_modules/typescript/bin/tsc'), '--noEmit', '--strict', '--skipLibCheck', '--module', 'ESNext', '--moduleResolution', 'Bundler', '--target', 'ES2022', join(temp, 'check.ts')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })

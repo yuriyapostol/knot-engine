@@ -7,6 +7,11 @@ export const LOMONACO_KAUFFMAN_11 = `${KNOT_NAMESPACE}tile-sets/lomonaco-kauffma
 export type MosaicTile = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
 /** Row-major square matrix; row 0 is top. */
 export interface MosaicDiagram { tileSet: typeof LOMONACO_KAUFFMAN_11; tiles: MosaicTile[][] }
+export const PD_CODE = `${KNOT_NAMESPACE}representation-types/pd-code`
+export const PD_CCW_UNDER_FIRST = `${KNOT_NAMESPACE}conventions/pd-ccw-under-first`
+export type PDCrossing = [number, number, number, number]
+/** Positive edge labels; CCW slots start at an incoming underpass. */
+export interface PDCode { convention: typeof PD_CCW_UNDER_FIRST; crossings: PDCrossing[]; unlinkedComponents?: number }
 export const ROPE_TYPE = `${KNOT_NAMESPACE}object-types/rope`
 export type Point3D = [number, number, number]
 export type Reference = { id: string; ref?: never } | { ref: string; id?: never }
