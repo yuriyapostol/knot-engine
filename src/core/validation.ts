@@ -2,7 +2,7 @@ import Ajv2020, { type ValidateFunction } from 'ajv/dist/2020.js'
 import contracts from './contracts.json'
 import type { ValidationIssue } from './errors'
 
-export const KNOT_ASSET_LIMITS = { depth: 64, entries: 262144, points: 65536, mosaicCells: 65536, pdCrossings: 16384, dtCrossings: 512, dtWork: 4194304, stringLength: 1048576 } as const
+export const KNOT_ASSET_LIMITS = { depth: 64, entries: 262144, points: 65536, mosaicCells: 65536, pdCrossings: 16384, dtCrossings: 512, dtComponents: 512, dtWork: 4194304, stringLength: 1048576 } as const
 export const canonical = (value: unknown): string => JSON.stringify(value, (_, v) => v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map(k => [k, v[k]])) : v)
 export const issue = (path: string, message: string, code: ValidationIssue['code'] = 'INVALID_MODEL'): ValidationIssue => ({ path, message, code })
 /** Bound traversal before any schema validator, also rejecting non-JSON values/cycles. */

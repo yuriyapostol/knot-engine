@@ -14,8 +14,8 @@ export type PDCrossing = [number, number, number, number]
 export interface PDCode { convention: typeof PD_CCW_UNDER_FIRST; crossings: PDCrossing[]; unlinkedComponents?: number }
 export const DT_CODE = `${KNOT_NAMESPACE}representation-types/dt-code`
 export const DT_SIGNED_EVEN = `${KNOT_NAMESPACE}conventions/dt-signed-even`
-/** One oriented traversal; negative entry means the odd visit passes under. */
-export interface DTCode { convention: typeof DT_SIGNED_EVEN; code: number[] }
+/** One traversal or component traversals; negative means the odd visit passes under. */
+export interface DTCode { convention: typeof DT_SIGNED_EVEN; code: number[] | number[][] }
 export const ROPE_TYPE = `${KNOT_NAMESPACE}object-types/rope`
 export type Point3D = [number, number, number]
 export type Reference = { id: string; ref?: never } | { ref: string; id?: never }

@@ -29,6 +29,7 @@ try {
     const core = await import('knot-engine/core')
     assert.equal(core.validateKnotAsset(${readFileSync('v1/spec/examples/assets/open-rope.json', 'utf8')}).valid, true)
     assert.equal(core.validateDTCode({convention: core.DT_SIGNED_EVEN, code: [4,6,2]}).valid, true)
+    assert.equal(core.validateDTCode({convention: core.DT_SIGNED_EVEN, code: [[4],[2]]}).componentCount, 2)
     assert.equal(core.validatePDCode({convention: core.PD_CCW_UNDER_FIRST, crossings: [], unlinkedComponents: 1}).componentCount, 1)
     assert.equal(core.resolveKnotAsset(${readFileSync('v1/spec/examples/assets/open-rope.json', 'utf8')}).curves.length, 1)
   `)
@@ -52,7 +53,7 @@ try {
     const props: Props = { asset, representationId: 'r', label: 'a', initialCamera: camera }
     const pd: PDCode = { convention: PD_CCW_UNDER_FIRST, crossings: [[1,1,2,2]] }
     validatePDCode(pd)
-    const dt: DTCode = { convention: DT_SIGNED_EVEN, code: [4,6,2] }
+    const dt: DTCode = { convention: DT_SIGNED_EVEN, code: [[4],[2]] }
     validateDTCode(dt)
     const source: SourceDefinition = { id: 'book', title: 'Book' }
     const contribution: Contribution = { name: 'Editor', roles: ['editing'] }
