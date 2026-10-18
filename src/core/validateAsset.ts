@@ -4,7 +4,7 @@ import { SPATIAL_CURVE, GRID_DIAGRAM, MOSAIC_DIAGRAM, PD_CODE, DT_CODE, ROPE_TYP
 import { createResourceIndex, expandURI, normalizeResource, addResource, namespaceIssues, resourceIssues, type ResourceIndex } from './resources'
 import { duplicates, issue, parallel, preflight, structure, KNOT_ASSET_LIMITS } from './validation'
 import { validateMosaicDiagram } from './validateMosaicDiagram'
-import { validateDTCode, dtWork } from './validateDTCode'
+import { validateDTCode, dtAnalysisWork } from './validateDTCode'
 import { validatePDCode } from './validatePDCode'
 import { validateGridDiagram } from './validateGridDiagram'
 import { validateSpatialCurve, viewIssues } from './validateSpatial'
@@ -135,7 +135,7 @@ export function validateKnotAsset(value: unknown, options: ValidationOptions = {
   if (totalPDCrossings > 16384) return { valid: false, issues: [issue('representations', 'Total PD crossing budget exceeded', 'LIMIT_EXCEEDED')] }
   const totalDTWork = (asset.representations ?? []).filter(r => r.type === DT_CODE).reduce((sum, r) => {
     const code = (r.data as { code?: unknown })?.code
-    return sum + (Array.isArray(code) ? dtWork(code.length) : 0)
+    return sum + dtAnalysisWork(code)
   }, 0)
   if (totalDTWork > KNOT_ASSET_LIMITS.dtWork) return { valid: false, issues: [issue('representations', 'Total DT analysis budget exceeded', 'LIMIT_EXCEEDED')] }
   let totalPoints = 0

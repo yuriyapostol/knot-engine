@@ -94,7 +94,7 @@ The [PD specification](pd-code.md) defines `pd-code` data: `convention`, `crossi
 
 ### Dowker–Thistlethwaite codes
 
-The [DT specification](dt-code.md) defines `dt-code` for single-component knots: an explicit sign convention and a numeric array of even traversal labels. Schemas, permutation validation and a full planar-realizability criterion are implemented. `viewSpace:"none"`; sources and contributions use the ordinary envelope. Link DT, layout and conversions remain separate work.
+The [DT specification](dt-code.md) defines `dt-code` for knots and links: an explicit sign convention and flat or component-divided numeric arrays of even traversal labels. Schemas, permutation validation and a full planar-realizability criterion are implemented. `viewSpace:"none"`; sources and contributions use the ordinary envelope. Layout and conversions remain separate work.
 
 ## Views
 
