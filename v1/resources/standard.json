@@ -89,6 +89,19 @@
         "specification": "https://yuriyapostol.github.io/knot-engine/v1/spec/pd-code.html",
         "viewSpace": "none"
       }
+    },
+    {
+      "kind": "representation-type",
+      "resource": {
+        "id": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/dt-code",
+        "name": "dt-code",
+        "description": "Signed even DT code for single-component knot diagrams, generation 1",
+        "dataSchema": {
+          "ref": "https://yuriyapostol.github.io/knot-engine/v1/schema/dt-code.schema.json"
+        },
+        "specification": "https://yuriyapostol.github.io/knot-engine/v1/spec/dt-code.html",
+        "viewSpace": "none"
+      }
     }
   ]
 }

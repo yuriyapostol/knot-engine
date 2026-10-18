@@ -10,3 +10,4 @@ export { STANDARD_RESOURCES, expandURI, validateResourceDocument, validateResour
 export { KNOT_ASSET_LIMITS } from './validation'
 export * from './validateMosaicDiagram'
 export * from './validatePDCode'
+export { validateDTCode } from './validateDTCode'

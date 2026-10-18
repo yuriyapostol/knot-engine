@@ -11,7 +11,7 @@ function asset(): KnotAsset {
   return a
 }
 it('keeps optional metadata separate from geometric data and accepts it for every representation type',()=>{
-  for(const name of ['open-rope','grid-diagram','grid-vertex-pairs','mosaic-diagram','pd-trefoil']) {
+  for(const name of ['open-rope','grid-diagram','grid-vertex-pairs','mosaic-diagram','pd-trefoil','dt-trefoil']) {
     const a=JSON.parse(readFileSync(`v1/spec/examples/assets/${name}.json`,'utf8'))
     a.representations[0].sources=[{title:'Own measurements',authors:[{name:'Team'}],note:'Measured by the author'}]
     a.representations[0].contributions=[{name:'Team',note:'Created data'}]

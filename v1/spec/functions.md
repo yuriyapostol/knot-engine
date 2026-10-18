@@ -6,6 +6,7 @@ Import core APIs from `knot-engine/core`; this entry point uses no Vue, Three.js
 | --- | --- |
 | `validateKnotAsset(value, options?)` | `{valid:true,asset,warnings,complete,missingDependencies,uncheckedTypes}` or `{valid:false,issues}` |
 | `validateGridDiagram(value)` | `{valid:true,data,diagram,warnings,componentCount,crossingCount}` or issues; independent grid diagram validation with `xo` or `vertex-pairs` encoding |
+| `validateDTCode(value)` | `{valid:true,data,code,warnings,componentCount,crossingCount}` or issues; single-component numeric DT with planar-realizability validation |
 | `validatePDCode(value)` | `{valid:true,data,code,warnings,componentCount,crossingCount}` or issues; independent planar diagram code validation |
 | `validateSpatialCurve(value)` | `{valid:true,data,warnings}` or issues |
 | `validateMosaicDiagram(value)` | `{valid:true,data,diagram,warnings,componentCount,occupiedTileCount,crossingCount}` or issues; independent mosaic diagram validation |

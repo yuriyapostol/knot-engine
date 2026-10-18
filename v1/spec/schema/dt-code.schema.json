@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuriyapostol.github.io/knot-engine/v1/schema/dt-code.schema.json",
+  "$ref": "#/$defs/dt",
+  "$defs": {
+    "dt": {
+      "type": "object",
+      "properties": {
+        "convention": {
+          "const": "https://yuriyapostol.github.io/knot-engine/v1/conventions/dt-signed-even"
+        },
+        "code": {
+          "type": "array",
+          "maxItems": 512,
+          "items": {
+            "type": "integer",
+            "multipleOf": 2,
+            "minimum": -1024,
+            "maximum": 1024,
+            "not": {
+              "const": 0
+            }
+          }
+        }
+      },
+      "required": [
+        "convention",
+        "code"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,6 +1,6 @@
 # KnotAsset: proposed contract revision
 
-**Implementation status:** the initial profile (spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, constructions, procedures, resources and cameras) is described in the [current specification](../v1/spec/knot-asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
+**Implementation status:** the initial profile (spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, procedures, resources and cameras) is described in the [current specification](../v1/spec/knot-asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
 
 Sources, flat contributions at asset/representation level and a global license are implemented under the [shared contract](../v1/spec/sources.md); the broader structure below also contains deferred features.
 
