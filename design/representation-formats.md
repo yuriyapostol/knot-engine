@@ -64,7 +64,7 @@ The [3_1 record](https://knotinfo.org/results.php?searchmode=singleknot&submitty
 
 This extracts two original values; it does not propose putting both in one `representation.data`. Under the [KnotInfo PD convention](https://knotinfo.org/descriptions/pd_notation.html), four labels go counterclockwise starting at the incoming underpassing arc. Implemented [PD data](../v1/spec/pd-code.md) has a fixed `convention` URI, `crossings` as positive-integer quadruples and optional `unlinkedComponents`, preserving source labels. It encodes a combinatorial diagram, not drawing coordinates; validation checks repeated labels, the planar rotation system and underpass direction consistency.
 
-DT needs `convention` and `code`, with signs/orientation/reconstruction tied to the [KnotInfo DT description](https://knotinfo.org/descriptions/dt_notation.html). Do not mix package conventions because their arrays look alike. [Spherogram](https://snappy.computop.org/spherogram.html) documents its own PD rules and orientation caveats. Completing DT is a separate step; `[4,6,2]` is not a universal context-free format.
+The implemented knot-only [DT profile](../v1/spec/dt-code.md) uses `convention` and `code`, with signs and traversal tied to the [KnotInfo DT description](https://knotinfo.org/descriptions/dt_notation.html). Do not mix package conventions because their arrays look alike. [Spherogram](https://snappy.computop.org/spherogram.html) documents its own PD rules and orientation caveats. The profile checks planar realizability but does not reconstruct a unique PD embedding; `[4,6,2]` is not a universal context-free format. Multicomponent DT and embedding choices remain separate work.
 
 ## 3. Spatial curve
 
@@ -134,6 +134,6 @@ One `grid-diagram` type now supports `xo` and `vertex-pairs`, both zero-based wi
 2. `pd-code` for layout-independent combinatorial diagrams; generated layout is not an original source image.
 3. `spatial-curve` with exact closure and parameterization.
 4. `mosaic-diagram` backed by mathematical definitions and real structured fixtures.
-5. Extend Grid with source encoding, then add DT/other notations after checking conventions.
+5. Both grid encodings and single-component numeric DT are implemented; multicomponent DT and other notations require separate contracts and convention checks.
 
 This is a proposed order, not a universal user priority. Practical users may favor geometry and illustrated procedures; researchers may favor combinatorial codes and mosaics. None requires a separate root `diagrams` collection. Each import needs primary-source fixtures and preservation checks for geometry, closure, components, crossings, orientation and provenance. Mathematical equivalence remains a separate task.

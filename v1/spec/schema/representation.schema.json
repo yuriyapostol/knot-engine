@@ -134,6 +134,22 @@
               }
             }
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/dt-code"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/dt"
+              }
+            }
+          }
         }
       ]
     },
@@ -1034,6 +1050,32 @@
       "required": [
         "convention",
         "crossings"
+      ],
+      "additionalProperties": false
+    },
+    "dt": {
+      "type": "object",
+      "properties": {
+        "convention": {
+          "const": "https://yuriyapostol.github.io/knot-engine/v1/conventions/dt-signed-even"
+        },
+        "code": {
+          "type": "array",
+          "maxItems": 512,
+          "items": {
+            "type": "integer",
+            "multipleOf": 2,
+            "minimum": -1024,
+            "maximum": 1024,
+            "not": {
+              "const": 0
+            }
+          }
+        }
+      },
+      "required": [
+        "convention",
+        "code"
       ],
       "additionalProperties": false
     }

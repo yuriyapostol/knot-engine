@@ -1,6 +1,6 @@
 # KnotAsset v1
 
-Implemented initial profile of the [contract redesign](../../design/knot-asset-draft.md). Package version remains 0.1.0; `schemaVersion` remains 1. The previous contracts and APIs have been removed. This profile supports spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, constructions, named states, procedures and reusable resources. Other representation formats, animation, properties, relations and classifications remain separate future work; they are not accepted as untyped fields.
+Implemented initial profile of the [contract redesign](../../design/knot-asset-draft.md). Package version remains 0.1.0; `schemaVersion` remains 1. The previous contracts and APIs have been removed. This profile supports spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, named states, procedures and reusable resources. Other representation formats, animation, properties, relations and classifications remain separate future work; they are not accepted as untyped fields.
 
 ## Terminology
 
@@ -15,6 +15,7 @@ Use descriptive concepts in prose. Name `KnotAsset` explicitly when referring to
 | Grid diagrams | `grid-diagram` |
 | Mosaic diagrams | `mosaic-diagram` |
 | Planar diagram codes | `pd-code` |
+| Dowker–Thistlethwaite codes | `dt-code` |
 | Construction | `Construction`, `constructions` |
 | Construction object | `ConstructionObject`, `objects` |
 | Named state | `states` |
@@ -91,6 +92,10 @@ The profile is defined in the [mosaic specification](mosaic-diagram.md). Types, 
 
 The [PD specification](pd-code.md) defines `pd-code` data: `convention`, `crossings` and optional `unlinkedComponents`. Types, schemas and semantic validation are implemented, including planar rotation systems, direction consistency and component counting. PD has `viewSpace:"none"`; layout and rendering are separate work.
 
+### Dowker–Thistlethwaite codes
+
+The [DT specification](dt-code.md) defines `dt-code` for single-component knots: an explicit sign convention and a numeric array of even traversal labels. Schemas, permutation validation and a full planar-realizability criterion are implemented. `viewSpace:"none"`; sources and contributions use the ordinary envelope. Link DT, layout and conversions remain separate work.
+
 ## Views
 
 Views can be embedded in `representation.views` or included using `{ref}`. Each requires `id`, `name`, `space`, `camera`; `description` is optional. `defaultView` is an `{id}` or `{ref}` selecting a member of that list. `preferredView: {direction,up}` is available only for 3D.
@@ -108,7 +113,7 @@ Initial choice: application `initialCamera` → application-selected `view` → 
 
 ## Standalone contracts and resources
 
-Independent schemas are available for grid diagrams, mosaic diagrams, planar diagram codes, spatial curves, representation, construction, view, catalog, representation type, object type and rope/equipment objects. Each published schema includes only its needed definitions and can be compiled without the root asset schema. Generated schemas come from `src/core/contracts.json` via `npm run build:schemas`.
+Independent schemas are available for grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, spatial curves, representation, construction, view, catalog, representation type, object type and rope/equipment objects. Each published schema includes only its needed definitions and can be compiled without the root asset schema. Generated schemas come from `src/core/contracts.json` via `npm run build:schemas`.
 
 `KnotResourceDocument` requires `schema`, `schemaVersion`, `kind`, `resource`; optional `$schema`, `namespaces`, `dependencies`. Kinds: `catalog`, `representation-type`, `object-type`, `view`, `construction`, `source`. A standalone resource requires a global ID. `KnotResourceRegistry` requires `schema`, `schemaVersion`, `resources:[{kind,resource}]`, with optional `$schema`, `namespaces`, `id`. A registry is an ordinary document, not a server or singleton. `KnotRepresentationDocument` requires `schema`, `schemaVersion`, `representation`, with optional `$schema`, `namespaces`, `dependencies`, `subject`, `sources`.
 
