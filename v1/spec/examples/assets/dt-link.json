@@ -24,17 +24,8 @@
       "data": {
         "convention": "https://yuriyapostol.github.io/knot-engine/v1/conventions/dt-signed-even",
         "code": [
-          [
-            6,
-            -8
-          ],
-          [
-            -10,
-            12,
-            -14,
-            2,
-            -4
-          ]
+          [6, -8],
+          [-10, 12, -14, 2, -4]
         ]
       },
       "sources": [
