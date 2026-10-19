@@ -59,7 +59,7 @@ Import `validateKnotAsset`, `resolveKnotAsset` and types from `knot-engine/core`
 
 Methods: `resetView()`, `fitToView()`, `capture({width,height,view,transparent})`. PNG defaults to 512×512 with a 2048×2048 maximum. Capture modes are `current` and `model-preview`. Events: `ready({assetId,schemaVersion,warnings})`, `error`, `camera-change`. `initialCamera` accepts complete fit/fixed modes with perspective or orthographic projection; FOV is in radians.
 
-[Data contract](v1/spec/knot-asset.md) · [Functions](v1/spec/functions.md) · [Component](v1/spec/components.md) · [JSON Schema](v1/spec/schema/knot-asset.schema.json) · [Examples](v1/spec/examples/assets)
+[Data contract](v1/spec/knot-asset.md) · [Functions](v1/spec/functions.md) · [Component](v1/spec/components.md) · [JSON Schema](v1/schema/knot-asset.schema.json) · [Examples](v1/spec/examples/assets)
 
 Styling uses `.knot-engine-v1-viewer…` classes and inherited `--knot-engine-v1-viewer-*` variables. The package namespace includes the major generation and component name, allowing different major versions on the same page; initial development requires no backward compatibility, including CSS. See [current variables, defaults and examples](v1/spec/components.md#css-namespace-and-styling).
 

@@ -18,13 +18,15 @@ try {
   writeFileSync(join(temp, 'package.json'), '{"type":"module"}')
   const metadata = JSON.parse(readFileSync(join(installed, 'package.json'), 'utf8'))
   assert.equal(metadata.name, 'knot-engine')
-  assert.ok(pack.files.some(f => f.path.startsWith('v1/spec/schema/')))
+  assert.ok(pack.files.some(f => f.path.startsWith('v1/schema/')))
   assert.ok(pack.files.every(f => !/^v(?!1\/)[0-9]+\//.test(f.path)))
   assert.ok(pack.files.every(f => !f.path.startsWith('site/')))
-  for (const schema of ['knot-asset', 'spatial-curve', 'grid-diagram', 'pd-code', 'dt-code', 'source', 'contribution', 'license', 'knot-resource-registry']) assert.ok(JSON.parse(readFileSync(join(installed, 'v1', 'spec', 'schema', `${schema}.schema.json`), 'utf8')).$id)
+  for (const schema of ['knot-asset', 'spatial-curve', 'grid-diagram', 'pd-code', 'dt-code', 'source', 'contribution', 'license', 'knot-resource-registry']) assert.ok(JSON.parse(readFileSync(join(installed, 'v1', 'schema', `${schema}.schema.json`), 'utf8')).$id)
   writeFileSync(join(temp, 'core-loader.mjs'), `export async function resolve(id, context, next) { if (['vue', 'three'].some(name => id === name || id.startsWith(name + '/'))) throw new Error('Core imported '+id); return next(id, context) }`)
   writeFileSync(join(temp, 'core.mjs'), `
     import assert from 'node:assert/strict'
+    assert.equal(import.meta.resolve('knot-engine/schema/dt-code.schema.json'), new URL('./node_modules/knot-engine/v1/schema/dt-code.schema.json', import.meta.url).href)
+    assert.equal(import.meta.resolve('knot-engine/schema/knot-asset.schema.json'), new URL('./node_modules/knot-engine/v1/schema/knot-asset.schema.json', import.meta.url).href)
     for (const key of ['window','document','WebGLRenderingContext']) Object.defineProperty(globalThis, key, { get() { throw new Error('DOM access: '+key) } })
     const core = await import('knot-engine/core')
     assert.equal(core.validateKnotAsset(${readFileSync('v1/spec/examples/assets/open-rope.json', 'utf8')}).valid, true)

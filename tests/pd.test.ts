@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import Ajv2020 from 'ajv/dist/2020.js'
-import schema from '../v1/spec/schema/pd-code.schema.json'
+import schema from '../v1/schema/pd-code.schema.json'
 import { PD_CODE, ROPE_TYPE, PD_CCW_UNDER_FIRST as convention, validatePDCode, validateKnotAsset, validateRepresentationDocument, STANDARD_RESOURCES, selectKnotAsset, composeKnotAsset, resolveKnotAsset } from '../src/core'
 const trefoil = [[1,5,2,4],[3,1,4,6],[5,3,6,2]]
 const link = [[6,1,7,2],[8,3,5,4],[2,5,3,6],[4,7,1,8]]

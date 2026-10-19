@@ -59,7 +59,7 @@ defineProps<{ asset: KnotAsset }>()
 
 Методи: `resetView()`, `fitToView()`, `capture({width,height,view,transparent})`. PNG має типовий розмір 512×512 і максимум 2048×2048. Режими знімка — `current` і `model-preview`. Події: `ready({assetId,schemaVersion,warnings})`, `error`, `camera-change`. `initialCamera` приймає повний fit/fixed режим із перспективною або ортографічною проєкцією; FOV у радіанах.
 
-[Контракт даних](v1/spec/knot-asset.uk.md) · [Функції](v1/spec/functions.uk.md) · [Компонент](v1/spec/components.uk.md) · [JSON Schema](v1/spec/schema/knot-asset.schema.json) · [Приклади](v1/spec/examples/assets)
+[Контракт даних](v1/spec/knot-asset.uk.md) · [Функції](v1/spec/functions.uk.md) · [Компонент](v1/spec/components.uk.md) · [JSON Schema](v1/schema/knot-asset.schema.json) · [Приклади](v1/spec/examples/assets)
 
 Оформлення використовує класи `.knot-engine-v1-viewer…` та наслідувані змінні `--knot-engine-v1-viewer-*`. Простір імен пакета містить мажорне покоління й назву компонента та дозволяє використовувати різні мажорні версії на одній сторінці; зворотна сумісність на початковій стадії не вимагається, включно з CSS. [Поточні змінні, типові значення та приклади](v1/spec/components.uk.md#простір-імен-css-та-оформлення).
 

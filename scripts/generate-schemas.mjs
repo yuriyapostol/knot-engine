@@ -10,5 +10,5 @@ for(const [name,key] of Object.entries(entries)) {
     visit(defs[k])
   }
   include(key)
-  writeFileSync(`v1/spec/schema/${name}.schema.json`,JSON.stringify({$schema:contracts.$schema,$id:`https://yuriyapostol.github.io/knot-engine/v1/schema/${name}.schema.json`,$ref:`#/$defs/${key}`,$defs:defs},null,2)+'\n')
+  writeFileSync(`v1/schema/${name}.schema.json`,JSON.stringify({$schema:contracts.$schema,$id:`https://yuriyapostol.github.io/knot-engine/v1/schema/${name}.schema.json`,$ref:`#/$defs/${key}`,$defs:defs},null,2)+'\n')
 }

@@ -39,7 +39,7 @@ The algorithm is iterative, using O(n) time and storage for n crossings. `KNOT_A
 
 Use the ordinary representation envelope, including scoped targets and dependencies. The standard resource has `viewSpace:"none"`: PD has no layout or coordinate system. Nonempty `views`, a `defaultView` without a member view and `preferredView` are rejected by the ordinary view rules. No mapping from counted link components to construction objects is implied.
 
-Both standalone representation documents and KnotAsset use the supported semantic validator. Completeness additionally requires resource closure, for example via `STANDARD_RESOURCES`; supported PD does not enter `uncheckedTypes`. The [standalone JSON Schema](schema/pd-code.schema.json) checks structure only; repeated-label multiplicity, planarity, direction consistency and component existence require runtime validation.
+Both standalone representation documents and KnotAsset use the supported semantic validator. Completeness additionally requires resource closure, for example via `STANDARD_RESOURCES`; supported PD does not enter `uncheckedTypes`. The [standalone JSON Schema](../schema/pd-code.schema.json) checks structure only; repeated-label multiplicity, planarity, direction consistency and component existence require runtime validation.
 
 Validation, extraction, JSON round trips and same-document composition preserve labels, crossing order and explicit `unlinkedComponents` without normalization. Equivalent relabelings are not automatically deduplicated. The existing 3D resolver and `KnotViewer` still require spatial curves; validation completeness does not imply renderer support.
 

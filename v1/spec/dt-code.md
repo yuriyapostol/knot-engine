@@ -52,7 +52,7 @@ This establishes existence of a planar realization, not a unique drawing or knot
 
 ## Limits and API
 
-`validateDTCode(data)` returns `{valid:false,issues}` or `{valid:true,data,code,warnings,componentCount,crossingCount}`. The `code` result aliases the validated data object, as with the PD validator. Inputs are not mutated; the counts describe the stored diagram. Independent [JSON Schema](schema/dt-code.schema.json) checks fields, numeric bounds, parity and shape; runtime additionally checks the permutation and full realizability criterion.
+`validateDTCode(data)` returns `{valid:false,issues}` or `{valid:true,data,code,warnings,componentCount,crossingCount}`. The `code` result aliases the validated data object, as with the PD validator. Inputs are not mutated; the counts describe the stored diagram. Independent [JSON Schema](../schema/dt-code.schema.json) checks fields, numeric bounds, parity and shape; runtime additionally checks the permutation and full realizability criterion.
 
 `KNOT_ASSET_LIMITS.dtCrossings` is 512 total stored crossings across all component lists. `KNOT_ASSET_LIMITS.dtComponents` is 512 components, including empty ones. Schema bounds each list and numeric values to ±1024; runtime checks the total crossing count and tightens values to ±2n. For a connected crossing graph with nⱼ crossings and kⱼ nonempty components, reduction introduces kⱼ−1 temporary letters, giving rⱼ=nⱼ+kⱼ−1. Matrices use O(rⱼ²/32+rⱼ) machine words; analysis takes O(rⱼ³/32+rⱼ² log rⱼ) operations. The straightforward iterative reduction adds O((n+k)²) preprocessing in the worst case. No recursive traversal or exponential embedding search is used.
 

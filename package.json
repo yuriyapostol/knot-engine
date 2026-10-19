@@ -23,8 +23,8 @@
       "import": "./dist/core/index.js"
     },
     "./styles.css": "./dist/style.css",
-    "./schema/knot-asset.schema.json": "./v1/spec/schema/knot-asset.schema.json",
-    "./schema/*": "./v1/spec/schema/*"
+    "./schema/knot-asset.schema.json": "./v1/schema/knot-asset.schema.json",
+    "./schema/*": "./v1/schema/*"
   },
   "scripts": {
     "build": "vue-tsc --noEmit && vite build && vue-tsc -p tsconfig.build.json",

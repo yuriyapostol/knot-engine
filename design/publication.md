@@ -8,8 +8,8 @@ Status: implemented site organization and release workflow. A local build does n
 v1/
   index.md / index.uk.md
   guide/
+  schema/
   spec/
-    schema/
     examples/
   resources/
   version.json
@@ -38,7 +38,7 @@ Package, documentation, specifications, schemas and available data form one rele
 
 /v1/ is the current first-generation material. /releases/<package-version>/ is an explicitly created immutable snapshot of that generation. Other vN directories are published concurrently; no independent specification-release or data-release numbering is introduced. Current documentation has a visible development label; no /next/ is needed.
 
-The namespace remains https://yuriyapostol.github.io/knot-engine/v1/. Moving files or documentation does not rename entities. Existing schema IDs under /v1/schema/ remain valid publication aliases of files physically under v1/spec/schema/. Package schema exports map to that physical directory. Schema filenames do not repeat the generation suffix.
+The namespace remains https://yuriyapostol.github.io/knot-engine/v1/. Moving files or documentation does not rename entities. Schemas live directly under v1/schema/ and are published at their canonical IDs under /v1/schema/. Package schema exports map to the same directory. Schema filenames do not repeat the generation suffix.
 
 Archives preserve canonical IDs. Reproducible validation supplies the chosen snapshot's schemas in an isolated registry rather than silently fetching current definitions. Different revisions with one canonical ID must not be mixed in the same validator registry.
 

@@ -8,7 +8,7 @@ Representation type: `https://yuriyapostol.github.io/knot-engine/v1/representati
 
 The profile describes an unoriented closed knot or link diagram on a square array of tiles. Multiple closed components are allowed. Open ends, tangles, virtual crossings, physical lengths, component orientations and arbitrary tile sets are outside this profile. Neither one component nor a catalog identity is inferred from the representation type.
 
-The standard type uses `viewSpace: "plane"` and references the standalone [JSON Schema](schema/mosaic-diagram.schema.json) and this specification.
+The standard type uses `viewSpace: "plane"` and references the standalone [JSON Schema](../schema/mosaic-diagram.schema.json) and this specification.
 
 ## Data contract
 

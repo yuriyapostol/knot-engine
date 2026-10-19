@@ -21,7 +21,7 @@ artifacts are not used as the source of previous releases. Do not commit
 `site-dist/`. Empty registries or invented data are not published for planned
 resource types that have no implemented definitions yet.
 
-Each generation needs `version.json`, paired English/Ukrainian Markdown, and `guide/`, `spec/schema/`, `spec/examples/`, and `resources/` directories. Other resource directories are copied as present. The current package generation is selected by `package.json#knotEngine.resourceDirectory`; only that generation receives the current interactive runtime and release snapshot. npm files and exports must select that same generation.
+Each generation needs `version.json`, paired English/Ukrainian Markdown, and `guide/`, `schema/`, `spec/examples/`, and `resources/` directories. Other resource directories are copied as present. The current package generation is selected by `package.json#knotEngine.resourceDirectory`; only that generation receives the current interactive runtime and release snapshot. npm files and exports must select that same generation.
 
 Run `npm run preview:site` to rebuild and serve the complete site at `http://localhost:5174/`. Use `npm run dev` on port 5173 for the complete site with automatic rebuild and browser reload. The shared `site/components/InteractiveExample.vue` host imports the package viewer; `site/runtime/` bundles that host. Content lives in root `vN/` and `design/`, with no version-specific source copies in `site/`.
 

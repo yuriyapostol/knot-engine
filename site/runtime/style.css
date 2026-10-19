@@ -32,7 +32,7 @@
 .knot-engine-v1-demo__sidebar, .knot-engine-v1-demo__panel { display: flex; flex-direction: column; gap: 20px; min-width: 0 }
 .knot-engine-v1-demo__panel { padding: 0; border: 0; background: transparent }
 .knot-engine-v1-demo__panel label { display: grid; gap: 8px; font-weight: 600 }
-.knot-engine-v1-demo__stage { min-width: 0 }
+.knot-engine-v1-demo__stage { display: flex; flex-direction: column; gap: 20px; min-width: 0 }
 .knot-engine-v1-demo__stage .knot-engine-v1-viewer { width: 100%; height: auto; min-height: 0; aspect-ratio: 1 }
 .knot-engine-v1-demo__actions { display: flex; flex-wrap: wrap; gap: 8px }
 .knot-engine-v1-demo :is(select, textarea, button) {

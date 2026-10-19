@@ -36,7 +36,7 @@ Component count follows O→X in each row, then X→O in that column, iterativel
 
 Validation uses O(n) storage, O(n) component tracing and O(n²) crossing counting. Size is bounded at 512 before analysis. General bounded-JSON checks apply before schema validation: depth 64, 262,144 entries and strings up to 1,048,576 characters. Multiple representations share the document's JSON budget; there is no additional aggregate grid-area allocation.
 
-The [standalone schema](schema/grid-diagram.schema.json) checks fields, encoding, scalar bounds and array lengths. Runtime additionally checks permutations, agreement with size and non-overlap. Supported semantics do not produce `uncheckedTypes`; `complete` still requires available resources, such as `STANDARD_RESOURCES`. Standalone representation documents, extraction and same-document composition use ordinary `KnotAsset` rules, preserving arrays and orientation exactly.
+The [standalone schema](../schema/grid-diagram.schema.json) checks fields, encoding, scalar bounds and array lengths. Runtime additionally checks permutations, agreement with size and non-overlap. Supported semantics do not produce `uncheckedTypes`; `complete` still requires available resources, such as `STANDARD_RESOURCES`. Standalone representation documents, extraction and same-document composition use ordinary `KnotAsset` rules, preserving arrays and orientation exactly.
 
 ## Standard conventions and KnotInfo interoperability
 

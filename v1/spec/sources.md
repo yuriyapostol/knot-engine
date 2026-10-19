@@ -68,7 +68,7 @@ Composition keeps ordinary identity/conflict rules for source definitions and re
 
 Schemas are closed and reject unsupported fields, mixed inline/reference entries, blank required text and unknown/duplicate contribution roles. Structural date patterns are supplemented by runtime calendar checks. HTTP(S) URLs are checked syntactically, without network access; email uses a basic nonwhitespace local-part/domain pattern, not delivery verification.
 
-Implementation limits: up to 256 source definitions per root, 256 source uses per representation, 128 authors per source and 1,024 contributions per owner; at most five distinct roles per contribution. Empty optional collections are allowed, except a present `authors` or `roles` list must not be empty. General bounded-JSON budgets still apply. Independent schemas are published for [source definitions](schema/source.schema.json), [contributions](schema/contribution.schema.json) and [licenses](schema/license.schema.json); their metadata definitions are also included in the appropriate envelope schemas.
+Implementation limits: up to 256 source definitions per root, 256 source uses per representation, 128 authors per source and 1,024 contributions per owner; at most five distinct roles per contribution. Empty optional collections are allowed, except a present `authors` or `roles` list must not be empty. General bounded-JSON budgets still apply. Independent schemas are published for [source definitions](../schema/source.schema.json), [contributions](../schema/contribution.schema.json) and [licenses](../schema/license.schema.json); their metadata definitions are also included in the appropriate envelope schemas.
 
 ## Contract rationale and examples
 

@@ -125,12 +125,14 @@ async function download(options: CaptureOptions, name: string) {
           <input ref="fileInput" class="knot-engine-v1-demo__file-input" type="file" accept=".json,application/json" @change="chooseFile">
           <section class="knot-engine-v1-demo__editor"><label class="knot-engine-v1-demo__code-label">{{ content.editor }}<textarea v-model="draft" @input="scheduleDraft" spellcheck="false" rows="18"></textarea></label><output v-if="issue" class="knot-engine-v1-demo__issue" role="alert">{{ issue }}</output><div class="knot-engine-v1-demo__actions"><button type="button" @click="fileInput?.click()">{{ content.openFile }}</button><button type="button" @click="saveCode">{{ content.saveFile }}</button></div></section>
         </section>
+      </aside>
+      <section class="knot-engine-v1-demo__stage">
         <section class="knot-engine-v1-demo__panel knot-engine-v1-demo__view-settings">
           <label v-if="asset">{{ content.representation }}<span class="knot-engine-v1-demo__select-field"><select v-model="representationId" class="knot-engine-v1-demo__representation-select"><option v-for="representation in representations" :key="representation.id" :value="representation.id">{{ representation.id }}</option></select></span></label>
-          <div class="knot-engine-v1-demo__actions"><button type="button" @click="download({ view: 'current' }, 'knot-current.png')">{{ content.export }}</button></div>
         </section>
-      </aside>
-      <section class="knot-engine-v1-demo__stage"><KnotViewer ref="viewer" :show-controls="false" :asset="asset" :representation-id="representationId" :initial-camera="demoCamera" :label="current.data.id || 'Rope model'" :locale="locale" :theme="theme" @error="issue = $event.message" /></section>
+        <KnotViewer ref="viewer" :show-controls="false" :asset="asset" :representation-id="representationId" :initial-camera="demoCamera" :label="current.data.id || 'Rope model'" :locale="locale" :theme="theme" @error="issue = $event.message" />
+        <div class="knot-engine-v1-demo__actions"><button type="button" @click="download({ view: 'current' }, 'knot-current.png')">{{ content.export }}</button></div>
+      </section>
     </div>
   </section>
 </template>

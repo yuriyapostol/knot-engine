@@ -4,7 +4,7 @@
 
 ## Що реалізовано
 
-[Специфікація `KnotAsset`](../spec/knot-asset.uk.md), її [схема](../spec/schema/knot-asset.schema.json) і [контракт компонента](../spec/components.uk.md) описують поточний пакет.
+[Специфікація `KnotAsset`](../spec/knot-asset.uk.md), її [схема](../schema/knot-asset.schema.json) і [контракт компонента](../spec/components.uk.md) описують поточний пакет.
 
 ## Що запропоновано
 

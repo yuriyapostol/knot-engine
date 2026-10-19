@@ -4,7 +4,7 @@ A specification defines the meaning of data and implementation behavior. A JSON 
 
 ## What is implemented
 
-The [`KnotAsset` specification](../spec/knot-asset.md), its [schema](../spec/schema/knot-asset.schema.json), and the [component contract](../spec/components.md) describe the current package.
+The [`KnotAsset` specification](../spec/knot-asset.md), its [schema](../schema/knot-asset.schema.json), and the [component contract](../spec/components.md) describe the current package.
 
 ## What is proposed
 
