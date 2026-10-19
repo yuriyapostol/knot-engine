@@ -6,7 +6,9 @@ Sources, flat contributions at asset/representation level and a global license a
 
 **Status: architectural draft for discussion.** This records agreed principles and a possible structure. It does not replace the [implemented contract](../v1/spec/knot-asset.md) or claim that the proposed API exists. The transition from `KnotModelV1` is complete for the initial profile. Features beyond the current specification remain under design.
 
-**Current policy: keep version numbers unchanged and do not preserve compatibility with old contracts.** The project has no external users yet. Revisions remain within `schemaVersion: 1` and package `0.1.0`. `KnotModelV1` APIs, schemas, adapters and dual-format support have been removed. Field names and example shapes are proposals except where explicitly agreed.
+**Current policy: keep version numbers unchanged and do not preserve compatibility with old data/JavaScript API contracts.** The project has no external users yet. Revisions remain within `schemaVersion: 1` and package `0.1.0`. `KnotModelV1` APIs, schemas, adapters and dual-format support have been removed. Field names and example shapes are proposals except where explicitly agreed.
+
+The public CSS contract has a separate compatibility guarantee throughout v1, including 0.x and later 1.x; the general data/API revision policy above does not override it. See the [CSS policy](publication.md#css-compatibility-between-releases).
 
 ## 1. Agreed decisions
 
@@ -26,7 +28,7 @@ Sources, flat contributions at asset/representation level and a global license a
 | 12 | Full viewer settings have a standalone contract; no mandatory root `views`. |
 | 13 | 3D representations may contain an optional initial orientation hint. |
 | 14 | Properties, relations and classifications may target inner entities. Shared assertion collections with explicit references are the working direction, subject to extraction scenarios. |
-| 15 | No version bumps or backward compatibility requirements during initial development. |
+| 15 | No version bumps or data/JavaScript API backward compatibility requirements during initial development; the public CSS contract remains compatible within v1. |
 | 16 | The initial profile fully replaces `KnotModelV1`; legacy APIs, adapters, duplicate inputs and compatibility tests have been removed. |
 | 17 | Catalogs, representation type definitions, constructions and views have standalone contracts; registries or inline definitions can supply them. Views are embedded in representations. |
 | 18 | Project global identifiers use `https://yuriyapostol.github.io/knot-engine/v1/`; this does not imply that every proposed resource is published. |
@@ -448,7 +450,7 @@ No claim is made about physical length, length preservation or valid interpolati
 
 ## 11. Versions, extensions and validation
 
-See [publication policy](publication.md). Until stabilization, keep package and schema versions unchanged, allow structural/API changes, update examples and tests together, and keep examples and tools on the current `KnotAsset` contract. `KnotModelV1` runtime, schemas, APIs, adapters and demo support have been removed. One-time data conversion does not require permanent compatibility adapters.
+See [publication policy](publication.md). Until stabilization, keep package and schema versions unchanged, allow data-structure/JavaScript API changes subject to the separate CSS guarantee, update examples and tests together, and keep examples and tools on the current `KnotAsset` contract. `KnotModelV1` runtime, schemas, APIs, adapters and demo support have been removed. One-time data conversion does not require permanent compatibility adapters.
 
 Shared contract generations do not require a monolithic schema. Fragment entry points remain separate. `schema`, `schemaVersion` and editor `$schema` have defined roles in the resource proposal. Contract generation and package release number differ, but documentation, specifications, schemas and data are published as one package release.
 

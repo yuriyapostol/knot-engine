@@ -2,7 +2,7 @@
 
 Render and inspect knots, rope constructions and their representations using the package's Vue components and validation functions.
 
-This is the first contract generation, including package versions before 1.0. The current format and the proposed redesign are documented separately. No compatibility commitment has been made during initial development.
+This is the first contract generation, including package versions before 1.0. The current format and the proposed redesign are documented separately. Data and JavaScript APIs may change during initial development; the [public CSS contract](spec/components.md#css-compatibility-and-styling) remains compatible throughout v1, including 0.x and later 1.x.
 
 - [Start using the package](guide/getting-started.md).
 - [Understand the data and resources](guide/concepts.md).

@@ -34,13 +34,20 @@ Design materials have the same two-language coverage at /design/architecture.htm
 
 ## One release and stable identities
 
-Package, documentation, specifications, schemas and available data form one release with the package version. v1 includes pre-1.0 packages and later 1.x. Before stabilization, incompatible changes are allowed without bumping the current numbers. `KnotModelV1` support has been removed; the current package uses `KnotAsset` exclusively.
+Package, documentation, specifications, schemas and available data form one release with the package version. v1 includes pre-1.0 packages and later 1.x. Before stabilization, incompatible data-contract and JavaScript API changes are allowed without bumping the current numbers; the CSS guarantee below is separate. `KnotModelV1` support has been removed; the current package uses `KnotAsset` exclusively.
 
 /v1/ is the current first-generation material. /releases/<package-version>/ is an explicitly created immutable snapshot of that generation. Other vN directories are published concurrently; no independent specification-release or data-release numbering is introduced. Current documentation has a visible development label; no /next/ is needed.
 
 The namespace remains https://yuriyapostol.github.io/knot-engine/v1/. Moving files or documentation does not rename entities. Existing schema IDs under /v1/schema/ remain valid publication aliases of files physically under v1/spec/schema/. Package schema exports map to that physical directory. Schema filenames do not repeat the generation suffix.
 
 Archives preserve canonical IDs. Reproducible validation supplies the chosen snapshot's schemas in an isolated registry rather than silently fetching current definitions. Different revisions with one canonical ID must not be mixed in the same validator registry.
+
+
+## CSS compatibility between releases
+
+The public `KnotViewer` CSS contract remains compatible throughout `v1`, including `0.x` and later `1.x`. This guarantee is separate from the data-contract and JavaScript API changes allowed during initial development. Classes `.knot-viewer-v1` / `.knot-viewer-v1__…`, documented state/theme attributes and `--knot-viewer-v1-*` variables retain their meaning. Stylesheets from releases in one generation must coexist without incompatible overrides depending on load order; extensions remain compatible with existing host styling without promising pixel-identical output.
+
+Major generations `v2`, `v3`, etc. may change the CSS contract incompatibly and use their own class suffixes and variable namespaces. No per-minor-release suffix is needed. This project decision supports concurrent viewers on one page. See the [component contract](../v1/spec/components.md#css-compatibility-and-styling) for details, defaults and styling limits. Published release snapshots remain immutable.
 
 ## Package and website selection
 

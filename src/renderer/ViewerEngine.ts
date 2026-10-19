@@ -37,7 +37,7 @@ export class ViewerEngine {
       throw new ViewerError('WEBGL_UNAVAILABLE', 'WebGL is unavailable')
     }
     this.canvas = this.renderer.domElement
-    this.canvas.className = 'knot-viewer__canvas'
+    this.canvas.className = 'knot-viewer-v1__canvas'
     this.canvas.setAttribute('aria-hidden', 'true')
     this.container.appendChild(this.canvas)
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))

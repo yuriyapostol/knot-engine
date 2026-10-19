@@ -61,6 +61,8 @@ Methods: `resetView()`, `fitToView()`, `capture({width,height,view,transparent})
 
 [Data contract](v1/spec/knot-asset.md) · [Functions](v1/spec/functions.md) · [Component](v1/spec/components.md) · [JSON Schema](v1/spec/schema/knot-asset.schema.json) · [Examples](v1/spec/examples/assets)
 
+Styling uses `.knot-viewer-v1…` classes and inherited `--knot-viewer-v1-*` variables, compatible throughout v1 (including 0.x and later 1.x). Major generations may introduce incompatible CSS in separate namespaces. See [variables, defaults and examples](v1/spec/components.md#css-compatibility-and-styling).
+
 ## Documentation
 
 Explain consequential contract decisions in the relevant specifications, with sources for definitions and implementations, checked examples and reasons for deviations from adopted conventions. Identify local project decisions as such rather than external standards. Data attribution, contributions and licensing follow the [metadata contract](v1/spec/sources.md).
