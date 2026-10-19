@@ -46,6 +46,10 @@ try {
  assert.equal(versions.current.path, 'v1/')
  assert.equal(JSON.parse(await readFile(path.join(output, 'v2/spec/schema/marker.json'), 'utf8')).generation, 2)
  assert.match(await readFile(path.join(output, 'v2/guide/future.html'), 'utf8'), /class="contract-version">v2/)
+ assert.doesNotMatch(await readFile(path.join(output, 'v2/guide/future.html'), 'utf8'), /data-knot-engine-demo|_example\/assets/)
+ assert.doesNotMatch(await readFile(path.join(output, 'v1/spec/components.html'), 'utf8'), /<script type="module"/)
+ assert.match(await readFile(path.join(snapshot, 'guide/getting-started.html'), 'utf8'), /data-knot-engine-demo="v1"/)
+ assert.doesNotMatch(await readFile(path.join(snapshot, 'guide/getting-started.html'), 'utf8'), /<iframe/)
  await assert.rejects(access(path.join(output, 'releases', version, 'v2')))
 
  for (const bundle of ['v1',`releases/${version}`]) {
@@ -56,7 +60,10 @@ try {
  const english = new JSDOM(await readFile(path.join(output,'v1/guide/getting-started.html'),'utf8'))
  assert.equal(english.window.document.documentElement.lang, 'en')
  assert.match(english.window.document.querySelector('[hreflang="uk"]').getAttribute('href'), /^getting-started\.uk\.html$/)
- assert.match(english.window.document.querySelector('iframe').src, /lang=en/)
+ assert.equal(english.window.document.querySelector('iframe'), null)
+ assert.ok(english.window.document.querySelector('[data-knot-engine-demo="v1"]'))
+ assert.ok(english.window.document.querySelector('script[type="module"][src*="_example/assets/"]'))
+ assert.ok(english.window.document.querySelector('link[rel="stylesheet"][href*="_example/assets/"]'))
  english.window.close()
  const ukrainian = new JSDOM(await readFile(path.join(output, 'design/architecture.uk.html'), 'utf8'))
  assert.equal(ukrainian.window.document.documentElement.lang, 'uk')

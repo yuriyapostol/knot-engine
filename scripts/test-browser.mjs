@@ -126,12 +126,12 @@ try {
   await page.setViewportSize({ width: 1280, height: 1000 })
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/?lang=uk`)
   await page.waitForSelector('.knot-engine-v1-viewer[data-state="ready"]')
-  await page.locator('.model-select select').selectOption('asset')
+  await page.locator('.knot-engine-v1-demo__model-select select').selectOption('asset')
   await page.waitForSelector('.knot-engine-v1-viewer[data-state="ready"]')
-  await page.locator('.representation-select').selectOption('view-3d-finish')
+  await page.locator('.knot-engine-v1-demo__representation-select').selectOption('view-3d-finish')
   await page.waitForSelector('.knot-engine-v1-viewer[data-state="ready"]')
   assert.deepEqual(failures, [])
-  const editor = page.locator('.editor textarea')
+  const editor = page.locator('.knot-engine-v1-demo__editor textarea')
   assert.ok(await editor.isVisible(), 'KnotAsset must use the same visible JSON editor')
   assert.equal(JSON.parse(await editor.inputValue()).representations.length, 3)
   const waitForModel = async id => {
@@ -143,7 +143,7 @@ try {
         return viewer?.getAttribute('data-state') === 'ready' && viewer.getAttribute('aria-label') === value
       }, id, { timeout: 10000 })
     } catch (error) {
-      console.error(await page.evaluate(() => ({ state: document.querySelector('.knot-engine-v1-viewer')?.getAttribute('data-state'), label: document.querySelector('.knot-engine-v1-viewer')?.getAttribute('aria-label'), issue: document.querySelector('.editor pre')?.textContent })))
+      console.error(await page.evaluate(() => ({ state: document.querySelector('.knot-engine-v1-viewer')?.getAttribute('data-state'), label: document.querySelector('.knot-engine-v1-viewer')?.getAttribute('aria-label'), issue: document.querySelector('.knot-engine-v1-demo__issue')?.textContent })))
       throw error
     }
   }
@@ -152,11 +152,11 @@ try {
   edited.representations[2].data.curves[0].points[1][1] += 0.1
   await editor.fill(JSON.stringify(edited))
   await waitForModel('edited-asset')
-  assert.equal(await page.locator('.representation-select').inputValue(), 'view-3d-finish', 'Editing must preserve selected representation')
-  assert.equal(await page.locator('.model-select select').inputValue(), 'custom')
+  assert.equal(await page.locator('.knot-engine-v1-demo__representation-select').inputValue(), 'view-3d-finish', 'Editing must preserve selected representation')
+  assert.equal(await page.locator('.knot-engine-v1-demo__model-select select').inputValue(), 'custom')
   const invalidDraft = structuredClone(edited); invalidDraft.units = 'relative'
   await editor.fill(JSON.stringify(invalidDraft))
-  await page.waitForSelector('.editor pre[role="alert"]')
+  await page.waitForSelector('.knot-engine-v1-demo__issue[role="alert"]')
   assert.equal(await page.locator('.knot-engine-v1-viewer').getAttribute('aria-label'), 'edited-asset', 'Invalid edits must retain last valid model')
   await editor.fill(JSON.stringify({ ...edited, id: 'recovered-asset' }))
   await waitForModel('recovered-asset')
@@ -177,12 +177,12 @@ try {
   imported.representations.push({ ...structuredClone(imported.representations[0]), id: 'second-view' })
   await page.locator('input[type="file"]').setInputFiles({ name: 'asset.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(imported)) })
   await waitForModel('imported-asset')
-  assert.equal(await page.locator('.representation-select').inputValue(), 'import-view')
-  await page.locator('.representation-select').selectOption('second-view')
+  assert.equal(await page.locator('.knot-engine-v1-demo__representation-select').inputValue(), 'import-view')
+  await page.locator('.knot-engine-v1-demo__representation-select').selectOption('second-view')
   await page.waitForSelector('.knot-engine-v1-viewer[data-state="ready"]')
-  await page.locator('.model-select select').selectOption('loop')
+  await page.locator('.knot-engine-v1-demo__model-select select').selectOption('loop')
   await waitForModel('twisted-loop')
-  assert.equal(await page.locator('.snapshot-select').count(), 0)
+  assert.equal(await page.locator('.knot-engine-v1-demo__snapshot-select').count(), 0)
   assert.equal(JSON.parse(await editor.inputValue()).schema, 'KnotAsset')
   assert.ok(JSON.parse(await editor.inputValue()).subject)
   assert.deepEqual(failures, [])
@@ -202,7 +202,7 @@ try {
     return png
   }
   await exportPNG()
-  assert.equal(await page.locator('.presentation-select').count(), 0)
+  assert.equal(await page.locator('.knot-engine-v1-demo__presentation-select').count(), 0)
   const square = await page.locator('.knot-engine-v1-viewer').boundingBox()
   assert.ok(Math.abs(square.width - square.height) < 1, 'Viewer must remain square')
   assert.deepEqual(failures, [])

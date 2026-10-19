@@ -15,6 +15,7 @@ const commit = (await run('git', ['rev-parse', 'HEAD'])).stdout.trim()
 const sourceDirty = Boolean((await run('git', ['status', '--porcelain'])).stdout.trim())
 const style = await readFile('site/style.css', 'utf8')
 const themeScript = await readFile('site/theme.js', 'utf8')
+let exampleEntry
 const esc = s => String(s).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('"', '&quot;')
 const relative = (from, to) => path.posix.relative(path.posix.dirname(from), to) || './'
 const route = (scope, key, lang) => [scope, `${key}${lang === 'en' ? '' : '.' + lang}.html`].filter(Boolean).join('/')
@@ -51,7 +52,10 @@ function html(title, body, file, scope, lang, key) {
   const l = locales[lang], generation = metadata.has(scope) ? scope : current, meta = metadata.get(generation)
   const link = target => relative(file, target)
   const nav = [['home', generation, 'index'], ['guide', generation, 'guide'], ['spec', generation, 'spec'], ['resources', generation, 'resources'], ['design', 'design', 'index']]
-  return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)} · Knot Engine</title><script>${themeScript}</script><style>${style}</style></head><body class="shell"><header><div class="header-row"><div class="identity"><a class="brand" href="${link(route(generation, 'index', lang))}">Knot Engine</a> <span class="contract-version">${generation}</span> <span class="package-version">(${esc(meta.packageVersion)})</span></div><div class="header-controls"><nav class="languages" aria-label="${l.language}">${Object.entries(locales).map(([code, locale]) => `<a hreflang="${code}" lang="${code}" ${code === lang ? 'aria-current="page"' : ''} href="${link(route(scope,key,code))}">${locale.name}</a>`).join('')}</nav><button class="theme-toggle" type="button" aria-label="${l.theme}" title="${l.theme}" onclick="window.toggleSiteTheme()"><span class="moon" aria-hidden="true">☾</span><span class="sun" aria-hidden="true">☀</span></button></div></div><p class="intro">${l.intro}</p><nav class="sections">${nav.map(([label,s,k]) => `<a href="${link(route(s,k,lang))}">${l[label]}</a>`).join('')}</nav></header>${scope === 'design' ? `<aside class="notice">${l.proposed}</aside>` : ''}<main class="markdown-body">${body}</main></body></html>`
+  const runtime = body.includes('data-knot-engine-demo="v1"')
+    ? `${(exampleEntry.css || []).map(css => `<link rel="stylesheet" href="${link(`${current}/_example/${css}`)}">`).join('')}<script type="module" src="${link(`${current}/_example/${exampleEntry.file}`)}"></script>`
+    : ''
+  return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)} · Knot Engine</title><script>${themeScript}</script><style>${style}</style>${runtime}</head><body class="shell"><header><div class="header-row"><div class="identity"><a class="brand" href="${link(route(generation, 'index', lang))}">Knot Engine</a> <span class="contract-version">${generation}</span> <span class="package-version">(${esc(meta.packageVersion)})</span></div><div class="header-controls"><nav class="languages" aria-label="${l.language}">${Object.entries(locales).map(([code, locale]) => `<a hreflang="${code}" lang="${code}" ${code === lang ? 'aria-current="page"' : ''} href="${link(route(scope,key,code))}">${locale.name}</a>`).join('')}</nav><button class="theme-toggle" type="button" aria-label="${l.theme}" title="${l.theme}" onclick="window.toggleSiteTheme()"><span class="moon" aria-hidden="true">☾</span><span class="sun" aria-hidden="true">☀</span></button></div></div><p class="intro">${l.intro}</p><nav class="sections">${nav.map(([label,s,k]) => `<a href="${link(route(s,k,lang))}">${l[label]}</a>`).join('')}</nav></header>${scope === 'design' ? `<aside class="notice">${l.proposed}</aside>` : ''}<main class="markdown-body">${body}</main></body></html>`
 }
 function resolveLink(href, source, file) {
   if (/^(?:[a-z][a-z\d+.-]*:|\/\/|#)/i.test(href)) return href
@@ -63,6 +67,8 @@ function resolveLink(href, source, file) {
 }
 await rm(output, { recursive: true, force: true })
 console.log((await run('npm', ['run', 'build:example'], { env: { ...process.env, BASE_PATH: './' }, maxBuffer: 10 * 1024 * 1024 })).stdout)
+exampleEntry = JSON.parse(await readFile('site-runtime-dist/.vite/manifest.json', 'utf8'))['index.html']
+if (!exampleEntry?.file) throw Error('Interactive example entry is missing')
 for (const scope of [...generations, 'design']) await cp(path.join(sourceRoot, scope), path.join(output, scope), { recursive: true })
 await cp('site-runtime-dist', path.join(output, current, '_example'), { recursive: true })
 for (const [source, p] of pages) {
@@ -76,7 +82,7 @@ for (const [source, p] of pages) {
     link({ href, title, tokens }) { return `<a href="${esc(resolveLink(href,source,file))}"${title ? ` title="${esc(title)}"` : ''}>${this.parser.parseInline(tokens)}</a>` },
     image({ href, text }) { return `<img src="${esc(resolveLink(href,source,file))}" alt="${esc(text)}">` }
   } })
-  const example = p.scope === current ? `<iframe class="example" title="${locales[p.lang].example}" src="${relative(file,`${current}/_example/index.html`)}?lang=${p.lang}" loading="lazy"></iframe>` : `<p>${p.lang === 'uk' ? 'Інтерактивний приклад доступний для поточної версії пакету та в її архівах.' : 'The interactive example is available for the current package generation and its archives.'}</p>`
+  const example = p.scope === current ? `<div class="knot-engine-v1-demo-host" data-knot-engine-demo="v1" aria-label="${locales[p.lang].example}"><p>${p.lang === 'uk' ? 'Завантаження інтерактивного прикладу…' : 'Loading interactive example…'}</p></div>` : `<p>${p.lang === 'uk' ? 'Інтерактивний приклад доступний для поточної версії пакету та в її архівах.' : 'The interactive example is available for the current package generation and its archives.'}</p>`
   await put(file, html(p.title, marked.parse(p.text).replaceAll('<!-- interactive-example -->',example),file,p.scope,p.lang,p.key))
 }
 for (const scope of [...generations, 'design']) {

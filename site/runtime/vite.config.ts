@@ -7,5 +7,5 @@ export default defineConfig({
   base: process.env.BASE_PATH || '/',
   plugins: [vue()],
   resolve: { alias: { 'knot-engine': fileURLToPath(new URL('../../src/index.ts', import.meta.url)) } },
-  build: { outDir: '../../site-runtime-dist', emptyOutDir: true }
+  build: { manifest: true, outDir: '../../site-runtime-dist', emptyOutDir: true }
 })

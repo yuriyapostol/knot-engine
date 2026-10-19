@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, shallowRef, watchEffect } from 'vue'
-import { KnotViewer, validateKnotAsset, resolveKnotAsset, ViewerError, type KnotAsset, SPATIAL_CURVE, type Camera3D, type CaptureOptions } from 'knot-engine'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
+import { KnotViewer, validateKnotAsset, resolveKnotAsset, ViewerError, type KnotAsset, SPATIAL_CURVE, expandURI, type Camera3D, type CaptureOptions } from 'knot-engine'
 import loop from '../../v1/spec/examples/assets/twisted-loop.json'
 import overhand from '../../v1/spec/examples/assets/overhand.json'
 import assetFixture from '../../v1/spec/examples/assets/procedures.json'
@@ -28,25 +28,22 @@ function formatModel(value: unknown, level = 0): string {
 const selected = ref('overhand')
 const current = shallowRef<DemoInput>(examples.overhand)
 const asset = computed(() => current.value.kind === 'asset' ? current.value.data : null)
-const representations = computed(() => asset.value?.representations?.filter(rep => rep.type === SPATIAL_CURVE) ?? [])
-const locale = ref<'uk' | 'en'>(new URLSearchParams(window.location.search).get('lang') === 'uk' ? 'uk' : 'en')
-const theme = ref<'light' | 'dark'>('light')
-let hostObserver: MutationObserver | undefined
-if (window.parent !== window) {
-  try {
-    const host = window.parent.document.documentElement
-    const inherit = () => {
-      locale.value = host.lang === 'uk' ? 'uk' : 'en'
-      theme.value = host.dataset.theme === 'dark' ? 'dark' : 'light'
-    }
-    inherit()
-    hostObserver = new MutationObserver(inherit)
-    hostObserver.observe(host, { attributes: true, attributeFilter: ['lang', 'data-theme'] })
-  } catch { /* A standalone cross-origin host retains the explicit locale. */ }
+function spatialRepresentations(data: KnotAsset) {
+  return data.representations?.filter(rep => expandURI(rep.type, data.namespaces) === SPATIAL_CURVE) ?? []
 }
-watchEffect(() => {
-  document.documentElement.lang = locale.value
-  document.documentElement.style.colorScheme = theme.value
+const representations = computed(() => asset.value ? spatialRepresentations(asset.value) : [])
+const host = document.documentElement
+const locale = ref<'uk' | 'en'>(host.lang === 'uk' ? 'uk' : 'en')
+const theme = ref<'light' | 'dark'>(host.dataset.theme === 'dark' ? 'dark' : 'light')
+let hostObserver: MutationObserver | undefined
+onMounted(() => {
+  const inherit = () => {
+    locale.value = host.lang === 'uk' ? 'uk' : 'en'
+    theme.value = host.dataset.theme === 'dark' ? 'dark' : 'light'
+  }
+  inherit()
+  hostObserver = new MutationObserver(inherit)
+  hostObserver.observe(host, { attributes: true, attributeFilter: ['lang', 'data-theme'] })
 })
 onBeforeUnmount(() => hostObserver?.disconnect())
 const draft = ref(formatModel(examples.overhand.data))
@@ -61,10 +58,11 @@ const content = computed(() => locale.value === 'uk' ? {
   model: 'Model', overhand: 'Overhand knot', loop: 'Twisted loop', asset: 'Rope with multiple states', representation: 'Representation', custom: 'Custom model', invalidJSON: 'Invalid JSON', invalidFormat: 'Expected KnotAsset', fileLimit: 'File exceeds 1 MiB', export: 'Export to PNG', editor: 'Code', openFile: 'Open from file', saveFile: 'Save to file'
 })
 function setCurrent(input: DemoInput) {
-  const rep = input.data.representations?.find(r => r.type === SPATIAL_CURVE && r.id === representationId.value)
-    ?? input.data.representations?.find(r => r.type === SPATIAL_CURVE)
-  resolveKnotAsset(input.data, { representationId: rep?.id })
-  representationId.value = rep!.id
+  const candidates = spatialRepresentations(input.data)
+  const rep = candidates.find(r => r.id === representationId.value) ?? candidates[0]
+  if (!rep) throw new ViewerError('UNSUPPORTED_SCHEMA', '3D viewer requires spatial-curve')
+  resolveKnotAsset(input.data, { representationId: rep.id })
+  representationId.value = rep.id
   current.value = input
 }
 function choose() {
@@ -119,20 +117,20 @@ async function download(options: CaptureOptions, name: string) {
 </script>
 
 <template>
-  <main :data-theme="theme">
-    <div class="layout">
-      <aside class="sidebar">
-        <section class="panel">
-          <label>{{ content.model }}<span class="model-select select-field"><select v-model="selected" @change="choose"><option value="overhand">{{ content.overhand }}</option><option value="loop">{{ content.loop }}</option><option value="asset">{{ content.asset }}</option><option v-if="selected === 'custom'" value="custom">{{ content.custom }}</option></select></span></label>
-          <input ref="fileInput" class="file-input" type="file" accept=".json,application/json" @change="chooseFile">
-          <section class="editor"><label class="code-label">{{ content.editor }}<textarea v-model="draft" @input="scheduleDraft" spellcheck="false" rows="18"></textarea></label><pre v-if="issue" role="alert">{{ issue }}</pre><div class="actions"><button type="button" @click="fileInput?.click()">{{ content.openFile }}</button><button type="button" @click="saveCode">{{ content.saveFile }}</button></div></section>
+  <section class="knot-engine-v1-demo" :data-theme="theme" :lang="locale" :aria-label="locale === 'uk' ? 'Інтерактивний приклад' : 'Interactive example'">
+    <div class="knot-engine-v1-demo__layout">
+      <aside class="knot-engine-v1-demo__sidebar">
+        <section class="knot-engine-v1-demo__panel">
+          <label>{{ content.model }}<span class="knot-engine-v1-demo__model-select knot-engine-v1-demo__select-field"><select v-model="selected" @change="choose"><option value="overhand">{{ content.overhand }}</option><option value="loop">{{ content.loop }}</option><option value="asset">{{ content.asset }}</option><option v-if="selected === 'custom'" value="custom">{{ content.custom }}</option></select></span></label>
+          <input ref="fileInput" class="knot-engine-v1-demo__file-input" type="file" accept=".json,application/json" @change="chooseFile">
+          <section class="knot-engine-v1-demo__editor"><label class="knot-engine-v1-demo__code-label">{{ content.editor }}<textarea v-model="draft" @input="scheduleDraft" spellcheck="false" rows="18"></textarea></label><output v-if="issue" class="knot-engine-v1-demo__issue" role="alert">{{ issue }}</output><div class="knot-engine-v1-demo__actions"><button type="button" @click="fileInput?.click()">{{ content.openFile }}</button><button type="button" @click="saveCode">{{ content.saveFile }}</button></div></section>
         </section>
-        <section class="panel view-settings">
-          <label v-if="asset">{{ content.representation }}<span class="select-field"><select v-model="representationId" class="representation-select"><option v-for="representation in representations" :key="representation.id" :value="representation.id">{{ representation.id }}</option></select></span></label>
-          <div class="actions"><button type="button" @click="download({ view: 'current' }, 'knot-current.png')">{{ content.export }}</button></div>
+        <section class="knot-engine-v1-demo__panel knot-engine-v1-demo__view-settings">
+          <label v-if="asset">{{ content.representation }}<span class="knot-engine-v1-demo__select-field"><select v-model="representationId" class="knot-engine-v1-demo__representation-select"><option v-for="representation in representations" :key="representation.id" :value="representation.id">{{ representation.id }}</option></select></span></label>
+          <div class="knot-engine-v1-demo__actions"><button type="button" @click="download({ view: 'current' }, 'knot-current.png')">{{ content.export }}</button></div>
         </section>
       </aside>
-      <section class="stage"><KnotViewer ref="viewer" :show-controls="false" :asset="asset" :representation-id="representationId" :initial-camera="demoCamera" :label="current.data.id || 'Rope model'" :locale="locale" :theme="theme" @error="issue = $event.message" /></section>
+      <section class="knot-engine-v1-demo__stage"><KnotViewer ref="viewer" :show-controls="false" :asset="asset" :representation-id="representationId" :initial-camera="demoCamera" :label="current.data.id || 'Rope model'" :locale="locale" :theme="theme" @error="issue = $event.message" /></section>
     </div>
-  </main>
+  </section>
 </template>
