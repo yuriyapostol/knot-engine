@@ -26,52 +26,52 @@ Import `knot-engine/styles.css`. Toolbar buttons and arrow keys support camera i
 
 ## CSS namespace and styling
 
-The current component's root class is `.knot-viewer-v1`; part classes are `.knot-viewer-v1__surface`, `.knot-viewer-v1__canvas`, `.knot-viewer-v1__fallback`, `.knot-viewer-v1__poster`, `.knot-viewer-v1__toolbar`. The root exposes `data-theme="light|dark"` and `data-state="empty|initializing|ready|error"`.
+The current component's root class is `.knot-engine-v1-viewer`; part classes are `.knot-engine-v1-viewer__surface`, `.knot-engine-v1-viewer__canvas`, `.knot-engine-v1-viewer__fallback`, `.knot-engine-v1-viewer__poster`, `.knot-engine-v1-viewer__toolbar`. The root exposes `data-theme="light|dark"` and `data-state="empty|initializing|ready|error"`.
 
-The `-v1` suffix separates major-generation styles so documentation can display `v1`, `v2`, etc. viewers on the same page when needed. `v1` covers `0.x` and later `1.x` packages; subsequent generations use their own `.knot-viewer-v2…` classes and `--knot-viewer-v2-*` variables. Unversioned `.knot-viewer…` aliases are not added.
+The package CSS namespace is `knot-engine-v1`; `viewer` identifies this component within it. Other components use their own names under the same package/generation prefix. `v1` covers `0.x` and later `1.x` packages; subsequent generations use `.knot-engine-v2-viewer…` classes and `--knot-engine-v2-viewer-*` variables. This permits different major versions on the same page. Unversioned aliases are not added.
 
-Backward compatibility is not required during initial development, including for CSS. The suffix does not freeze classes, variables, markup or appearance between releases in one generation or guarantee interchangeable stylesheets. Each viewer should use the stylesheet from its corresponding release.
+Backward compatibility is not required during initial development, including for CSS. The namespace does not freeze classes, variables, markup or appearance between releases in one generation or guarantee interchangeable stylesheets. Each viewer should use the stylesheet from its corresponding release.
 
-Public `--knot-viewer-v1-*` CSS variables are the preferred customization mechanism. Set them on a host container for inheritance or on an individual component through `class`/`style`. The package does not assign public variables on its root: absent overrides use defaults. Private `--_knot-viewer-v1-*` variables hold the theme palette and are not public API. Explicit overrides win in both themes; hosts can use `[data-theme=dark]` for theme-specific colors.
+Public `--knot-engine-v1-viewer-*` CSS variables are the preferred customization mechanism. Set them on a host container for inheritance or on an individual component through `class`/`style`. The package does not assign public variables on its root: absent overrides use defaults. Private `--_knot-engine-v1-viewer-*` variables hold the theme palette and are not public API. Explicit overrides win in both themes; hosts can use `[data-theme=dark]` for theme-specific colors.
 
 | Variable | Default (light / dark for colors) | Meaning |
 | --- | --- | --- |
-| `--knot-viewer-v1-background` | `#f8f5ef / #171b24` | Viewer and button background |
-| `--knot-viewer-v1-foreground` | `#29231d / #f2eee8` | Text color |
-| `--knot-viewer-v1-border` | `#c9bdae / #3f4652` | Border color |
-| `--knot-viewer-v1-focus` | `#1467b6 / #91c6ff` | Keyboard focus color |
-| `--knot-viewer-v1-toolbar-background` | `#fffdf7e8 / #242a34e8` | Toolbar background |
-| `--knot-viewer-v1-error` | `#9b2525 / #ffb0a7` | Error text color |
-| `--knot-viewer-v1-aspect-ratio` | `4/3` | Viewer aspect ratio |
-| `--knot-viewer-v1-min-height` | `260px` | Minimum viewer height |
-| `--knot-viewer-v1-border-width` | `1px` | Border width |
-| `--knot-viewer-v1-radius` | `12px` | Viewer corner radius |
-| `--knot-viewer-v1-toolbar-offset` | `12px` | Toolbar side/bottom inset |
-| `--knot-viewer-v1-toolbar-gap` | `6px` | Gap between toolbar controls |
-| `--knot-viewer-v1-toolbar-padding` | `6px` | Toolbar padding |
-| `--knot-viewer-v1-toolbar-radius` | `10px` | Toolbar corner radius |
-| `--knot-viewer-v1-button-min-size` | `44px` | Minimum button width and height |
-| `--knot-viewer-v1-button-padding` | `6px 10px` | Button padding |
-| `--knot-viewer-v1-button-radius` | `7px` | Button corner radius |
+| `--knot-engine-v1-viewer-background` | `#f8f5ef / #171b24` | Viewer and button background |
+| `--knot-engine-v1-viewer-foreground` | `#29231d / #f2eee8` | Text color |
+| `--knot-engine-v1-viewer-border` | `#c9bdae / #3f4652` | Border color |
+| `--knot-engine-v1-viewer-focus` | `#1467b6 / #91c6ff` | Keyboard focus color |
+| `--knot-engine-v1-viewer-toolbar-background` | `#fffdf7e8 / #242a34e8` | Toolbar background |
+| `--knot-engine-v1-viewer-error` | `#9b2525 / #ffb0a7` | Error text color |
+| `--knot-engine-v1-viewer-aspect-ratio` | `4/3` | Viewer aspect ratio |
+| `--knot-engine-v1-viewer-min-height` | `260px` | Minimum viewer height |
+| `--knot-engine-v1-viewer-border-width` | `1px` | Border width |
+| `--knot-engine-v1-viewer-radius` | `12px` | Viewer corner radius |
+| `--knot-engine-v1-viewer-toolbar-offset` | `12px` | Toolbar side/bottom inset |
+| `--knot-engine-v1-viewer-toolbar-gap` | `6px` | Gap between toolbar controls |
+| `--knot-engine-v1-viewer-toolbar-padding` | `6px` | Toolbar padding |
+| `--knot-engine-v1-viewer-toolbar-radius` | `10px` | Toolbar corner radius |
+| `--knot-engine-v1-viewer-button-min-size` | `44px` | Minimum button width and height |
+| `--knot-engine-v1-viewer-button-padding` | `6px 10px` | Button padding |
+| `--knot-engine-v1-viewer-button-radius` | `7px` | Button corner radius |
 
 ```vue
 <template>
   <section class="knot-gallery">
     <KnotViewer :asset="asset" label="Rope" />
     <KnotViewer :asset="otherAsset" label="Other rope"
-      style="--knot-viewer-v1-background: #ffffff" />
+      style="--knot-engine-v1-viewer-background: #ffffff" />
   </section>
 </template>
 
 <style>
 .knot-gallery {
-  --knot-viewer-v1-radius: 0px;
-  --knot-viewer-v1-aspect-ratio: 1;
-  --knot-viewer-v1-toolbar-gap: 8px;
+  --knot-engine-v1-viewer-radius: 0px;
+  --knot-engine-v1-viewer-aspect-ratio: 1;
+  --knot-engine-v1-viewer-toolbar-gap: 8px;
 }
 </style>
 ```
 
 These variables style the HTML interface, not WebGL materials, lighting or PNG backgrounds. The `theme` prop continues to control the 3D palette; `capture` uses its own theme/mode background, or transparency with `transparent:true`. Smaller buttons can reduce touch usability; the default remains 44px.
 
-This is a project decision: a generation suffix separates styles for different major viewers on one documentation page. Inherited variables customize a group or individual instance without changing internal markup. See the [publication policy](../../design/publication.md).
+This is a project decision: package, generation and component names distinguish styles for multiple components and major versions. Inherited variables customize a group or individual instance without changing internal markup. See the [publication policy](../../design/publication.md).

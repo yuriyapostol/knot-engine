@@ -113,20 +113,20 @@ defineExpose({ resetView, fitToView, capture: (options?: CaptureOptions) => engi
 </script>
 
 <template>
-  <div ref="root" class="knot-viewer-v1" :data-theme="theme" :data-state="state" :aria-label="label" :aria-description="description" role="group" tabindex="0" @keydown="onKeydown">
-    <div ref="surface" class="knot-viewer-v1__surface" @pointerdown.capture="onPointerDown"></div>
-    <div v-if="state !== 'ready'" class="knot-viewer-v1__fallback" :role="state === 'error' ? 'alert' : undefined">
+  <div ref="root" class="knot-engine-v1-viewer" :data-theme="theme" :data-state="state" :aria-label="label" :aria-description="description" role="group" tabindex="0" @keydown="onKeydown">
+    <div ref="surface" class="knot-engine-v1-viewer__surface" @pointerdown.capture="onPointerDown"></div>
+    <div v-if="state !== 'ready'" class="knot-engine-v1-viewer__fallback" :role="state === 'error' ? 'alert' : undefined">
       <slot v-if="state === 'initializing'" name="loading" :state="state">
-        <img v-if="poster" :src="poster" :alt="label" class="knot-viewer-v1__poster">
+        <img v-if="poster" :src="poster" :alt="label" class="knot-engine-v1-viewer__poster">
         <span v-else>{{ text.loading }}</span>
       </slot>
       <slot v-else name="fallback" :state="state" :error="error" :poster="poster">
-        <img v-if="poster" :src="poster" :alt="label" class="knot-viewer-v1__poster">
+        <img v-if="poster" :src="poster" :alt="label" class="knot-engine-v1-viewer__poster">
         <span v-else>{{ state === 'empty' ? text.empty : text.unavailable }}</span>
         <button v-if="showControls && state === 'error' && error?.recoverable" type="button" @click="retry">{{ text.retry }}</button>
       </slot>
     </div>
-    <div v-if="showControls && state === 'ready'" class="knot-viewer-v1__toolbar">
+    <div v-if="showControls && state === 'ready'" class="knot-engine-v1-viewer__toolbar">
       <slot name="toolbar" :reset="resetView" :fit="fitToView" :zoom-in="zoomIn" :zoom-out="zoomOut" :ready="state === 'ready'" :touch-active="touchActive">
         <button type="button" :title="text.reset" :aria-label="text.reset" @click="resetView">↺</button>
         <button type="button" :title="text.fit" :aria-label="text.fit" @click="fitToView">⌗</button>

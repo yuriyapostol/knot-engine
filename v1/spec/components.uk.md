@@ -26,52 +26,52 @@ Vue 3 компонент для одного статичного простор
 
 ## Простір імен CSS та оформлення
 
-Кореневий клас поточного компонента — `.knot-viewer-v1`; класи частин — `.knot-viewer-v1__surface`, `.knot-viewer-v1__canvas`, `.knot-viewer-v1__fallback`, `.knot-viewer-v1__poster`, `.knot-viewer-v1__toolbar`. Корінь має `data-theme="light|dark"` і `data-state="empty|initializing|ready|error"`.
+Кореневий клас поточного компонента — `.knot-engine-v1-viewer`; класи частин — `.knot-engine-v1-viewer__surface`, `.knot-engine-v1-viewer__canvas`, `.knot-engine-v1-viewer__fallback`, `.knot-engine-v1-viewer__poster`, `.knot-engine-v1-viewer__toolbar`. Корінь має `data-theme="light|dark"` і `data-state="empty|initializing|ready|error"`.
 
-Суфікс `-v1` розділяє стилі мажорних поколінь, щоб за потреби на одній сторінці документації можна було відобразити переглядачі `v1`, `v2` тощо. `v1` охоплює пакети `0.x` і подальші `1.x`; наступні покоління використовують власні класи `.knot-viewer-v2…` та змінні `--knot-viewer-v2-*`. Незаверсійовані класи `.knot-viewer…` не додаються як псевдоніми.
+Простір імен CSS пакета — `knot-engine-v1`; `viewer` позначає цей компонент у його межах. Інші компоненти використовують власні назви зі спільним префіксом пакета/покоління. `v1` охоплює пакети `0.x` і подальші `1.x`; наступні покоління використовують класи `.knot-engine-v2-viewer…` та змінні `--knot-engine-v2-viewer-*`. Це дозволяє використовувати різні мажорні версії на одній сторінці. Незаверсійовані псевдоніми не додаються.
 
-На початковій стадії розробки зворотна сумісність не вимагається, зокрема й для CSS. Суфікс не фіксує класи, змінні, розмітку або оформлення між випусками одного покоління й не гарантує взаємозамінність їхніх таблиць стилів. Кожний переглядач слід використовувати зі стилями відповідного випуску.
+На початковій стадії розробки зворотна сумісність не вимагається, зокрема й для CSS. Простір імен не фіксує класи, змінні, розмітку або оформлення між випусками одного покоління й не гарантує взаємозамінність їхніх таблиць стилів. Кожний переглядач слід використовувати зі стилями відповідного випуску.
 
-Переважний спосіб налаштування — публічні CSS-змінні `--knot-viewer-v1-*`. Задавайте їх на контейнері для наслідування або на конкретному компоненті через `class`/`style`. Пакет не присвоює публічним змінним власні значення на корені: якщо перевизначення немає, застосовується типове значення. Приватні змінні `--_knot-viewer-v1-*` зберігають палітру теми й не є публічним API. Явне перевизначення має пріоритет в обох темах; для різних кольорів тем застосунок може використати селектор `[data-theme=dark]`.
+Переважний спосіб налаштування — публічні CSS-змінні `--knot-engine-v1-viewer-*`. Задавайте їх на контейнері для наслідування або на конкретному компоненті через `class`/`style`. Пакет не присвоює публічним змінним власні значення на корені: якщо перевизначення немає, застосовується типове значення. Приватні змінні `--_knot-engine-v1-viewer-*` зберігають палітру теми й не є публічним API. Явне перевизначення має пріоритет в обох темах; для різних кольорів тем застосунок може використати селектор `[data-theme=dark]`.
 
 | Змінна | Типово (light / dark для кольорів) | Призначення |
 | --- | --- | --- |
-| `--knot-viewer-v1-background` | `#f8f5ef / #171b24` | Фон переглядача й кнопок |
-| `--knot-viewer-v1-foreground` | `#29231d / #f2eee8` | Колір тексту |
-| `--knot-viewer-v1-border` | `#c9bdae / #3f4652` | Колір рамок |
-| `--knot-viewer-v1-focus` | `#1467b6 / #91c6ff` | Колір фокуса клавіатури |
-| `--knot-viewer-v1-toolbar-background` | `#fffdf7e8 / #242a34e8` | Фон панелі керування |
-| `--knot-viewer-v1-error` | `#9b2525 / #ffb0a7` | Колір тексту помилки |
-| `--knot-viewer-v1-aspect-ratio` | `4/3` | Пропорції переглядача |
-| `--knot-viewer-v1-min-height` | `260px` | Мінімальна висота переглядача |
-| `--knot-viewer-v1-border-width` | `1px` | Товщина рамок |
-| `--knot-viewer-v1-radius` | `12px` | Радіус кутів переглядача |
-| `--knot-viewer-v1-toolbar-offset` | `12px` | Відступ панелі з боків і знизу |
-| `--knot-viewer-v1-toolbar-gap` | `6px` | Проміжок між елементами панелі |
-| `--knot-viewer-v1-toolbar-padding` | `6px` | Внутрішній відступ панелі |
-| `--knot-viewer-v1-toolbar-radius` | `10px` | Радіус кутів панелі |
-| `--knot-viewer-v1-button-min-size` | `44px` | Мінімальні ширина й висота кнопки |
-| `--knot-viewer-v1-button-padding` | `6px 10px` | Внутрішній відступ кнопки |
-| `--knot-viewer-v1-button-radius` | `7px` | Радіус кутів кнопки |
+| `--knot-engine-v1-viewer-background` | `#f8f5ef / #171b24` | Фон переглядача й кнопок |
+| `--knot-engine-v1-viewer-foreground` | `#29231d / #f2eee8` | Колір тексту |
+| `--knot-engine-v1-viewer-border` | `#c9bdae / #3f4652` | Колір рамок |
+| `--knot-engine-v1-viewer-focus` | `#1467b6 / #91c6ff` | Колір фокуса клавіатури |
+| `--knot-engine-v1-viewer-toolbar-background` | `#fffdf7e8 / #242a34e8` | Фон панелі керування |
+| `--knot-engine-v1-viewer-error` | `#9b2525 / #ffb0a7` | Колір тексту помилки |
+| `--knot-engine-v1-viewer-aspect-ratio` | `4/3` | Пропорції переглядача |
+| `--knot-engine-v1-viewer-min-height` | `260px` | Мінімальна висота переглядача |
+| `--knot-engine-v1-viewer-border-width` | `1px` | Товщина рамок |
+| `--knot-engine-v1-viewer-radius` | `12px` | Радіус кутів переглядача |
+| `--knot-engine-v1-viewer-toolbar-offset` | `12px` | Відступ панелі з боків і знизу |
+| `--knot-engine-v1-viewer-toolbar-gap` | `6px` | Проміжок між елементами панелі |
+| `--knot-engine-v1-viewer-toolbar-padding` | `6px` | Внутрішній відступ панелі |
+| `--knot-engine-v1-viewer-toolbar-radius` | `10px` | Радіус кутів панелі |
+| `--knot-engine-v1-viewer-button-min-size` | `44px` | Мінімальні ширина й висота кнопки |
+| `--knot-engine-v1-viewer-button-padding` | `6px 10px` | Внутрішній відступ кнопки |
+| `--knot-engine-v1-viewer-button-radius` | `7px` | Радіус кутів кнопки |
 
 ```vue
 <template>
   <section class="knot-gallery">
     <KnotViewer :asset="asset" label="Rope" />
     <KnotViewer :asset="otherAsset" label="Other rope"
-      style="--knot-viewer-v1-background: #ffffff" />
+      style="--knot-engine-v1-viewer-background: #ffffff" />
   </section>
 </template>
 
 <style>
 .knot-gallery {
-  --knot-viewer-v1-radius: 0px;
-  --knot-viewer-v1-aspect-ratio: 1;
-  --knot-viewer-v1-toolbar-gap: 8px;
+  --knot-engine-v1-viewer-radius: 0px;
+  --knot-engine-v1-viewer-aspect-ratio: 1;
+  --knot-engine-v1-viewer-toolbar-gap: 8px;
 }
 </style>
 ```
 
 Ці змінні оформлюють HTML-інтерфейс, а не WebGL-матеріали, освітлення чи фон PNG. Властивість `theme` продовжує керувати палітрою 3D; `capture` використовує власний фон відповідно до теми/режиму, або прозорий при `transparent:true`. Менші кнопки можуть погіршити зручність сенсорного керування; типово збережено 44px.
 
-Це рішення проєкту: суфікс покоління розділяє стилі різних мажорних переглядачів на одній сторінці документації. Наслідувані змінні дозволяють оформлювати групу чи один екземпляр без зміни внутрішньої розмітки. Правила публікації описані в [design](../../design/publication.uk.md).
+Це рішення проєкту: назви пакета, покоління й компонента розділяють стилі різних компонентів і мажорних версій. Наслідувані змінні дозволяють оформлювати групу чи один екземпляр без зміни внутрішньої розмітки. Правила публікації описані в [design](../../design/publication.uk.md).

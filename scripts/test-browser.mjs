@@ -10,37 +10,39 @@ let browser
 try {
   await server.listen()
   browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || (existsSync('/usr/bin/google-chrome') ? '/usr/bin/google-chrome' : chromium.executablePath()), headless: true, args: ['--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader', '--enable-webgl'] })
-  // Probe future-generation namespace isolation with representative CSS, not a v2 runtime.
+  // Probe generation and component namespaces with representative CSS, not future runtimes.
   const styles = await browser.newPage()
   const v1CSS = readFileSync('src/styles.css', 'utf8')
-  const v2CSS = `.knot-viewer-v2{background:var(--knot-viewer-v2-background,rgb(40,50,60));border-radius:3px}.knot-viewer-v2__canvas{position:relative}`
+  const v2CSS = `.knot-engine-v2-viewer{background:var(--knot-engine-v2-viewer-background,rgb(40,50,60));border-radius:3px}.knot-engine-v2-viewer__canvas{position:relative}.knot-engine-v1-probe{background:rgb(70,80,90)}.knot-engine-v1-probe__canvas{position:relative}`
   for (const sheets of [[v1CSS, v2CSS], [v2CSS, v1CSS]]) {
-    await styles.setContent(`<section id="host" style="--knot-viewer-v1-background:rgb(1,2,3);--knot-viewer-v1-radius:20px;--knot-viewer-v1-aspect-ratio:1;--knot-viewer-v1-toolbar-gap:9px">
-      <div id="light" class="knot-viewer-v1" data-theme="light" data-state="ready">
-        <canvas class="knot-viewer-v1__canvas"></canvas>
-        <div class="knot-viewer-v1__toolbar"><button>Reset</button></div>
+    await styles.setContent(`<section id="host" style="--knot-engine-v1-viewer-background:rgb(1,2,3);--knot-engine-v1-viewer-radius:20px;--knot-engine-v1-viewer-aspect-ratio:1;--knot-engine-v1-viewer-toolbar-gap:9px">
+      <div id="light" class="knot-engine-v1-viewer" data-theme="light" data-state="ready">
+        <canvas class="knot-engine-v1-viewer__canvas"></canvas>
+        <div class="knot-engine-v1-viewer__toolbar"><button>Reset</button></div>
       </div>
-      <div id="dark" class="knot-viewer-v1" data-theme="dark" data-state="error">
-        <canvas class="knot-viewer-v1__canvas"></canvas>
-        <div class="knot-viewer-v1__fallback" role="alert">Error</div>
+      <div id="dark" class="knot-engine-v1-viewer" data-theme="dark" data-state="error">
+        <canvas class="knot-engine-v1-viewer__canvas"></canvas>
+        <div class="knot-engine-v1-viewer__fallback" role="alert">Error</div>
       </div>
-      <div id="local" class="knot-viewer-v1" data-theme="dark" style="--knot-viewer-v1-background:rgb(4,5,6)"></div>
-      <div id="future" class="knot-viewer-v2"><canvas class="knot-viewer-v2__canvas"></canvas></div>
+      <div id="local" class="knot-engine-v1-viewer" data-theme="dark" style="--knot-engine-v1-viewer-background:rgb(4,5,6)"></div>
+      <div id="future" class="knot-engine-v2-viewer"><canvas class="knot-engine-v2-viewer__canvas"></canvas></div>
+      <div id="other" class="knot-engine-v1-probe"><canvas class="knot-engine-v1-probe__canvas"></canvas></div>
     </section>
-    <div id="default-light" class="knot-viewer-v1" data-theme="light"></div>
-    <div id="default-dark" class="knot-viewer-v1" data-theme="dark"></div>`)
+    <div id="default-light" class="knot-engine-v1-viewer" data-theme="light"></div>
+    <div id="default-dark" class="knot-engine-v1-viewer" data-theme="dark"></div>`)
     for (const content of sheets) await styles.addStyleTag({ content })
     const computed = () => styles.evaluate(() => {
       const css = selector => getComputedStyle(document.querySelector(selector))
       return {
         light: css('#light').backgroundColor, dark: css('#dark').backgroundColor,
         local: css('#local').backgroundColor, radius: css('#light').borderRadius,
-        aspect: css('#light').aspectRatio, gap: css('#light .knot-viewer-v1__toolbar').gap,
+        aspect: css('#light').aspectRatio, gap: css('#light .knot-engine-v1-viewer__toolbar').gap,
         button: css('#light button').minHeight, canvas: css('#light canvas').position,
         ready: css('#light canvas').visibility, error: css('#dark canvas').visibility,
-        alert: css('#dark .knot-viewer-v1__fallback').color,
+        alert: css('#dark .knot-engine-v1-viewer__fallback').color,
         future: css('#future').backgroundColor, futureRadius: css('#future').borderRadius,
         futureCanvas: css('#future canvas').position,
+        other: css('#other').backgroundColor, otherCanvas: css('#other canvas').position,
         defaultLight: css('#default-light').backgroundColor, defaultDark: css('#default-dark').backgroundColor
       }
     })
@@ -49,19 +51,20 @@ try {
       radius: '20px', aspect: '1 / 1', gap: '9px', button: '44px', canvas: 'absolute',
       ready: 'visible', error: 'hidden', alert: 'rgb(255, 176, 167)',
       future: 'rgb(40, 50, 60)', futureRadius: '3px', futureCanvas: 'relative',
+      other: 'rgb(70, 80, 90)', otherCanvas: 'relative',
       defaultLight: 'rgb(248, 245, 239)', defaultDark: 'rgb(23, 27, 36)'
     }
     assert.deepEqual(await computed(), expected)
-    await styles.evaluate(() => document.querySelector('#host').style.setProperty('--knot-viewer-v1-background', 'rgb(7,8,9)'))
+    await styles.evaluate(() => document.querySelector('#host').style.setProperty('--knot-engine-v1-viewer-background', 'rgb(7,8,9)'))
     assert.deepEqual(await computed(), { ...expected, light: 'rgb(7, 8, 9)', dark: 'rgb(7, 8, 9)' })
     await styles.evaluate(() => {
-      document.querySelector('#host').style.removeProperty('--knot-viewer-v1-background')
+      document.querySelector('#host').style.removeProperty('--knot-engine-v1-viewer-background')
       document.querySelector('#light').setAttribute('data-theme', 'dark')
     })
     assert.deepEqual(await computed(), { ...expected, light: expected.defaultDark, dark: expected.defaultDark })
   }
   await styles.close()
-  console.log('CSS: inherited/local overrides, theme defaults and major-generation namespace isolation in both load orders passed')
+  console.log('CSS: inherited/local overrides, theme defaults and package/component/generation namespace isolation in both load orders passed')
   const page = await browser.newPage({ viewport: { width: 640, height: 480 } })
   const failures = []
   page.on('pageerror', error => failures.push(error.message))
@@ -116,31 +119,31 @@ try {
   assert.ok(before.length > 1000 && after.length > 1000)
   assert.notDeepEqual(before, after, 'Representation selection must change the captured geometry')
   assert.match(await setInput({ asset, selection: { representationId: 'missing' } }), /INVALID_MODEL/)
-  assert.equal(await page.locator('.knot-viewer-v1').getAttribute('data-state'), 'error')
+  assert.equal(await page.locator('.knot-engine-v1-viewer').getAttribute('data-state'), 'error')
   assert.equal(await setInput({ asset }), undefined)
   assert.deepEqual(failures, [])
   console.log('KnotAsset: render, representation replacement, PNG capture, invalid selection, and recovery passed')
   await page.setViewportSize({ width: 1280, height: 1000 })
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/?lang=uk`)
-  await page.waitForSelector('.knot-viewer-v1[data-state="ready"]')
+  await page.waitForSelector('.knot-engine-v1-viewer[data-state="ready"]')
   await page.locator('.model-select select').selectOption('asset')
-  await page.waitForSelector('.knot-viewer-v1[data-state="ready"]')
+  await page.waitForSelector('.knot-engine-v1-viewer[data-state="ready"]')
   await page.locator('.representation-select').selectOption('view-3d-finish')
-  await page.waitForSelector('.knot-viewer-v1[data-state="ready"]')
+  await page.waitForSelector('.knot-engine-v1-viewer[data-state="ready"]')
   assert.deepEqual(failures, [])
   const editor = page.locator('.editor textarea')
   assert.ok(await editor.isVisible(), 'KnotAsset must use the same visible JSON editor')
   assert.equal(JSON.parse(await editor.inputValue()).representations.length, 3)
   const waitForModel = async id => {
     // Filling the editor scrolls the narrow layout; hidden viewers intentionally pause rendering.
-    await page.locator('.knot-viewer-v1').scrollIntoViewIfNeeded()
+    await page.locator('.knot-engine-v1-viewer').scrollIntoViewIfNeeded()
     try {
       await page.waitForFunction(value => {
-        const viewer = document.querySelector('.knot-viewer-v1')
+        const viewer = document.querySelector('.knot-engine-v1-viewer')
         return viewer?.getAttribute('data-state') === 'ready' && viewer.getAttribute('aria-label') === value
       }, id, { timeout: 10000 })
     } catch (error) {
-      console.error(await page.evaluate(() => ({ state: document.querySelector('.knot-viewer-v1')?.getAttribute('data-state'), label: document.querySelector('.knot-viewer-v1')?.getAttribute('aria-label'), issue: document.querySelector('.editor pre')?.textContent })))
+      console.error(await page.evaluate(() => ({ state: document.querySelector('.knot-engine-v1-viewer')?.getAttribute('data-state'), label: document.querySelector('.knot-engine-v1-viewer')?.getAttribute('aria-label'), issue: document.querySelector('.editor pre')?.textContent })))
       throw error
     }
   }
@@ -154,7 +157,7 @@ try {
   const invalidDraft = structuredClone(edited); invalidDraft.units = 'relative'
   await editor.fill(JSON.stringify(invalidDraft))
   await page.waitForSelector('.editor pre[role="alert"]')
-  assert.equal(await page.locator('.knot-viewer-v1').getAttribute('aria-label'), 'edited-asset', 'Invalid edits must retain last valid model')
+  assert.equal(await page.locator('.knot-engine-v1-viewer').getAttribute('aria-label'), 'edited-asset', 'Invalid edits must retain last valid model')
   await editor.fill(JSON.stringify({ ...edited, id: 'recovered-asset' }))
   await waitForModel('recovered-asset')
   const saveJSON = async filename => {
@@ -176,7 +179,7 @@ try {
   await waitForModel('imported-asset')
   assert.equal(await page.locator('.representation-select').inputValue(), 'import-view')
   await page.locator('.representation-select').selectOption('second-view')
-  await page.waitForSelector('.knot-viewer-v1[data-state="ready"]')
+  await page.waitForSelector('.knot-engine-v1-viewer[data-state="ready"]')
   await page.locator('.model-select select').selectOption('loop')
   await waitForModel('twisted-loop')
   assert.equal(await page.locator('.snapshot-select').count(), 0)
@@ -200,7 +203,7 @@ try {
   }
   await exportPNG()
   assert.equal(await page.locator('.presentation-select').count(), 0)
-  const square = await page.locator('.knot-viewer-v1').boundingBox()
+  const square = await page.locator('.knot-engine-v1-viewer').boundingBox()
   assert.ok(Math.abs(square.width - square.height) < 1, 'Viewer must remain square')
   assert.deepEqual(failures, [])
   console.log('Demo: current-image PNG export and square viewer passed')

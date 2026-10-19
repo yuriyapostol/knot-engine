@@ -1,63 +1,63 @@
 /* Public v1 variables are intentionally not assigned here: host values inherit.
    Private palette defaults change with theme; public overrides win in both themes. */
-.knot-viewer-v1 {
-  --_knot-viewer-v1-background: #f8f5ef;
-  --_knot-viewer-v1-foreground: #29231d;
-  --_knot-viewer-v1-border: #c9bdae;
-  --_knot-viewer-v1-focus: #1467b6;
-  --_knot-viewer-v1-toolbar-background: #fffdf7e8;
-  --_knot-viewer-v1-error: #9b2525;
+.knot-engine-v1-viewer {
+  --_knot-engine-v1-viewer-background: #f8f5ef;
+  --_knot-engine-v1-viewer-foreground: #29231d;
+  --_knot-engine-v1-viewer-border: #c9bdae;
+  --_knot-engine-v1-viewer-focus: #1467b6;
+  --_knot-engine-v1-viewer-toolbar-background: #fffdf7e8;
+  --_knot-engine-v1-viewer-error: #9b2525;
   position: relative;
   display: block;
   min-width: 0;
-  aspect-ratio: var(--knot-viewer-v1-aspect-ratio, 4/3);
-  min-height: var(--knot-viewer-v1-min-height, 260px);
+  aspect-ratio: var(--knot-engine-v1-viewer-aspect-ratio, 4/3);
+  min-height: var(--knot-engine-v1-viewer-min-height, 260px);
   overflow: hidden;
-  border: var(--knot-viewer-v1-border-width, 1px) solid var(--knot-viewer-v1-border, var(--_knot-viewer-v1-border));
-  border-radius: var(--knot-viewer-v1-radius, 12px);
-  background: var(--knot-viewer-v1-background, var(--_knot-viewer-v1-background));
-  color: var(--knot-viewer-v1-foreground, var(--_knot-viewer-v1-foreground));
+  border: var(--knot-engine-v1-viewer-border-width, 1px) solid var(--knot-engine-v1-viewer-border, var(--_knot-engine-v1-viewer-border));
+  border-radius: var(--knot-engine-v1-viewer-radius, 12px);
+  background: var(--knot-engine-v1-viewer-background, var(--_knot-engine-v1-viewer-background));
+  color: var(--knot-engine-v1-viewer-foreground, var(--_knot-engine-v1-viewer-foreground));
   font: inherit;
 }
-.knot-viewer-v1[data-theme=dark] {
-  --_knot-viewer-v1-background: #171b24;
-  --_knot-viewer-v1-foreground: #f2eee8;
-  --_knot-viewer-v1-border: #3f4652;
-  --_knot-viewer-v1-focus: #91c6ff;
-  --_knot-viewer-v1-toolbar-background: #242a34e8;
-  --_knot-viewer-v1-error: #ffb0a7;
+.knot-engine-v1-viewer[data-theme=dark] {
+  --_knot-engine-v1-viewer-background: #171b24;
+  --_knot-engine-v1-viewer-foreground: #f2eee8;
+  --_knot-engine-v1-viewer-border: #3f4652;
+  --_knot-engine-v1-viewer-focus: #91c6ff;
+  --_knot-engine-v1-viewer-toolbar-background: #242a34e8;
+  --_knot-engine-v1-viewer-error: #ffb0a7;
 }
-.knot-viewer-v1:focus { outline: none }
-.knot-viewer-v1 button:focus-visible { outline: 3px solid var(--knot-viewer-v1-focus, var(--_knot-viewer-v1-focus)); outline-offset: 2px }
-.knot-viewer-v1__surface, .knot-viewer-v1__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block }
-.knot-viewer-v1__fallback { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; color: var(--knot-viewer-v1-foreground, var(--_knot-viewer-v1-foreground)); pointer-events: none }
-.knot-viewer-v1__fallback[role=alert] { color: var(--knot-viewer-v1-error, var(--_knot-viewer-v1-error)) }
-.knot-viewer-v1__fallback button { pointer-events: auto }
-.knot-viewer-v1__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain }
-.knot-viewer-v1__toolbar {
+.knot-engine-v1-viewer:focus { outline: none }
+.knot-engine-v1-viewer button:focus-visible { outline: 3px solid var(--knot-engine-v1-viewer-focus, var(--_knot-engine-v1-viewer-focus)); outline-offset: 2px }
+.knot-engine-v1-viewer__surface, .knot-engine-v1-viewer__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block }
+.knot-engine-v1-viewer__fallback { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; color: var(--knot-engine-v1-viewer-foreground, var(--_knot-engine-v1-viewer-foreground)); pointer-events: none }
+.knot-engine-v1-viewer__fallback[role=alert] { color: var(--knot-engine-v1-viewer-error, var(--_knot-engine-v1-viewer-error)) }
+.knot-engine-v1-viewer__fallback button { pointer-events: auto }
+.knot-engine-v1-viewer__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain }
+.knot-engine-v1-viewer__toolbar {
   position: absolute;
-  left: var(--knot-viewer-v1-toolbar-offset, 12px);
-  right: var(--knot-viewer-v1-toolbar-offset, 12px);
-  bottom: var(--knot-viewer-v1-toolbar-offset, 12px);
+  left: var(--knot-engine-v1-viewer-toolbar-offset, 12px);
+  right: var(--knot-engine-v1-viewer-toolbar-offset, 12px);
+  bottom: var(--knot-engine-v1-viewer-toolbar-offset, 12px);
   display: flex;
   flex-wrap: wrap;
-  gap: var(--knot-viewer-v1-toolbar-gap, 6px);
+  gap: var(--knot-engine-v1-viewer-toolbar-gap, 6px);
   width: max-content;
-  max-width: calc(100% - 2 * var(--knot-viewer-v1-toolbar-offset, 12px));
-  padding: var(--knot-viewer-v1-toolbar-padding, 6px);
-  border: var(--knot-viewer-v1-border-width, 1px) solid var(--knot-viewer-v1-border, var(--_knot-viewer-v1-border));
-  border-radius: var(--knot-viewer-v1-toolbar-radius, 10px);
-  background: var(--knot-viewer-v1-toolbar-background, var(--_knot-viewer-v1-toolbar-background));
+  max-width: calc(100% - 2 * var(--knot-engine-v1-viewer-toolbar-offset, 12px));
+  padding: var(--knot-engine-v1-viewer-toolbar-padding, 6px);
+  border: var(--knot-engine-v1-viewer-border-width, 1px) solid var(--knot-engine-v1-viewer-border, var(--_knot-engine-v1-viewer-border));
+  border-radius: var(--knot-engine-v1-viewer-toolbar-radius, 10px);
+  background: var(--knot-engine-v1-viewer-toolbar-background, var(--_knot-engine-v1-viewer-toolbar-background));
 }
-.knot-viewer-v1 button {
-  min-width: var(--knot-viewer-v1-button-min-size, 44px);
-  min-height: var(--knot-viewer-v1-button-min-size, 44px);
-  padding: var(--knot-viewer-v1-button-padding, 6px 10px);
-  border: var(--knot-viewer-v1-border-width, 1px) solid var(--knot-viewer-v1-border, var(--_knot-viewer-v1-border));
-  border-radius: var(--knot-viewer-v1-button-radius, 7px);
-  background: var(--knot-viewer-v1-background, var(--_knot-viewer-v1-background));
-  color: var(--knot-viewer-v1-foreground, var(--_knot-viewer-v1-foreground));
+.knot-engine-v1-viewer button {
+  min-width: var(--knot-engine-v1-viewer-button-min-size, 44px);
+  min-height: var(--knot-engine-v1-viewer-button-min-size, 44px);
+  padding: var(--knot-engine-v1-viewer-button-padding, 6px 10px);
+  border: var(--knot-engine-v1-viewer-border-width, 1px) solid var(--knot-engine-v1-viewer-border, var(--_knot-engine-v1-viewer-border));
+  border-radius: var(--knot-engine-v1-viewer-button-radius, 7px);
+  background: var(--knot-engine-v1-viewer-background, var(--_knot-engine-v1-viewer-background));
+  color: var(--knot-engine-v1-viewer-foreground, var(--_knot-engine-v1-viewer-foreground));
   font: inherit;
   cursor: pointer;
 }
-.knot-viewer-v1[data-state=error] .knot-viewer-v1__canvas, .knot-viewer-v1[data-state=empty] .knot-viewer-v1__canvas { visibility: hidden }
+.knot-engine-v1-viewer[data-state=error] .knot-engine-v1-viewer__canvas, .knot-engine-v1-viewer[data-state=empty] .knot-engine-v1-viewer__canvas { visibility: hidden }

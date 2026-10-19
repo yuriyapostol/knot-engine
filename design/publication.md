@@ -45,7 +45,9 @@ Archives preserve canonical IDs. Reproducible validation supplies the chosen sna
 
 ## CSS namespace for major generations
 
-Classes `.knot-viewer-v1` / `.knot-viewer-v1__…` and `--knot-viewer-v1-*` variables carry the generation suffix. Its purpose is to allow viewers from different major versions on one documentation page when needed. Future `v2`, `v3`, etc. use their own class and variable namespaces; no separate suffix is introduced for each `0.x` release.
+CSS names start with the full package namespace `knot-engine`, followed by the major generation and component name. Classes follow `knot-engine-vN-<component>` / `knot-engine-vN-<component>__<part>`; component variables follow `--knot-engine-vN-<component>-<setting>`. The implemented `KnotViewer` uses `.knot-engine-v1-viewer`, `.knot-engine-v1-viewer__…` and `--knot-engine-v1-viewer-*`. Other components receive distinct names under the same package/generation prefix.
+
+Different major versions can be used on the same page. Future `v2`, `v3`, etc. use their own class and variable namespaces; no separate namespace is introduced for each `0.x` release.
 
 During initial development, no part of the package requires backward compatibility, including CSS. There are no separate guarantees of stable classes, variables or stylesheet compatibility between releases in one generation. A viewer uses its release's stylesheet. This is a project decision about namespace separation; see the [component contract](../v1/spec/components.md#css-namespace-and-styling) for current styling settings. Published release snapshots remain immutable.
 
