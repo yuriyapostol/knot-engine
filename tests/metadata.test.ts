@@ -4,7 +4,7 @@ import { validateKnotAsset, validateRepresentationDocument, validateResourceDocu
 const source={id:'book',title:'Example publication',authors:[{name:'Original Author',email:'author@example.org'}],license:{name:'Source terms',url:'https://example.org/terms'},note:'Source-level note'}
 const contribution={name:'Editor',email:'editor@example.org',url:'https://example.org/editor',roles:['editing','validation'],date:'2026-10-18',note:'Corrected and checked data'}
 function asset(): KnotAsset {
-  const a=JSON.parse(readFileSync('v1/spec/examples/assets/pd-trefoil.json','utf8'))
+  const a=JSON.parse(readFileSync('v1/examples/assets/pd-trefoil.json','utf8'))
   a.sources=[source,{id:'unused',title:'Unused'}];a.contributions=[contribution];a.license={name:'Example license',url:'https://example.org/license'}
   a.representations[0].sources=[{id:'book',locator:'Page 12',accessed:'2026-10-18',note:'Imported this table'}]
   a.representations[0].contributions=[contribution]
@@ -12,7 +12,7 @@ function asset(): KnotAsset {
 }
 it('keeps optional metadata separate from geometric data and accepts it for every representation type',()=>{
   for(const name of ['open-rope','grid-diagram','grid-vertex-pairs','mosaic-diagram','pd-trefoil','dt-trefoil']) {
-    const a=JSON.parse(readFileSync(`v1/spec/examples/assets/${name}.json`,'utf8'))
+    const a=JSON.parse(readFileSync(`v1/examples/assets/${name}.json`,'utf8'))
     a.representations[0].sources=[{title:'Own measurements',authors:[{name:'Team'}],note:'Measured by the author'}]
     a.representations[0].contributions=[{name:'Team',note:'Created data'}]
     expect(validateKnotAsset(a)).toMatchObject({valid:true,complete:true})
@@ -40,11 +40,11 @@ it('retains required sources and both contribution levels and license in selecte
 })
 it('supports standalone representation documents with source definitions',()=>{
   const a=asset()
-  expect(validateRepresentationDocument({schema:'KnotRepresentationDocument',schemaVersion:1,sources:a.sources,representation:a.representations![0]}, {registries:[STANDARD_RESOURCES]})).toMatchObject({valid:true,complete:true})
+  expect(validateRepresentationDocument({schema:'KnotRepresentationDocument',schemaVersion:1,namespaces:a.namespaces,sources:a.sources,representation:a.representations![0]}, {registries:[STANDARD_RESOURCES]})).toMatchObject({valid:true,complete:true})
 })
 it('resolves only explicit source resource references and normalizes IDs without rewriting URLs',()=>{
   const a=asset(),global={...source,id:'https://example.org/sources/book'}
-  a.sources=[global];a.namespaces={ex:'https://example.org/sources/'}
+  a.sources=[global];a.namespaces={...a.namespaces,ex:'https://example.org/sources/'}
   a.representations![0].sources=[{id:'ex:book'},{ref:'ex:book',note:'Local context'}]
   expect(validateKnotAsset(a)).toMatchObject({valid:true,complete:true})
   expect(selectKnotAsset(a,{representations:['pd']}).sources).toHaveLength(1)

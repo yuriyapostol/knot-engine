@@ -3,7 +3,7 @@ import { createSSRApp } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import { KnotViewer, resolveKnotAsset, type KnotAsset } from '../src'
 import { buildGeometry } from '../src/geometry/build'
-import open from '../v1/spec/examples/assets/open-rope.json'
+import open from '../v1/examples/assets/open-rope.json'
 it('builds finite geometry for all supported interpolation modes',()=>{
   for(const interpolation of [{type:'polyline' as const},{type:'catmull-rom' as const,parameterization:'uniform' as const,tension:0.5},{type:'catmull-rom' as const,parameterization:'centripetal' as const},{type:'catmull-rom' as const,parameterization:'chordal' as const}]) {
     const model=resolveKnotAsset(open);model.curves[0].interpolation=interpolation

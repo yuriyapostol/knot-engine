@@ -23,14 +23,14 @@ try {
  await mkdir(archives)
  await mkdir(sources)
  await cp('v1', path.join(sources, 'v1'), { recursive: true })
- for (const section of ['guide', 'schema', 'spec/examples']) await mkdir(path.join(sources, 'v2', section), { recursive: true })
+ for (const section of ['guide', 'specifications', 'schema', 'examples']) await mkdir(path.join(sources, 'v2', section), { recursive: true })
  await writeFile(path.join(sources, 'v2/version.json'), JSON.stringify({ packageVersion: '2.0.0', schemaVersion: 2, status: 'development' }))
- await writeFile(path.join(sources, 'v2/guide/future.md'), '# Future guide\n\n[First generation](../../v1/spec/knot-asset.md)')
- await writeFile(path.join(sources, 'v2/spec/format.md'), '# Future format')
- await writeFile(path.join(sources, 'v1/guide/cross-generation.md'), '# Generations\n\n[Future format](../../v2/spec/format.md)')
+ await writeFile(path.join(sources, 'v2/guide/future.md'), '# Future guide\n\n[First generation](../../v1/specifications/knot-asset.md)')
+ await writeFile(path.join(sources, 'v2/specifications/format.md'), '# Future format')
+ await writeFile(path.join(sources, 'v1/guide/cross-generation.md'), '# Generations\n\n[Future format](../../v2/specifications/format.md)')
  await writeFile(path.join(sources, 'v2/schema/marker.json'), '{"generation":2}')
  await cp('design', path.join(sources, 'design'), { recursive: true })
- for (const f of ['v2/guide/future', 'v2/spec/format', 'v1/guide/cross-generation']) await cp(path.join(sources,f+'.md'),path.join(sources,f+'.uk.md'))
+ for (const f of ['v2/guide/future', 'v2/specifications/format', 'v1/guide/cross-generation']) await cp(path.join(sources,f+'.md'),path.join(sources,f+'.uk.md'))
  await run('node', ['scripts/site/archive.mjs'], { env })
  const snapshot = path.join(archives, version)
  const before = new Map(await Promise.all((await files(snapshot)).map(async f => [f, await readFile(f)])))
@@ -44,8 +44,12 @@ try {
  assert.equal(versions.releases[0].version,version)
  assert.deepEqual(versions.generations.map(g => g.schemaVersion), [1, 2])
  assert.equal(versions.current.path, 'v1/')
+ await assert.rejects(access(path.join(output, 'v1/spec')))
+ await assert.rejects(access(path.join(output, 'v1/spec.html')))
  assert.equal(JSON.parse(await readFile(path.join(output, 'v2/schema/marker.json'), 'utf8')).generation, 2)
- await assert.rejects(access(path.join(output, 'v1/spec/schema')))
+ await assert.rejects(access(path.join(output, 'v1/specifications/schema')))
+ await assert.rejects(access(path.join(output, 'v1/specifications/examples')))
+ assert.equal(await readFile(path.join(output, 'v1/examples/assets/open-rope.json'), 'utf8'), await readFile(path.join(sources, 'v1/examples/assets/open-rope.json'), 'utf8'))
  for (const name of await readdir(path.join(sources, 'v1/schema'))) {
   const published = await readFile(path.join(output, 'v1/schema', name), 'utf8')
   assert.equal(published, await readFile(path.join(sources, 'v1/schema', name), 'utf8'))
@@ -53,13 +57,13 @@ try {
  }
  assert.match(await readFile(path.join(output, 'v2/guide/future.html'), 'utf8'), /class="contract-version">v2/)
  assert.doesNotMatch(await readFile(path.join(output, 'v2/guide/future.html'), 'utf8'), /data-knot-engine-demo|_example\/assets/)
- assert.doesNotMatch(await readFile(path.join(output, 'v1/spec/components.html'), 'utf8'), /<script type="module"/)
+ assert.doesNotMatch(await readFile(path.join(output, 'v1/specifications/components.html'), 'utf8'), /<script type="module"/)
  assert.match(await readFile(path.join(snapshot, 'guide/getting-started.html'), 'utf8'), /data-knot-engine-demo="v1"/)
  assert.doesNotMatch(await readFile(path.join(snapshot, 'guide/getting-started.html'), 'utf8'), /<iframe/)
  await assert.rejects(access(path.join(output, 'releases', version, 'v2')))
 
  for (const bundle of ['v1',`releases/${version}`]) {
-  await access(path.join(output,bundle,'spec/knot-asset.html'))
+  await access(path.join(output,bundle,'specifications/knot-asset.html'))
   const schema=JSON.parse(await readFile(path.join(output,bundle,'schema/knot-asset.schema.json'),'utf8'))
   assert.equal(schema.$id,'https://yuriyapostol.github.io/knot-engine/v1/schema/knot-asset.schema.json')
  }
@@ -76,7 +80,7 @@ try {
  assert.equal(ukrainian.window.document.querySelector('[hreflang="uk"]').getAttribute('href'), 'architecture.uk.html')
  assert.equal(ukrainian.window.document.querySelector('[hreflang="en"]').getAttribute('href'), 'architecture.html')
  ukrainian.window.close()
- for (const key of ['index', 'guide', 'spec', 'resources', 'schema', 'spec/examples']) {
+ for (const key of ['index', 'guide', 'specifications', 'resources', 'schema', 'examples']) {
   for (const lang of ['en', 'uk']) {
    const name = key + (lang === 'uk' ? '.uk' : '') + '.html'
    const page = new JSDOM(await readFile(path.join(output, 'v1', name), 'utf8'))
@@ -90,7 +94,7 @@ try {
  }
  await assert.rejects(access(path.join(output, 'design/uk')))
  await access(path.join(snapshot, 'index.uk.html'))
- await rm(path.join(sources,'v2/spec/format.md'))
+ await rm(path.join(sources,'v2/specifications/format.md'))
  await assert.rejects(run('node',['scripts/site/build.mjs'],{env}),/Missing translation/)
  let count=0
  for(const file of await files(output)) {

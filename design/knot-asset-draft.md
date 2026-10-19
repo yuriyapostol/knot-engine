@@ -1,10 +1,10 @@
 # KnotAsset: proposed contract revision
 
-**Implementation status:** the initial profile (spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, procedures, resources and cameras) is described in the [current specification](../v1/spec/knot-asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
+**Implementation status:** the initial profile (spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, procedures, resources and cameras) is described in the [current specification](../v1/specifications/knot-asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
 
-Sources, flat contributions at asset/representation level and a global license are implemented under the [shared contract](../v1/spec/sources.md); the broader structure below also contains deferred features.
+Sources, flat contributions at asset/representation level and a global license are implemented under the [shared contract](../v1/specifications/sources.md); the broader structure below also contains deferred features.
 
-**Status: architectural draft for discussion.** This records agreed principles and a possible structure. It does not replace the [implemented contract](../v1/spec/knot-asset.md) or claim that the proposed API exists. The transition from `KnotModelV1` is complete for the initial profile. Features beyond the current specification remain under design.
+**Status: architectural draft for discussion.** This records agreed principles and a possible structure. It does not replace the [implemented contract](../v1/specifications/knot-asset.md) or claim that the proposed API exists. The transition from `KnotModelV1` is complete for the initial profile. Features beyond the current specification remain under design.
 
 **Current policy: keep version numbers unchanged and do not preserve compatibility with old contracts.** The project has no external users yet. Revisions remain within `schemaVersion: 1` and package `0.1.0`. `KnotModelV1` APIs, schemas, adapters and dual-format support have been removed. Field names and example shapes are proposals except where explicitly agreed.
 

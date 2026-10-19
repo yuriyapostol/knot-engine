@@ -1,16 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync, readdirSync } from 'node:fs'
-import open from '../v1/spec/examples/assets/open-rope.json'
-import multi from '../v1/spec/examples/assets/procedures.json'
+import open from '../v1/examples/assets/open-rope.json'
+import multi from '../v1/examples/assets/procedures.json'
 import { validateKnotAsset, resolveKnotAsset, validateGridDiagram, validateSpatialCurve, validateView, STANDARD_RESOURCES, expandURI, validateResourceRegistry, validateResourceDocument, validateRepresentationDocument, SPATIAL_CURVE, type KnotAsset } from '../src/core'
 const copy = () => structuredClone(open)
 describe('KnotAsset generation 1', () => {
-  for(const file of readdirSync('v1/spec/examples/assets').filter(f=>f.endsWith('.json'))) it(`validates ${file}`,()=>{
-    const value=JSON.parse(readFileSync(`v1/spec/examples/assets/${file}`,'utf8'))
+  for(const file of readdirSync('v1/examples/assets').filter(f=>f.endsWith('.json'))) it(`validates ${file}`,()=>{
+    const value=JSON.parse(readFileSync(`v1/examples/assets/${file}`,'utf8'))
     const result=validateKnotAsset(value)
     expect(result,JSON.stringify(result)).toMatchObject({valid:true,complete:true})
   })
-  for(const file of readdirSync('v1/spec/examples/assets/invalid')) it(`rejects ${file}`,()=>expect(validateKnotAsset(JSON.parse(readFileSync(`v1/spec/examples/assets/invalid/${file}`,'utf8'))).valid).toBe(false))
+  for(const file of readdirSync('v1/examples/assets/invalid')) it(`rejects ${file}`,()=>expect(validateKnotAsset(JSON.parse(readFileSync(`v1/examples/assets/invalid/${file}`,'utf8'))).valid).toBe(false))
   it('accepts metadata-only documents and rejects old roots',()=>{
     expect(validateKnotAsset({schema:'KnotAsset',schemaVersion:1,id:'document',subject:{id:'subject'}})).toMatchObject({valid:true,complete:true})
     expect(validateKnotAsset({schemaVersion:1,curves:[]} ).valid).toBe(false)
@@ -55,7 +55,7 @@ describe('KnotAsset generation 1', () => {
     expect(()=>expandURI('typo:thing')).toThrow()
     expect(validateKnotAsset({...open,namespaces:{https:'urn:example:'}}).valid).toBe(false)
     const a=copy();a.representations[0].type='k:representation-types/spatial-curve'
-    expect(validateKnotAsset({...a,namespaces:{k:'https://yuriyapostol.github.io/knot-engine/v1/'}}).valid).toBe(true)
+    expect(validateKnotAsset({...a,namespaces:{...a.namespaces,k:'https://yuriyapostol.github.io/knot-engine/v1/'}}).valid).toBe(true)
   })
   it('checks all representations, object and state scopes',()=>{
     const a=copy();a.representations[0].target.id='missing'
@@ -110,7 +110,7 @@ describe('independent contracts',()=>{
   })
   it('validates resource registry/document and standalone representation',()=>{
     expect(validateResourceRegistry(STANDARD_RESOURCES).valid).toBe(true)
-    expect(validateResourceDocument({schema:'KnotResourceDocument',schemaVersion:1,...STANDARD_RESOURCES.resources[0]}).valid).toBe(true)
+    expect(validateResourceDocument({schema:'KnotResourceDocument',schemaVersion:1,namespaces:STANDARD_RESOURCES.namespaces,...STANDARD_RESOURCES.resources[0]}).valid).toBe(true)
     const rep={id:'grid',type:'https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram',data:{encoding:'xo',size:2,x:[0,1],o:[1,0]}}
     expect(validateRepresentationDocument({schema:'KnotRepresentationDocument',schemaVersion:1,representation:rep},{registries:[STANDARD_RESOURCES]})).toMatchObject({valid:true,complete:true})
   })

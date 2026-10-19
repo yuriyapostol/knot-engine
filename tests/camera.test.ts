@@ -2,7 +2,7 @@ import { expect, it } from 'vitest'
 import * as THREE from 'three'
 import { prepareCamera, cameraView } from '../src/renderer/camera'
 import { resolveKnotAsset, type Camera3D, type KnotAsset } from '../src/core'
-import open from '../v1/spec/examples/assets/open-rope.json'
+import open from '../v1/examples/assets/open-rope.json'
 const bounds=new THREE.Box3(new THREE.Vector3(-2,-1,-3),new THREE.Vector3(2,1,3))
 it('fits the entire bounding box for both projections in wide and narrow viewports',()=>{
   for(const aspect of [0.25,1,4])for(const projection of [{kind:'orthographic' as const},{kind:'perspective' as const,fovY:Math.PI/3}]) {

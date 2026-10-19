@@ -3,7 +3,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { createSSRApp, nextTick } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import { KnotViewer, type KnotAsset } from '../src'
-import open from '../v1/spec/examples/assets/open-rope.json'
+import open from '../v1/examples/assets/open-rope.json'
 
 afterEach(() => { document.body.innerHTML = ''; vi.restoreAllMocks() })
 

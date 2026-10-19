@@ -1,6 +1,6 @@
 # knot-engine architecture
 
-The initial `KnotAsset` redesign profile is implemented. The authoritative current contracts are [data](../v1/spec/knot-asset.md), [functions](../v1/spec/functions.md) and [component](../v1/spec/components.md). The [broader design](knot-asset-draft.md) still contains future work; it does not mean every proposed field is accepted.
+The initial `KnotAsset` redesign profile is implemented. The authoritative current contracts are [data](../v1/specifications/knot-asset.md), [functions](../v1/specifications/functions.md) and [component](../v1/specifications/components.md). The [broader design](knot-asset-draft.md) still contains future work; it does not mean every proposed field is accepted.
 
 ```text
 KnotAsset / standalone data / explicitly provided registries
@@ -23,4 +23,4 @@ Extraction includes required constructions and resources. Composition is limited
 
 Verification: typecheck, unit/schema tests, library/example builds, browser tests, tarball consumer and site/link tests. Hardware touch, WebView and physical knot correctness are not established by these checks. Versions remain package 0.1.0 and `schemaVersion` 1.
 
-CSS uses the package namespace `knot-engine`, followed by the major generation and component name: `.knot-engine-v1-viewer…` and `--knot-engine-v1-viewer-*` for `KnotViewer`. Other components receive their own names within the same package/generation namespace. Different major versions can be used on the same page. CSS, like the rest of the package, has no backward compatibility requirement during initial development. See the [publication policy](publication.md#css-namespace-for-major-generations) and [component contract](../v1/spec/components.md#css-namespace-and-styling).
+CSS uses the package namespace `knot-engine`, followed by the major generation and component name: `.knot-engine-v1-viewer…` and `--knot-engine-v1-viewer-*` for `KnotViewer`. Other components receive their own names within the same package/generation namespace. Different major versions can be used on the same page. CSS, like the rest of the package, has no backward compatibility requirement during initial development. See the [publication policy](publication.md#css-namespace-for-major-generations) and [component contract](../v1/specifications/components.md#css-namespace-and-styling).

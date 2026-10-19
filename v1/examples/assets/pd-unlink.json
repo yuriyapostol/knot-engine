@@ -1,0 +1,34 @@
+{
+  "schema": "KnotAsset",
+  "schemaVersion": 1,
+  "namespaces": {
+    "knot-engine": "https://yuriyapostol.github.io/knot-engine/v1/"
+  },
+  "id": "pd-unlink",
+  "subject": {
+    "id": "pd-unlink-subject"
+  },
+  "representationTypes": [
+    {
+      "id": "knot-engine:representation-types/pd-code",
+      "name": "pd-code",
+      "description": "Planar diagram code contract, generation 1",
+      "dataSchema": {
+        "ref": "knot-engine:schema/pd-code.schema.json"
+      },
+      "specification": "knot-engine:specifications/pd-code.html",
+      "viewSpace": "none"
+    }
+  ],
+  "representations": [
+    {
+      "id": "pd",
+      "type": "knot-engine:representation-types/pd-code",
+      "data": {
+        "convention": "knot-engine:conventions/pd-ccw-under-first",
+        "crossings": [],
+        "unlinkedComponents": 2
+      }
+    }
+  ]
+}

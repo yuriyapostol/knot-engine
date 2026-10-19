@@ -1,0 +1,35 @@
+{
+  "schema": "KnotAsset",
+  "schemaVersion": 1,
+  "namespaces": {
+    "knot-engine": "https://yuriyapostol.github.io/knot-engine/v1/"
+  },
+  "id": "grid-example",
+  "subject": {
+    "id": "grid-example"
+  },
+  "representations": [
+    {
+      "id": "grid",
+      "type": "knot-engine:representation-types/grid-diagram",
+      "data": {
+        "encoding": "xo",
+        "size": 5,
+        "x": [0, 1, 2, 3, 4],
+        "o": [2, 3, 4, 0, 1]
+      }
+    }
+  ],
+  "representationTypes": [
+    {
+      "id": "knot-engine:representation-types/grid-diagram",
+      "name": "grid-diagram",
+      "description": "grid-diagram contract, generation 1",
+      "dataSchema": {
+        "ref": "knot-engine:schema/grid-diagram.schema.json"
+      },
+      "specification": "knot-engine:specifications/knot-asset.html",
+      "viewSpace": "plane"
+    }
+  ]
+}

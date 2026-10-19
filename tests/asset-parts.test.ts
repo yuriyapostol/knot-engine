@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
-import multi from '../v1/spec/examples/assets/procedures.json'
-import grid from '../v1/spec/examples/assets/grid-diagram.json'
+import multi from '../v1/examples/assets/procedures.json'
+import grid from '../v1/examples/assets/grid-diagram.json'
 import { selectKnotAsset, composeKnotAsset, validateKnotAsset, STANDARD_RESOURCES } from '../src/core'
 it('extracts a procedure with its representations, construction and type definitions',()=>{
   const source=structuredClone(multi)
@@ -34,8 +34,8 @@ it('closes external construction and view dependencies without copying the regis
   const construction={...a.constructions[0],id:'urn:example:setup'}
   const view={id:'urn:example:front',name:'Front',space:'space' as const,camera:{mode:'fit' as const,direction:[0,0,1] as [number,number,number],up:[0,1,0] as [number,number,number],projection:{kind:'orthographic' as const}}}
   const rep={...a.representations[0],target:{kind:'state' as const,construction:{ref:construction.id},id:a.representations[0].target.id},views:[{ref:view.id}],defaultView:{ref:view.id}}
-  const asset={schema:'KnotAsset',schemaVersion:1,id:'external',subject:{id:'s'},representations:[rep]}
-  const registry:import('../src/core').KnotResourceRegistry={schema:'KnotResourceRegistry',schemaVersion:1,resources:[...STANDARD_RESOURCES.resources,{kind:'construction',resource:construction},{kind:'view',resource:view}]}
+  const asset={schema:'KnotAsset',schemaVersion:1,namespaces:a.namespaces,id:'external',subject:{id:'s'},representations:[rep]}
+  const registry:import('../src/core').KnotResourceRegistry={schema:'KnotResourceRegistry',schemaVersion:1,namespaces:STANDARD_RESOURCES.namespaces,resources:[...STANDARD_RESOURCES.resources,{kind:'construction',resource:construction},{kind:'view',resource:view}]}
   const part=selectKnotAsset(asset,{representations:[rep.id]},{registries:[registry]})
   expect(validateKnotAsset(part)).toMatchObject({valid:true,complete:true})
   expect(part.constructions).toHaveLength(1)

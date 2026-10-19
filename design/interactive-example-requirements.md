@@ -14,4 +14,4 @@ Automated acceptance covers:
 6. Independent schemas, resource dependency checks, extraction and composition.
 7. Site languages, links, multiple generations and immutable release snapshots.
 
-Hardware touch/WebView behavior and device performance still require device-specific verification. No service worker, hosting deployment or publication is part of local builds. See [component contract](../v1/spec/components.md), [data contract](../v1/spec/knot-asset.md) and [publication policy](publication.md).
+Hardware touch/WebView behavior and device performance still require device-specific verification. No service worker, hosting deployment or publication is part of local builds. See [component contract](../v1/specifications/components.md), [data contract](../v1/specifications/knot-asset.md) and [publication policy](publication.md).

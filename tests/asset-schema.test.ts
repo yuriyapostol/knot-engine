@@ -8,11 +8,12 @@ import dtSchema from '../v1/schema/dt-code.schema.json'
 import pdSchema from '../v1/schema/pd-code.schema.json'
 import gridSchema from '../v1/schema/grid-diagram.schema.json'
 import { validateKnotAsset } from '../src/core'
+import { normalizeAsset } from '../src/core/validateAsset'
 const ajv=new Ajv2020({strict:false}),asset=ajv.compile(assetSchema),spatial=ajv.compile(spatialSchema),grid=ajv.compile(gridSchema),mosaic=ajv.compile(mosaicSchema),pd=ajv.compile(pdSchema),dt=ajv.compile(dtSchema)
-for(const f of readdirSync('v1/spec/examples/assets').filter(f=>f.endsWith('.json')))it(`schema/runtime align for ${f}`,()=>{
-  const data=JSON.parse(readFileSync(`v1/spec/examples/assets/${f}`,'utf8'))
+for(const f of readdirSync('v1/examples/assets').filter(f=>f.endsWith('.json')))it(`schema/runtime align for ${f}`,()=>{
+  const data=JSON.parse(readFileSync(`v1/examples/assets/${f}`,'utf8'))
   expect(asset(data),JSON.stringify(asset.errors)).toBe(true)
-  for(const rep of data.representations){const validate=rep.type.endsWith('spatial-curve')?spatial:rep.type.endsWith('mosaic-diagram')?mosaic:rep.type.endsWith('pd-code')?pd:rep.type.endsWith('dt-code')?dt:grid;expect(validate(rep.data),JSON.stringify(validate.errors)).toBe(true)}
+  for(const rep of normalizeAsset(data).representations!){const validate=rep.type.endsWith('spatial-curve')?spatial:rep.type.endsWith('mosaic-diagram')?mosaic:rep.type.endsWith('pd-code')?pd:rep.type.endsWith('dt-code')?dt:grid;expect(validate(rep.data),JSON.stringify(validate.errors)).toBe(true)}
   expect(validateKnotAsset(data).valid).toBe(true)
 })
 it('schemas reject old envelope, unknown fields and invalid standalone data',()=>{

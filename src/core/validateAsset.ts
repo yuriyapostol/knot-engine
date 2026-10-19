@@ -33,6 +33,12 @@ export function normalizeAsset(asset: KnotAsset): KnotAsset {
       else if ('id' in source && source.id?.includes(':')) source.id = uri(source.id)
     }
     rep.type = uri(rep.type)
+    // Expand only URI fields belonging to supported data contracts, never arbitrary data.
+    if (rep.data && typeof rep.data === 'object' && !Array.isArray(rep.data)) {
+      const data = rep.data as Record<string, unknown>
+      const key = rep.type === DT_CODE || rep.type === PD_CODE ? 'convention' : rep.type === MOSAIC_DIAGRAM ? 'tileSet' : undefined
+      if (key && typeof data[key] === 'string') data[key] = uri(data[key])
+    }
     if (rep.target && rep.target.kind !== 'subject') reference(rep.target.construction)
     if (rep.views) rep.views = rep.views.map(v => 'ref' in v ? { ref: uri(v.ref) } : normalizeResource({ kind: 'view',resource:v },ns).resource as ViewDefinition)
     if (rep.defaultView) reference(rep.defaultView)

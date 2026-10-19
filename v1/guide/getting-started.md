@@ -27,7 +27,7 @@ import asset from './open-rope.json'
 </template>
 ```
 
-Use the [open-rope asset](../spec/examples/assets/open-rope.json) as `open-rope.json`. Read the [component contract](../spec/components.md) for selection parameters, events and capture methods. The package uses only the current `KnotAsset` contract. Select a static representation with `representation-id`.
+Use the [open-rope asset](../examples/assets/open-rope.json) as `open-rope.json`. Read the [component contract](../specifications/components.md) for selection parameters, events and capture methods. The package uses only the current `KnotAsset` contract. Select a static representation with `representation-id`.
 
 ## Edit the data
 

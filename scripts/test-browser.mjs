@@ -82,12 +82,12 @@ try {
     await page.waitForFunction(() => window.__previewReady || window.__previewError)
     return page.evaluate(() => window.__previewError)
   }
-  const invalid = fixture('v1/spec/examples/assets/invalid/dimension.json')
+  const invalid = fixture('v1/examples/assets/invalid/dimension.json')
   assert.match(await setInput({ asset: invalid }), /INVALID_MODEL/)
   assert.equal(await page.evaluate(() => window.__webglContexts), 0, 'Malformed asset must fail before WebGL allocation')
 
   for (const model of ['overhand', 'twisted-loop']) {
-    assert.equal(await setInput({ asset: fixture(`v1/spec/examples/assets/${model}.json`) }), undefined)
+    assert.equal(await setInput({ asset: fixture(`v1/examples/assets/${model}.json`) }), undefined)
     const capture = await page.evaluate(async () => {
       const blob = await window.__previewCapture(240, 180)
       const bitmap = await createImageBitmap(blob)
@@ -102,12 +102,12 @@ try {
     assert.ok(capture.size > 1000 && capture.colored > 100, `${model}: capture must contain rendered geometry`)
     console.log(`${model}: render and 240×180 PNG capture passed`)
   }
-  const orthographic = fixture('v1/spec/examples/assets/open-rope.json')
+  const orthographic = fixture('v1/examples/assets/open-rope.json')
   orthographic.representations[0].views = [{ id: 'ortho', name: 'Orthographic', space: 'space', camera: { mode: 'fit', direction: [0,0,1], up: [0,1,0], projection: { kind: 'orthographic' } } }]
   orthographic.representations[0].defaultView = { id: 'ortho' }
   assert.equal(await setInput({ asset: orthographic }), undefined)
   assert.ok(await page.evaluate(async () => (await window.__previewCapture(320,180)).size) > 1000)
-  const asset = fixture('v1/spec/examples/assets/procedures.json')
+  const asset = fixture('v1/examples/assets/procedures.json')
   assert.equal(await setInput({ asset, selection: { representationId: 'view-3d-rest' } }), undefined)
   const capturePixels = () => page.evaluate(async () => {
     const blob = await window.__previewCapture(240, 180)
@@ -171,7 +171,7 @@ try {
     assert.deepEqual(JSON.parse(Buffer.concat(chunks).toString()), JSON.parse(await editor.inputValue()))
   }
   await saveJSON('knot-asset.json')
-  const imported = fixture('v1/spec/examples/assets/open-rope.json')
+  const imported = fixture('v1/examples/assets/open-rope.json')
   imported.id = 'imported-asset'
   imported.representations[0].id = 'import-view'
   imported.representations.push({ ...structuredClone(imported.representations[0]), id: 'second-view' })

@@ -18,15 +18,14 @@ export function namespaceIssues(namespaces: Namespaces = {}): ValidationIssue[] 
   return Object.entries(namespaces).flatMap(([key,value]) => ['http','https','urn'].includes(key.toLowerCase()) || !schemes.test(value) ? [issue(`namespaces.${key}`, 'Reserved prefix or invalid namespace URI')] : [])
 }
 export const STANDARD_RESOURCES = standardResources as unknown as KnotResourceRegistry
-/** Only contract-defined URI fields are expanded; arbitrary data and JSON Schema are untouched. */
+/** Only contract-defined URI fields are expanded; inline JSON Schema is untouched. */
 export function normalizeResource(entry: ResourceEntry, namespaces: Namespaces): ResourceEntry {
   const e = structuredClone(entry)
   if (e.resource.id.includes(':')) e.resource.id = expandURI(e.resource.id, namespaces)
   if (e.kind === 'representation-type' || e.kind === 'object-type') {
     e.resource.id = expandURI(e.resource.id, namespaces)
     e.resource.specification = expandURI(e.resource.specification, namespaces)
-    // JSON Schema references keep standard URI semantics, without our compact prefixes.
-    if ('ref' in e.resource.dataSchema && e.resource.dataSchema.ref && !schemes.test(e.resource.dataSchema.ref)) throw new ViewerError('INVALID_MODEL', 'Schema reference must be an absolute URI', undefined, false)
+    if (e.resource.dataSchema.ref) e.resource.dataSchema.ref = expandURI(e.resource.dataSchema.ref, namespaces)
   }
   if (e.kind === 'catalog') e.resource.id = expandURI(e.resource.id, namespaces)
   if (e.kind === 'construction') for (const object of e.resource.objects) object.type = expandURI(object.type, namespaces)

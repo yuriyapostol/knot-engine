@@ -62,9 +62,9 @@ The [3_1 record](https://knotinfo.org/results.php?searchmode=singleknot&submitty
 }
 ```
 
-This extracts two original values; it does not propose putting both in one `representation.data`. Under the [KnotInfo PD convention](https://knotinfo.org/descriptions/pd_notation.html), four labels go counterclockwise starting at the incoming underpassing arc. Implemented [PD data](../v1/spec/pd-code.md) has a fixed `convention` URI, `crossings` as positive-integer quadruples and optional `unlinkedComponents`, preserving source labels. It encodes a combinatorial diagram, not drawing coordinates; validation checks repeated labels, the planar rotation system and underpass direction consistency.
+This extracts two original values; it does not propose putting both in one `representation.data`. Under the [KnotInfo PD convention](https://knotinfo.org/descriptions/pd_notation.html), four labels go counterclockwise starting at the incoming underpassing arc. Implemented [PD data](../v1/specifications/pd-code.md) has a fixed `convention` URI, `crossings` as positive-integer quadruples and optional `unlinkedComponents`, preserving source labels. It encodes a combinatorial diagram, not drawing coordinates; validation checks repeated labels, the planar rotation system and underpass direction consistency.
 
-The implemented knot-only [DT profile](../v1/spec/dt-code.md) uses `convention` and `code`, with signs and traversal tied to the [KnotInfo DT description](https://knotinfo.org/descriptions/dt_notation.html). Do not mix package conventions because their arrays look alike. [Spherogram](https://snappy.computop.org/spherogram.html) documents its own PD rules and orientation caveats. The profile checks planar realizability but does not reconstruct a unique PD embedding; `[4,6,2]` is not a universal context-free format. Multicomponent DT and embedding choices remain separate work.
+The implemented knot-only [DT profile](../v1/specifications/dt-code.md) uses `convention` and `code`, with signs and traversal tied to the [KnotInfo DT description](https://knotinfo.org/descriptions/dt_notation.html). Do not mix package conventions because their arrays look alike. [Spherogram](https://snappy.computop.org/spherogram.html) documents its own PD rules and orientation caveats. The profile checks planar realizability but does not reconstruct a unique PD embedding; `[4,6,2]` is not a universal context-free format. Multicomponent DT and embedding choices remain separate work.
 
 ## 3. Spatial curve
 
@@ -126,7 +126,7 @@ KnotInfo provides a [Grid description](https://knotinfo.org/descriptions/grid_no
 
 These are ten endpoints on a 5×5 grid, two per row/column, not X/O arrays. Verticals pass over horizontals. The SVG maps the second coordinate downward. Conversion to upward mathematical coordinates must record the transform rather than silently mirror data.
 
-One `grid-diagram` type now supports `xo` and `vertex-pairs`, both zero-based with fixed axis and crossing conventions. Source conventions are adapted during import. X/O specifies orientation; `vertex-pairs` does not. See the [grid diagram specification](../v1/spec/grid-diagram.md) for the implemented contracts.
+One `grid-diagram` type now supports `xo` and `vertex-pairs`, both zero-based with fixed axis and crossing conventions. Source conventions are adapted during import. X/O specifies orientation; `vertex-pairs` does not. See the [grid diagram specification](../v1/specifications/grid-diagram.md) for the implemented contracts.
 
 ## 6. Recommended order
 

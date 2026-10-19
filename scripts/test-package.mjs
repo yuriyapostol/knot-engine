@@ -29,11 +29,11 @@ try {
     assert.equal(import.meta.resolve('knot-engine/schema/knot-asset.schema.json'), new URL('./node_modules/knot-engine/v1/schema/knot-asset.schema.json', import.meta.url).href)
     for (const key of ['window','document','WebGLRenderingContext']) Object.defineProperty(globalThis, key, { get() { throw new Error('DOM access: '+key) } })
     const core = await import('knot-engine/core')
-    assert.equal(core.validateKnotAsset(${readFileSync('v1/spec/examples/assets/open-rope.json', 'utf8')}).valid, true)
+    assert.equal(core.validateKnotAsset(${readFileSync('v1/examples/assets/open-rope.json', 'utf8')}).valid, true)
     assert.equal(core.validateDTCode({convention: core.DT_SIGNED_EVEN, code: [4,6,2]}).valid, true)
     assert.equal(core.validateDTCode({convention: core.DT_SIGNED_EVEN, code: [[4],[2]]}).componentCount, 2)
     assert.equal(core.validatePDCode({convention: core.PD_CCW_UNDER_FIRST, crossings: [], unlinkedComponents: 1}).componentCount, 1)
-    assert.equal(core.resolveKnotAsset(${readFileSync('v1/spec/examples/assets/open-rope.json', 'utf8')}).curves.length, 1)
+    assert.equal(core.resolveKnotAsset(${readFileSync('v1/examples/assets/open-rope.json', 'utf8')}).curves.length, 1)
   `)
   execFileSync(process.execPath, ['--no-warnings', '--experimental-loader', join(temp, 'core-loader.mjs'), join(temp, 'core.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
   writeFileSync(join(temp, 'ssr.mjs'), `
@@ -41,7 +41,7 @@ try {
     import { createSSRApp } from 'vue'
     import { renderToString } from 'vue/server-renderer'
     import { KnotViewer } from 'knot-engine'
-    const html = await renderToString(createSSRApp(KnotViewer, { asset: ${readFileSync('v1/spec/examples/assets/open-rope.json', 'utf8')}, label: 'Tarball asset' }))
+    const html = await renderToString(createSSRApp(KnotViewer, { asset: ${readFileSync('v1/examples/assets/open-rope.json', 'utf8')}, label: 'Tarball asset' }))
     assert.ok(html.includes('Tarball asset') && !html.includes('<canvas'))
   `)
   execFileSync(process.execPath, [join(temp, 'ssr.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })

@@ -51,7 +51,7 @@ for (const lang of Object.keys(locales)) routes.set(lang === 'en' ? 'README.md' 
 function html(title, body, file, scope, lang, key) {
   const l = locales[lang], generation = metadata.has(scope) ? scope : current, meta = metadata.get(generation)
   const link = target => relative(file, target)
-  const nav = [['home', generation, 'index'], ['guide', generation, 'guide'], ['spec', generation, 'spec'], ['resources', generation, 'resources'], ['design', 'design', 'index']]
+  const nav = [['home', generation, 'index'], ['guide', generation, 'guide'], ['specifications', generation, 'specifications'], ['resources', generation, 'resources'], ['design', 'design', 'index']]
   const runtime = body.includes('data-knot-engine-demo="v1"')
     ? `${(exampleEntry.css || []).map(css => `<link rel="stylesheet" href="${link(`${current}/_example/${css}`)}">`).join('')}<script type="module" src="${link(`${current}/_example/${exampleEntry.file}`)}"></script>`
     : ''
@@ -87,22 +87,21 @@ for (const [source, p] of pages) {
 }
 for (const scope of [...generations, 'design']) {
   for (const lang of Object.keys(locales)) {
-    for (const section of scope === 'design' ? ['index'] : ['index','guide','spec','resources']) {
+    for (const section of scope === 'design' ? ['index'] : ['index','guide','specifications','resources']) {
       const file = route(scope,section,lang)
       if ([...routes.values()].includes(file)) continue
       const items = [...pages].filter(([,p]) => p.scope === scope && p.lang === lang && (section === 'index' || p.key.startsWith(section + '/')))
       const title = locales[lang][scope === 'design' ? 'design' : section === 'index' ? 'home' : section]
-      await put(file,html(title,`<h1>${title}</h1><ul>${items.map(([s,p]) => `<li><a href="${relative(file,routes.get(s))}">${esc(p.title)}</a></li>`).join('')}</ul>${section === 'spec' ? `<p><a href="${relative(file,route(scope,'schema',lang))}">${locales[lang].schemas}</a> · <a href="${relative(file,route(scope,'spec/examples',lang))}">${locales[lang].examples}</a></p>` : ''}`,file,scope,lang,section))
+      await put(file,html(title,`<h1>${title}</h1><ul>${items.map(([s,p]) => `<li><a href="${relative(file,routes.get(s))}">${esc(p.title)}</a></li>`).join('')}</ul>${section === 'specifications' ? `<p><a href="${relative(file,route(scope,'schema',lang))}">${locales[lang].schemas}</a> · <a href="${relative(file,route(scope,'examples',lang))}">${locales[lang].examples}</a></p>` : ''}`,file,scope,lang,section))
     }
   }
   if (scope === 'design') continue
   for (const section of ['schema','examples']) {
-    const sectionKey = section === 'schema' ? 'schema' : 'spec/examples'
-    const dir = `${scope}/${sectionKey}`
+    const dir = `${scope}/${section}`
     const listing = await files(path.join(sourceRoot,dir))
     const folders = ['', ...new Set(listing.flatMap(f => { const parts = f.split('/'); return parts.slice(0,-1).map((_,i) => parts.slice(0,i+1).join('/')) }))]
     for (const folder of folders) for (const lang of Object.keys(locales)) {
-      const key = `${sectionKey}${folder ? '/' + folder : ''}`
+      const key = `${section}${folder ? '/' + folder : ''}`
       const file = route(scope,key,lang), title = locales[lang][section === 'schema' ? 'schemas' : 'examples']
       await put(file,html(title,`<h1>${title}</h1><ul>${listing.filter(f => !folder || f.startsWith(folder + '/')).map(f => `<li><a href="${relative(file,`${dir}/${f}`)}">${esc(f)}</a></li>`).join('')}</ul>`,file,scope,lang,key))
     }

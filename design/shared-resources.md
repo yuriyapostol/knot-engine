@@ -1,8 +1,8 @@
 # Shared and inline KnotAsset resources
 
-**Implementation status:** the initial profile (spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, procedures, resources and cameras) is described in the [current specification](../v1/spec/knot-asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
+**Implementation status:** the initial profile (spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, procedures, resources and cameras) is described in the [current specification](../v1/specifications/knot-asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
 
-Status: design reference elaborating the [architectural draft](knot-asset-draft.md). Standalone resources and optional embedding are implemented in the initial profile. The [current specification](../v1/spec/knot-asset.md) defines their supported fields; additional details below remain proposals. Package version and `schemaVersion: 1` stay unchanged; compatibility with the previous structure is not required. See [publication](publication.md).
+Status: design reference elaborating the [architectural draft](knot-asset-draft.md). Standalone resources and optional embedding are implemented in the initial profile. The [current specification](../v1/specifications/knot-asset.md) defines their supported fields; additional details below remain proposals. Package version and `schemaVersion: 1` stay unchanged; compatibility with the previous structure is not required. See [publication](publication.md).
 
 ## 1. Namespace
 
@@ -19,7 +19,7 @@ Project identifiers use `https://yuriyapostol.github.io/knot-engine/v1/`.
 | `views/<name>`, `constructions/<name>` | Reusable views and constructions |
 | `examples/<name>` | Demonstration identities |
 
-These are identifiers, not a claim that all resources are published. Documentation now lives under `guide/` and `spec/`, while concrete registry records belong under `resources/`. Navigation and storage paths do not redefine resource identity. Integration identifiers belong to Knot Engine, not to external publishers. External standards retain their own identifiers.
+These are identifiers, not a claim that all resources are published. Documentation now lives under `guide/` and `specifications/`, while concrete registry records belong under `resources/`. Navigation and storage paths do not redefine resource identity. Integration identifiers belong to Knot Engine, not to external publishers. External standards retain their own identifiers.
 
 `schema` names the document contract; `schemaVersion` names its generation; optional editor `$schema` locates its JSON Schema. Contradictory values are errors. A shared generation does not prevent independent subschema entry points.
 
@@ -165,4 +165,4 @@ The unchanged resource can be placed in `asset.catalogs`. The localized sample n
 
 ## Sources as shared resources
 
-The additional `source` resource kind holds a shared description with an ID, at least a title or URL and optional authors, version, license and note. Local and external references use ordinary rules; see the [metadata specification](../v1/spec/sources.md) for the implemented contract and limits. Contributions remain flat lists on their owners rather than a new agent registry.
+The additional `source` resource kind holds a shared description with an ID, at least a title or URL and optional authors, version, license and note. Local and external references use ordinary rules; see the [metadata specification](../v1/specifications/sources.md) for the implemented contract and limits. Contributions remain flat lists on their owners rather than a new agent registry.

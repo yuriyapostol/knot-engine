@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 import { KnotViewer, validateKnotAsset, resolveKnotAsset, ViewerError, type KnotAsset, SPATIAL_CURVE, expandURI, type Camera3D, type CaptureOptions } from 'knot-engine'
-import loop from '../../v1/spec/examples/assets/twisted-loop.json'
-import overhand from '../../v1/spec/examples/assets/overhand.json'
-import assetFixture from '../../v1/spec/examples/assets/procedures.json'
+import loop from '../../v1/examples/assets/twisted-loop.json'
+import overhand from '../../v1/examples/assets/overhand.json'
+import assetFixture from '../../v1/examples/assets/procedures.json'
 type DemoInput = { kind: 'asset'; data: KnotAsset }
 const examples: Record<string, DemoInput> = {
   overhand: { kind: 'asset', data: overhand as unknown as KnotAsset },

@@ -25,7 +25,7 @@ npm run test:package
 npm pack --dry-run
 ```
 
-Generate a card PNG with `npm run preview:model -- --model v1/spec/examples/assets/twisted-loop.json --out /tmp/knot-preview.png`. The script uses local Chrome (or `CHROME_PATH`) and caches output by model, size, browser and renderer version.
+Generate a card PNG with `npm run preview:model -- --model v1/examples/assets/twisted-loop.json --out /tmp/knot-preview.png`. The script uses local Chrome (or `CHROME_PATH`) and caches output by model, size, browser and renderer version.
 
 The working package name is `knot-engine`; no npm release has been published. The library build is in `dist/`, and the demo build is in `site-runtime-dist/`. To build the demo for a project subpath, set `BASE_PATH=/your-path/`.
 
@@ -33,7 +33,7 @@ The working package name is `knot-engine`; no npm release has been published. Th
 
 To preview the complete site locally, run `npm run preview:site` and open `http://localhost:5174/`. This rebuilds the site before serving it. `npm run dev` on port `5173` serves the complete site and rebuilds it automatically after source changes.
 
-Run `npm run build:site` to build `site-dist/`. The site includes the guide at `/v1/guide.html`, specifications with schemas and examples at `/v1/spec.html`, resources at `/v1/resources.html`, and design material at `/design/index.html`. The interactive editor is embedded in the generation home page and guide. English is the default; page URLs retain `.html`, and Ukrainian pages use `.uk.html`, for example `/v1/guide/getting-started.uk.html` and `/design/architecture.uk.html`. Version `v1` includes pre-1.0 packages. Existing snapshots from `site/releases/` are preserved under `/releases/<package-version>/`.
+Run `npm run build:site` to build `site-dist/`. The site includes the guide at `/v1/guide.html`, specifications with schemas and examples at `/v1/specifications.html`, resources at `/v1/resources.html`, and design material at `/design/index.html`. The interactive editor is embedded in the generation home page and guide. English is the default; page URLs retain `.html`, and Ukrainian pages use `.uk.html`, for example `/v1/guide/getting-started.uk.html` and `/design/architecture.uk.html`. Version `v1` includes pre-1.0 packages. Existing snapshots from `site/releases/` are preserved under `/releases/<package-version>/`.
 
 The [Pages workflow](.github/workflows/pages.yml) publishes the complete site after a push to `main`, or a manual run on `main`, after typecheck and tests. In **Settings → Pages**, select **GitHub Actions**. The default site address is [Knot Engine](https://yuriyapostol.github.io/knot-engine/). Pages and demo assets use relative links and also work under a custom domain.
 
@@ -59,21 +59,21 @@ Import `validateKnotAsset`, `resolveKnotAsset` and types from `knot-engine/core`
 
 Methods: `resetView()`, `fitToView()`, `capture({width,height,view,transparent})`. PNG defaults to 512×512 with a 2048×2048 maximum. Capture modes are `current` and `model-preview`. Events: `ready({assetId,schemaVersion,warnings})`, `error`, `camera-change`. `initialCamera` accepts complete fit/fixed modes with perspective or orthographic projection; FOV is in radians.
 
-[Data contract](v1/spec/knot-asset.md) · [Functions](v1/spec/functions.md) · [Component](v1/spec/components.md) · [JSON Schema](v1/schema/knot-asset.schema.json) · [Examples](v1/spec/examples/assets)
+[Data contract](v1/specifications/knot-asset.md) · [Functions](v1/specifications/functions.md) · [Component](v1/specifications/components.md) · [JSON Schema](v1/schema/knot-asset.schema.json) · [Examples](v1/examples/assets)
 
-Styling uses `.knot-engine-v1-viewer…` classes and inherited `--knot-engine-v1-viewer-*` variables. The package namespace includes the major generation and component name, allowing different major versions on the same page; initial development requires no backward compatibility, including CSS. See [current variables, defaults and examples](v1/spec/components.md#css-namespace-and-styling).
+Styling uses `.knot-engine-v1-viewer…` classes and inherited `--knot-engine-v1-viewer-*` variables. The package namespace includes the major generation and component name, allowing different major versions on the same page; initial development requires no backward compatibility, including CSS. See [current variables, defaults and examples](v1/specifications/components.md#css-namespace-and-styling).
 
 ## Documentation
 
-Explain consequential contract decisions in the relevant specifications, with sources for definitions and implementations, checked examples and reasons for deviations from adopted conventions. Identify local project decisions as such rather than external standards. Data attribution, contributions and licensing follow the [metadata contract](v1/spec/sources.md).
+Explain consequential contract decisions in the relevant specifications, with sources for definitions and implementations, checked examples and reasons for deviations from adopted conventions. Identify local project decisions as such rather than external standards. Data attribution, contributions and licensing follow the [metadata contract](v1/specifications/sources.md).
 
 [English](README.md) and [Ukrainian](README.uk.md) are equivalent versions of the documentation. Update both versions together when changing a requirement, API or implementation policy. Keep technical identifiers, executable examples and numeric limits consistent; explanatory text and UI labels may be localized. Links within each version lead to documents in the same language.
 
 | Document | Scope |
 | --- | --- |
-| [`KnotAsset` v1](v1/spec/knot-asset.md) | Authoritative domain-data specification |
+| [`KnotAsset` v1](v1/specifications/knot-asset.md) | Authoritative domain-data specification |
 | [Architecture and migration](design/architecture.md) | Implementation policies, compatibility and current limits |
-| [`KnotViewer` specification](v1/spec/components.md) | Component API and retained acceptance criteria |
+| [`KnotViewer` specification](v1/specifications/components.md) | Component API and retained acceptance criteria |
 | [Demo application](design/interactive-example-requirements.md) | Demo behavior and acceptance plan |
 
 ## Current limits
