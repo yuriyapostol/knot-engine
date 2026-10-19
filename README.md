@@ -61,7 +61,7 @@ Methods: `resetView()`, `fitToView()`, `capture({width,height,view,transparent})
 
 [Data contract](v1/spec/knot-asset.md) · [Functions](v1/spec/functions.md) · [Component](v1/spec/components.md) · [JSON Schema](v1/spec/schema/knot-asset.schema.json) · [Examples](v1/spec/examples/assets)
 
-Styling uses `.knot-viewer-v1…` classes and inherited `--knot-viewer-v1-*` variables, compatible throughout v1 (including 0.x and later 1.x). Major generations may introduce incompatible CSS in separate namespaces. See [variables, defaults and examples](v1/spec/components.md#css-compatibility-and-styling).
+Styling uses `.knot-viewer-v1…` classes and inherited `--knot-viewer-v1-*` variables. The suffix separates major-generation styles for display on one documentation page; initial development requires no backward compatibility, including CSS. See [current variables, defaults and examples](v1/spec/components.md#css-namespace-and-styling).
 
 ## Documentation
 

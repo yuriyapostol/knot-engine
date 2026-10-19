@@ -52,9 +52,6 @@ try {
       defaultLight: 'rgb(248, 245, 239)', defaultDark: 'rgb(23, 27, 36)'
     }
     assert.deepEqual(await computed(), expected)
-    // A second v1 stylesheet may coexist; customizations still win.
-    await styles.addStyleTag({ content: v1CSS })
-    assert.deepEqual(await computed(), expected)
     await styles.evaluate(() => document.querySelector('#host').style.setProperty('--knot-viewer-v1-background', 'rgb(7,8,9)'))
     assert.deepEqual(await computed(), { ...expected, light: 'rgb(7, 8, 9)', dark: 'rgb(7, 8, 9)' })
     await styles.evaluate(() => {
@@ -64,7 +61,7 @@ try {
     assert.deepEqual(await computed(), { ...expected, light: expected.defaultDark, dark: expected.defaultDark })
   }
   await styles.close()
-  console.log('CSS: inherited/local overrides, theme defaults, duplicate v1 CSS and major-generation namespace isolation in both load orders passed')
+  console.log('CSS: inherited/local overrides, theme defaults and major-generation namespace isolation in both load orders passed')
   const page = await browser.newPage({ viewport: { width: 640, height: 480 } })
   const failures = []
   page.on('pageerror', error => failures.push(error.message))

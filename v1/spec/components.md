@@ -24,11 +24,13 @@ Slots: `toolbar({reset,fit,zoomIn,zoomOut,ready,touchActive})`, `fallback({state
 
 Import `knot-engine/styles.css`. Toolbar buttons and arrow keys support camera interaction. Touch orbit/pinch and scroll handoff remain supported; hardware touch/WebView verification is separate from headless browser coverage. There is no automatic data fetching or animation. Geometry quality has a 100,000-triangle budget; it is reduced before allocation or fails when low quality is still too large.
 
-## CSS compatibility and styling
+## CSS namespace and styling
 
-The public CSS contract is stable within generation `v1`, including all `0.x` and later `1.x` packages. The root class is `.knot-viewer-v1`; part classes are `.knot-viewer-v1__surface`, `.knot-viewer-v1__canvas`, `.knot-viewer-v1__fallback`, `.knot-viewer-v1__poster`, `.knot-viewer-v1__toolbar`. The root exposes `data-theme="light|dark"` and `data-state="empty|initializing|ready|error"`. Existing classes, attribute values and documented variables retain their meaning; extensions must remain compatible with existing host styling. Pixel identity and the complete internal DOM structure are not guaranteed.
+The current component's root class is `.knot-viewer-v1`; part classes are `.knot-viewer-v1__surface`, `.knot-viewer-v1__canvas`, `.knot-viewer-v1__fallback`, `.knot-viewer-v1__poster`, `.knot-viewer-v1__toolbar`. The root exposes `data-theme="light|dark"` and `data-state="empty|initializing|ready|error"`.
 
-Different `v1` releases can share the CSS contract; their stylesheets must coexist without incompatible overrides depending on load order. `v2` and later major generations may introduce incompatible changes: they use separate `.knot-viewer-v2…` classes and `--knot-viewer-v2-*` variables. Unversioned `.knot-viewer…` aliases are not added, keeping generation styles separate.
+The `-v1` suffix separates major-generation styles so documentation can display `v1`, `v2`, etc. viewers on the same page when needed. `v1` covers `0.x` and later `1.x` packages; subsequent generations use their own `.knot-viewer-v2…` classes and `--knot-viewer-v2-*` variables. Unversioned `.knot-viewer…` aliases are not added.
+
+Backward compatibility is not required during initial development, including for CSS. The suffix does not freeze classes, variables, markup or appearance between releases in one generation or guarantee interchangeable stylesheets. Each viewer should use the stylesheet from its corresponding release.
 
 Public `--knot-viewer-v1-*` CSS variables are the preferred customization mechanism. Set them on a host container for inheritance or on an individual component through `class`/`style`. The package does not assign public variables on its root: absent overrides use defaults. Private `--_knot-viewer-v1-*` variables hold the theme palette and are not public API. Explicit overrides win in both themes; hosts can use `[data-theme=dark]` for theme-specific colors.
 
@@ -72,4 +74,4 @@ Public `--knot-viewer-v1-*` CSS variables are the preferred customization mechan
 
 These variables style the HTML interface, not WebGL materials, lighting or PNG backgrounds. The `theme` prop continues to control the 3D palette; `capture` uses its own theme/mode background, or transparency with `transparent:true`. Smaller buttons can reduce touch usability; the default remains 44px.
 
-This is a project decision: a shared CSS generation supports concurrent viewers from different releases without a separate styling namespace per `0.x`. A generation suffix isolates potentially incompatible major versions; inherited variables customize a group or individual instance without depending on internal markup. See the [publication policy](../../design/publication.md).
+This is a project decision: a generation suffix separates styles for different major viewers on one documentation page. Inherited variables customize a group or individual instance without changing internal markup. See the [publication policy](../../design/publication.md).
