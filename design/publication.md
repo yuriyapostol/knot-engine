@@ -24,7 +24,7 @@ tests/
 
 Versioned materials live once under root vN directories. Guide pages explain tasks; specifications define implemented data and component/function behavior. Schemas and format examples are part of specifications. Resources hold actual reusable definitions; catalogs are specifically identification systems. Proposed contracts, research, acceptance plans and architectural decisions live in design, visibly separate from implemented specifications.
 
-The site directory contains common navigation, localization, rendering and the interactive-example host. It does not duplicate v1/v2 source content. Its release snapshots are immutable generated artifacts, not another authoring tree. Package components implement knot rendering; the site supplies the editor and explanatory context. Current renderer code is not silently applied to incompatible old generations: only the current generation receives the current interactive runtime. Archived snapshots preserve their built runtime. Another actively interactive generation needs an explicitly compatible runtime.
+The site directory contains common navigation, localization, rendering and the interactive-example host. Current-generation examples mount directly into page containers; only pages with examples load their generation-local JavaScript and CSS bundles. Demo styles are scoped to `knot-engine-v1-demo` and inherit the page palette. It does not duplicate v1/v2 source content. Its release snapshots are immutable generated artifacts, not another authoring tree. Package components implement knot rendering; the site supplies the editor and explanatory context. Current renderer code is not silently applied to incompatible old generations: only the current generation receives the current interactive runtime. Archived snapshots preserve their built runtime. Another actively interactive generation needs an explicitly compatible runtime.
 
 ## Two language editions
 
@@ -41,6 +41,15 @@ Package, documentation, specifications, schemas and available data form one rele
 The namespace remains https://yuriyapostol.github.io/knot-engine/v1/. Moving files or documentation does not rename entities. Existing schema IDs under /v1/schema/ remain valid publication aliases of files physically under v1/spec/schema/. Package schema exports map to that physical directory. Schema filenames do not repeat the generation suffix.
 
 Archives preserve canonical IDs. Reproducible validation supplies the chosen snapshot's schemas in an isolated registry rather than silently fetching current definitions. Different revisions with one canonical ID must not be mixed in the same validator registry.
+
+
+## CSS namespace for major generations
+
+CSS names start with the full package namespace `knot-engine`, followed by the major generation and component name. Classes follow `knot-engine-vN-<component>` / `knot-engine-vN-<component>__<part>`; component variables follow `--knot-engine-vN-<component>-<setting>`. The implemented `KnotViewer` uses `.knot-engine-v1-viewer`, `.knot-engine-v1-viewer__…` and `--knot-engine-v1-viewer-*`. Other components receive distinct names under the same package/generation prefix.
+
+Different major versions can be used on the same page. Future `v2`, `v3`, etc. use their own class and variable namespaces; no separate namespace is introduced for each `0.x` release.
+
+During initial development, no part of the package requires backward compatibility, including CSS. There are no separate guarantees of stable classes, variables or stylesheet compatibility between releases in one generation. A viewer uses its release's stylesheet. This is a project decision about namespace separation; see the [component contract](../v1/spec/components.md#css-namespace-and-styling) for current styling settings. Published release snapshots remain immutable.
 
 ## Package and website selection
 

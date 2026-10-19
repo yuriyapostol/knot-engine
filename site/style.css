@@ -90,12 +90,11 @@ nav [aria-current="page"] { color: var(--fg); font-weight: 600; text-decoration:
 .markdown-body tr { background: var(--bg); }
 .markdown-body tr:nth-child(2n) { background: var(--subtle); }
 .markdown-body img { max-width: 100%; height: auto; }
-.example { display: block; width: 100%; height: 1120px; margin-bottom: 16px; border: 1px solid var(--border); border-radius: 6px; background: var(--subtle); }
+.knot-engine-v1-demo-host { margin-bottom: 16px; }
 footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; }
 
 @media (max-width: 760px) {
   .shell { padding: 16px 16px 32px; }
-  .example { height: 1480px; }
 }
 
 @media (max-width: 480px) {
