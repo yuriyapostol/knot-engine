@@ -190,6 +190,8 @@ Scale belongs where coordinates gain meaning. Do not infer physical scale during
 
 ## 6. Viewing and initial orientation
 
+Future direction: the [viewer architecture](architecture.md) requires separate representation viewers with a consistent API and view settings supplied independently of knot data. The embedded `views`, `defaultView` and `preferredView` design below describes the current profile and must be revised when that separation is implemented.
+
 Camera, projection, styling and user interaction state have a separate contract, supplied independently by an application. See the [`ViewDefinition` proposal](shared-resources.md#5-viewdefinition-and-preferredview). `Representation.views` may embed or reference such records; no root `views` collection is needed.
 
 ```json

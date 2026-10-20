@@ -92,6 +92,8 @@ A type needs structural validation and documented indexing, orientation, topolog
 
 ## 5. ViewDefinition and preferredView
 
+Future direction: the [viewer architecture](architecture.md) separates view settings from knot data and passes them as a distinct input to the main and representation-specific viewers. The embedded view fields and selection rules below describe the current profile; their presentation role must move to the separate settings contract.
+
 Required fields: local or global `id`, `name`, `space` (`plane` or `space`), `camera`. `description` is optional. Views do not require a subject and can be supplied without an asset. Coordinates belong to the representation to which the view is applied.
 
 | Camera mode | Required parameters | Meaning |
