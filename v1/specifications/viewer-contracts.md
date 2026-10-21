@@ -1,6 +1,6 @@
 # Representation selection and viewer contracts
 
-**Status:** `selectRepresentation` supports targeted validation of the selected representation; arbitrary partial root structures and UI contracts remain in design. Supplements the [architecture](../../design/modular-viewers.md).
+**Status:** `selectRepresentation` supports targeted validation of the selected representation; arbitrary partial root structures and a basic UI compositor and registry are implemented; remaining UI contracts are still in design. Supplements the [architecture](../../design/modular-viewers.md).
 
 ## Input and selection
 

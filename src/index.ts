@@ -1,3 +1,6 @@
+export { default as Knot3DViewer } from './components/Knot3DViewer.vue'
+export { createViewerRegistry, findViewer } from './components/viewerRegistry'
+export type { ViewerCapabilities, ViewerRegistration, ViewerRegistry } from './components/viewerRegistry'
 export { default as KnotViewer } from './components/KnotViewer.vue'
 export * from './core'
 export type { CaptureOptions } from './renderer/ViewerEngine'
