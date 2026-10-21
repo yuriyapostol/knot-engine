@@ -37,13 +37,14 @@ const diagram = computed((): MosaicDiagram | null => {
 })
 const size = computed(() => diagram.value?.tiles.length ?? 1)
 const selectedView = computed(() => {
-  if (!props.view) return null
-  if ('id' in props.view || 'ref' in props.view) {
+  const requested = props.view
+  if (!requested) return null
+  if ('id' in requested || 'ref' in requested) {
     const views = selection.value?.ok ? selection.value.representation.views ?? [] : []
-    const found = views.find(v => 'ref' in props.view! ? 'ref' in v && v.ref === props.view.ref : 'id' in v && v.id === props.view.id)
+    const found = views.find(v => 'ref' in requested ? 'ref' in v && v.ref === requested.ref : 'id' in v && v.id === requested.id)
     return found && 'space' in found ? found : null
   }
-  return props.view
+  return requested
 })
 const viewError = computed(() => {
   if (!props.view) return null
