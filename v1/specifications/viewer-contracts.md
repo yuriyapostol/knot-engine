@@ -1,6 +1,6 @@
 # Representation selection and viewer contracts
 
-**Status:** basic `selectRepresentation` is implemented for complete `KnotAsset`; partial assets, targeted validation and UI contracts remain in design. Supplements the [architecture](../../design/modular-viewers.md).
+**Status:** `selectRepresentation` supports targeted validation of the selected representation; arbitrary partial root structures and UI contracts remain in design. Supplements the [architecture](../../design/modular-viewers.md).
 
 ## Input and selection
 
@@ -19,10 +19,10 @@ type SelectionIssue = {
   message: string
   path?: string
 }
-function selectRepresentation(asset: KnotAsset, query?: RepresentationQuery, options?: ValidationOptions): SelectionResult
+function selectRepresentation(asset: KnotAsset, query?: RepresentationQuery, options?: SelectionOptions): SelectionResult
 ```
 
-This operation returns data without UI, mutation or resource fetching. Type matching uses expanded URIs. An explicit ID must also match the requested type; missing and ambiguous matches have distinct diagnostics. Without an ID, the generic viewer may select only under an unambiguous rule; silently choosing the first representation is forbidden. Partial assets require validation of a minimally sufficient dependency closure. The exact permitted partial-asset shape and validation rules must be finalized before implementation without weakening complete-document validation.
+This operation returns data without UI, mutation or resource fetching. Type matching uses expanded URIs. An explicit ID must also match the requested type; missing and ambiguous matches have distinct diagnostics. Without an ID, the generic viewer may select only under an unambiguous rule; silently choosing the first representation is forbidden. Partial assets require validation of a minimally sufficient dependency closure. The root must conform to the v1 `KnotAsset` structure; optional sections may be omitted. By default, only the selected representation and required context are validated, not unrelated representations or procedures. `scope: 'all'` validates the entire document. Missing dependencies of the selected representation remain errors.
 
 ## UI contract
 

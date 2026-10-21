@@ -47,3 +47,35 @@ describe('independent representation selection', () => {
     })
   })
 })
+
+describe('targeted validation', () => {
+  it('ignores unrelated unsupported representations but preserves them in the result', () => {
+    const asset = copy()
+    asset.representations!.push({ id: 'future', type: 'urn:example:future', data: { value: 1 } })
+    const selected = selectRepresentation(asset, { type: SPATIAL_CURVE })
+    expect(selected).toMatchObject({ ok: true, typeUri: SPATIAL_CURVE })
+    if (selected.ok) expect(selected.asset.representations).toHaveLength(2)
+    expect(selectRepresentation(asset, { type: SPATIAL_CURVE }, { scope: 'all' })).toMatchObject({
+      ok: false, issues: [{ code: 'MISSING_DEPENDENCY' }],
+    })
+  })
+  it('validates selected data even if unrelated representation data is invalid', () => {
+    const asset = copy()
+    asset.representations!.push({ id: 'broken', type: SPATIAL_CURVE, data: {} })
+    expect(selectRepresentation(asset, { representationId: 'view-3d-rest' })).toMatchObject({ ok: true })
+    expect(selectRepresentation(asset, { representationId: 'broken' })).toMatchObject({
+      ok: false, issues: [{ code: 'INVALID_REPRESENTATION' }],
+    })
+  })
+  it('does not require unrelated procedures to validate the selected representation', () => {
+    const asset = copy()
+    asset.procedures = [{ id: 'future-steps', steps: [{ id: 'step', representations: [{ id: 'missing' }] }] }]
+    expect(selectRepresentation(asset, { type: SPATIAL_CURVE })).toMatchObject({ ok: true })
+    expect(selectRepresentation(asset, { type: SPATIAL_CURVE }, { scope: 'all' })).toMatchObject({ ok: false })
+  })
+  it('still checks the selected construction and object references', () => {
+    const asset = copy()
+    asset.constructions = []
+    expect(selectRepresentation(asset, { type: SPATIAL_CURVE })).toMatchObject({ ok: false })
+  })
+})
