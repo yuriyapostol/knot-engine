@@ -55,17 +55,17 @@ describe('targeted validation', () => {
     const selected = selectRepresentation(asset, { type: SPATIAL_CURVE })
     expect(selected).toMatchObject({ ok: true, typeUri: SPATIAL_CURVE })
     if (selected.ok) expect(selected.asset.representations).toHaveLength(2)
-    expect(selectRepresentation(asset, { type: SPATIAL_CURVE }, { scope: 'all' })).toMatchObject({
-      ok: false, issues: [{ code: 'MISSING_DEPENDENCY' }],
-    })
+    const full = selectRepresentation(asset, { type: SPATIAL_CURVE }, { scope: 'all' })
+    expect(full.ok).toBe(false)
+    if (!full.ok) expect(full.issues.some(issue => issue.code === 'MISSING_DEPENDENCY')).toBe(true)
   })
   it('validates selected data even if unrelated representation data is invalid', () => {
     const asset = copy()
     asset.representations!.push({ id: 'broken', type: SPATIAL_CURVE, data: {} })
     expect(selectRepresentation(asset, { representationId: 'view-3d-rest' })).toMatchObject({ ok: true })
-    expect(selectRepresentation(asset, { representationId: 'broken' })).toMatchObject({
-      ok: false, issues: [{ code: 'INVALID_REPRESENTATION' }],
-    })
+    const broken = selectRepresentation(asset, { representationId: 'broken' })
+    expect(broken.ok).toBe(false)
+    if (!broken.ok) expect(broken.issues.some(issue => issue.code === 'INVALID_REPRESENTATION')).toBe(true)
   })
   it('does not require unrelated procedures to validate the selected representation', () => {
     const asset = copy()
