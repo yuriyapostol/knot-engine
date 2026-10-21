@@ -4,11 +4,19 @@
 
 ## Architecture
 
-`KnotViewer` becomes a generic compositor. It validates the asset, selects a representation, expands its type URI using document namespaces, resolves an explicitly supplied or built-in viewer registry, and delegates rendering, events and methods. It must not contain Three.js or representation-specific geometry.
+`KnotViewer` becomes a generic compositor. It uses independent core operations to validate input and select a representation, expands its type URI using document namespaces, resolves an explicitly supplied or built-in viewer registry, and delegates rendering, events and methods. It must not contain Three.js or representation-specific geometry.
 
 `Knot3DViewer` renders `spatial-curve`; `KnotMosaicViewer` renders `mosaic-diagram`. Both must also work independently with typed representation data and only the domain context actually needed. A representation-type resource does not imply that a renderer exists. Invalid data, incomplete dependencies, unsupported types and missing renderers require distinct diagnostics.
 
-Core owns data contracts, JSON Schema, validation, URI expansion, resource resolution and domain semantics without Vue, DOM, Three.js or network access. The compositor owns selection, shared states and delegation. Each specialized viewer owns its renderer, interactions, lifecycle, snapshots and type-specific settings. The registry maps **expanded absolute URIs** to implementations/capabilities; it is explicitly provided or instance-local, never mutable global state. Applications may explicitly override built-ins. Registry lookup must not fetch code or data.
+Core owns data contracts, JSON Schema, validation, URI expansion, resource resolution and domain semantics without Vue, DOM, Three.js or network access. The compositor owns viewer-component routing, shared states and delegation; core owns representation selection and validation. Each specialized viewer owns its renderer, interactions, lifecycle, snapshots and type-specific settings. The registry maps **expanded absolute URIs** to implementations/capabilities; it is explicitly provided or instance-local, never mutable global state. Applications may explicitly override built-ins. Registry lookup must not fetch code or data.
+
+## Independent selection and validation
+
+`core` exposes public operations for validating complete `KnotAsset` documents, validating permitted partial inputs, selecting representations by ID or type, expanding type URIs, validating selected representations and resolving their required dependencies. These operations are usable independently of any viewer for data inspection or transformation. The normative specification will define exact names and signatures; results must expose structured diagnostics without a UI dependency.
+
+`KnotViewer` and specialized viewers are peers consuming these core operations. `KnotViewer` additionally determines **which viewer component** to use. `Knot3DViewer` and `KnotMosaicViewer` know their supported types, yet each can independently accept a complete or permitted partial `KnotAsset`, select its representation via core, validate it and prepare its dependencies. They also accept direct typed representation input with necessary context. No specialized viewer depends on `KnotViewer` for validation or selection.
+
+Full-document validation differs from targeted partial-input validation: unrelated optional portions are not required, but necessary dependencies and domain constraints are checked. Selection among multiple matching representations must be deterministic or require an explicit ID; ambiguity must not be silently ignored.
 
 ## Common contract
 
