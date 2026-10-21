@@ -83,7 +83,7 @@ try {
     return page.evaluate(() => window.__previewError)
   }
   const invalid = fixture('v1/examples/assets/invalid/dimension.json')
-  assert.match(await setInput({ asset: invalid }), /INVALID_MODEL/)
+  assert.match(await setInput({ asset: invalid }), /^INVALID_REPRESENTATION:/)
   assert.equal(await page.evaluate(() => window.__webglContexts), 0, 'Malformed asset must fail before WebGL allocation')
 
   for (const model of ['overhand', 'twisted-loop']) {
@@ -118,7 +118,7 @@ try {
   const after = await capturePixels()
   assert.ok(before.length > 1000 && after.length > 1000)
   assert.notDeepEqual(before, after, 'Representation selection must change the captured geometry')
-  assert.match(await setInput({ asset, selection: { representationId: 'missing' } }), /INVALID_MODEL/)
+  assert.match(await setInput({ asset, selection: { representationId: 'missing' } }), /^REPRESENTATION_NOT_FOUND:/)
   assert.equal(await page.locator('.knot-engine-v1-viewer').getAttribute('data-state'), 'error')
   assert.equal(await setInput({ asset }), undefined)
   assert.deepEqual(failures, [])
