@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { MOSAIC_DIAGRAM, selectRepresentation, validateMosaicDiagram, resolveRepresentationView, type KnotAsset, type MosaicDiagram, type KnotResourceRegistry, type Reference, type ViewDefinition } from '../core'
 import { mosaicPaths } from './mosaicGeometry'
 
-export interface MosaicView { center: [number, number]; height: number; rotation: number }
+export interface MosaicView { center: [number, number]; height: number }
 const props = withDefaults(defineProps<{
   asset?: KnotAsset | null
   representationId?: string
@@ -25,7 +25,6 @@ const emit = defineEmits<{
 const svg = ref<SVGSVGElement | null>(null)
 const zoom = ref(1)
 const center = ref<[number, number] | null>(null)
-const rotation = ref(0)
 const dragging = ref<{ x: number; y: number; center: [number, number] } | null>(null)
 const selection = computed(() => props.asset
   ? selectRepresentation(props.asset, { representationId: props.representationId, type: MOSAIC_DIAGRAM }, { registries: props.registries })
@@ -44,7 +43,7 @@ const selectedView = computed(() => resolvedView.value?.ok ? resolvedView.value.
 const viewError = computed(() => {
   if (!resolvedView.value) return null
   if (!resolvedView.value.ok) return resolvedView.value.message
-  if (selectedView.value && selectedView.value.space !== 'plane') return 'Invalid plane view'
+  if (selectedView.value && (selectedView.value.space !== 'plane' || selectedView.value.camera.rotation !== 0)) return 'Mosaic viewer supports only unrotated plane views'
   return null
 })
 const error = computed(() => {
@@ -57,7 +56,6 @@ const ready = computed(() => !!diagram.value && !error.value)
 const current = computed((): MosaicView => ({
   center: center.value ?? [size.value / 2, size.value / 2],
   height: size.value / zoom.value,
-  rotation: rotation.value,
 }))
 const viewBox = computed(() => {
   const height = current.value.height
@@ -68,10 +66,9 @@ function applyView() {
   const camera = selectedView.value?.space === 'plane' ? selectedView.value.camera : null
   center.value = camera ? [...camera.center] : null
   zoom.value = camera ? size.value / camera.height : 1
-  rotation.value = camera?.rotation ?? 0
 }
 function resetView() { applyView(); announceView() }
-function fitToView() { center.value = null; zoom.value = 1; rotation.value = 0; announceView() }
+function fitToView() { center.value = null; zoom.value = 1; announceView() }
 function zoomIn() { zoom.value = Math.min(zoom.value * 1.25, 32); announceView() }
 function zoomOut() { zoom.value = Math.max(zoom.value / 1.25, 0.25); announceView() }
 function onWheel(event: WheelEvent) {
@@ -117,7 +114,7 @@ defineExpose({ resetView, fitToView, capture })
 <template>
   <div class="knot-engine-v1-viewer" :data-theme="theme" :data-state="ready ? 'ready' : error ? 'error' : 'empty'" :aria-label="label" :aria-description="description" role="group">
     <svg v-if="ready" ref="svg" class="knot-engine-v1-mosaic" :viewBox="viewBox" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" :aria-label="label" @wheel="onWheel" @pointerdown="onPointerDown" @pointermove="onPointerMove" @pointerup="onPointerUp" @pointercancel="onPointerUp" @lostpointercapture="onPointerUp">
-      <g :transform="`rotate(${-rotation * 180 / Math.PI} ${current.center[0]} ${size - current.center[1]})`">
+      <g>
         <g v-for="path in paths" :key="path.key" :transform="path.transform">
           <path :d="path.d" fill="none" stroke="currentColor" stroke-width="0.095" stroke-linecap="round" stroke-linejoin="round" />
         </g>
