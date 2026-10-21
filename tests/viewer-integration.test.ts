@@ -43,7 +43,7 @@ describe('viewer integration', () => {
     await nextTick()
     const blob = await exposed.value!.capture({ width: 320, height: 180, view: 'model-preview' })
     expect(blob.type).toBe('image/svg+xml')
-    const svg = await blob.text()
+    const svg = await new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(reader.error); reader.readAsText(blob) })
     expect(svg).toContain('width="320"')
     expect(svg).toContain('height="180"')
     expect(svg).toContain('viewBox="0 0 4 4"')
