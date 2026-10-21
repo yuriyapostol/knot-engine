@@ -120,7 +120,8 @@ try {
   assert.notDeepEqual(before, after, 'Representation selection must change the captured geometry')
   assert.match(await setInput({ asset, selection: { representationId: 'missing' } }), /^REPRESENTATION_NOT_FOUND:/)
   assert.equal(await page.locator('.knot-engine-v1-viewer').getAttribute('data-state'), 'error')
-  assert.equal(await setInput({ asset }), undefined)
+  assert.match(await setInput({ asset }), /^AMBIGUOUS_REPRESENTATION:/)
+  assert.equal(await setInput({ asset, selection: { representationId: 'view-3d-rest' } }), undefined)
   assert.deepEqual(failures, [])
   console.log('KnotAsset: render, representation replacement, PNG capture, invalid selection, and recovery passed')
   // Exercise the actual generic compositor in Chromium: SVG, export, failure, recovery, 3D.
