@@ -46,7 +46,7 @@ const selectedView = computed(() => resolvedView.value?.ok ? resolvedView.value.
 const viewError = computed(() => {
   if (!resolvedView.value) return null
   if (!resolvedView.value.ok) return resolvedView.value.message
-  if (selectedView.value && (selectedView.value.space !== 'plane' || selectedView.value.camera.rotation !== 0)) return 'Mosaic viewer supports only unrotated plane views'
+  if (selectedView.value && (selectedView.value.space !== 'plane')) return 'Mosaic viewer requires a plane view'
   return null
 })
 const error = computed(() => {

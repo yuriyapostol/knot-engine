@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { resolveRepresentationView, type KnotResourceRegistry, type ViewDefinition } from '../src/core'
 
-const plane: ViewDefinition = { id: 'urn:test:view', name: 'Plane', space: 'plane', camera: { mode: 'plane', center: [2,2], height: 4, rotation: 0 } }
+const plane: ViewDefinition = { id: 'urn:test:view', name: 'Plane', space: 'plane', camera: { mode: 'plane', center: [2,2], height: 4 } }
 const registry: KnotResourceRegistry = {
   schema: 'KnotResourceRegistry', schemaVersion: 1,
   resources: [{ kind: 'view', resource: plane }],

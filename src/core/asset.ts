@@ -38,7 +38,7 @@ export type Camera3D =
   | { mode: 'fit'; direction: Point3D; up: Point3D; projection: Projection; padding?: number }
   | { mode: 'fixed'; position: Point3D; target: Point3D; up: Point3D; projection: { kind: 'perspective'; fovY: number } | { kind: 'orthographic'; height: number } }
 export type ViewDefinition = { id: string; name: string; description?: string } & (
-  { space: 'space'; camera: Camera3D } | { space: 'plane'; camera: { mode: 'plane'; center: [number, number]; height: number; rotation: number } }
+  { space: 'space'; camera: Camera3D } | { space: 'plane'; camera: { mode: 'plane'; center: [number, number]; height: number } }
 )
 export interface CatalogDefinition { id: string; name: string; description: string; homepage?: string; edition?: string; identifierRules?: { caseSensitive?: boolean; pattern?: string } }
 export type DataSchema = { ref: string; inline?: never } | { inline: Record<string, unknown>; ref?: never }
