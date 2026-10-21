@@ -2,10 +2,10 @@
 import { computed, ref } from 'vue'
 import Knot3DViewer from './Knot3DViewer.vue'
 import KnotMosaicViewer from './KnotMosaicViewer.vue'
-import { MOSAIC_DIAGRAM, SPATIAL_CURVE, selectRepresentation, type KnotAsset, type Camera3D, type KnotResourceRegistry, type Reference, type ViewDefinition } from '../core'
+import { MOSAIC_DIAGRAM, SPATIAL_CURVE, type KnotAsset, type Camera3D, type KnotResourceRegistry, type Reference, type ViewDefinition } from '../core'
 import type { ViewerMessages } from '../locales'
 import type { ViewerRegistry } from './viewerRegistry'
-import { createViewerRegistry } from './viewerRegistry'
+import { createViewerRegistry, selectViewerRepresentation } from './viewerRegistry'
 import type { CaptureOptions } from '../renderer/ViewerEngine'
 
 const props = withDefaults(defineProps<{
@@ -34,10 +34,10 @@ const emit = defineEmits<{
 }>()
 const builtIns = createViewerRegistry([
   { typeUri: SPATIAL_CURVE, component: Knot3DViewer, capabilities: { orbit: true, pan: true, zoom: true, capture: ['png'] } },
-  { typeUri: MOSAIC_DIAGRAM, component: KnotMosaicViewer, capabilities: { zoom: true } },
+  { typeUri: MOSAIC_DIAGRAM, component: KnotMosaicViewer, capabilities: { pan: true, zoom: true, capture: ['svg'] } },
 ])
 const viewer = ref<{ resetView: () => void; fitToView: () => void; capture: (options?: CaptureOptions) => Promise<Blob> } | null>(null)
-const selection = computed(() => props.asset ? selectRepresentation(props.asset, { representationId: props.representationId }) : null)
+const selection = computed(() => props.asset ? selectViewerRepresentation(props.asset, props.registry ?? builtIns, props.representationId) : null)
 const selected = computed(() => {
   if (!selection.value?.ok) return null
   return (props.registry ?? builtIns).get(selection.value.typeUri) ?? null

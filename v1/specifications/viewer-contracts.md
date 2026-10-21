@@ -55,3 +55,8 @@ Cover complete and partial assets; explicit ID; missing and ambiguous selection;
 ## Dedicated package entry points
 
 The package publishes `knot-engine/core` for headless validation, `knot-engine/3d` for `Knot3DViewer`, and `knot-engine/mosaic` for `KnotMosaicViewer`. The root entry retains `KnotViewer` and both specialized components for compatibility. Import `knot-engine/styles.css` when using the visual components. Each dedicated entry is tested from the packed npm tarball, including its generated TypeScript declarations.
+
+
+## Generic viewer selection rule
+
+Without `representationId`, `KnotViewer` filters available representations by the effective viewer registry, then selects **only if exactly one supported representation exists**. Unsupported siblings are ignored for dispatch, not deleted or modified. Multiple supported representations require an explicit ID, even when they share a type; zero supported representations return `UNSUPPORTED_REPRESENTATION`. An explicit ID selects that representation without fallback and reports an unsupported viewer if its type is not registered. A caller-provided registry replaces the built-in registry. The selected representation is then validated by `core` using its dependency context.
