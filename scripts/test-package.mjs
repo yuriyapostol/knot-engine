@@ -36,6 +36,18 @@ try {
     assert.equal(core.resolveKnotAsset(${readFileSync('v1/examples/assets/open-rope.json', 'utf8')}).curves.length, 1)
   `)
   execFileSync(process.execPath, ['--no-warnings', '--experimental-loader', join(temp, 'core-loader.mjs'), join(temp, 'core.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
+  writeFileSync(join(temp, 'subpaths.mjs'), `
+    import assert from 'node:assert/strict'
+    import { createSSRApp } from 'vue'
+    import { renderToString } from 'vue/server-renderer'
+    import { Knot3DViewer } from 'knot-engine/3d'
+    import { KnotMosaicViewer } from 'knot-engine/mosaic'
+    assert.equal(typeof Knot3DViewer, 'object')
+    assert.equal(typeof KnotMosaicViewer, 'object')
+    const html = await renderToString(createSSRApp(KnotMosaicViewer, { label: 'Mosaic standalone' }))
+    assert.ok(html.includes('Mosaic standalone'))
+  `)
+  execFileSync(process.execPath, [join(temp, 'subpaths.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
   writeFileSync(join(temp, 'ssr.mjs'), `
     import assert from 'node:assert/strict'
     import { createSSRApp } from 'vue'
@@ -47,12 +59,17 @@ try {
   execFileSync(process.execPath, [join(temp, 'ssr.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
   writeFileSync(join(temp, 'check.ts'), `
     import { KnotViewer, type KnotAsset, type CameraView } from 'knot-engine'
+    import { Knot3DViewer } from 'knot-engine/3d'
+    import { KnotMosaicViewer } from 'knot-engine/mosaic'
     import { validateKnotAsset, resolveKnotAsset, type Representation, type DTCode, DT_SIGNED_EVEN, validateDTCode, type PDCode, type SourceDefinition, type Contribution, type License, validatePDCode, PD_CCW_UNDER_FIRST } from 'knot-engine/core'
     const representation: Representation = { id: 'r', type: 'urn:example:representation', data: {} }
     const asset: KnotAsset = { schema: 'KnotAsset', schemaVersion: 1, id: 'a', subject: { id: 's' }, representations: [representation] }
     const camera: CameraView = { mode: 'fixed', position: [0,0,1], target: [0,0,0], up: [0,1,0], projection: { kind: 'perspective', fovY: 1 } }
     type Props = InstanceType<typeof KnotViewer>['$props']
     const props: Props = { asset, representationId: 'r', label: 'a', initialCamera: camera }
+    const threeProps: InstanceType<typeof Knot3DViewer>['$props'] = { label: '3d', asset }
+    const mosaicProps: InstanceType<typeof KnotMosaicViewer>['$props'] = { label: 'mosaic', asset }
+    void threeProps; void mosaicProps
     const pd: PDCode = { convention: PD_CCW_UNDER_FIRST, crossings: [[1,1,2,2]] }
     validatePDCode(pd)
     const dt: DTCode = { convention: DT_SIGNED_EVEN, code: [[4],[2]] }

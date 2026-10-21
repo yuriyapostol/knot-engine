@@ -22,6 +22,14 @@
       "types": "./dist/core/index.d.ts",
       "import": "./dist/core/index.js"
     },
+    "./3d": {
+      "types": "./dist/3d/index.d.ts",
+      "import": "./dist/3d/index.js"
+    },
+    "./mosaic": {
+      "types": "./dist/mosaic/index.d.ts",
+      "import": "./dist/mosaic/index.js"
+    },
     "./styles.css": "./dist/style.css",
     "./schema/knot-asset.schema.json": "./v1/schema/knot-asset.schema.json",
     "./schema/*": "./v1/schema/*"

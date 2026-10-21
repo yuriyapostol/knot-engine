@@ -50,3 +50,8 @@ Registry is explicit or locally assembled from built-ins, never mutable global s
 ## Tests
 
 Cover complete and partial assets; explicit ID; missing and ambiguous selection; prefix expansion; unknown type; missing resources; immutable inputs; independent viewer instances; and procedures without conflating tying steps with camera viewpoints.
+
+
+## Dedicated package entry points
+
+The package publishes `knot-engine/core` for headless validation, `knot-engine/3d` for `Knot3DViewer`, and `knot-engine/mosaic` for `KnotMosaicViewer`. The root entry retains `KnotViewer` and both specialized components for compatibility. Import `knot-engine/styles.css` when using the visual components. Each dedicated entry is tested from the packed npm tarball, including its generated TypeScript declarations.
