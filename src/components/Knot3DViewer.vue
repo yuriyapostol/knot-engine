@@ -72,7 +72,7 @@ async function loadModel() {
     }
     const selection = selectRepresentation(props.asset, { representationId: props.representationId, type: SPATIAL_CURVE }, { registries: props.registries })
     if (!selection.ok) throw new ViewerError('INVALID_MODEL', selection.issues[0]?.message ?? 'Unable to select representation', undefined, false)
-    resolved = resolveKnotAsset(props.asset, { representationId: selection.representation.id, view: props.view }, { registries: props.registries })
+    resolved = resolveKnotAsset(props.asset, { representationId: selection.representation.id, view: props.view }, { registries: props.registries, scope: 'selected' })
   } catch (cause) {
     engine?.clear()
     report(cause instanceof ViewerError ? cause : new ViewerError('INVALID_MODEL', 'Unable to resolve input', undefined, false))

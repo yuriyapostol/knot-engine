@@ -79,3 +79,19 @@ describe('targeted validation', () => {
     expect(selectRepresentation(asset, { type: SPATIAL_CURVE })).toMatchObject({ ok: false })
   })
 })
+
+describe('scoped spatial resolution', () => {
+  it('ignores unrelated unsupported sibling while preserving strict default', async () => {
+    const { resolveKnotAsset } = await import('../src/core')
+    const asset = copy()
+    asset.representations!.push({ id: 'future', type: 'urn:example:future', data: {} })
+    expect(() => resolveKnotAsset(asset, { representationId: 'view-3d-rest' })).toThrow()
+    expect(resolveKnotAsset(asset, { representationId: 'view-3d-rest' }, { scope: 'selected' }).curves.length).toBeGreaterThan(0)
+  })
+  it('rejects invalid selected data', async () => {
+    const { resolveKnotAsset } = await import('../src/core')
+    const asset = copy()
+    asset.representations![0].data = {}
+    expect(() => resolveKnotAsset(asset, { representationId: asset.representations![0].id }, { scope: 'selected' })).toThrow()
+  })
+})

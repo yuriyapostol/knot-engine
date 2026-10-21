@@ -1,17 +1,26 @@
 import { SPATIAL_CURVE, ROPE_TYPE, type Camera3D, type SpatialCurveData, type SpatialCurve, type Reference, type ViewDefinition, type KnotAsset, type Representation } from './asset'
 import { validateKnotAsset, normalizeAsset, indexAsset, constructionFor, type ValidationOptions } from './validateAsset'
 import { expandURI } from './resources'
+import { selectRepresentation } from './selectRepresentation'
 import { ViewerError } from './errors'
 import { validateView } from './validateSpatial'
 export type CameraView = Extract<Camera3D,{mode:'fixed'}>
 export interface RenderableCurve extends SpatialCurve { radius: number }
 export interface RenderableModel { id?: string; curves: RenderableCurve[]; camera?: Camera3D; warnings: string[] }
 export interface RepresentationSelection { representationId?: string; view?: Reference | ViewDefinition }
-export function resolveKnotAsset(value: unknown, selection: RepresentationSelection = {}, options: ValidationOptions = {}): RenderableModel {
-  const checked=validateKnotAsset(value,options)
-  if(!checked.valid) throw new ViewerError(checked.issues[0].code,'Invalid KnotAsset',checked.issues,false)
-  if(!checked.complete) throw new ViewerError('UNSUPPORTED_SCHEMA',`Incomplete validation: ${checked.missingDependencies.map(d=>d.ref).concat(checked.uncheckedTypes).join(', ')}`,undefined,false)
-  const asset=normalizeAsset(checked.asset), index=indexAsset(asset,options.registries)
+export function resolveKnotAsset(value: unknown, selection: RepresentationSelection = {}, options: ValidationOptions & { scope?: 'selected' | 'all' } = {}): RenderableModel {
+  let asset: KnotAsset
+  if (options.scope === 'selected') {
+    const result = selectRepresentation(value as KnotAsset, { representationId: selection.representationId, type: SPATIAL_CURVE }, options)
+    if (!result.ok) throw new ViewerError('INVALID_MODEL', result.issues[0]?.message ?? 'Invalid representation', undefined, false)
+    asset = result.asset
+  } else {
+    const checked=validateKnotAsset(value,options)
+    if(!checked.valid) throw new ViewerError(checked.issues[0].code,'Invalid KnotAsset',checked.issues,false)
+    if(!checked.complete) throw new ViewerError('UNSUPPORTED_SCHEMA',`Incomplete validation: ${checked.missingDependencies.map(d=>d.ref).concat(checked.uncheckedTypes).join(', ')}`,undefined,false)
+    asset=normalizeAsset(checked.asset)
+  }
+  const index=indexAsset(asset,options.registries)
   const rep=selection.representationId === undefined ? asset.representations?.find(r=>r.type === SPATIAL_CURVE) : asset.representations?.find(r=>r.id === selection.representationId)
   if(!rep) throw new ViewerError('INVALID_MODEL','Requested representation was not found',undefined,false)
   if(rep.type !== SPATIAL_CURVE) throw new ViewerError('UNSUPPORTED_SCHEMA','3D viewer requires spatial-curve',undefined,false)
@@ -30,7 +39,7 @@ export function resolveKnotAsset(value: unknown, selection: RepresentationSelect
   })
   let camera: Camera3D | undefined
   let selected=selection.view ?? rep.defaultView
-  if(selected && 'ref' in selected && selected.ref) selected={ref:expandURI(selected.ref,checked.asset.namespaces)}
+  if(selected && 'ref' in selected && selected.ref) selected={ref:expandURI(selected.ref,(value as KnotAsset).namespaces)}
   if(selected) {
     const wanted='camera' in selected ? selected : (rep.views ?? []).map(v=>'ref' in v ? index.get(v.ref)?.resource : v).find(v=>v?.id === (selected.ref ?? selected.id))
     if(!wanted || !('camera' in wanted)) throw new ViewerError('INVALID_MODEL','Requested view was not found',undefined,false)
