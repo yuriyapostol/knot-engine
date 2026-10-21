@@ -34,7 +34,7 @@ describe('generic viewer dispatch', () => {
     expect(selectViewerRepresentation(onlyUnknown, registry)).toMatchObject({
       ok: false, issues: [{ code: 'UNSUPPORTED_REPRESENTATION' }],
     })
-    expect(selectViewerRepresentation(asset, registry, 'future')).toMatchObject({ ok: true })
+    expect(selectViewerRepresentation(asset, registry, 'future')).toMatchObject({ ok: false })
     expect(registry.has('urn:example:future')).toBe(false)
   })
   it('uses an explicitly provided registry as authoritative', () => {

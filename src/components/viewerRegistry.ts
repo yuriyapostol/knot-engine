@@ -40,7 +40,14 @@ export function selectViewerRepresentation(
   registry: ViewerRegistry,
   representationId?: string,
 ): SelectionResult {
-  if (representationId !== undefined) return selectRepresentation(asset, { representationId })
+  if (representationId !== undefined) {
+    const result = selectRepresentation(asset, { representationId })
+    if (result.ok && !registry.has(result.typeUri)) return {
+      ok: false,
+      issues: [{ code: 'UNSUPPORTED_REPRESENTATION', message: `No viewer registered for ${result.typeUri}` }],
+    }
+    return result
+  }
   // Run core validation even for a missing/malformed representation collection.
   if (!Array.isArray(asset?.representations) || asset.representations.length === 0) {
     return selectRepresentation(asset)
