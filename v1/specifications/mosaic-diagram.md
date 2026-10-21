@@ -140,3 +140,8 @@ A rotation or reflection must remap tile codes as well as matrix positions. Swap
 ## Attribution of concrete data
 
 Optional `sources` and `contributions` belong to the `Representation` envelope, outside `data`. Shared source definitions and the global license belong to the KnotAsset. Convention references in this specification explain the contract; representation sources identify where its concrete data came from. See the [shared metadata specification](sources.md).
+
+
+### Explicit external view resources
+
+The mosaic viewer resolves a local view by ID, or a declared external view by absolute URI through an explicitly supplied `KnotResourceRegistry`. If `view` is omitted, `defaultView` is used. Missing, undeclared and conflicting resources are reported; no network requests are made. The shared headless `resolveRepresentationView` operation is available through `knot-engine/core`.

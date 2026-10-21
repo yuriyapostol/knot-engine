@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { MOSAIC_DIAGRAM, selectRepresentation, validateMosaicDiagram, validateView, type KnotAsset, type MosaicDiagram, type KnotResourceRegistry, type Reference, type ViewDefinition } from '../core'
+import { MOSAIC_DIAGRAM, selectRepresentation, validateMosaicDiagram, resolveRepresentationView, type KnotAsset, type MosaicDiagram, type KnotResourceRegistry, type Reference, type ViewDefinition } from '../core'
 import { mosaicPaths } from './mosaicGeometry'
 
 export interface MosaicView { center: [number, number]; height: number; rotation: number }
@@ -36,21 +36,15 @@ const diagram = computed((): MosaicDiagram | null => {
   return result.valid ? result.diagram : null
 })
 const size = computed(() => diagram.value?.tiles.length ?? 1)
-const selectedView = computed(() => {
-  const requested = props.view
-  if (!requested) return null
-  if ('id' in requested || 'ref' in requested) {
-    const views = selection.value?.ok ? selection.value.representation.views ?? [] : []
-    const found = views.find(v => 'ref' in requested ? 'ref' in v && v.ref === requested.ref : 'id' in v && v.id === requested.id)
-    return found && 'space' in found ? found : null
-  }
-  return requested
+const resolvedView = computed(() => {
+  if (!selection.value?.ok) return null
+  return resolveRepresentationView(props.asset!, selection.value.representation, props.view, props.registries)
 })
+const selectedView = computed(() => resolvedView.value?.ok ? resolvedView.value.view : null)
 const viewError = computed(() => {
-  if (!props.view) return null
-  if (!selectedView.value) return 'Requested plane view was not found'
-  const result = validateView(selectedView.value)
-  if (!result.valid || selectedView.value.space !== 'plane') return 'Invalid plane view'
+  if (!resolvedView.value) return null
+  if (!resolvedView.value.ok) return resolvedView.value.message
+  if (selectedView.value && selectedView.value.space !== 'plane') return 'Invalid plane view'
   return null
 })
 const error = computed(() => {
