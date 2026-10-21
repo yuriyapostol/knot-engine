@@ -28,7 +28,7 @@ const emit = defineEmits<{
 const builtIns = createViewerRegistry([
   { typeUri: SPATIAL_CURVE, component: Knot3DViewer, capabilities: { orbit: true, pan: true, zoom: true, capture: ['png'] } },
 ])
-const viewer = ref<{ resetView: () => void; fitToView: () => void; capture: (options?: CaptureOptions) => Promise<unknown> } | null>(null)
+const viewer = ref<{ resetView: () => void; fitToView: () => void; capture: (options?: CaptureOptions) => Promise<Blob> } | null>(null)
 const selection = computed(() => props.asset ? selectRepresentation(props.asset, { representationId: props.representationId }) : null)
 const selected = computed(() => {
   if (!selection.value?.ok) return null

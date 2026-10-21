@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import open from '../v1/examples/assets/open-rope.json'
 import { selectRepresentation, SPATIAL_CURVE, MOSAIC_DIAGRAM, type KnotAsset } from '../src/core'
 
-const copy = (): KnotAsset => structuredClone(open) as KnotAsset
+const copy = (): KnotAsset => structuredClone(open) as unknown as KnotAsset
 describe('independent representation selection', () => {
   it('selects by type or explicit ID without changing input', () => {
     const asset = copy(), before = JSON.stringify(asset)
