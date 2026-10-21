@@ -223,7 +223,7 @@ export class ViewerEngine {
   async capture(options: CaptureOptions = {}): Promise<Blob> {
     if (!this.ready || !this.built || !this.alive) throw new ViewerError('CAPTURE_FAILED', 'Viewer is not ready')
     const width = options.width ?? 512, height = options.height ?? 512
-    if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 || width > 2048 || height > 2048 || (options.format && options.format !== 'image/png') || (options.view && options.view !== 'current' && options.view !== 'model-preview')) throw new ViewerError('CAPTURE_FAILED', 'Invalid capture dimensions or format')
+    if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 || width > 2048 || height > 2048 || (options.format && options.format !== 'image/png') || (options.view && options.view !== 'current' && options.view !== 'model-preview')) throw new ViewerError('CAPTURE_FAILED', 'Invalid capture dimensions, format or view')
     const operation = this.operation
     const camera = options.view === 'model-preview'
       ? prepareCamera(this.model?.camera ?? DEFAULT_CAMERA,this.built.bounds,width/height).camera

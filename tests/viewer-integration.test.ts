@@ -48,6 +48,8 @@ describe('viewer integration', () => {
     expect(svg).toContain('height="180"')
     expect(svg).toContain('viewBox="0 0 4 4"')
     await expect(exposed.value!.capture({ format: 'image/png' })).rejects.toThrow()
+    await expect(exposed.value!.capture({ view: 'unsupported' })).rejects.toThrow()
+    await expect(exposed.value!.capture({ width: 0 })).rejects.toThrow()
   })
   it('dispatches a mosaic and forwards ready and view-change events', async () => {
     const events: string[] = []
