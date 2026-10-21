@@ -18,7 +18,7 @@ it('composes fragments of the same document and detects conflicts',()=>{
   expect(composeKnotAsset([a,b]).representations).toHaveLength(2)
   expect(composeKnotAsset([a,a]).representations).toHaveLength(1)
   expect(()=>composeKnotAsset([a,grid])).toThrow()
-  const conflict=structuredClone(a);conflict.representations![0].data = { ...conflict.representations![0].data as object, changed: true }
+  const conflict=structuredClone(a);conflict.representations![0].data = { ...conflict.representations![0].data as object, curves: [...(conflict.representations![0].data as { curves: unknown[] }).curves].reverse() }
   expect(()=>composeKnotAsset([a,conflict])).toThrow(/Conflicting/)
   expect(()=>selectKnotAsset(a,{representations:['missing']})).toThrow()
 })
