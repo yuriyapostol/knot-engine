@@ -8,7 +8,7 @@ import { messages as builtInMessages, type ViewerMessages } from '../locales'
 
 export interface ViewerErrorEvent { code: ViewerErrorCode; message: string; issues?: ValidationIssue[]; recoverable: boolean }
 const props = withDefaults(defineProps<{
-  asset?: KnotAsset | null; representationId?: string; view?: Reference | ViewDefinition; registries?: KnotResourceRegistry[]; label: string; description?: string; poster?: string
+  asset?: KnotAsset | null; representationId?: string; view?: Reference | ViewDefinition; views?: ViewDefinition[]; registries?: KnotResourceRegistry[]; label: string; description?: string; poster?: string
   locale?: 'uk' | 'en'; messages?: Partial<ViewerMessages>; theme?: 'light' | 'dark'
   quality?: Quality; active?: boolean; interactive?: boolean; showControls?: boolean; initialCamera?: Camera3D
 }>(), { locale: 'uk', theme: 'light', quality: 'medium', active: true, interactive: true, showControls: true })

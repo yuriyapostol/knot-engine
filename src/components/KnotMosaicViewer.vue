@@ -10,6 +10,7 @@ const props = withDefaults(defineProps<{
   asset?: KnotAsset | null
   representationId?: string
   view?: Reference | ViewDefinition
+  views?: ViewDefinition[]
   registries?: KnotResourceRegistry[]
   label: string
   description?: string
@@ -39,7 +40,7 @@ const diagram = computed((): MosaicDiagram | null => {
 const size = computed(() => diagram.value?.tiles.length ?? 1)
 const resolvedView = computed(() => {
   if (!selection.value?.ok) return null
-  return resolveRepresentationView(props.asset!, selection.value.representation, props.view, props.registries)
+  return resolveRepresentationView(props.view, props.views, props.registries, props.asset?.namespaces)
 })
 const selectedView = computed(() => resolvedView.value?.ok ? resolvedView.value.view : null)
 const viewError = computed(() => {
