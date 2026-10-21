@@ -33,6 +33,22 @@ describe('viewer integration', () => {
     expect(element.querySelectorAll('svg path').length).toBeGreaterThan(0)
     expect(element.querySelector('canvas')).toBeNull()
   })
+  it('captures SVG with requested dimensions and rejects unsupported formats', async () => {
+    const exposed = ref<{ capture: (options?: { width?: number; height?: number; format?: string; view?: string }) => Promise<Blob> } | null>(null)
+    const element = document.createElement('div')
+    document.body.append(element)
+    const app = createApp(defineComponent({ render: () => h(KnotMosaicViewer, { ref: exposed, asset: diagram(), label: 'Mosaic' }) }))
+    app.mount(element)
+    containers.push({ app, element })
+    await nextTick()
+    const blob = await exposed.value!.capture({ width: 320, height: 180, view: 'model-preview' })
+    expect(blob.type).toBe('image/svg+xml')
+    const svg = await blob.text()
+    expect(svg).toContain('width="320"')
+    expect(svg).toContain('height="180"')
+    expect(svg).toContain('viewBox="0 0 4 4"')
+    await expect(exposed.value!.capture({ format: 'image/png' })).rejects.toThrow()
+  })
   it('dispatches a mosaic and forwards ready and view-change events', async () => {
     const events: string[] = []
     const element = mount(KnotViewer, {
