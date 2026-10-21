@@ -1,6 +1,6 @@
 # Mosaic diagram
 
-**Data support implemented.** Types, semantic validation, JSON Schema and the standard registry entry are available. An initial SVG renderer is implemented; pan, plane views, and capture remain pending.
+**Data support implemented.** Types, semantic validation, JSON Schema and the standard registry entry are available. SVG rendering, pan, zoom, inline plane views and SVG capture are implemented. External view references and raster capture remain pending.
 
 ## Identity and scope
 

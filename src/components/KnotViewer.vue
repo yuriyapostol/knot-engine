@@ -30,6 +30,7 @@ const emit = defineEmits<{
   ready: [payload: { assetId?: string; schemaVersion: 1; warnings: string[] }]
   error: [payload: { code: string; message: string; recoverable: boolean }]
   'camera-change': [view: unknown]
+  'view-change': [view: unknown]
 }>()
 const builtIns = createViewerRegistry([
   { typeUri: SPATIAL_CURVE, component: Knot3DViewer, capabilities: { orbit: true, pan: true, zoom: true, capture: ['png'] } },
@@ -78,6 +79,7 @@ defineExpose({ resetView, fitToView, capture })
     @ready="emit('ready', $event)"
     @error="emit('error', $event)"
     @camera-change="emit('camera-change', $event)"
+    @view-change="emit('view-change', $event)"
   >
     <template v-if="$slots.toolbar" #toolbar="slotProps"><slot name="toolbar" v-bind="slotProps" /></template>
     <template v-if="$slots.loading" #loading="slotProps"><slot name="loading" v-bind="slotProps" /></template>
