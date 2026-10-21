@@ -46,12 +46,6 @@ export function selectKnotAsset(value: unknown, selection: { representations?: s
         if (!output.sources?.some(s=>s.id === found.id)) (output.sources ??= []).push(found)
       }
     }
-    if(rep.views) rep.views=rep.views.map(v=> {
-      if(!('ref' in v)) return v
-      const e=index.get(v.ref)
-      if(e?.kind !== 'view') throw new ViewerError('INVALID_MODEL','Missing view',undefined,false)
-      return e.resource
-    })
   }
   return structuredClone(checked(output,{}))
 }

@@ -55,7 +55,6 @@ export function indexAsset(asset: KnotAsset, registries: readonly KnotResourceRe
   for (const r of asset.representationTypes ?? []) addResource(index,{ kind:'representation-type',resource:r })
   for (const o of asset.objectTypes ?? []) addResource(index,{ kind:'object-type',resource:o })
   for (const c of asset.constructions ?? []) if (!('ref' in c) && c.id.includes(':')) addResource(index,{ kind:'construction',resource:c })
-  for (const r of asset.representations ?? []) for (const v of r.views ?? []) if (!('ref' in v) && v.id.includes(':')) addResource(index,{ kind:'view',resource:v })
   return index
 }
 export function constructionFor(asset: KnotAsset, index: ResourceIndex, ref: Reference): Construction | undefined {
