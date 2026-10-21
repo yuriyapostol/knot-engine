@@ -1,6 +1,6 @@
 # Representation selection and viewer contracts
 
-**Status:** normative design for the next phase; API not yet implemented. Supplements the [architecture](../../design/modular-viewers.md).
+**Status:** basic `selectRepresentation` is implemented for complete `KnotAsset`; partial assets, targeted validation and UI contracts remain in design. Supplements the [architecture](../../design/modular-viewers.md).
 
 ## Input and selection
 
