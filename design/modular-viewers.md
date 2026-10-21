@@ -32,7 +32,7 @@ Future representations may describe sequences of construction/tying states or st
 
 Pass display settings **outside** `KnotAsset` and `Representation.data`: camera, projection, zoom/pan, framing, visual styling and interaction. Coordinate conventions, units, authored geometry, topology, tile conventions, construction objects and meaningful states remain domain data. Rotating the mosaic viewport does not rewrite its matrix; a topological mirror is not a camera setting.
 
-Review and migrate `Representation.views`, `defaultView`, `preferredView` and component `view`/`initialCamera` together. Named presets may live outside assets and reference representation IDs. Decide persistence and precedence before changing schemas. Defaults must work without settings. Screen and capture must interpret settings consistently. User interaction never mutates the asset.
+Migration completed: `Representation.views`, `defaultView`, and `preferredView` are removed from the asset contract and bundled schemas. Applications provide `view`, optional `views` presets and 3D `initialCamera` through viewer props. Without an explicit view, viewers use default framing. Screen and capture share the selected viewer state; `model-preview` requests default framing. User interaction never mutates the asset.
 
 ## Package, CSS and delivery
 
