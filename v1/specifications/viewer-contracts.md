@@ -1,6 +1,6 @@
 # Representation selection and viewer contracts
 
-**Status:** `selectRepresentation` supports targeted validation of the selected representation; arbitrary partial root structures and a basic UI compositor and registry are implemented; remaining UI contracts are still in design. Supplements the [architecture](../../design/modular-viewers.md).
+**Status:** modular 3D and SVG mosaic viewers, representation dispatch, shared capture options, and application-owned views are implemented.
 
 ## Input and selection
 
@@ -45,7 +45,7 @@ Registry is explicit or locally assembled from built-ins, never mutable global s
 
 ## Settings and migration
 
-`settings` lives outside `KnotAsset`; 3D settings include camera/viewpoint and rendering options, while mosaic settings include pan, zoom and styling. Meaningful steps, states and sequences remain in the asset. Before removing `views`, `defaultView`, `preferredView`, agree on mapping old fields to new settings and documented defaults. A temporary compatibility layer is not required.
+Viewer settings are external to `KnotAsset`. The application provides `view`, optional local presets `views`, `initialCamera` for 3D, and rendering props. Representation-level `views`, `defaultView`, and `preferredView` are removed; no compatibility fallback is provided.
 
 ## Tests
 
