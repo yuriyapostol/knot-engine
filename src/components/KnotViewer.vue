@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import Knot3DViewer from './Knot3DViewer.vue'
-import { SPATIAL_CURVE, selectRepresentation, type KnotAsset } from '../core'
+import { SPATIAL_CURVE, selectRepresentation, type KnotAsset, type Camera3D, type KnotResourceRegistry, type Reference, type ViewDefinition } from '../core'
+import type { ViewerMessages } from '../locales'
 import type { ViewerRegistry } from './viewerRegistry'
 import { createViewerRegistry } from './viewerRegistry'
 import type { CaptureOptions } from '../renderer/ViewerEngine'
@@ -9,6 +10,10 @@ import type { CaptureOptions } from '../renderer/ViewerEngine'
 const props = withDefaults(defineProps<{
   asset?: KnotAsset | null
   representationId?: string
+  view?: Reference | ViewDefinition
+  registries?: KnotResourceRegistry[]
+  initialCamera?: Camera3D
+  messages?: Partial<ViewerMessages>
   registry?: ViewerRegistry
   label: string
   description?: string
@@ -55,6 +60,10 @@ defineExpose({ resetView, fitToView, capture })
     ref="viewer"
     :asset="asset"
     :representation-id="selection.representation.id"
+    :view="view"
+    :registries="registries"
+    :initial-camera="initialCamera"
+    :messages="messages"
     :label="label"
     :description="description"
     :poster="poster"
