@@ -38,7 +38,7 @@ export function resolveKnotAsset(value: unknown, selection: RepresentationSelect
     return {...structuredClone(curve),radius}
   })
   let camera: Camera3D | undefined
-  let selected=selection.view ?? rep.defaultView
+  let selected=selection.view
   if(selected && 'ref' in selected && selected.ref) selected={ref:expandURI(selected.ref,(value as KnotAsset).namespaces)}
   if(selected) {
     const wanted='camera' in selected ? selected : (rep.views ?? []).map(v=>'ref' in v ? index.get(v.ref)?.resource : v).find(v=>v?.id === (selected.ref ?? selected.id))
@@ -46,7 +46,7 @@ export function resolveKnotAsset(value: unknown, selection: RepresentationSelect
     const valid=validateView(wanted)
     if(!valid.valid || wanted.space !== 'space') throw new ViewerError('INVALID_MODEL','Invalid 3D view',valid.valid ? undefined : valid.issues,false)
     camera=structuredClone(wanted.camera)
-  } else if(rep.preferredView) camera={mode:'fit',...structuredClone(rep.preferredView),projection:{kind:'perspective',fovY:55*Math.PI/180}}
+  }
   const numbers = camera ? (camera.mode === 'fit' ? [...camera.direction,...camera.up] : [...camera.position,...camera.target,...camera.up]) : []
   if(curves.some(c=>!Number.isFinite(c.radius) || c.radius<=0 || c.radius>1e6 || c.points.some(p=>p.some(n=>Math.abs(n)>1e6))) || numbers.some(n=>Math.abs(n)>1e6)) throw new ViewerError('LIMIT_EXCEEDED','Renderer supports coordinates and radii up to 1000000 data units',undefined,false)
   return {id:asset.id,curves,camera,warnings}
