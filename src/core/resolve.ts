@@ -1,6 +1,5 @@
 import { SPATIAL_CURVE, ROPE_TYPE, type Camera3D, type SpatialCurveData, type SpatialCurve, type Reference, type ViewDefinition, type KnotAsset, type Representation } from './asset'
 import { validateKnotAsset, normalizeAsset, indexAsset, constructionFor, type ValidationOptions } from './validateAsset'
-import { expandURI } from './resources'
 import { selectRepresentation } from './selectRepresentation'
 import { ViewerError } from './errors'
 import { validateView } from './validateSpatial'
@@ -38,14 +37,12 @@ export function resolveKnotAsset(value: unknown, selection: RepresentationSelect
     return {...structuredClone(curve),radius}
   })
   let camera: Camera3D | undefined
-  let selected=selection.view
-  if(selected && 'ref' in selected && selected.ref) selected={ref:expandURI(selected.ref,(value as KnotAsset).namespaces)}
-  if(selected) {
-    const wanted='camera' in selected ? selected : (rep.views ?? []).map(v=>'ref' in v ? index.get(v.ref)?.resource : v).find(v=>v?.id === (selected.ref ?? selected.id))
-    if(!wanted || !('camera' in wanted)) throw new ViewerError('INVALID_MODEL','Requested view was not found',undefined,false)
-    const valid=validateView(wanted)
-    if(!valid.valid || wanted.space !== 'space') throw new ViewerError('INVALID_MODEL','Invalid 3D view',valid.valid ? undefined : valid.issues,false)
-    camera=structuredClone(wanted.camera)
+  const selected = selection.view
+  if (selected) {
+    if (!('camera' in selected)) throw new ViewerError('INVALID_MODEL', 'View references must be resolved by the application', undefined, false)
+    const valid = validateView(selected)
+    if (!valid.valid || selected.space !== 'space') throw new ViewerError('INVALID_MODEL', 'Invalid 3D view', valid.valid ? undefined : valid.issues, false)
+    camera = structuredClone(selected.camera)
   }
   const numbers = camera ? (camera.mode === 'fit' ? [...camera.direction,...camera.up] : [...camera.position,...camera.target,...camera.up]) : []
   if(curves.some(c=>!Number.isFinite(c.radius) || c.radius<=0 || c.radius>1e6 || c.points.some(p=>p.some(n=>Math.abs(n)>1e6))) || numbers.some(n=>Math.abs(n)>1e6)) throw new ViewerError('LIMIT_EXCEEDED','Renderer supports coordinates and radii up to 1000000 data units',undefined,false)

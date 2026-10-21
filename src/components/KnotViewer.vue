@@ -12,6 +12,7 @@ const props = withDefaults(defineProps<{
   asset?: KnotAsset | null
   representationId?: string
   view?: Reference | ViewDefinition
+  views?: ViewDefinition[]
   registries?: KnotResourceRegistry[]
   initialCamera?: Camera3D
   messages?: Partial<ViewerMessages>
@@ -69,6 +70,7 @@ defineExpose({ resetView, fitToView, capture })
     :asset="asset"
     :representation-id="selection.representation.id"
     :view="view"
+    :views="views"
     :registries="registries"
     :initial-camera="initialCamera"
     :messages="messages"

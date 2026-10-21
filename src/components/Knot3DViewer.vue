@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import type { CameraView, Camera3D, KnotAsset, KnotResourceRegistry, Reference, ViewDefinition, RenderableModel, ViewerErrorCode, ValidationIssue } from '../core'
-import { resolveKnotAsset, selectRepresentation, SPATIAL_CURVE, validateView, ViewerError } from '../core'
+import { resolveKnotAsset, resolveRepresentationView, selectRepresentation, SPATIAL_CURVE, validateView, ViewerError } from '../core'
 import type { Quality } from '../geometry/build'
 import { ViewerEngine, type CaptureOptions } from '../renderer/ViewerEngine'
 import { messages as builtInMessages, type ViewerMessages } from '../locales'
@@ -73,7 +73,10 @@ async function loadModel() {
     }
     const selection = selectRepresentation(props.asset, { representationId: props.representationId, type: SPATIAL_CURVE }, { registries: props.registries })
     if (!selection.ok) throw new ViewerError('INVALID_MODEL', selection.issues[0]?.message ?? 'Unable to select representation', undefined, false)
-    resolved = resolveKnotAsset(props.asset, { representationId: selection.representation.id, view: props.view }, { registries: props.registries, scope: 'selected' })
+    const selectedView = resolveRepresentationView(props.view, props.views, props.registries, props.asset.namespaces)
+    if (!selectedView.ok) throw new ViewerError('INVALID_MODEL', selectedView.message, undefined, false)
+    if (selectedView.view && selectedView.view.space !== 'space') throw new ViewerError('INVALID_MODEL', '3D viewer requires a spatial view', undefined, false)
+    resolved = resolveKnotAsset(props.asset, { representationId: selection.representation.id, view: selectedView.view ?? undefined }, { registries: props.registries, scope: 'selected' })
   } catch (cause) {
     engine?.clear()
     report(cause instanceof ViewerError ? cause : new ViewerError('INVALID_MODEL', 'Unable to resolve input', undefined, false))
@@ -104,7 +107,7 @@ function onKeydown(event: KeyboardEvent) {
   const action = actions[event.key]
   if (action) { event.preventDefault(); action() }
 }
-watch(() => [props.asset, props.representationId, props.view, props.registries], loadModel)
+watch(() => [props.asset, props.representationId, props.view, props.views, props.registries], loadModel)
 watch(() => props.quality, loadModel)
 watch(() => props.initialCamera, loadModel)
 watch(() => props.theme, value => engine?.setTheme(value))
