@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { MOSAIC_DIAGRAM, selectRepresentation, validateMosaicDiagram, resolveRepresentationView, type KnotAsset, type MosaicDiagram, type KnotResourceRegistry, type Reference, type ViewDefinition } from '../core'
 import { mosaicPaths } from './mosaicGeometry'
 import { mosaicPanCenter } from './mosaicViewport'
+import type { CaptureOptions } from './captureOptions'
 
 export interface MosaicView { center: [number, number]; height: number }
 const props = withDefaults(defineProps<{
@@ -94,12 +95,14 @@ function onPointerMove(event: PointerEvent) {
   announceView()
 }
 function onPointerUp() { dragging.value = null }
-function capture(): Promise<Blob> {
+function capture(options: CaptureOptions = {}): Promise<Blob> {
   if (!svg.value || !ready.value) return Promise.reject(new Error('Mosaic viewer is not ready'))
+  const width = options.width ?? 1024, height = options.height ?? 1024
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 || width > 2048 || height > 2048 || (options.format && options.format !== 'image/svg+xml') || (options.view && options.view !== 'current')) return Promise.reject(new Error('Invalid mosaic capture dimensions, format or view'))
   const clone = svg.value.cloneNode(true) as SVGSVGElement
   clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-  clone.setAttribute('width', '1024')
-  clone.setAttribute('height', '1024')
+  clone.setAttribute('width', String(width))
+  clone.setAttribute('height', String(height))
   clone.style.color = getComputedStyle(svg.value).color
   return Promise.resolve(new Blob([new XMLSerializer().serializeToString(clone)], { type: 'image/svg+xml' }))
 }

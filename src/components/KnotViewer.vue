@@ -6,7 +6,7 @@ import { MOSAIC_DIAGRAM, SPATIAL_CURVE, type KnotAsset, type Camera3D, type Knot
 import type { ViewerMessages } from '../locales'
 import type { ViewerRegistry } from './viewerRegistry'
 import { createViewerRegistry, selectViewerRepresentation } from './viewerRegistry'
-import type { CaptureOptions } from '../renderer/ViewerEngine'
+import type { CaptureOptions } from './captureOptions'
 
 const props = withDefaults(defineProps<{
   asset?: KnotAsset | null

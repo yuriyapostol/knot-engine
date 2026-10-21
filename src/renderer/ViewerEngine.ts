@@ -6,7 +6,8 @@ import { ViewerError, validateView } from '../core'
 import { prepareCamera, cameraView, resizeCamera, DEFAULT_CAMERA, type RenderCamera } from './camera'
 import { buildGeometry, type BuiltModel, type Quality } from '../geometry/build'
 
-export interface CaptureOptions { width?: number; height?: number; format?: 'image/png'; view?: 'current' | 'model-preview'; transparent?: boolean }
+import type { CaptureOptions } from '../components/captureOptions'
+export type { CaptureOptions } from '../components/captureOptions'
 
 export class ViewerEngine {
   readonly canvas: HTMLCanvasElement

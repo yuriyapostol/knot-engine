@@ -4,7 +4,7 @@ export { createViewerRegistry, findViewer, selectViewerRepresentation } from './
 export type { ViewerCapabilities, ViewerRegistration, ViewerRegistry } from './components/viewerRegistry'
 export { default as KnotViewer } from './components/KnotViewer.vue'
 export * from './core'
-export type { CaptureOptions } from './renderer/ViewerEngine'
+export type { CaptureOptions } from './components/captureOptions'
 export type { ViewerMessages } from './locales'
 export type { Quality } from './geometry/build'
 import './styles.css'
