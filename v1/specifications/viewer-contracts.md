@@ -65,3 +65,6 @@ Without `representationId`, `KnotViewer` filters available representations by th
 ### Event forwarding
 
 The generic compositor emits a structured `error` when dispatch itself fails (including ambiguous or unsupported selections), not only when a mounted specialized viewer fails. The 3D viewer emits the shared `view-change` alongside its existing `camera-change`; the compositor forwards both without changing their payloads. No new interaction capability is implied.
+
+
+Integration tests mount the standalone mosaic and the generic compositor in a DOM environment, verify event forwarding, invalid-ID recovery, SVG rendering without WebGL, and input immutability. These complement headless selection and package tests; they do not replace the existing Chromium 3D smoke tests.
