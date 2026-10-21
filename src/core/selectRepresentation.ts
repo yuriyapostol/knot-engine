@@ -1,6 +1,6 @@
 import { type KnotAsset, type Representation } from './asset'
 import { expandURI } from './resources'
-import { preflight, structure } from './validation'
+import { preflight } from './validation'
 import { validateKnotAsset, normalizeAsset, type ValidationOptions } from './validateAsset'
 
 export type RepresentationQuery = { representationId?: string; type?: string }
@@ -31,7 +31,9 @@ export function selectRepresentation(
 ): SelectionResult {
   // Reject non-JSON values and malformed root structures before inspecting fields.
   const structural = preflight(asset)
-  if (!structural.length) structural.push(...structure('asset', asset))
+  if (!structural.length && (!asset || typeof asset !== 'object' || !Array.isArray(asset.representations))) {
+    return failure('INVALID_ASSET', 'Expected KnotAsset with representations')
+  }
   if (structural.length) return {
     ok: false,
     issues: structural.map(i => ({ code: 'INVALID_ASSET', message: i.message, path: i.path })),
