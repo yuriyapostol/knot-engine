@@ -145,3 +145,6 @@ Optional `sources` and `contributions` belong to the `Representation` envelope, 
 ### Explicit external view resources
 
 The mosaic viewer resolves a local view by ID, or a declared external view by absolute URI through an explicitly supplied `KnotResourceRegistry`. If `view` is omitted, `defaultView` is used. Missing, undeclared and conflicting resources are reported; no network requests are made. The shared headless `resolveRepresentationView` operation is available through `knot-engine/core`.
+
+
+The SVG viewer pans using the actual square viewport scale under `preserveAspectRatio="xMidYMid meet"`, including non-square host containers. Pointer dragging changes only the viewer's local center; it never edits tile data.

@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { MOSAIC_DIAGRAM, selectRepresentation, validateMosaicDiagram, resolveRepresentationView, type KnotAsset, type MosaicDiagram, type KnotResourceRegistry, type Reference, type ViewDefinition } from '../core'
 import { mosaicPaths } from './mosaicGeometry'
+import { mosaicPanCenter } from './mosaicViewport'
 
 export interface MosaicView { center: [number, number]; height: number }
 const props = withDefaults(defineProps<{
@@ -78,7 +79,7 @@ function onWheel(event: WheelEvent) {
   else zoomOut()
 }
 function onPointerDown(event: PointerEvent) {
-  if (!props.interactive || !props.active || !ready.value || !svg.value) return
+  if (!props.interactive || !props.active || !ready.value || !svg.value || event.button !== 0) return
   dragging.value = { x: event.clientX, y: event.clientY, center: [...current.value.center] }
   svg.value.setPointerCapture(event.pointerId)
 }
@@ -86,11 +87,10 @@ function onPointerMove(event: PointerEvent) {
   if (!dragging.value || !svg.value) return
   const rect = svg.value.getBoundingClientRect()
   if (!rect.width || !rect.height) return
-  const h = current.value.height
-  center.value = [
-    dragging.value.center[0] - (event.clientX - dragging.value.x) * h / rect.width,
-    dragging.value.center[1] + (event.clientY - dragging.value.y) * h / rect.height,
-  ]
+  center.value = mosaicPanCenter(
+    dragging.value.center, event.clientX - dragging.value.x,
+    event.clientY - dragging.value.y, current.value.height, rect.width, rect.height,
+  )
   announceView()
 }
 function onPointerUp() { dragging.value = null }
