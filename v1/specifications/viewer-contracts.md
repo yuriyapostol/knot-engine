@@ -68,3 +68,6 @@ The generic compositor emits a structured `error` when dispatch itself fails (in
 
 
 Integration tests mount the standalone mosaic and the generic compositor in a DOM environment, verify event forwarding, invalid-ID recovery, SVG rendering without WebGL, and input immutability. These complement headless selection and package tests; they do not replace the existing Chromium 3D smoke tests.
+
+
+The Chromium browser suite additionally checks the real generic compositor switching between 3D and SVG mosaic, the absence of new WebGL contexts for mosaic rendering, SVG capture content, invalid-ID error reporting and recovery, and switching back to 3D with PNG capture. Capture output is representation-specific (PNG for 3D, SVG for mosaic); the existing `CaptureOptions` signature is retained for compatibility pending a separate API cleanup.
