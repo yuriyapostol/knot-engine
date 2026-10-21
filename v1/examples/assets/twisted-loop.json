@@ -48,26 +48,6 @@
             ]
           }
         ]
-      },
-      "views": [
-        {
-          "id": "author",
-          "name": "Author view",
-          "space": "space",
-          "camera": {
-            "mode": "fixed",
-            "position": [0.0, 0.1, 0.26],
-            "target": [0.0, 0.0, 0.0],
-            "up": [0, 1, 0],
-            "projection": {
-              "kind": "perspective",
-              "fovY": 0.9599310885968813
-            }
-          }
-        }
-      ],
-      "defaultView": {
-        "id": "author"
       }
     }
   ],
