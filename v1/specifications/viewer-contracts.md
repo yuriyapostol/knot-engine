@@ -1,0 +1,52 @@
+# Representation selection and viewer contracts
+
+**Status:** normative design for the next phase; API not yet implemented. Supplements the [architecture](../../design/modular-viewers.md).
+
+## Input and selection
+
+All viewer components receive `asset: KnotAsset` (complete or permitted partial), `representationId?: string` and separate `settings`. Schema, namespaces, resources, constructions, procedures and states are checked according to the selected representation's needs. Core uses the same asset container without depending on Vue.
+
+Proposed core operations:
+
+```ts
+type RepresentationQuery = { representationId?: string; type?: string }
+type SelectionResult =
+  | { ok: true; asset: KnotAsset; representation: Representation; typeUri: string }
+  | { ok: false; issues: SelectionIssue[] }
+type SelectionIssue = {
+  code: 'INVALID_ASSET' | 'REPRESENTATION_NOT_FOUND' | 'AMBIGUOUS_REPRESENTATION'
+      | 'UNSUPPORTED_REPRESENTATION' | 'MISSING_DEPENDENCY' | 'INVALID_REPRESENTATION'
+  message: string
+  path?: string
+}
+function selectRepresentation(asset: KnotAsset, query?: RepresentationQuery, options?: ValidationOptions): SelectionResult
+```
+
+This operation returns data without UI, mutation or resource fetching. Type matching uses expanded URIs. An explicit ID must also match the requested type; missing and ambiguous matches have distinct diagnostics. Without an ID, the generic viewer may select only under an unambiguous rule; silently choosing the first representation is forbidden. Partial assets require validation of a minimally sufficient dependency closure. The exact permitted partial-asset shape and validation rules must be finalized before implementation without weakening complete-document validation.
+
+## UI contract
+
+`KnotViewer` selects the component by `typeUri`; specialized viewers call `selectRepresentation` with a fixed type. Shared states: `empty | initializing | ready | error`; events: `ready`, `error`, `view-change`; methods: `resetView()`, `fitToView()`, `capture(options?)`. `camera-change` is 3D-specific. Events do not mutate the asset.
+
+```ts
+type ViewerRegistration = {
+  typeUri: string
+  component: unknown // Vue component type in UI package
+  capabilities: {
+    orbit?: boolean; pan?: boolean; zoom?: boolean; edit?: boolean
+    capture?: readonly ('png' | 'svg')[]
+    sequences?: boolean
+  }
+}
+type ViewerRegistry = ReadonlyMap<string, ViewerRegistration>
+```
+
+Registry is explicit or locally assembled from built-ins, never mutable global state. Sequence support is a declared capability; step schemas and navigation APIs will be defined separately.
+
+## Settings and migration
+
+`settings` lives outside `KnotAsset`; 3D settings include camera/viewpoint and rendering options, while mosaic settings include pan, zoom and styling. Meaningful steps, states and sequences remain in the asset. Before removing `views`, `defaultView`, `preferredView`, agree on mapping old fields to new settings and documented defaults. A temporary compatibility layer is not required.
+
+## Tests
+
+Cover complete and partial assets; explicit ID; missing and ambiguous selection; prefix expansion; unknown type; missing resources; immutable inputs; independent viewer instances; and procedures without conflating tying steps with camera viewpoints.
