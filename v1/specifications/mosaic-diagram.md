@@ -1,6 +1,6 @@
 # Mosaic diagram
 
-**Data support implemented.** Types, semantic validation, JSON Schema and the standard registry entry are available. Rendering is deferred.
+**Data support implemented.** Types, semantic validation, JSON Schema and the standard registry entry are available. An initial SVG renderer is implemented; pan, plane views, and capture remain pending.
 
 ## Identity and scope
 
@@ -71,7 +71,7 @@ Extraction shall retain the representation, its view/type resources and any targ
 
 `validateMosaicDiagram(data)` checks structure and semantics. Success returns `diagram`, `data`, `componentCount`, `occupiedTileCount` and `crossingCount`. JSON Schema checks structure; square shape, port matching, boundaries and components are runtime checks.
 
-The type is semantically checked without `uncheckedTypes`; completeness still requires its resources, for example via `STANDARD_RESOURCES`. The 3D resolver and `KnotViewer` remain spatial-curve-only. Mosaic rendering is deferred.
+The type is semantically checked without `uncheckedTypes`; completeness still requires its resources, for example via `STANDARD_RESOURCES`. The 3D resolver remains spatial-curve-only. `KnotMosaicViewer` renders this profile as SVG and `KnotViewer` dispatches to it.
 
 ## Examples and acceptance cases
 

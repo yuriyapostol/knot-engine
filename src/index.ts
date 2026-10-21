@@ -1,3 +1,4 @@
+export { default as KnotMosaicViewer } from './components/KnotMosaicViewer.vue'
 export { default as Knot3DViewer } from './components/Knot3DViewer.vue'
 export { createViewerRegistry, findViewer } from './components/viewerRegistry'
 export type { ViewerCapabilities, ViewerRegistration, ViewerRegistry } from './components/viewerRegistry'
