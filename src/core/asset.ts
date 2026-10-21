@@ -56,7 +56,7 @@ export type Source = SourceFields & ({ title: string } | { url: string })
 export type SourceDefinition = Source & { id: string }
 export type SourceReference = Reference & { locator?: string; accessed?: string; note?: string }
 export type SourceUse = Source | SourceReference
-export interface Representation { sources?: SourceUse[]; contributions?: Contribution[]; id: string; type: string; target?: Target; data: unknown; views?: (ViewDefinition | { ref: string })[]; defaultView?: Reference; preferredView?: { direction: Point3D; up: Point3D } }
+export interface Representation { sources?: SourceUse[]; contributions?: Contribution[]; id: string; type: string; target?: Target; data: unknown }
 export interface Step { id: string; instructions?: Record<string, string>; representations?: Reference[] }
 export interface Procedure { id: string; name?: string; construction?: Reference; steps: Step[] }
 export type ResourceEntry = { kind: 'source'; resource: SourceDefinition } | { kind: 'catalog'; resource: CatalogDefinition } | { kind: 'representation-type'; resource: RepresentationTypeDefinition } | { kind: 'object-type'; resource: ObjectTypeDefinition } | { kind: 'construction'; resource: Construction } | { kind: 'view'; resource: ViewDefinition }

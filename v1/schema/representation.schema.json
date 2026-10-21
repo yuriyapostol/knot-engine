@@ -18,37 +18,6 @@
           "$ref": "#/$defs/target"
         },
         "data": {},
-        "views": {
-          "type": "array",
-          "items": {
-            "oneOf": [
-              {
-                "$ref": "#/$defs/view"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "ref": {
-                    "type": "string",
-                    "minLength": 1
-                  }
-                },
-                "required": [
-                  "ref"
-                ],
-                "additionalProperties": false
-              }
-            ]
-          },
-          "minItems": 0,
-          "maxItems": 128
-        },
-        "defaultView": {
-          "$ref": "#/$defs/reference"
-        },
-        "preferredView": {
-          "$ref": "#/$defs/orientation"
-        },
         "sources": {
           "type": "array",
           "items": {
