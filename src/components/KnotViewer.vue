@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Knot3DViewer from './Knot3DViewer.vue'
 import KnotMosaicViewer from './KnotMosaicViewer.vue'
 import { MOSAIC_DIAGRAM, SPATIAL_CURVE, type KnotAsset, type Camera3D, type KnotResourceRegistry, type Reference, type ViewDefinition } from '../core'
@@ -48,6 +48,11 @@ const failure = computed(() => {
   if (!selected.value) return `Unsupported viewer type: ${selection.value.typeUri}`
   return null
 })
+watch(failure, message => {
+  if (!message || !props.asset) return
+  const issue = selection.value && !selection.value.ok ? selection.value.issues[0] : undefined
+  emit('error', { code: issue?.code ?? 'UNSUPPORTED_REPRESENTATION', message, recoverable: false })
+}, { immediate: true })
 function resetView() { viewer.value?.resetView() }
 function fitToView() { viewer.value?.fitToView() }
 function capture(options?: CaptureOptions) {

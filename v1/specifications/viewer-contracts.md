@@ -60,3 +60,8 @@ The package publishes `knot-engine/core` for headless validation, `knot-engine/3
 ## Generic viewer selection rule
 
 Without `representationId`, `KnotViewer` filters available representations by the effective viewer registry, then selects **only if exactly one supported representation exists**. Unsupported siblings are ignored for dispatch, not deleted or modified. Multiple supported representations require an explicit ID, even when they share a type; zero supported representations return `UNSUPPORTED_REPRESENTATION`. An explicit ID selects that representation without fallback and reports an unsupported viewer if its type is not registered. A caller-provided registry replaces the built-in registry. The selected representation is then validated by `core` using its dependency context.
+
+
+### Event forwarding
+
+The generic compositor emits a structured `error` when dispatch itself fails (including ambiguous or unsupported selections), not only when a mounted specialized viewer fails. The 3D viewer emits the shared `view-change` alongside its existing `camera-change`; the compositor forwards both without changing their payloads. No new interaction capability is implied.

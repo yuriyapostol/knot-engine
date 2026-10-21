@@ -16,6 +16,7 @@ const emit = defineEmits<{
   ready: [payload: { assetId?: string; schemaVersion: 1; warnings: string[] }]
   error: [payload: ViewerErrorEvent]
   'camera-change': [view: CameraView]
+  'view-change': [view: CameraView]
 }>()
 const slots = defineSlots<{
   toolbar(props: { reset: () => void; fit: () => void; zoomIn: () => void; zoomOut: () => void; ready: boolean; touchActive: boolean }): any
@@ -49,7 +50,7 @@ function ensureEngine() {
       emit('ready', { assetId: props.asset?.id, schemaVersion: 1, warnings })
     }
     engine.onError = report
-    engine.onCameraChange = view => emit('camera-change', view)
+    engine.onCameraChange = view => { emit('camera-change', view); emit('view-change', view) }
     engine.setActive(props.active)
     engine.setInteractive(props.interactive)
     resize = new ResizeObserver(() => engine?.resize())
