@@ -40,13 +40,27 @@
             },
             "points": [
               [-0.04, 0.03, -0.01],
-              [-0.08, 0.0, 0.0],
+              [-0.08, 0, 0],
               [-0.04, -0.03, 0.01],
               [0.04, 0.03, 0.01],
-              [0.08, 0.0, 0.0],
+              [0.08, 0, 0],
               [0.04, -0.03, -0.01]
             ]
           }
+        ]
+      }
+    },
+    {
+      "id": "mosaic-loop",
+      "type": "knot-engine:representation-types/mosaic-diagram",
+      "data": {
+        "tileSet": "knot-engine:tile-sets/lomonaco-kauffman-11",
+        "tiles": [
+          [0, 0, 0, 0, 0],
+          [0, 0, 2, 1, 0],
+          [0, 2, 9, 4, 0],
+          [0, 3, 4, 0, 0],
+          [0, 0, 0, 0, 0]
         ]
       }
     }
@@ -91,6 +105,16 @@
       },
       "specification": "knot-engine:specifications/knot-asset.html",
       "viewSpace": "space"
+    },
+    {
+      "id": "knot-engine:representation-types/mosaic-diagram",
+      "name": "mosaic-diagram",
+      "description": "mosaic-diagram contract, generation 1",
+      "dataSchema": {
+        "ref": "knot-engine:schema/mosaic-diagram.schema.json"
+      },
+      "specification": "knot-engine:specifications/mosaic-diagram.html",
+      "viewSpace": "plane"
     }
   ]
 }
