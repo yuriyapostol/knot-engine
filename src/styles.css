@@ -61,3 +61,5 @@
   cursor: pointer;
 }
 .knot-engine-v1-viewer[data-state=error] .knot-engine-v1-viewer__canvas, .knot-engine-v1-viewer[data-state=empty] .knot-engine-v1-viewer__canvas { visibility: hidden }
+
+.knot-engine-v1-mosaic { display: block; width: 100%; height: 100%; color: var(--knot-engine-v1-mosaic-stroke, currentColor); }

@@ -1,137 +1,101 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import type { CameraView, Camera3D, KnotAsset, KnotResourceRegistry, Reference, ViewDefinition, RenderableModel, ViewerErrorCode, ValidationIssue } from '../core'
-import { resolveKnotAsset, validateView, ViewerError } from '../core'
-import type { Quality } from '../geometry/build'
-import { ViewerEngine, type CaptureOptions } from '../renderer/ViewerEngine'
-import { messages as builtInMessages, type ViewerMessages } from '../locales'
+import { computed, ref, watch } from 'vue'
+import Knot3DViewer from './Knot3DViewer.vue'
+import KnotMosaicViewer from './KnotMosaicViewer.vue'
+import { MOSAIC_DIAGRAM, SPATIAL_CURVE, type KnotAsset, type Camera3D, type KnotResourceRegistry, type Reference, type ViewDefinition } from '../core'
+import type { ViewerMessages } from '../locales'
+import type { ViewerRegistry } from './viewerRegistry'
+import { createViewerRegistry, selectViewerRepresentation } from './viewerRegistry'
+import type { CaptureOptions } from './captureOptions'
 
-export interface ViewerErrorEvent { code: ViewerErrorCode; message: string; issues?: ValidationIssue[]; recoverable: boolean }
 const props = withDefaults(defineProps<{
-  asset?: KnotAsset | null; representationId?: string; view?: Reference | ViewDefinition; registries?: KnotResourceRegistry[]; label: string; description?: string; poster?: string
-  locale?: 'uk' | 'en'; messages?: Partial<ViewerMessages>; theme?: 'light' | 'dark'
-  quality?: Quality; active?: boolean; interactive?: boolean; showControls?: boolean; initialCamera?: Camera3D
+  asset?: KnotAsset | null
+  representationId?: string
+  view?: Reference | ViewDefinition
+  views?: ViewDefinition[]
+  registries?: KnotResourceRegistry[]
+  initialCamera?: Camera3D
+  messages?: Partial<ViewerMessages>
+  registry?: ViewerRegistry
+  label: string
+  description?: string
+  poster?: string
+  locale?: 'uk' | 'en'
+  theme?: 'light' | 'dark'
+  quality?: 'low' | 'medium' | 'high'
+  active?: boolean
+  interactive?: boolean
+  showControls?: boolean
 }>(), { locale: 'uk', theme: 'light', quality: 'medium', active: true, interactive: true, showControls: true })
 const emit = defineEmits<{
   ready: [payload: { assetId?: string; schemaVersion: 1; warnings: string[] }]
-  error: [payload: ViewerErrorEvent]
-  'camera-change': [view: CameraView]
+  error: [payload: { code: string; message: string; recoverable: boolean }]
+  'camera-change': [view: unknown]
+  'view-change': [view: unknown]
 }>()
-const slots = defineSlots<{
-  toolbar(props: { reset: () => void; fit: () => void; zoomIn: () => void; zoomOut: () => void; ready: boolean; touchActive: boolean }): any
-  fallback(props: { state: string; error: ViewerErrorEvent | null; poster?: string }): any
-  loading(props: { state: string }): any
-}>()
-const root = ref<HTMLElement | null>(null)
-const surface = ref<HTMLElement | null>(null)
-const state = ref<'empty' | 'initializing' | 'ready' | 'error'>('empty')
-const error = ref<ViewerErrorEvent | null>(null)
-const touchActive = computed(() => props.interactive)
-const text = computed(() => ({ ...builtInMessages[props.locale], ...props.messages }))
-let engine: ViewerEngine | undefined
-let resize: ResizeObserver | undefined
-let intersection: IntersectionObserver | undefined
-let generation = 0
-
-function report(cause: ViewerError) {
-  error.value = { code: cause.code, message: cause.message, issues: cause.issues, recoverable: cause.recoverable }
-  state.value = 'error'
-  emit('error', error.value)
+const builtIns = createViewerRegistry([
+  { typeUri: SPATIAL_CURVE, component: Knot3DViewer, capabilities: { orbit: true, pan: true, zoom: true, capture: ['png'] } },
+  { typeUri: MOSAIC_DIAGRAM, component: KnotMosaicViewer, capabilities: { pan: true, zoom: true, capture: ['svg'] } },
+])
+const viewer = ref<{ resetView: () => void; fitToView: () => void; capture: (options?: CaptureOptions) => Promise<Blob> } | null>(null)
+const selection = computed(() => props.asset ? selectViewerRepresentation(props.asset, props.registry ?? builtIns, props.representationId) : null)
+const selected = computed(() => {
+  if (!selection.value?.ok) return null
+  return (props.registry ?? builtIns).get(selection.value.typeUri) ?? null
+})
+const failure = computed(() => {
+  if (!props.asset) return null
+  if (!selection.value?.ok) return selection.value?.issues[0]?.message ?? 'Unable to select representation'
+  if (!selected.value) return `Unsupported viewer type: ${selection.value.typeUri}`
+  return null
+})
+watch(failure, message => {
+  if (!message || !props.asset) return
+  const issue = selection.value && !selection.value.ok ? selection.value.issues[0] : undefined
+  emit('error', { code: issue?.code ?? 'UNSUPPORTED_REPRESENTATION', message, recoverable: false })
+}, { immediate: true })
+function resetView() { viewer.value?.resetView() }
+function fitToView() { viewer.value?.fitToView() }
+function capture(options?: CaptureOptions) {
+  return viewer.value?.capture(options) ?? Promise.reject(new Error('Viewer is not ready'))
 }
-function ensureEngine() {
-  if (engine || !surface.value) return
-  try {
-    engine = new ViewerEngine(surface.value)
-    engine.onReady = warnings => {
-      if ((!props.asset) || !engine) return
-      state.value = 'ready'
-      error.value = null
-      emit('ready', { assetId: props.asset?.id, schemaVersion: 1, warnings })
-    }
-    engine.onError = report
-    engine.onCameraChange = view => emit('camera-change', view)
-    engine.setActive(props.active)
-    engine.setInteractive(props.interactive)
-    resize = new ResizeObserver(() => engine?.resize())
-    resize.observe(surface.value)
-    intersection = new IntersectionObserver(entries => engine?.setVisible(entries[0]?.isIntersecting ?? false))
-    intersection.observe(root.value ?? surface.value)
-    document.addEventListener('visibilitychange', onVisibility)
-    engine.resize()
-  } catch (cause) { report(cause instanceof ViewerError ? cause : new ViewerError('RENDER_FAILED', 'Unable to initialize renderer')) }
-}
-function onVisibility() { if (!document.hidden) engine?.resize() }
-async function loadModel() {
-  const current = ++generation
-  if (!props.asset) { engine?.clear(); state.value = 'empty'; error.value = null; return }
-  let resolved: RenderableModel
-  try {
-    if (props.initialCamera) {
-      const result = validateView({ id: 'application', name: 'Application', space: 'space', camera: props.initialCamera })
-      if (!result.valid) throw new ViewerError('INVALID_MODEL', 'Invalid application camera', result.issues, false)
-    }
-    resolved = resolveKnotAsset(props.asset, { representationId: props.representationId, view: props.view }, { registries: props.registries })
-  } catch (cause) {
-    engine?.clear()
-    report(cause instanceof ViewerError ? cause : new ViewerError('INVALID_MODEL', 'Unable to resolve input', undefined, false))
-    return
-  }
-  engine?.clear()
-  state.value = 'initializing'; error.value = null
-  await nextTick()
-  if (current !== generation || !surface.value) return
-  ensureEngine()
-  if (!engine) return
-  try {
-    engine.setModel(resolved, props.quality, props.initialCamera)
-    engine.setTheme(props.theme)
-    engine.resize()
-  } catch (cause) { engine.clear(); report(cause instanceof ViewerError ? cause : new ViewerError('RENDER_FAILED', 'Unable to build model')) }
-}
-function retry() { engine?.dispose(); engine = undefined; resize?.disconnect(); intersection?.disconnect(); document.removeEventListener('visibilitychange', onVisibility); void loadModel() }
-function onPointerDown(event: PointerEvent) { if (event.pointerType === 'mouse' && props.interactive) { root.value?.focus(); engine?.setInteractive(true) } }
-function resetView() { engine?.resetView() }
-function fitToView() { engine?.fitToView() }
-function zoomIn() { engine?.zoom(0.8) }
-function zoomOut() { engine?.zoom(1.25) }
-function onKeydown(event: KeyboardEvent) {
-  if (!props.interactive || !(event.target instanceof Node) || !root.value?.contains(event.target)) return
-  if (event.target !== root.value) return
-  const actions: Record<string, () => void> = { ArrowLeft: () => engine?.orbit(-0.14, 0), ArrowRight: () => engine?.orbit(0.14, 0), ArrowUp: () => engine?.orbit(0, -0.14), ArrowDown: () => engine?.orbit(0, 0.14), '+': zoomIn, '=': zoomIn, '-': zoomOut, Home: resetView }
-  const action = actions[event.key]
-  if (action) { event.preventDefault(); action() }
-}
-watch(() => [props.asset, props.representationId, props.view, props.registries], loadModel)
-watch(() => props.quality, loadModel)
-watch(() => props.initialCamera, loadModel)
-watch(() => props.theme, value => engine?.setTheme(value))
-watch(() => props.active, value => engine?.setActive(value))
-watch(() => props.interactive, value => engine?.setInteractive(value))
-onMounted(() => { void loadModel() })
-onBeforeUnmount(() => { generation++; resize?.disconnect(); intersection?.disconnect(); document.removeEventListener('visibilitychange', onVisibility); engine?.dispose() })
-defineExpose({ resetView, fitToView, capture: (options?: CaptureOptions) => engine?.capture(options) ?? Promise.reject(new ViewerError('CAPTURE_FAILED', 'Viewer is not ready')) })
+defineExpose({ resetView, fitToView, capture })
 </script>
 
 <template>
-  <div ref="root" class="knot-engine-v1-viewer" :data-theme="theme" :data-state="state" :aria-label="label" :aria-description="description" role="group" tabindex="0" @keydown="onKeydown">
-    <div ref="surface" class="knot-engine-v1-viewer__surface" @pointerdown.capture="onPointerDown"></div>
-    <div v-if="state !== 'ready'" class="knot-engine-v1-viewer__fallback" :role="state === 'error' ? 'alert' : undefined">
-      <slot v-if="state === 'initializing'" name="loading" :state="state">
-        <img v-if="poster" :src="poster" :alt="label" class="knot-engine-v1-viewer__poster">
-        <span v-else>{{ text.loading }}</span>
-      </slot>
-      <slot v-else name="fallback" :state="state" :error="error" :poster="poster">
-        <img v-if="poster" :src="poster" :alt="label" class="knot-engine-v1-viewer__poster">
-        <span v-else>{{ state === 'empty' ? text.empty : text.unavailable }}</span>
-        <button v-if="showControls && state === 'error' && error?.recoverable" type="button" @click="retry">{{ text.retry }}</button>
-      </slot>
-    </div>
-    <div v-if="showControls && state === 'ready'" class="knot-engine-v1-viewer__toolbar">
-      <slot name="toolbar" :reset="resetView" :fit="fitToView" :zoom-in="zoomIn" :zoom-out="zoomOut" :ready="state === 'ready'" :touch-active="touchActive">
-        <button type="button" :title="text.reset" :aria-label="text.reset" @click="resetView">↺</button>
-        <button type="button" :title="text.fit" :aria-label="text.fit" @click="fitToView">⌗</button>
-        <button type="button" :title="text.zoomIn" :aria-label="text.zoomIn" @click="zoomIn">+</button>
-        <button type="button" :title="text.zoomOut" :aria-label="text.zoomOut" @click="zoomOut">−</button>
+  <component
+    :is="selected.component"
+    v-if="asset && selection?.ok && selected"
+    ref="viewer"
+    :asset="asset"
+    :representation-id="selection.representation.id"
+    :view="view"
+    :views="views"
+    :registries="registries"
+    :initial-camera="initialCamera"
+    :messages="messages"
+    :label="label"
+    :description="description"
+    :poster="poster"
+    :locale="locale"
+    :theme="theme"
+    :quality="quality"
+    :active="active"
+    :interactive="interactive"
+    :show-controls="showControls"
+    @ready="emit('ready', $event)"
+    @error="emit('error', $event)"
+    @camera-change="emit('camera-change', $event)"
+    @view-change="emit('view-change', $event)"
+  >
+    <template v-if="$slots.toolbar" #toolbar="slotProps"><slot name="toolbar" v-bind="slotProps" /></template>
+    <template v-if="$slots.loading" #loading="slotProps"><slot name="loading" v-bind="slotProps" /></template>
+    <template v-if="$slots.fallback" #fallback="slotProps"><slot name="fallback" v-bind="slotProps" /></template>
+  </component>
+  <div v-else class="knot-engine-v1-viewer" :data-theme="theme" :data-state="failure ? 'error' : 'empty'" :aria-label="label" role="group">
+    <div class="knot-engine-v1-viewer__fallback" :role="failure ? 'alert' : undefined">
+      <slot name="fallback" :state="failure ? 'error' : 'empty'" :error="failure ? { message: failure } : null" :poster="poster">
+        <span>{{ failure ?? (locale === 'uk' ? 'Немає даних' : 'No data') }}</span>
       </slot>
     </div>
   </div>

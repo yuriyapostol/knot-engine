@@ -1,13 +1,13 @@
 import { contributionIssues, licenseIssues, sourceIssues } from './metadata'
 import Ajv2020 from 'ajv/dist/2020.js'
-import { SPATIAL_CURVE, GRID_DIAGRAM, MOSAIC_DIAGRAM, PD_CODE, DT_CODE, ROPE_TYPE, type KnotAsset, type KnotResourceRegistry, type Reference, type Construction, type ResourceEntry, type Representation, type RepresentationTypeDefinition, type ViewDefinition, type Dependency, type SpatialCurveData, type KnotRepresentationDocument } from './asset'
+import { SPATIAL_CURVE, GRID_DIAGRAM, MOSAIC_DIAGRAM, PD_CODE, DT_CODE, ROPE_TYPE, type KnotAsset, type KnotResourceRegistry, type Reference, type Construction, type ResourceEntry, type Representation, type RepresentationTypeDefinition, type Dependency, type SpatialCurveData, type KnotRepresentationDocument } from './asset'
 import { createResourceIndex, expandURI, normalizeResource, addResource, namespaceIssues, resourceIssues, type ResourceIndex } from './resources'
-import { duplicates, issue, parallel, preflight, structure, KNOT_ASSET_LIMITS } from './validation'
+import { duplicates, issue, preflight, structure, KNOT_ASSET_LIMITS } from './validation'
 import { validateMosaicDiagram } from './validateMosaicDiagram'
 import { validateDTCode, dtAnalysisWork } from './validateDTCode'
 import { validatePDCode } from './validatePDCode'
 import { validateGridDiagram } from './validateGridDiagram'
-import { validateSpatialCurve, viewIssues } from './validateSpatial'
+import { validateSpatialCurve } from './validateSpatial'
 import type { ValidationIssue } from './errors'
 export interface ValidationOptions { strict?: boolean; registries?: readonly KnotResourceRegistry[]; schemas?: readonly Record<string, unknown>[] }
 export interface ValidationReport { missingDependencies: Dependency[]; uncheckedTypes: string[]; complete: boolean; warnings: string[] }
@@ -40,8 +40,6 @@ export function normalizeAsset(asset: KnotAsset): KnotAsset {
       if (key && typeof data[key] === 'string') data[key] = uri(data[key])
     }
     if (rep.target && rep.target.kind !== 'subject') reference(rep.target.construction)
-    if (rep.views) rep.views = rep.views.map(v => 'ref' in v ? { ref: uri(v.ref) } : normalizeResource({ kind: 'view',resource:v },ns).resource as ViewDefinition)
-    if (rep.defaultView) reference(rep.defaultView)
   }
   for (const proc of a.procedures ?? []) {
     if (proc.construction) reference(proc.construction)
@@ -57,7 +55,6 @@ export function indexAsset(asset: KnotAsset, registries: readonly KnotResourceRe
   for (const r of asset.representationTypes ?? []) addResource(index,{ kind:'representation-type',resource:r })
   for (const o of asset.objectTypes ?? []) addResource(index,{ kind:'object-type',resource:o })
   for (const c of asset.constructions ?? []) if (!('ref' in c) && c.id.includes(':')) addResource(index,{ kind:'construction',resource:c })
-  for (const r of asset.representations ?? []) for (const v of r.views ?? []) if (!('ref' in v) && v.id.includes(':')) addResource(index,{ kind:'view',resource:v })
   return index
 }
 export function constructionFor(asset: KnotAsset, index: ResourceIndex, ref: Reference): Construction | undefined {
@@ -156,22 +153,6 @@ export function validateKnotAsset(value: unknown, options: ValidationOptions = {
     }
     const definition = entry?.resource as RepresentationTypeDefinition | undefined
     checkData(rep.type,rep.data,entry,`${path}.data`)
-    const space = rep.type === SPATIAL_CURVE ? 'space' : (rep.type === GRID_DIAGRAM || rep.type === MOSAIC_DIAGRAM) ? 'plane' : (rep.type === PD_CODE || rep.type === DT_CODE) ? 'none' : definition?.viewSpace ?? 'none'
-    if (rep.preferredView && (space !== 'space' || parallel(rep.preferredView.direction,rep.preferredView.up))) issues.push(issue(`${path}.preferredView`,'Expected noncollinear 3D orientation'))
-    const views = new Map<string,ViewDefinition>()
-    for(const v of rep.views ?? []) {
-      const e = 'ref' in v ? need('view',v.ref,`${path}.views`) : {kind:'view' as const,resource:v}
-      if(e?.kind !== 'view') continue
-      if(views.has(e.resource.id)) issues.push(issue(`${path}.views`,'Duplicate view ID'))
-      views.set(e.resource.id,e.resource)
-      issues.push(...viewIssues(e.resource).map(e=>({...e,path:`${path}.views.${e.path}`})))
-      if(e.resource.space !== space) issues.push(issue(`${path}.views`,'View space is incompatible'))
-    }
-    if(rep.defaultView) {
-      const wanted = rep.defaultView.ref ?? rep.defaultView.id
-      // Selection must be a member, even if an external definition is missing.
-      if(!(rep.views ?? []).some(v => ('ref' in v ? v.ref : v.id) === wanted)) issues.push(issue(`${path}.defaultView`,'Default view must belong to views'))
-    }
     let construction: Construction | undefined
     if(rep.target && rep.target.kind !== 'subject') {
       construction = checkConstruction(rep.target.construction,`${path}.target`)

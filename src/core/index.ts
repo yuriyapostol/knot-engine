@@ -11,3 +11,6 @@ export { KNOT_ASSET_LIMITS } from './validation'
 export * from './validateMosaicDiagram'
 export * from './validatePDCode'
 export { validateDTCode } from './validateDTCode'
+export * from './selectRepresentation'
+
+export * from './resolveRepresentationView'

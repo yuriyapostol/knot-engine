@@ -23,8 +23,8 @@ it('rejects malformed values and enforces size boundaries',()=>{
   const x=Array.from({length:512},(_,i)=>i),o=x.map(i=>(i+1)%512)
   expect(validateGridDiagram(grid(x,o))).toMatchObject({valid:true,componentCount:1})
 })
-it('preserves plane views and complete standalone and composed assets',()=>{
-  const rep={id:'g',type:GRID_DIAGRAM,data:grid([0,1],[1,0]),views:[{id:'front',name:'Front',space:'plane',camera:{mode:'plane',center:[1,1],height:2,rotation:0}}]}
+it('preserves viewer-independent representations and complete standalone and composed assets',()=>{
+  const rep={id:'g',type:GRID_DIAGRAM,data:grid([0,1],[1,0])}
   const asset={schema:'KnotAsset',schemaVersion:1,id:'g',subject:{id:'s'},representations:[rep]}
   const options={registries:[STANDARD_RESOURCES]}
   expect(validateKnotAsset(asset,options)).toMatchObject({valid:true,complete:true,uncheckedTypes:[]})
@@ -70,9 +70,9 @@ it('validates zero-based unoriented vertex pairs and preserves input order',()=>
   const n=512,x=Array.from({length:n},(_,i)=>i)
   expect(validateGridDiagram(pairs(x,x.map(i=>(i+1)%n)))).toMatchObject({valid:true,componentCount:1})
 })
-it('checks vertex distribution, JSON structure, plane views and standalone documents',()=>{
+it('checks vertex distribution, JSON structure and standalone documents',()=>{
   const d={encoding:'vertex-pairs',size:3,vertices:[[0,0],[0,1],[1,1],[1,2],[2,2],[2,0]]}
-  const rep={id:'v',type:GRID_DIAGRAM,data:d,views:[{id:'front',name:'Front',space:'plane',camera:{mode:'plane',center:[1.5,1.5],height:3,rotation:0}}]}
+  const rep={id:'v',type:GRID_DIAGRAM,data:d}
   expect(validateRepresentationDocument({schema:'KnotRepresentationDocument',schemaVersion:1,representation:rep},{registries:[STANDARD_RESOURCES]})).toMatchObject({valid:true,complete:true})
   for(const vertices of [[[0,0],[0,1],[0,2],[1,0],[1,1],[2,2]],[[0,0],[0,1],[1,0],[1,1],[2,0],[2,2]],[[0,0],[0,1],[1,1],[1,2],[2,2],[2,NaN]],Array(6)])expect(validateGridDiagram({...d,vertices}).valid).toBe(false)
   const before=JSON.stringify(d)

@@ -20,7 +20,7 @@ Use descriptive concepts in prose. Name `KnotAsset` explicitly when referring to
 | Construction object | `ConstructionObject`, `objects` |
 | Named state | `states` |
 | Procedure and step | `Procedure`, `procedures`, `Step`, `steps` |
-| View and camera | `ViewDefinition`, `views`, `camera` |
+| View and camera | Viewer-owned `ViewDefinition`, `view`, `views`, `initialCamera` |
 | Catalog definition | `CatalogDefinition`, `catalogs` |
 | Source and contribution | `SourceDefinition`, `SourceUse`, `Contribution` |
 | License | `License` |
@@ -59,7 +59,7 @@ A procedure requires `id` and nonempty `steps`; optional `name` and `constructio
 
 ## Representations
 
-A representation requires `id`, URI `type` and `data`; optional fields are `target`, `views`, `defaultView`, `preferredView`. IDs are unique in the asset. Type definitions require `id`, `name`, `description`, `dataSchema`, `specification`; optional `viewSpace` is `none` (default), `plane` or `space`. Object type definitions use the same fields except `viewSpace`.
+A representation requires `id`, URI `type` and `data`; optional fields are `target`, `sources`, `contributions`. IDs are unique in the asset. Type definitions require `id`, `name`, `description`, `dataSchema`, `specification`; optional `viewSpace` is `none` (default), `plane` or `space`. Object type definitions use the same fields except `viewSpace`.
 
 `dataSchema` is `{ref: absolute-or-compact-schema-URI}` or `{inline: JSON-Schema-object}` with an explicit `$schema` dialect. External schemas must be supplied through `options.schemas`; no network resolver is installed. The current custom schema engine supports draft 2020-12. A schema cannot prove domain semantics. Unknown types may pass structural validation while remaining in `uncheckedTypes`; they cannot be rendered or exported as verified self-contained fragments.
 
@@ -100,20 +100,11 @@ The [PD specification](pd-code.md) defines `pd-code` data: `convention`, `crossi
 
 The [DT specification](dt-code.md) defines `dt-code` for knots and links: an explicit sign convention and flat or component-divided numeric arrays of even traversal labels. Schemas, permutation validation and a full planar-realizability criterion are implemented. `viewSpace:"none"`; sources and contributions use the ordinary envelope. Layout and conversions remain separate work.
 
-## Views
+## Viewer-owned views and settings
 
-Views can be embedded in `representation.views` or included using `{ref}`. Each requires `id`, `name`, `space`, `camera`; `description` is optional. `defaultView` is an `{id}` or `{ref}` selecting a member of that list. `preferredView: {direction,up}` is available only for 3D.
+`KnotAsset` contains representation data, constructions, states, and procedures, but **no camera presets or rendering settings**. In particular, `views`, `defaultView`, and `preferredView` are not representation fields. Their presence is rejected by the JSON Schema.
 
-For `space:"space"`, `camera` is:
-
-- `mode:"fit"`, `direction`, `up`, `projection`, optional `padding >= 1` (default 1.1);
-- `mode:"fixed"`, `position`, `target`, `up`, `projection`.
-
-`direction` points from focus to camera. `direction`/`up` must be finite, nonzero and noncollinear (normalized cross-product magnitude at least 1e-12); fixed `position` must differ from `target`. Projection is `{kind:"perspective",fovY}` in radians, `0 < fovY < π`, or `{kind:"orthographic"}`. Fixed orthographic projection also requires a positive `height`. Fit uses the bounding-box center and a containing sphere to fit the complete rendered geometry. Viewport sets aspect; renderer computes clipping planes. Fixed framing is respected even when it crops geometry.
-
-For `space:"plane"`, camera is `{mode:"plane",center:[x,y],height:positive,rotation:radians}`; positive rotation is counterclockwise. It is validated as data, not rendered by the 3D viewer. View space must match the representation type.
-
-Initial choice: application `initialCamera` → application-selected `view` → `defaultView` → `preferredView` with fitting → component default. Modes are selected whole; fields are never mixed. User interaction changes viewer state, not asset data. `model-preview` PNG uses the author's selected/default/preferred view independently of the current camera or application `initialCamera`.
+The application passes a `view` (inline `ViewDefinition`, local `{id}`, or registry `{ref}`) and optional `views` preset collection directly to `KnotViewer`, `Knot3DViewer`, or `KnotMosaicViewer`. `initialCamera` is a separate 3D viewer prop. With no requested view, each viewer uses its own default framing. Plane views use `{mode:"plane",center:[x,y],height:positive}`; rotation is not supported. Capture settings belong to the viewer API, not the asset. See [viewer contracts](viewer-contracts.md).
 
 ## Standalone contracts and resources
 
@@ -137,7 +128,7 @@ The [shared metadata contract](sources.md) defines fields, roles, validation, ex
 
 Before traversal, a resource profile bounds nesting at 64, total visited values at 262144 and individual strings at 1048576 characters. Non-JSON values, sparse arrays, accessors and cycles are rejected. Additional structural limits include 1024 representations, 256 constructions/objects/states, 256 procedures, 1024 steps per procedure, 4096 points per curve, and 65536 points across the asset. Limits protect this implementation and do not define every possible domain object.
 
-`selectKnotAsset(asset,{representations?,procedures?},options?)` returns a cloned self-contained asset with requested procedures, their referenced representations, required complete constructions, views and type/catalog definitions. Unrelated procedures and representations are omitted. Global references remain valid after external resources are embedded. Only supported types may be extracted; unknown URI fields cannot be safely rewritten. Assertions are outside this initial profile, so there are no hidden relation traversals or assertion omissions.
+`selectKnotAsset(asset,{representations?,procedures?},options?)` returns a cloned self-contained asset with requested procedures, their referenced representations, required complete constructions and type/catalog definitions. Unrelated procedures and representations are omitted. Global references remain valid after external resources are embedded. Only supported types may be extracted; unknown URI fields cannot be safely rewritten. Assertions are outside this initial profile, so there are no hidden relation traversals or assertion omissions.
 
 `composeKnotAsset(parts,options?)` merges fragments with equal document IDs and equal subjects, after namespace expansion. Conflicting collection IDs are errors; omitted fields do not delete data. It is not a patch format or a merger of independent documents. Both operations return independent copies and revalidate the result.
 

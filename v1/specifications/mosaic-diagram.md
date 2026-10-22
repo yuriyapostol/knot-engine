@@ -1,6 +1,6 @@
 # Mosaic diagram
 
-**Data support implemented.** Types, semantic validation, JSON Schema and the standard registry entry are available. Rendering is deferred.
+**Data support implemented.** Types, semantic validation, JSON Schema and the standard registry entry are available. SVG rendering, pan, zoom, inline plane views and SVG capture are implemented. Raster capture remains pending; external view references are supported.
 
 ## Identity and scope
 
@@ -65,13 +65,13 @@ Traversal is iterative. `KNOT_ASSET_LIMITS.mosaicCells` limits each document (or
 
 Use the ordinary `Representation` envelope: `id`, `type`, `data`, optional `target`, `views` and `defaultView`. An omitted target describes the asset subject. Explicit targets follow the existing scoped target rules; this profile supplies no mapping from traced components to construction objects.
 
-Views must have `space: "plane"`. `preferredView` is a 3D hint and is not accepted for this type. For plane camera coordinates, tile (row r, column c) occupies x in [c,c+1] and y in [n-r-1,n-r], with Y upward. Thus the unrotated mosaic fills [0,n] × [0,n], its center is [n/2,n/2], and a plane view with that center, height n and rotation 0 shows its full vertical extent. Aspect ratio and padding remain viewer concerns. Row indexing stays downward; this mapping is not a data reflection.
+Views must have `space: "plane"` and `rotation: 0` for this viewer; nonzero rotation is rejected, not applied. `preferredView` is a 3D hint and is not accepted for this type. For plane camera coordinates, tile (row r, column c) occupies x in [c,c+1] and y in [n-r-1,n-r], with Y upward. Thus the unrotated mosaic fills [0,n] × [0,n], its center is [n/2,n/2], and a plane view with that center, height n and rotation 0 shows its full vertical extent. Aspect ratio and padding remain viewer concerns. Row indexing stays downward; this mapping is not a data reflection.
 
 Extraction shall retain the representation, its view/type resources and any target dependencies under the ordinary rules, preserving the matrix exactly. The fixed tile-set convention needs no new dependency kind or hidden registry. Composition follows the existing same-document identity and conflict rules; visually equivalent rotated matrices are not automatically deduplicated.
 
 `validateMosaicDiagram(data)` checks structure and semantics. Success returns `diagram`, `data`, `componentCount`, `occupiedTileCount` and `crossingCount`. JSON Schema checks structure; square shape, port matching, boundaries and components are runtime checks.
 
-The type is semantically checked without `uncheckedTypes`; completeness still requires its resources, for example via `STANDARD_RESOURCES`. The 3D resolver and `KnotViewer` remain spatial-curve-only. Mosaic rendering is deferred.
+The type is semantically checked without `uncheckedTypes`; completeness still requires its resources, for example via `STANDARD_RESOURCES`. The 3D resolver remains spatial-curve-only. `KnotMosaicViewer` renders this profile as SVG and `KnotViewer` dispatches to it.
 
 ## Examples and acceptance cases
 
@@ -140,3 +140,11 @@ A rotation or reflection must remap tile codes as well as matrix positions. Swap
 ## Attribution of concrete data
 
 Optional `sources` and `contributions` belong to the `Representation` envelope, outside `data`. Shared source definitions and the global license belong to the KnotAsset. Convention references in this specification explain the contract; representation sources identify where its concrete data came from. See the [shared metadata specification](sources.md).
+
+
+### Explicit external view resources
+
+The mosaic viewer resolves a local view by ID, or a declared external view by absolute URI through an explicitly supplied `KnotResourceRegistry`. If `view` is omitted, `defaultView` is used. Missing, undeclared and conflicting resources are reported; no network requests are made. The shared headless `resolveRepresentationView` operation is available through `knot-engine/core`.
+
+
+The SVG viewer pans using the actual square viewport scale under `preserveAspectRatio="xMidYMid meet"`, including non-square host containers. Pointer dragging changes only the viewer's local center; it never edits tile data.

@@ -40,34 +40,26 @@
             },
             "points": [
               [-0.04, 0.03, -0.01],
-              [-0.08, 0.0, 0.0],
+              [-0.08, 0, 0],
               [-0.04, -0.03, 0.01],
               [0.04, 0.03, 0.01],
-              [0.08, 0.0, 0.0],
+              [0.08, 0, 0],
               [0.04, -0.03, -0.01]
             ]
           }
         ]
-      },
-      "views": [
-        {
-          "id": "author",
-          "name": "Author view",
-          "space": "space",
-          "camera": {
-            "mode": "fixed",
-            "position": [0.0, 0.1, 0.26],
-            "target": [0.0, 0.0, 0.0],
-            "up": [0, 1, 0],
-            "projection": {
-              "kind": "perspective",
-              "fovY": 0.9599310885968813
-            }
-          }
-        }
-      ],
-      "defaultView": {
-        "id": "author"
+      }
+    },
+    {
+      "id": "mosaic-loop",
+      "type": "knot-engine:representation-types/mosaic-diagram",
+      "data": {
+        "tileSet": "https://yuriyapostol.github.io/knot-engine/v1/tile-sets/lomonaco-kauffman-11",
+        "tiles": [
+          [0, 2, 1],
+          [2, 9, 4],
+          [3, 4, 0]
+        ]
       }
     }
   ],
@@ -111,6 +103,16 @@
       },
       "specification": "knot-engine:specifications/knot-asset.html",
       "viewSpace": "space"
+    },
+    {
+      "id": "knot-engine:representation-types/mosaic-diagram",
+      "name": "mosaic-diagram",
+      "description": "mosaic-diagram contract, generation 1",
+      "dataSchema": {
+        "ref": "knot-engine:schema/mosaic-diagram.schema.json"
+      },
+      "specification": "knot-engine:specifications/mosaic-diagram.html",
+      "viewSpace": "plane"
     }
   ]
 }

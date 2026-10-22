@@ -26,12 +26,12 @@ it('rejects malformed JSON, unsupported profiles, open boundaries and mismatches
 it('bounds cells before tracing', () => {
   expect(validateMosaicDiagram(data(Array.from({length:257},()=>Array(257).fill(0))))).toMatchObject({valid:false,issues:[{code:'LIMIT_EXCEEDED'}]})
 })
-it('integrates completeness, compact type names, plane views and standalone documents', () => {
+it('integrates completeness, compact type names and standalone documents', () => {
   const options={registries:[STANDARD_RESOURCES]}
   expect(validateKnotAsset(asset,options)).toMatchObject({valid:true,complete:true,uncheckedTypes:[]})
   expect(validateKnotAsset(asset)).toMatchObject({valid:true,complete:false,uncheckedTypes:[]})
   expect(validateKnotAsset({...asset,namespaces:{k:'https://yuriyapostol.github.io/knot-engine/v1/representation-types/'},representations:[{...asset.representations[0],type:'k:mosaic-diagram'}]},options)).toMatchObject({valid:true,complete:true})
-  const rep={...asset.representations[0],views:[{id:'front',name:'Front',space:'plane',camera:{mode:'plane',center:[2,2],height:4,rotation:0}}]}
+  const rep={...asset.representations[0]}
   expect(validateRepresentationDocument({schema:'KnotRepresentationDocument',schemaVersion:1,representation:rep},options)).toMatchObject({valid:true,complete:true})
   expect(validateKnotAsset({...asset,representations:[{...rep,preferredView:{direction:[0,0,1],up:[0,1,0]}}]},options).valid).toBe(false)
   const part=selectKnotAsset(asset,{representations:['m']},options)

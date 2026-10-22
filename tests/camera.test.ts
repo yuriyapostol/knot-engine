@@ -19,12 +19,8 @@ it('preserves fixed framing and radians through camera events',()=>{
   const {camera,target}=prepareCamera(view,bounds,2)
   expect(cameraView(camera,target)).toEqual(view)
 })
-it('uses explicit view, then default, then preferred orientation',()=>{
+it('uses only explicitly supplied application views, never asset view presets',()=>{
   const a=structuredClone(open) as unknown as KnotAsset
-  a.representations![0].views=[{id:'side',name:'Side',space:'space',camera:{mode:'fit',direction:[1,0,0],up:[0,1,0],projection:{kind:'orthographic'}}}]
-  a.representations![0].defaultView={id:'side'}
-  expect(resolveKnotAsset(a).camera).toMatchObject({direction:[1,0,0]})
+  expect(resolveKnotAsset(a).camera).toBeUndefined()
   expect(resolveKnotAsset(a,{view:{id:'app',name:'App',space:'space',camera:{mode:'fit',direction:[0,1,0],up:[0,0,1],projection:{kind:'perspective',fovY:1}}}}).camera).toMatchObject({direction:[0,1,0]})
-  delete a.representations![0].defaultView
-  expect(resolveKnotAsset(a).camera).toMatchObject({direction:[0,0,1]})
 })
