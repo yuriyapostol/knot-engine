@@ -11,7 +11,7 @@ for (const fixture of [overhand, twistedLoop]) {
     const types = asset.representations!.map(rep => expandURI(rep.type, asset.namespaces))
     expect(types).toContain(SPATIAL_CURVE)
     expect(types).toContain(MOSAIC_DIAGRAM)
-    for (const rep of asset.representations) {
+    for (const rep of asset.representations ?? []) {
       expect(selectRepresentation(asset, { representationId: rep.id })).toMatchObject({ ok: true })
     }
     const mosaic = asset.representations!.find(rep => expandURI(rep.type, asset.namespaces) === MOSAIC_DIAGRAM)!
