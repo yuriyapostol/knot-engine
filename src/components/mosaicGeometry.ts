@@ -1,14 +1,14 @@
 import type { MosaicDiagram } from '../core'
 
-/** Tile-local SVG path geometry. Each strand stays separate at crossings. */
+/** Tile-local SVG paths with circular quarter arcs and separate strands at crossings. */
 const arcs: readonly (readonly string[])[] = [
-  [], ['M 0 0.5 Q 0.5 0.5 0.5 1'], ['M 0.5 1 Q 0.5 0.5 1 0.5'],
-  ['M 0.5 0 Q 0.5 0.5 1 0.5'], ['M 0.5 0 Q 0.5 0.5 0 0.5'],
+  [], ['M 0 0.5 A 0.5 0.5 0 0 1 0.5 1'], ['M 0.5 1 A 0.5 0.5 0 0 1 1 0.5'],
+  ['M 0.5 0 A 0.5 0.5 0 0 0 1 0.5'], ['M 0.5 0 A 0.5 0.5 0 0 1 0 0.5'],
   ['M 0 0.5 L 1 0.5'], ['M 0.5 0 L 0.5 1'],
-  ['M 0 0.5 Q 0.5 0.5 0.5 1', 'M 0.5 0 Q 0.5 0.5 1 0.5'],
-  ['M 0.5 0 Q 0.5 0.5 0 0.5', 'M 0.5 1 Q 0.5 0.5 1 0.5'],
-  ['M 0.5 0 L 0.5 0.41', 'M 0.5 0.59 L 0.5 1', 'M 0 0.5 L 1 0.5'],
-  ['M 0 0.5 L 0.41 0.5', 'M 0.59 0.5 L 1 0.5', 'M 0.5 0 L 0.5 1'],
+  ['M 0 0.5 A 0.5 0.5 0 0 1 0.5 1', 'M 0.5 0 A 0.5 0.5 0 0 0 1 0.5'],
+  ['M 0.5 0 A 0.5 0.5 0 0 1 0 0.5', 'M 0.5 1 A 0.5 0.5 0 0 1 1 0.5'],
+  ['M 0.5 0 L 0.5 0.35', 'M 0.5 0.65 L 0.5 1', 'M 0 0.5 L 1 0.5'],
+  ['M 0 0.5 L 0.35 0.5', 'M 0.65 0.5 L 1 0.5', 'M 0.5 0 L 0.5 1'],
 ]
 export interface MosaicPath { key: string; d: string; transform: string }
 export function mosaicPaths(diagram: MosaicDiagram): MosaicPath[] {
