@@ -1001,6 +1001,22 @@
             "$ref": "#/$defs/contribution"
           },
           "maxItems": 1024
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "minItems": 0,
+          "maxItems": 128
         }
       },
       "required": [
@@ -1100,11 +1116,12 @@
           "minLength": 1
         },
         "instructions": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string",
-            "minLength": 1
-          }
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "minItems": 0,
+          "maxItems": 128
         },
         "representations": {
           "type": "array",
@@ -1113,6 +1130,14 @@
           },
           "minItems": 0,
           "maxItems": 256
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "minItems": 0,
+          "maxItems": 128
         }
       },
       "required": [
@@ -1127,10 +1152,6 @@
           "type": "string",
           "minLength": 1
         },
-        "name": {
-          "type": "string",
-          "minLength": 1
-        },
         "construction": {
           "$ref": "#/$defs/reference"
         },
@@ -1141,6 +1162,22 @@
           },
           "minItems": 1,
           "maxItems": 1024
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "minItems": 0,
+          "maxItems": 128
         }
       },
       "required": [
