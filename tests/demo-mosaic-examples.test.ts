@@ -1,7 +1,8 @@
 import { expect, it } from 'vitest'
 import overhand from '../v1/examples/assets/overhand.json'
 import twistedLoop from '../v1/examples/assets/twisted-loop.json'
-import { MOSAIC_DIAGRAM, SPATIAL_CURVE, expandURI, validateKnotAsset, validateMosaicDiagram, normalizeAsset, selectRepresentation, type KnotAsset } from '../src/core'
+import { normalizeAsset } from '../src/core/validateAsset'
+import { MOSAIC_DIAGRAM, SPATIAL_CURVE, expandURI, validateKnotAsset, validateMosaicDiagram, selectRepresentation, type KnotAsset } from '../src/core'
 
 for (const fixture of [overhand, twistedLoop]) {
   const asset = fixture as unknown as KnotAsset
