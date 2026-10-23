@@ -1680,10 +1680,6 @@
           "type": "string",
           "minLength": 1
         },
-        "name": {
-          "type": "string",
-          "minLength": 1
-        },
         "construction": {
           "$ref": "#/$defs/reference"
         },
