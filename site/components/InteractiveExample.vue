@@ -25,6 +25,12 @@ function formatModel(value: unknown, level = 0): string {
   }
   return JSON.stringify(value) ?? 'null'
 }
+function localizedName(data: KnotAsset, language: string): string {
+  return data.subject.names?.find(item => item.language === language)?.value
+    ?? data.subject.names?.find(item => item.language === 'en')?.value
+    ?? data.subject.names?.[0]?.value
+    ?? data.subject.id
+}
 const selected = ref('overhand')
 const current = shallowRef<DemoInput>(examples.overhand)
 const asset = computed(() => current.value.kind === 'asset' ? current.value.data : null)
@@ -53,9 +59,9 @@ const issue = ref('')
 const viewer = ref<InstanceType<typeof KnotViewer> | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 const content = computed(() => locale.value === 'uk' ? {
-  model: 'Модель', overhand: 'Простий вузол', loop: 'Скручена петля', asset: 'Мотузка з кількома станами', representation: 'Представлення', custom: 'Власна модель', invalidJSON: 'Некоректний JSON', invalidFormat: 'Очікується KnotAsset', fileLimit: 'Файл перевищує 1 MiB', export: 'Експорт зображення', editor: 'Код', openFile: 'Відкрити з файлу', saveFile: 'Зберегти в файл'
+  model: 'Модель', representation: 'Представлення', custom: 'Власна модель', invalidJSON: 'Некоректний JSON', invalidFormat: 'Очікується KnotAsset', fileLimit: 'Файл перевищує 1 MiB', export: 'Експорт зображення', editor: 'Код', openFile: 'Відкрити з файлу', saveFile: 'Зберегти в файл'
 } : {
-  model: 'Model', overhand: 'Overhand knot', loop: 'Twisted loop', asset: 'Rope with multiple states', representation: 'Representation', custom: 'Custom model', invalidJSON: 'Invalid JSON', invalidFormat: 'Expected KnotAsset', fileLimit: 'File exceeds 1 MiB', export: 'Export image', editor: 'Code', openFile: 'Open from file', saveFile: 'Save to file'
+  model: 'Model', representation: 'Representation', custom: 'Custom model', invalidJSON: 'Invalid JSON', invalidFormat: 'Expected KnotAsset', fileLimit: 'File exceeds 1 MiB', export: 'Export image', editor: 'Code', openFile: 'Open from file', saveFile: 'Save to file'
 })
 function setCurrent(input: DemoInput) {
   const candidates = supportedRepresentations(input.data)
@@ -126,7 +132,7 @@ async function download(options: CaptureOptions, name: string) {
     <div class="knot-engine-v1-demo__layout">
       <aside class="knot-engine-v1-demo__sidebar">
         <section class="knot-engine-v1-demo__panel">
-          <label>{{ content.model }}<span class="knot-engine-v1-demo__model-select knot-engine-v1-demo__select-field"><select v-model="selected" @change="choose"><option value="overhand">{{ content.overhand }}</option><option value="loop">{{ content.loop }}</option><option value="asset">{{ content.asset }}</option><option v-if="selected === 'custom'" value="custom">{{ content.custom }}</option></select></span></label>
+          <label>{{ content.model }}<span class="knot-engine-v1-demo__model-select knot-engine-v1-demo__select-field"><select v-model="selected" @change="choose"><option v-for="(example, key) in examples" :key="key" :value="key">{{ localizedName(example.data, locale) }}</option><option v-if="selected === 'custom'" value="custom">{{ content.custom }}</option></select></span></label>
           <input ref="fileInput" class="knot-engine-v1-demo__file-input" type="file" accept=".json,application/json" @change="chooseFile">
           <section class="knot-engine-v1-demo__editor"><label class="knot-engine-v1-demo__code-label">{{ content.editor }}<textarea v-model="draft" @input="scheduleDraft" spellcheck="false" rows="18"></textarea></label><output v-if="issue" class="knot-engine-v1-demo__issue" role="alert">{{ issue }}</output><div class="knot-engine-v1-demo__actions"><button type="button" @click="fileInput?.click()">{{ content.openFile }}</button><button type="button" @click="saveCode">{{ content.saveFile }}</button></div></section>
         </section>
@@ -135,7 +141,7 @@ async function download(options: CaptureOptions, name: string) {
         <section class="knot-engine-v1-demo__panel knot-engine-v1-demo__view-settings">
           <label v-if="asset">{{ content.representation }}<span class="knot-engine-v1-demo__select-field"><select v-model="representationId" class="knot-engine-v1-demo__representation-select"><option v-for="representation in representations" :key="representation.id" :value="representation.id">{{ representation.id }}</option></select></span></label>
         </section>
-        <KnotViewer ref="viewer" :show-controls="false" :asset="asset" :representation-id="representationId" :initial-camera="demoCamera" :label="current.data.id || 'Rope model'" :locale="locale" :theme="theme" @error="issue = $event.message" />
+        <KnotViewer ref="viewer" :show-controls="false" :asset="asset" :representation-id="representationId" :initial-camera="demoCamera" :label="localizedName(current.data, locale)" :locale="locale" :theme="theme" @error="issue = $event.message" />
         <div class="knot-engine-v1-demo__actions"><button type="button" @click="download({ view: 'current', format: isMosaic ? 'image/svg+xml' : 'image/png' }, isMosaic ? 'knot-current.svg' : 'knot-current.png')">{{ content.export }}</button></div>
       </section>
     </div>

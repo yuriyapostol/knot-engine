@@ -20,7 +20,7 @@ export const ROPE_TYPE = `${KNOT_NAMESPACE}object-types/rope`
 export type Point3D = [number, number, number]
 export type Reference = { id: string; ref?: never } | { ref: string; id?: never }
 export type Namespaces = Record<string, string>
-export interface Subject { id: string; names?: { language: string; value: string }[]; identifiers?: { catalog: string; value: string }[] }
+export interface Subject { id: string; names?: { language: string; value: string }[]; descriptions?: { language: string; value: string }[]; identifiers?: { catalog: string; value: string }[] }
 export type Target = { kind: 'subject' } | { kind: 'construction'; construction: Reference } | { kind: 'state' | 'object'; construction: Reference; id: string }
 export type Interpolation = { type: 'polyline' } | { type: 'catmull-rom'; parameterization: 'uniform'; tension: number } | { type: 'catmull-rom'; parameterization: 'centripetal' | 'chordal' }
 export interface SpatialCurve { id: string; object?: string; closed: boolean; interpolation: Interpolation; points: Point3D[] }
