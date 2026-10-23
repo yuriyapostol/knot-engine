@@ -45,7 +45,7 @@ const steps = computed(() => asset.value?.procedures?.flatMap(procedure => proce
 const selectedStep = ref('')
 function chooseStep() {
   const step = steps.value.find(item => item.procedureId + ':' + item.id === selectedStep.value)
-  const id = step?.representations?.find(ref => 'id' in ref && representations.value.some(rep => rep.id === ref.id))
+  const id = step?.representations?.find((ref): ref is { id: string } => 'id' in ref && representations.value.some(rep => rep.id === ref.id))
   if (id && 'id' in id) representationId.value = id.id
 }
 const host = document.documentElement

@@ -57,7 +57,7 @@ A representation's omitted `target` means the document subject. Explicit forms a
 
 A procedure requires `id` and nonempty `steps`; optional `name` and `construction` provide context. Each step has a unique local `id`, optional `instructions` (language → string) and `representations` (local `{id}` references in this profile). A step may have no image or several images. Procedures impose no equality of point counts, interpolation or animation timing. A state can be shared by multiple procedures and representations.
 
-Representations and procedure steps may carry optional `names` and `descriptions` arrays of `{language,value}` records, like `subject`. These fields do not determine the UI locale or fallback language.
+Representations may carry optional `names` and `descriptions` arrays of `{language,value}` records, like `subject`. Procedure steps may carry `names` in the same format; actionable text uses the existing `instructions` language-to-text mapping. These fields do not determine UI locale or fallback language.
 
 ## Representations
 

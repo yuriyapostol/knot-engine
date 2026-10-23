@@ -261,16 +261,10 @@
               "value": "Initial state"
             }
           ],
-          "descriptions": [
-            {
-              "language": "uk",
-              "value": "Крок процедури: початковий стан."
-            },
-            {
-              "language": "en",
-              "value": "Procedure step: initial state."
-            }
-          ]
+          "instructions": {
+            "uk": "Розмістіть мотузку в початковому положенні.",
+            "en": "Place the rope in its initial position."
+          }
         },
         {
           "id": "bend",
@@ -289,16 +283,10 @@
               "value": "Forming the bend"
             }
           ],
-          "descriptions": [
-            {
-              "language": "uk",
-              "value": "Крок процедури: формування вигину."
-            },
-            {
-              "language": "en",
-              "value": "Procedure step: forming the bend."
-            }
-          ]
+          "instructions": {
+            "uk": "Сформуйте вигин мотузки.",
+            "en": "Form a bend in the rope."
+          }
         },
         {
           "id": "finish",
@@ -317,16 +305,10 @@
               "value": "Finished state"
             }
           ],
-          "descriptions": [
-            {
-              "language": "uk",
-              "value": "Крок процедури: завершений стан."
-            },
-            {
-              "language": "en",
-              "value": "Procedure step: finished state."
-            }
-          ]
+          "instructions": {
+            "uk": "Надайте мотузці завершеної форми.",
+            "en": "Arrange the rope into its final shape."
+          }
         }
       ]
     },
@@ -353,16 +335,10 @@
               "value": "Initial state"
             }
           ],
-          "descriptions": [
-            {
-              "language": "uk",
-              "value": "Крок процедури: початковий стан."
-            },
-            {
-              "language": "en",
-              "value": "Procedure step: initial state."
-            }
-          ]
+          "instructions": {
+            "uk": "Розмістіть мотузку в початковому положенні.",
+            "en": "Place the rope in its initial position."
+          }
         },
         {
           "id": "finish",
@@ -381,16 +357,10 @@
               "value": "Finished state"
             }
           ],
-          "descriptions": [
-            {
-              "language": "uk",
-              "value": "Крок процедури: завершений стан."
-            },
-            {
-              "language": "en",
-              "value": "Procedure step: finished state."
-            }
-          ]
+          "instructions": {
+            "uk": "Надайте мотузці завершеної форми.",
+            "en": "Arrange the rope into its final shape."
+          }
         }
       ]
     }
