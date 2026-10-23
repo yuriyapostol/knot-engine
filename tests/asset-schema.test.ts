@@ -30,3 +30,14 @@ it('publishes independent compilable schemas and exact resource-kind dispatch',(
   const check=new Ajv2020({strict:false}).compile(schema)
   expect(check({schema:'KnotResourceDocument',schemaVersion:1,kind:'view',resource:{id:'urn:example:bad'}})).toBe(false)
 })
+
+it('accepts localized subject names and descriptions but rejects malformed records',()=>{
+  const a=JSON.parse(readFileSync('v1/examples/assets/overhand.json','utf8'))
+  expect(asset(a)).toBe(true)
+  expect(validateKnotAsset(a).valid).toBe(true)
+  a.subject.descriptions=[{language:'uk',value:''}]
+  expect(asset(a)).toBe(false)
+  expect(validateKnotAsset(a).valid).toBe(false)
+  a.subject.descriptions=[{language:'uk',value:'Опис',extra:true}]
+  expect(asset(a)).toBe(false)
+})

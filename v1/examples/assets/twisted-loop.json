@@ -6,7 +6,27 @@
   },
   "id": "twisted-loop",
   "subject": {
-    "id": "twisted-loop"
+    "id": "twisted-loop",
+    "names": [
+      {
+        "language": "uk",
+        "value": "Скручена петля"
+      },
+      {
+        "language": "en",
+        "value": "Twisted loop"
+      }
+    ],
+    "descriptions": [
+      {
+        "language": "uk",
+        "value": "Замкнена петля мотузки зі скручуванням, наведена як геометричний приклад."
+      },
+      {
+        "language": "en",
+        "value": "A closed rope loop with a twist, provided as a geometric example."
+      }
+    ]
   },
   "representations": [
     {
@@ -39,12 +59,36 @@
               "tension": 0.7
             },
             "points": [
-              [-0.04, 0.03, -0.01],
-              [-0.08, 0, 0],
-              [-0.04, -0.03, 0.01],
-              [0.04, 0.03, 0.01],
-              [0.08, 0, 0],
-              [0.04, -0.03, -0.01]
+              [
+                -0.04,
+                0.03,
+                -0.01
+              ],
+              [
+                -0.08,
+                0,
+                0
+              ],
+              [
+                -0.04,
+                -0.03,
+                0.01
+              ],
+              [
+                0.04,
+                0.03,
+                0.01
+              ],
+              [
+                0.08,
+                0,
+                0
+              ],
+              [
+                0.04,
+                -0.03,
+                -0.01
+              ]
             ]
           }
         ]
@@ -56,9 +100,21 @@
       "data": {
         "tileSet": "https://yuriyapostol.github.io/knot-engine/v1/tile-sets/lomonaco-kauffman-11",
         "tiles": [
-          [0, 2, 1],
-          [2, 9, 4],
-          [3, 4, 0]
+          [
+            0,
+            2,
+            1
+          ],
+          [
+            2,
+            9,
+            4
+          ],
+          [
+            3,
+            4,
+            0
+          ]
         ]
       }
     }

@@ -193,6 +193,14 @@
           },
           "minItems": 0,
           "maxItems": 1024
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "minItems": 0,
+          "maxItems": 128
         }
       },
       "required": [

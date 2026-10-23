@@ -6,7 +6,27 @@
   },
   "id": "overhand",
   "subject": {
-    "id": "overhand"
+    "id": "overhand",
+    "names": [
+      {
+        "language": "uk",
+        "value": "Простий вузол"
+      },
+      {
+        "language": "en",
+        "value": "Overhand knot"
+      }
+    ],
+    "descriptions": [
+      {
+        "language": "uk",
+        "value": "Простий стопорний вузол, утворений одним переплетенням мотузки."
+      },
+      {
+        "language": "en",
+        "value": "A simple stopper knot formed by a single overhand turn of the rope."
+      }
+    ]
   },
   "representations": [
     {
