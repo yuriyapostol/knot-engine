@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest'
 import overhand from '../v1/examples/assets/overhand.json'
 import twistedLoop from '../v1/examples/assets/twisted-loop.json'
-import { MOSAIC_DIAGRAM, SPATIAL_CURVE, expandURI, validateKnotAsset, validateMosaicDiagram, selectRepresentation, type KnotAsset } from '../src/core'
+import { MOSAIC_DIAGRAM, SPATIAL_CURVE, expandURI, validateKnotAsset, validateMosaicDiagram, normalizeAsset, selectRepresentation, type KnotAsset } from '../src/core'
 
 for (const fixture of [overhand, twistedLoop]) {
   const asset = fixture as unknown as KnotAsset
@@ -15,6 +15,6 @@ for (const fixture of [overhand, twistedLoop]) {
       expect(selectRepresentation(asset, { representationId: rep.id })).toMatchObject({ ok: true })
     }
     const mosaic = asset.representations!.find(rep => expandURI(rep.type, asset.namespaces) === MOSAIC_DIAGRAM)!
-    expect(validateMosaicDiagram(mosaic.data)).toMatchObject({ valid: true, componentCount: 1 })
+    expect(validateMosaicDiagram(normalizeAsset(asset).representations!.find(rep => rep.id === mosaic.id)!.data)).toMatchObject({ valid: true, componentCount: 1 })
   })
 }
