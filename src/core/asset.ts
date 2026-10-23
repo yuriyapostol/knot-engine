@@ -57,7 +57,7 @@ export type SourceDefinition = Source & { id: string }
 export type SourceReference = Reference & { locator?: string; accessed?: string; note?: string }
 export type SourceUse = Source | SourceReference
 export interface Representation { names?: { language: string; value: string }[]; descriptions?: { language: string; value: string }[]; sources?: SourceUse[]; contributions?: Contribution[]; id: string; type: string; target?: Target; data: unknown }
-export interface Step { names?: { language: string; value: string }[]; id: string; instructions?: Record<string, string>; representations?: Reference[] }
+export interface Step { names?: { language: string; value: string }[]; id: string; instructions?: { language: string; value: string }[]; representations?: Reference[] }
 export interface Procedure { id: string; name?: string; construction?: Reference; steps: Step[] }
 export type ResourceEntry = { kind: 'source'; resource: SourceDefinition } | { kind: 'catalog'; resource: CatalogDefinition } | { kind: 'representation-type'; resource: RepresentationTypeDefinition } | { kind: 'object-type'; resource: ObjectTypeDefinition } | { kind: 'construction'; resource: Construction } | { kind: 'view'; resource: ViewDefinition }
 export type ResourceKind = ResourceEntry['kind']

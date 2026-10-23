@@ -261,10 +261,16 @@
               "value": "Initial state"
             }
           ],
-          "instructions": {
-            "uk": "Розмістіть мотузку в початковому положенні.",
-            "en": "Place the rope in its initial position."
-          }
+          "instructions": [
+            {
+              "language": "uk",
+              "value": "Розмістіть мотузку в початковому положенні."
+            },
+            {
+              "language": "en",
+              "value": "Place the rope in its initial position."
+            }
+          ]
         },
         {
           "id": "bend",
@@ -283,10 +289,16 @@
               "value": "Forming the bend"
             }
           ],
-          "instructions": {
-            "uk": "Сформуйте вигин мотузки.",
-            "en": "Form a bend in the rope."
-          }
+          "instructions": [
+            {
+              "language": "uk",
+              "value": "Сформуйте вигин мотузки."
+            },
+            {
+              "language": "en",
+              "value": "Form a bend in the rope."
+            }
+          ]
         },
         {
           "id": "finish",
@@ -305,10 +317,16 @@
               "value": "Finished state"
             }
           ],
-          "instructions": {
-            "uk": "Надайте мотузці завершеної форми.",
-            "en": "Arrange the rope into its final shape."
-          }
+          "instructions": [
+            {
+              "language": "uk",
+              "value": "Надайте мотузці завершеної форми."
+            },
+            {
+              "language": "en",
+              "value": "Arrange the rope into its final shape."
+            }
+          ]
         }
       ]
     },
@@ -335,10 +353,16 @@
               "value": "Initial state"
             }
           ],
-          "instructions": {
-            "uk": "Розмістіть мотузку в початковому положенні.",
-            "en": "Place the rope in its initial position."
-          }
+          "instructions": [
+            {
+              "language": "uk",
+              "value": "Розмістіть мотузку в початковому положенні."
+            },
+            {
+              "language": "en",
+              "value": "Place the rope in its initial position."
+            }
+          ]
         },
         {
           "id": "finish",
@@ -357,10 +381,16 @@
               "value": "Finished state"
             }
           ],
-          "instructions": {
-            "uk": "Надайте мотузці завершеної форми.",
-            "en": "Arrange the rope into its final shape."
-          }
+          "instructions": [
+            {
+              "language": "uk",
+              "value": "Надайте мотузці завершеної форми."
+            },
+            {
+              "language": "en",
+              "value": "Arrange the rope into its final shape."
+            }
+          ]
         }
       ]
     }

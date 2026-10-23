@@ -1710,11 +1710,12 @@
           "minLength": 1
         },
         "instructions": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string",
-            "minLength": 1
-          }
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "minItems": 0,
+          "maxItems": 128
         },
         "representations": {
           "type": "array",
