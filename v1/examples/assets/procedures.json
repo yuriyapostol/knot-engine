@@ -55,7 +55,27 @@
             ]
           }
         ]
-      }
+      },
+      "names": [
+        {
+          "language": "uk",
+          "value": "3D-представлення"
+        },
+        {
+          "language": "en",
+          "value": "3D representation"
+        }
+      ],
+      "descriptions": [
+        {
+          "language": "uk",
+          "value": "Просторове представлення мотузки."
+        },
+        {
+          "language": "en",
+          "value": "Spatial representation of the rope."
+        }
+      ]
     },
     {
       "id": "view-3d-bend",
@@ -93,7 +113,27 @@
             ]
           }
         ]
-      }
+      },
+      "names": [
+        {
+          "language": "uk",
+          "value": "3D — вигин"
+        },
+        {
+          "language": "en",
+          "value": "3D — bend"
+        }
+      ],
+      "descriptions": [
+        {
+          "language": "uk",
+          "value": "Просторове представлення мотузки."
+        },
+        {
+          "language": "en",
+          "value": "Spatial representation of the rope."
+        }
+      ]
     },
     {
       "id": "view-3d-finish",
@@ -131,7 +171,27 @@
             ]
           }
         ]
-      }
+      },
+      "names": [
+        {
+          "language": "uk",
+          "value": "3D — завершення"
+        },
+        {
+          "language": "en",
+          "value": "3D — finish"
+        }
+      ],
+      "descriptions": [
+        {
+          "language": "uk",
+          "value": "Просторове представлення мотузки."
+        },
+        {
+          "language": "en",
+          "value": "Spatial representation of the rope."
+        }
+      ]
     }
   ],
   "constructions": [
@@ -190,6 +250,26 @@
             {
               "id": "view-3d-rest"
             }
+          ],
+          "names": [
+            {
+              "language": "uk",
+              "value": "Початковий стан"
+            },
+            {
+              "language": "en",
+              "value": "Initial state"
+            }
+          ],
+          "descriptions": [
+            {
+              "language": "uk",
+              "value": "Крок процедури: початковий стан."
+            },
+            {
+              "language": "en",
+              "value": "Procedure step: initial state."
+            }
           ]
         },
         {
@@ -198,6 +278,26 @@
             {
               "id": "view-3d-bend"
             }
+          ],
+          "names": [
+            {
+              "language": "uk",
+              "value": "Формування вигину"
+            },
+            {
+              "language": "en",
+              "value": "Forming the bend"
+            }
+          ],
+          "descriptions": [
+            {
+              "language": "uk",
+              "value": "Крок процедури: формування вигину."
+            },
+            {
+              "language": "en",
+              "value": "Procedure step: forming the bend."
+            }
           ]
         },
         {
@@ -205,6 +305,26 @@
           "representations": [
             {
               "id": "view-3d-finish"
+            }
+          ],
+          "names": [
+            {
+              "language": "uk",
+              "value": "Завершений стан"
+            },
+            {
+              "language": "en",
+              "value": "Finished state"
+            }
+          ],
+          "descriptions": [
+            {
+              "language": "uk",
+              "value": "Крок процедури: завершений стан."
+            },
+            {
+              "language": "en",
+              "value": "Procedure step: finished state."
             }
           ]
         }
@@ -222,6 +342,26 @@
             {
               "id": "view-3d-rest"
             }
+          ],
+          "names": [
+            {
+              "language": "uk",
+              "value": "Початковий стан"
+            },
+            {
+              "language": "en",
+              "value": "Initial state"
+            }
+          ],
+          "descriptions": [
+            {
+              "language": "uk",
+              "value": "Крок процедури: початковий стан."
+            },
+            {
+              "language": "en",
+              "value": "Procedure step: initial state."
+            }
           ]
         },
         {
@@ -229,6 +369,26 @@
           "representations": [
             {
               "id": "view-3d-finish"
+            }
+          ],
+          "names": [
+            {
+              "language": "uk",
+              "value": "Завершений стан"
+            },
+            {
+              "language": "en",
+              "value": "Finished state"
+            }
+          ],
+          "descriptions": [
+            {
+              "language": "uk",
+              "value": "Крок процедури: завершений стан."
+            },
+            {
+              "language": "en",
+              "value": "Procedure step: finished state."
             }
           ]
         }

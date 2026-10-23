@@ -25,6 +25,9 @@ function formatModel(value: unknown, level = 0): string {
   }
   return JSON.stringify(value) ?? 'null'
 }
+function localizedEntryName(entry: { id: string; names?: { language: string; value: string }[] }, language: string): string {
+  return entry.names?.find(item => item.language === language)?.value ?? entry.names?.find(item => item.language === 'en')?.value ?? entry.names?.[0]?.value ?? entry.id
+}
 function localizedName(data: KnotAsset, language: string): string {
   return data.subject.names?.find(item => item.language === language)?.value
     ?? data.subject.names?.find(item => item.language === 'en')?.value
@@ -38,6 +41,13 @@ function supportedRepresentations(data: KnotAsset) {
   return data.representations?.filter(rep => [SPATIAL_CURVE, MOSAIC_DIAGRAM].includes(expandURI(rep.type, data.namespaces) as typeof SPATIAL_CURVE | typeof MOSAIC_DIAGRAM)) ?? []
 }
 const representations = computed(() => asset.value ? supportedRepresentations(asset.value) : [])
+const steps = computed(() => asset.value?.procedures?.flatMap(procedure => procedure.steps.map(step => ({ ...step, procedureId: procedure.id }))) ?? [])
+const selectedStep = ref('')
+function chooseStep() {
+  const step = steps.value.find(item => item.procedureId + ':' + item.id === selectedStep.value)
+  const id = step?.representations?.find(ref => 'id' in ref && representations.value.some(rep => rep.id === ref.id))
+  if (id && 'id' in id) representationId.value = id.id
+}
 const host = document.documentElement
 const locale = ref<'uk' | 'en'>(host.lang === 'uk' ? 'uk' : 'en')
 const theme = ref<'light' | 'dark'>(host.dataset.theme === 'dark' ? 'dark' : 'light')
@@ -59,9 +69,9 @@ const issue = ref('')
 const viewer = ref<InstanceType<typeof KnotViewer> | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 const content = computed(() => locale.value === 'uk' ? {
-  model: 'Модель', representation: 'Представлення', custom: 'Власна модель', invalidJSON: 'Некоректний JSON', invalidFormat: 'Очікується KnotAsset', fileLimit: 'Файл перевищує 1 MiB', export: 'Експорт зображення', editor: 'Код', openFile: 'Відкрити з файлу', saveFile: 'Зберегти в файл'
+  model: 'Модель', representation: 'Представлення', step: 'Крок зав’язування', custom: 'Власна модель', invalidJSON: 'Некоректний JSON', invalidFormat: 'Очікується KnotAsset', fileLimit: 'Файл перевищує 1 MiB', export: 'Експорт зображення', editor: 'Код', openFile: 'Відкрити з файлу', saveFile: 'Зберегти в файл'
 } : {
-  model: 'Model', representation: 'Representation', custom: 'Custom model', invalidJSON: 'Invalid JSON', invalidFormat: 'Expected KnotAsset', fileLimit: 'File exceeds 1 MiB', export: 'Export image', editor: 'Code', openFile: 'Open from file', saveFile: 'Save to file'
+  model: 'Model', representation: 'Representation', step: 'Tying step', custom: 'Custom model', invalidJSON: 'Invalid JSON', invalidFormat: 'Expected KnotAsset', fileLimit: 'File exceeds 1 MiB', export: 'Export image', editor: 'Code', openFile: 'Open from file', saveFile: 'Save to file'
 })
 function setCurrent(input: DemoInput) {
   const candidates = supportedRepresentations(input.data)
@@ -71,6 +81,7 @@ function setCurrent(input: DemoInput) {
   if (!selection.ok) throw new ViewerError('INVALID_MODEL', selection.issues[0]?.message ?? 'Invalid representation')
   representationId.value = rep.id
   current.value = input
+  selectedStep.value = ''
 }
 function choose() {
   clearTimeout(draftTimer)
@@ -139,7 +150,8 @@ async function download(options: CaptureOptions, name: string) {
       </aside>
       <section class="knot-engine-v1-demo__stage">
         <section class="knot-engine-v1-demo__panel knot-engine-v1-demo__view-settings">
-          <label v-if="asset">{{ content.representation }}<span class="knot-engine-v1-demo__select-field"><select v-model="representationId" class="knot-engine-v1-demo__representation-select"><option v-for="representation in representations" :key="representation.id" :value="representation.id">{{ representation.id }}</option></select></span></label>
+          <label v-if="asset">{{ content.representation }}<span class="knot-engine-v1-demo__select-field"><select v-model="representationId" class="knot-engine-v1-demo__representation-select"><option v-for="representation in representations" :key="representation.id" :value="representation.id">{{ localizedEntryName(representation, locale) }}</option></select></span></label>
+          <label v-if="steps.length">{{ content.step }}<span class="knot-engine-v1-demo__select-field"><select v-model="selectedStep" @change="chooseStep"><option value="">{{ content.step }}</option><option v-for="step in steps" :key="step.procedureId + ':' + step.id" :value="step.procedureId + ':' + step.id">{{ localizedEntryName(step, locale) }}</option></select></span></label>
         </section>
         <KnotViewer ref="viewer" :show-controls="false" :asset="asset" :representation-id="representationId" :initial-camera="demoCamera" :label="localizedName(current.data, locale)" :locale="locale" :theme="theme" @error="issue = $event.message" />
         <div class="knot-engine-v1-demo__actions"><button type="button" @click="download({ view: 'current', format: isMosaic ? 'image/svg+xml' : 'image/png' }, isMosaic ? 'knot-current.svg' : 'knot-current.png')">{{ content.export }}</button></div>

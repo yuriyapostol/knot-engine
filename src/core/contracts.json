@@ -1001,6 +1001,22 @@
             "$ref": "#/$defs/contribution"
           },
           "maxItems": 1024
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "minItems": 0,
+          "maxItems": 128
         }
       },
       "required": [
@@ -1113,6 +1129,22 @@
           },
           "minItems": 0,
           "maxItems": 256
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "minItems": 0,
+          "maxItems": 128
         }
       },
       "required": [

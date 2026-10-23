@@ -59,64 +59,68 @@
               "tension": 0.7
             },
             "points": [
-              [
-                -0.04,
-                0.03,
-                -0.01
-              ],
-              [
-                -0.08,
-                0,
-                0
-              ],
-              [
-                -0.04,
-                -0.03,
-                0.01
-              ],
-              [
-                0.04,
-                0.03,
-                0.01
-              ],
-              [
-                0.08,
-                0,
-                0
-              ],
-              [
-                0.04,
-                -0.03,
-                -0.01
-              ]
+              [-0.04, 0.03, -0.01],
+              [-0.08, 0, 0],
+              [-0.04, -0.03, 0.01],
+              [0.04, 0.03, 0.01],
+              [0.08, 0, 0],
+              [0.04, -0.03, -0.01]
             ]
           }
         ]
-      }
+      },
+      "names": [
+        {
+          "language": "uk",
+          "value": "3D-представлення"
+        },
+        {
+          "language": "en",
+          "value": "3D representation"
+        }
+      ],
+      "descriptions": [
+        {
+          "language": "uk",
+          "value": "Просторове представлення мотузки."
+        },
+        {
+          "language": "en",
+          "value": "Spatial representation of the rope."
+        }
+      ]
     },
     {
       "id": "mosaic-loop",
       "type": "knot-engine:representation-types/mosaic-diagram",
       "data": {
-        "tileSet": "https://yuriyapostol.github.io/knot-engine/v1/tile-sets/lomonaco-kauffman-11",
+        "tileSet": "knot-engine:tile-sets/lomonaco-kauffman-11",
         "tiles": [
-          [
-            0,
-            2,
-            1
-          ],
-          [
-            2,
-            9,
-            4
-          ],
-          [
-            3,
-            4,
-            0
-          ]
+          [0, 2, 1],
+          [2, 9, 4],
+          [3, 4, 0]
         ]
-      }
+      },
+      "names": [
+        {
+          "language": "uk",
+          "value": "Мозаїчна діаграма"
+        },
+        {
+          "language": "en",
+          "value": "Mosaic diagram"
+        }
+      ],
+      "descriptions": [
+        {
+          "language": "uk",
+          "value": "Мозаїчне представлення вузла."
+        },
+        {
+          "language": "en",
+          "value": "Mosaic representation of the knot."
+        }
+      ]
     }
   ],
   "constructions": [
