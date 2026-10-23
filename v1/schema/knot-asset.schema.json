@@ -1694,6 +1694,22 @@
           },
           "minItems": 1,
           "maxItems": 1024
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "minItems": 0,
+          "maxItems": 128
         }
       },
       "required": [

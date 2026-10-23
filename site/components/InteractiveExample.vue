@@ -87,7 +87,8 @@ function setCurrent(input: DemoInput) {
   representationId.value = rep.id
   current.value = input
   selectedProcedure.value = input.data.procedures?.[0]?.id ?? ''
-  selectedStep.value = ''
+  selectedStep.value = input.data.procedures?.[0]?.steps[0]?.id ?? ''
+  chooseStep()
 }
 function choose() {
   clearTimeout(draftTimer)
@@ -157,8 +158,8 @@ async function download(options: CaptureOptions, name: string) {
       <section class="knot-engine-v1-demo__stage">
         <section class="knot-engine-v1-demo__panel knot-engine-v1-demo__view-settings">
           <label v-if="asset">{{ content.representation }}<span class="knot-engine-v1-demo__select-field"><select v-model="representationId" class="knot-engine-v1-demo__representation-select"><option v-for="representation in representations" :key="representation.id" :value="representation.id">{{ localizedEntryName(representation, locale) }}</option></select></span></label>
-          <label v-if="procedures.length > 1">{{ content.procedure }}<span class="knot-engine-v1-demo__select-field"><select v-model="selectedProcedure" @change="chooseProcedure"><option v-for="procedure in procedures" :key="procedure.id" :value="procedure.id">{{ procedure.name ?? procedure.id }}</option></select></span></label>
-          <label v-if="steps.length">{{ content.step }}<span class="knot-engine-v1-demo__select-field"><select v-model="selectedStep" @change="chooseStep"><option value="">{{ content.step }}</option><option v-for="step in steps" :key="step.id" :value="step.id">{{ localizedEntryName(step, locale) }}</option></select></span></label>
+          <label v-if="procedures.length > 1">{{ content.procedure }}<span class="knot-engine-v1-demo__select-field"><select v-model="selectedProcedure" @change="chooseProcedure"><option v-for="procedure in procedures" :key="procedure.id" :value="procedure.id">{{ localizedEntryName(procedure, locale) === procedure.id ? (procedure.name ?? procedure.id) : localizedEntryName(procedure, locale) }}</option></select></span></label>
+          <label v-if="steps.length">{{ content.step }}<span class="knot-engine-v1-demo__select-field"><select v-model="selectedStep" @change="chooseStep"><option v-for="step in steps" :key="step.id" :value="step.id">{{ localizedEntryName(step, locale) }}</option></select></span></label>
         </section>
         <KnotViewer ref="viewer" :show-controls="false" :asset="asset" :representation-id="representationId" :initial-camera="demoCamera" :label="localizedName(current.data, locale)" :locale="locale" :theme="theme" @error="issue = $event.message" />
         <div class="knot-engine-v1-demo__actions"><button type="button" @click="download({ view: 'current', format: isMosaic ? 'image/svg+xml' : 'image/png' }, isMosaic ? 'knot-current.svg' : 'knot-current.png')">{{ content.export }}</button></div>

@@ -328,6 +328,26 @@
             }
           ]
         }
+      ],
+      "names": [
+        {
+          "language": "uk",
+          "value": "Послідовне формування вигину"
+        },
+        {
+          "language": "en",
+          "value": "Forming a bend step by step"
+        }
+      ],
+      "descriptions": [
+        {
+          "language": "uk",
+          "value": "Триетапний спосіб із проміжним станом вигину."
+        },
+        {
+          "language": "en",
+          "value": "Three-step procedure with an intermediate bend state."
+        }
       ]
     },
     {
@@ -391,6 +411,26 @@
               "value": "Arrange the rope into its final shape."
             }
           ]
+        }
+      ],
+      "names": [
+        {
+          "language": "uk",
+          "value": "Перехід до кінцевого стану"
+        },
+        {
+          "language": "en",
+          "value": "Direct transition to the final state"
+        }
+      ],
+      "descriptions": [
+        {
+          "language": "uk",
+          "value": "Скорочений двоетапний спосіб без проміжного стану."
+        },
+        {
+          "language": "en",
+          "value": "Short two-step procedure without the intermediate state."
         }
       ]
     }
