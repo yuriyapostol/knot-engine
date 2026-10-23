@@ -55,9 +55,9 @@ Built-in rope objects have `topology: open | closed` and `ends`. Open ropes have
 
 A representation's omitted `target` means the document subject. Explicit forms are `{kind:"subject"}`, `{kind:"construction",construction:Reference}`, or `{kind:"state"|"object",construction:Reference,id:string}`. State and object references resolve within that construction.
 
-A procedure requires `id` and nonempty `steps`; optional localized `names` and `descriptions` arrays of `{language,value}` records and `construction` provide context. The singular `name` field is not supported for procedures. Each step has a unique local `id`, optional `instructions` (array of `{language,value}` records) and `representations` (local `{id}` references in this profile). A step may have no image or several images. Procedures impose no equality of point counts, interpolation or animation timing. A state can be shared by multiple procedures and representations.
+A procedure requires `id` and nonempty `steps`; optional localized `names` and `descriptions` arrays of `{language,value}` records and `construction` provide context. Each step has a unique local `id`, optional `instructions` (array of `{language,value}` records) and `representations` (local `{id}` references in this profile). A step may have no image or several images. Procedures impose no equality of point counts, interpolation or animation timing. A state can be shared by multiple procedures and representations.
 
-Representations may carry optional `names` and `descriptions` arrays of `{language,value}` records, like `subject`. Procedures may carry optional localized `names` and `descriptions` in the same format, and the singular `name` is not accepted. Procedure steps may carry `names` in the same format; actionable text uses `instructions` as an array of `{language,value}` records. These fields do not determine UI locale or fallback language.
+Representations may carry optional `names` and `descriptions` arrays of `{language,value}` records, like `subject`. Procedures may carry optional localized `names` and `descriptions` in the same format, Procedure steps may carry `names` in the same format; actionable text uses `instructions` as an array of `{language,value}` records. These fields do not determine UI locale or fallback language.
 
 ## Representations
 
