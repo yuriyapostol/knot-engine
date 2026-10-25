@@ -21,3 +21,5 @@ const independent = knot.clone()
 Це несумісна зміна контракту v1: JSON використовує `schema: "Knot"` і `knot.schema.json`. Публічні операції над документом — методи `Knot`, а не окремі функції.
 
 Локальні налаштування передаються у `Knot.from(raw, { locale, fallbackLocale, overrides })`. Вони застосовуються тільки до відповідного екземпляра й зберігаються при `clone()` та `select()`. Локальні перевизначення мають пріоритет перед глобальними. Мова визначається під час виклику `getName()` або `getDescription()`, тому зміна глобальної локалі не потребує повторної підготовки документа.
+
+Кероване редагування охоплює представлення (`knot.addRepresentation()`, `knot.removeRepresentation()`), процедури (`knot.addProcedure()`, `knot.removeProcedure()`) і кроки (`procedure.addStep()`, `procedure.removeStep()`). Методи `getRepresentation()`, `getProcedure()` і `getStep()` повертають стабільні об'єкти, доки відповідні елементи не видалено. Масиви цих колекцій заморожені, щоб структурні зміни проходили через методи.

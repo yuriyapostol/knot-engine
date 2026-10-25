@@ -21,3 +21,5 @@ Structural edits use methods such as `addRepresentation` and `removeRepresentati
 This is a breaking v1 contract change: JSON uses `schema: "Knot"` and `knot.schema.json`. Public document operations are methods of `Knot`, not standalone functions.
 
 Per-knot localization is configured with `Knot.from(raw, { locale, fallbackLocale, overrides })`. These settings apply only to that instance and survive `clone()` and `select()`. Local overrides take precedence over global overrides. Language is resolved when calling `getName()` or `getDescription()`, so a global locale change does not require re-preparing the document.
+
+Controlled editing covers representations (`knot.addRepresentation()`, `knot.removeRepresentation()`), procedures (`knot.addProcedure()`, `knot.removeProcedure()`) and steps (`procedure.addStep()`, `procedure.removeStep()`). `getRepresentation()`, `getProcedure()` and `getStep()` return stable instances until the item is removed. Their collection arrays are frozen so structural changes go through the methods.
