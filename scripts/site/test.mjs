@@ -63,7 +63,7 @@ try {
  await assert.rejects(access(path.join(output, 'releases', version, 'v2')))
 
  for (const bundle of ['v1',`releases/${version}`]) {
-  await access(path.join(output,bundle,'specifications/knot-asset.html'))
+  await access(path.join(output,bundle,'specifications/asset.html'))
   const schema=JSON.parse(await readFile(path.join(output,bundle,'schema/asset.schema.json'),'utf8'))
   assert.equal(schema.$id,'https://yuriyapostol.github.io/knot-engine/v1/schema/asset.schema.json')
  }
