@@ -5,6 +5,8 @@ import raw from '../v1/examples/assets/open-rope.json'
 describe('prepared Asset model', () => {
   it('prepares, resolves resources and serializes without methods', () => {
     configureLocalization({ locale: 'uk', fallbackLocale: 'en' })
+    const report = validateAsset(raw, { registries: [STANDARD_RESOURCES] })
+    if (!report.valid) throw new Error('Validation diagnostic: ' + JSON.stringify(report.issues))
     const asset = Asset.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const representation = asset.getRepresentation('view-3d-rest')!
     expect(representation).toBe(asset.representations?.[0])
