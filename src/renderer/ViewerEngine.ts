@@ -159,7 +159,7 @@ export class ViewerEngine {
     this.requestRender()
   }
   private quality: Quality = 'medium'
-  setModel(model: quality: Quality, initial?: Camera3D) {
+  setModel(model: RenderableModel, quality: Quality, initial?: Camera3D) {
     this.operation++
     this.ready = false
     this.quality = quality
