@@ -19,3 +19,5 @@ Prepared entities share a resource context; repeated lookup by ID returns the sa
 Structural edits use methods such as `addRepresentation` and `removeRepresentation`; representation arrays are frozen. `toRaw()` returns JSON-compatible data; `clone()` creates an independent prepared graph. Do not use `structuredClone()` on prepared objects. Existing raw-data functions remain available and accept prepared knots where supported.
 
 This is a breaking v1 contract change: JSON uses `schema: "Knot"` and `knot.schema.json`. Public document operations are methods of `Knot`, not standalone functions.
+
+Per-knot localization is configured with `Knot.from(raw, { locale, fallbackLocale, overrides })`. These settings apply only to that instance and survive `clone()` and `select()`. Local overrides take precedence over global overrides. Language is resolved when calling `getName()` or `getDescription()`, so a global locale change does not require re-preparing the document.

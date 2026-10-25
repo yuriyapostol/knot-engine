@@ -19,6 +19,23 @@ describe('prepared Knot model', () => {
     expect(knot.clone().getRepresentation('view-3d-rest')).not.toBe(representation)
     configureLocalization({ locale: 'en' })
   })
+  it('supports per-knot locale and overrides without changing global locale or raw JSON', () => {
+    configureLocalization({ locale: 'en', fallbackLocale: 'en' })
+    const uri = 'https://yuriyapostol.github.io/knot-engine/v1/representation-types/spatial-curve'
+    const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES], locale: 'uk', overrides: {
+      'view-3d-rest': { names: [{ language: 'uk', value: 'Мій вигляд' }] },
+      [uri]: { names: [{ language: 'uk', value: 'Мій тип' }] },
+    } })
+    const rep = knot.getRepresentation('view-3d-rest')!
+    expect(rep.getName()).toBe('Мій вигляд')
+    expect(rep.getTypeDefinition()?.getName()).toBe('Мій тип')
+    expect(rep.getName('en')).toBe('Spatial curve')
+    expect(knot.clone().getRepresentation('view-3d-rest')?.getName()).toBe('Мій вигляд')
+    expect(knot.select({ representations: ['view-3d-rest'] }).getRepresentation('view-3d-rest')?.getName()).toBe('Мій вигляд')
+    expect(knot.toRaw()).toEqual(raw)
+    const other = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
+    expect(other.getRepresentation('view-3d-rest')?.getName()).toBe('Spatial curve')
+  })
   it('controls structural changes and preserves stable identity', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const existing = knot.getRepresentation('view-3d-rest')!

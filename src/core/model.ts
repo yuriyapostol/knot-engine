@@ -5,7 +5,7 @@ import { selectKnot, composeKnot } from './knotParts'
 
 export type RawLocalizedTexts = { language: string; value: string }[]
 export type PreparedResource = ResourceEntry['resource'] & { getName(locale?: string): string | undefined; getDescription(locale?: string): string | undefined }
-type LocalizedConfig = { locale?: string; fallbackLocale?: string; overrides?: Record<string, { names?: RawLocalizedTexts; descriptions?: RawLocalizedTexts }> }
+export type LocalizedConfig = { locale?: string; fallbackLocale?: string; overrides?: Record<string, { names?: RawLocalizedTexts; descriptions?: RawLocalizedTexts }> }
 let config: Required<LocalizedConfig> = { locale: 'en', fallbackLocale: 'en', overrides: {} }
 export function configureLocalization(options: LocalizedConfig): void { config = { ...config, ...options } }
 export class LocalizedTexts extends Array<{ language: string; value: string }> {
@@ -17,6 +17,17 @@ export class LocalizedTexts extends Array<{ language: string; value: string }> {
   }
 }
 const owner = new WeakMap<object, Knot>()
+const resourceOwner = new WeakMap<object, Knot>()
+const localizations = new WeakMap<Knot, LocalizedConfig>()
+export type KnotOptions = LocalizedConfig & { registries?: readonly RawResourceRegistry[] }
+function exact(values: RawLocalizedTexts | undefined, language: string): string | undefined {
+  return values?.find(x => x.language === language)?.value ?? values?.find(x => x.language === language.split('-')[0])?.value
+}
+function languageFor(knot?: Knot): string { return (knot && localizations.get(knot)?.locale) || config.locale }
+function fallbackFor(knot?: Knot): string { return (knot && localizations.get(knot)?.fallbackLocale) || config.fallbackLocale }
+function overrideFor(knot: Knot | undefined, id: string, key: 'names' | 'descriptions', language: string): string | undefined {
+  return exact(knot && localizations.get(knot)?.overrides?.[id]?.[key], language) ?? exact(config.overrides[id]?.[key], language)
+}
 const contexts = new WeakMap<Knot, Map<string, PreparedResource>>()
 const registries = new WeakMap<Knot, readonly RawResourceRegistry[]>()
 function texts(values?: RawLocalizedTexts): LocalizedTexts | undefined {
@@ -28,18 +39,25 @@ function decorate(value: any): void {
   for (const key of ['names', 'descriptions', 'instructions']) if (Array.isArray(value[key])) texts(value[key])
 }
 const resourceMethods = {
-  getName(this: any, language = config.locale): string | undefined {
-    const override = config.overrides[this.id]?.names
-    return override?.find(x => x.language === language)?.value ?? this.names?.get(language) ?? this.name
+  getName(this: any, language?: string): string | undefined {
+    const knot = resourceOwner.get(this)
+    const target = language ?? languageFor(knot)
+    return overrideFor(knot, this.id, 'names', target) ?? exact(this.names, target)
+      ?? overrideFor(knot, this.id, 'names', fallbackFor(knot)) ?? exact(this.names, fallbackFor(knot))
+      ?? exact(this.names, 'en') ?? this.name
   },
-  getDescription(this: any, language = config.locale): string | undefined {
-    const override = config.overrides[this.id]?.descriptions
-    return override?.find(x => x.language === language)?.value ?? this.descriptions?.get(language) ?? this.description
+  getDescription(this: any, language?: string): string | undefined {
+    const knot = resourceOwner.get(this)
+    const target = language ?? languageFor(knot)
+    return overrideFor(knot, this.id, 'descriptions', target) ?? exact(this.descriptions, target)
+      ?? overrideFor(knot, this.id, 'descriptions', fallbackFor(knot)) ?? exact(this.descriptions, fallbackFor(knot))
+      ?? exact(this.descriptions, 'en') ?? this.description
   },
 }
-function resource<T extends object>(input: T): T & PreparedResource {
+function resource<T extends object>(input: T, knot: Knot): T & PreparedResource {
   decorate(input)
   Object.setPrototypeOf(input, resourceMethods)
+  resourceOwner.set(input, knot)
   return input as T & PreparedResource
 }
 export class Subject implements RawSubject {
@@ -57,13 +75,23 @@ export class Representation implements RawRepresentation {
   names?: LocalizedTexts
   descriptions?: LocalizedTexts
   getTypeDefinition(): PreparedResource | undefined { return owner.get(this)?.getResource(this.type) }
-  getName(language = config.locale): string | undefined {
+  getName(language?: string): string {
+    const knot = owner.get(this)
+    const target = language ?? languageFor(knot)
     const def = this.getTypeDefinition() as any
-    return this.names?.getExact(language) ?? def?.names?.getExact(language) ?? this.names?.get(language) ?? def?.getName(language)
+    return overrideFor(knot, this.id, 'names', target) ?? exact(this.names, target)
+      ?? (def ? overrideFor(knot, def.id, 'names', target) : undefined) ?? exact(def?.names, target)
+      ?? exact(this.names, fallbackFor(knot)) ?? exact(def?.names, fallbackFor(knot))
+      ?? exact(this.names, 'en') ?? exact(def?.names, 'en') ?? def?.name ?? this.id
   }
-  getDescription(language = config.locale): string | undefined {
+  getDescription(language?: string): string | undefined {
+    const knot = owner.get(this)
+    const target = language ?? languageFor(knot)
     const def = this.getTypeDefinition() as any
-    return this.descriptions?.getExact(language) ?? def?.descriptions?.getExact(language) ?? this.descriptions?.get(language) ?? def?.getDescription(language)
+    return overrideFor(knot, this.id, 'descriptions', target) ?? exact(this.descriptions, target)
+      ?? (def ? overrideFor(knot, def.id, 'descriptions', target) : undefined) ?? exact(def?.descriptions, target)
+      ?? exact(this.descriptions, fallbackFor(knot)) ?? exact(def?.descriptions, fallbackFor(knot))
+      ?? exact(this.descriptions, 'en') ?? exact(def?.descriptions, 'en') ?? def?.description
   }
 }
 export class Step implements RawStep {
@@ -92,13 +120,13 @@ export class Knot implements RawKnot {
   catalogs?: RawKnot['catalogs']
   representationTypes?: RawKnot['representationTypes']
   objectTypes?: RawKnot['objectTypes']
-  static from(input: RawKnot | Knot, options: { registries?: readonly RawResourceRegistry[] } = {}): Knot {
+  static from(input: RawKnot | Knot, options: KnotOptions = {}): Knot {
     if (input instanceof Knot) return input
-    return prepareKnot(input, options.registries)
+    return prepareKnot(input, options.registries, options)
   }
   static validate(input: unknown, options: { registries?: readonly RawResourceRegistry[] } = {}) { return validateKnot(input, options) }
   validate(options: { registries?: readonly RawResourceRegistry[] } = {}) { return validateKnot(this.toRaw(), { registries: options.registries ?? registries.get(this) }) }
-  static compose(parts: readonly (RawKnot | Knot)[], options: { registries?: readonly RawResourceRegistry[] } = {}): Knot {
+  static compose(parts: readonly (RawKnot | Knot)[], options: KnotOptions = {}): Knot {
     return Knot.from(composeKnot(parts.map(x => x instanceof Knot ? x.toRaw() : x), options), options)
   }
   getRepresentation(id: string): Representation | undefined { return this.representations?.find(x => x.id === id) }
@@ -124,17 +152,18 @@ export class Knot implements RawKnot {
     return true
   }
   toRaw(): RawKnot { return JSON.parse(JSON.stringify(this)) as RawKnot }
-  clone(): Knot { return prepareKnot(this.toRaw(), registries.get(this)) }
+  clone(): Knot { return prepareKnot(this.toRaw(), registries.get(this), localizations.get(this)) }
   select(selection: { representations?: string[]; procedures?: string[] }): Knot {
     const attached = registries.get(this) ?? []
-    return Knot.from(selectKnot(this.toRaw(), selection, { registries: attached }), { registries: attached })
+    return Knot.from(selectKnot(this.toRaw(), selection, { registries: attached }), { registries: attached, ...localizations.get(this) })
   }
 }
-export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry[] = []): Knot {
+export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry[] = [], localization: LocalizedConfig = {}): Knot {
   if (raw instanceof Knot) return raw
   const knot = structuredClone(raw) as unknown as Knot
   Object.setPrototypeOf(knot, Knot.prototype)
   registries.set(knot, attached)
+  localizations.set(knot, localization)
   decorate(knot.subject)
   Object.setPrototypeOf(knot.subject, Subject.prototype)
   for (const representation of knot.representations ?? []) {
@@ -158,7 +187,7 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
       const id = item.id.startsWith('https://') || item.id.startsWith('http://') || item.id.startsWith('urn:') ? item.id : expandURI(item.id, registry.namespaces)
       const defaults = index.get(id) as any
       const enhanced = { ...item, ...(defaults?.names && !('names' in item) ? { names: defaults.names } : {}), ...(defaults?.descriptions && !('descriptions' in item) ? { descriptions: defaults.descriptions } : {}) }
-      index.set(id, resource(enhanced))
+      index.set(id, resource(enhanced, knot))
     }
   }
   for (const key of ['catalogs', 'representationTypes', 'objectTypes'] as const) {
@@ -166,7 +195,7 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
       const id = item.id.startsWith('https://') || item.id.startsWith('http://') || item.id.startsWith('urn:') ? item.id : expandURI(item.id, knot.namespaces)
       const defaults = index.get(id) as any
       const enhanced = { ...item, ...(defaults?.names && !('names' in item) ? { names: defaults.names } : {}), ...(defaults?.descriptions && !('descriptions' in item) ? { descriptions: defaults.descriptions } : {}) }
-      index.set(id, resource(enhanced))
+      index.set(id, resource(enhanced, knot))
     }
   }
   contexts.set(knot, index)
