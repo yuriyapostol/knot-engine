@@ -18,6 +18,7 @@ export class LocalizedTexts extends Array<{ language: string; value: string }> {
 }
 const owner = new WeakMap<object, Knot>()
 const resourceOwner = new WeakMap<object, Knot>()
+const resourceKey = new WeakMap<object, string>()
 const localizations = new WeakMap<Knot, LocalizedConfig>()
 export type KnotOptions = LocalizedConfig & { registries?: readonly RawResourceRegistry[] }
 function exact(values: RawLocalizedTexts | undefined, language: string): string | undefined {
@@ -42,22 +43,23 @@ const resourceMethods = {
   getName(this: any, language?: string): string | undefined {
     const knot = resourceOwner.get(this)
     const target = language ?? languageFor(knot)
-    return overrideFor(knot, this.id, 'names', target) ?? exact(this.names, target)
-      ?? overrideFor(knot, this.id, 'names', fallbackFor(knot)) ?? exact(this.names, fallbackFor(knot))
+    return overrideFor(knot, resourceKey.get(this) ?? this.id, 'names', target) ?? exact(this.names, target)
+      ?? overrideFor(knot, resourceKey.get(this) ?? this.id, 'names', fallbackFor(knot)) ?? exact(this.names, fallbackFor(knot))
       ?? exact(this.names, 'en') ?? this.name
   },
   getDescription(this: any, language?: string): string | undefined {
     const knot = resourceOwner.get(this)
     const target = language ?? languageFor(knot)
-    return overrideFor(knot, this.id, 'descriptions', target) ?? exact(this.descriptions, target)
-      ?? overrideFor(knot, this.id, 'descriptions', fallbackFor(knot)) ?? exact(this.descriptions, fallbackFor(knot))
+    return overrideFor(knot, resourceKey.get(this) ?? this.id, 'descriptions', target) ?? exact(this.descriptions, target)
+      ?? overrideFor(knot, resourceKey.get(this) ?? this.id, 'descriptions', fallbackFor(knot)) ?? exact(this.descriptions, fallbackFor(knot))
       ?? exact(this.descriptions, 'en') ?? this.description
   },
 }
-function resource<T extends object>(input: T, knot: Knot): T & PreparedResource {
+function resource<T extends object>(input: T, knot: Knot, id: string): T & PreparedResource {
   decorate(input)
   Object.setPrototypeOf(input, resourceMethods)
   resourceOwner.set(input, knot)
+  resourceKey.set(input, id)
   return input as T & PreparedResource
 }
 export class Subject implements RawSubject {
@@ -79,7 +81,7 @@ export class Representation implements RawRepresentation {
     const knot = owner.get(this)
     const target = language ?? languageFor(knot)
     const def = this.getTypeDefinition() as any
-    return overrideFor(knot, this.id, 'names', target) ?? exact(this.names, target)
+    return overrideFor(knot, resourceKey.get(this) ?? this.id, 'names', target) ?? exact(this.names, target)
       ?? (def ? overrideFor(knot, def.id, 'names', target) : undefined) ?? exact(def?.names, target)
       ?? exact(this.names, fallbackFor(knot)) ?? exact(def?.names, fallbackFor(knot))
       ?? exact(this.names, 'en') ?? exact(def?.names, 'en') ?? def?.name ?? this.id
@@ -88,7 +90,7 @@ export class Representation implements RawRepresentation {
     const knot = owner.get(this)
     const target = language ?? languageFor(knot)
     const def = this.getTypeDefinition() as any
-    return overrideFor(knot, this.id, 'descriptions', target) ?? exact(this.descriptions, target)
+    return overrideFor(knot, resourceKey.get(this) ?? this.id, 'descriptions', target) ?? exact(this.descriptions, target)
       ?? (def ? overrideFor(knot, def.id, 'descriptions', target) : undefined) ?? exact(def?.descriptions, target)
       ?? exact(this.descriptions, fallbackFor(knot)) ?? exact(def?.descriptions, fallbackFor(knot))
       ?? exact(this.descriptions, 'en') ?? exact(def?.descriptions, 'en') ?? def?.description
@@ -187,7 +189,7 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
       const id = item.id.startsWith('https://') || item.id.startsWith('http://') || item.id.startsWith('urn:') ? item.id : expandURI(item.id, registry.namespaces)
       const defaults = index.get(id) as any
       const enhanced = { ...item, ...(defaults?.names && !('names' in item) ? { names: defaults.names } : {}), ...(defaults?.descriptions && !('descriptions' in item) ? { descriptions: defaults.descriptions } : {}) }
-      index.set(id, resource(enhanced, knot))
+      index.set(id, resource(enhanced, knot, id))
     }
   }
   for (const key of ['catalogs', 'representationTypes', 'objectTypes'] as const) {
@@ -195,7 +197,7 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
       const id = item.id.startsWith('https://') || item.id.startsWith('http://') || item.id.startsWith('urn:') ? item.id : expandURI(item.id, knot.namespaces)
       const defaults = index.get(id) as any
       const enhanced = { ...item, ...(defaults?.names && !('names' in item) ? { names: defaults.names } : {}), ...(defaults?.descriptions && !('descriptions' in item) ? { descriptions: defaults.descriptions } : {}) }
-      index.set(id, resource(enhanced, knot))
+      index.set(id, resource(enhanced, knot, id))
     }
   }
   contexts.set(knot, index)
