@@ -1,5 +1,8 @@
+import { validateKnot } from '../src/core/validateKnot'
+import { selectKnot } from '../src/core/knotParts'
+import { composeKnot } from '../src/core/knotParts'
 import { expect, it } from 'vitest'
-import { validateGridDiagram, validateKnot, validateRepresentationDocument, STANDARD_RESOURCES, GRID_DIAGRAM, selectKnot, composeKnot } from '../src/core'
+import { validateGridDiagram, validateRepresentationDocument, STANDARD_RESOURCES, GRID_DIAGRAM } from '../src/core'
 const grid=(x:number[],o:number[])=>({encoding:'xo',size:x.length,x,o})
 it('counts closed components and strict interior crossings',()=>{
   expect(validateGridDiagram(grid([0,1],[1,0]))).toMatchObject({valid:true,componentCount:1,crossingCount:0})

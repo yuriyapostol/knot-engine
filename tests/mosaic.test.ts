@@ -1,7 +1,10 @@
+import { validateKnot } from '../src/core/validateKnot'
+import { selectKnot } from '../src/core/knotParts'
+import { composeKnot } from '../src/core/knotParts'
 import { expect, it } from 'vitest'
 import Ajv2020 from 'ajv/dist/2020.js'
 import schema from '../v1/schema/mosaic-diagram.schema.json'
-import { validateMosaicDiagram, LOMONACO_KAUFFMAN_11 as tileSet, MOSAIC_DIAGRAM, STANDARD_RESOURCES, validateKnot, validateRepresentationDocument, selectKnot, composeKnot } from '../src/core'
+import { validateMosaicDiagram, LOMONACO_KAUFFMAN_11 as tileSet, MOSAIC_DIAGRAM, STANDARD_RESOURCES, validateRepresentationDocument } from '../src/core'
 const loop = [[2,1],[3,4]]
 const source = [[0,2,1,0],[2,9,10,1],[3,10,8,4],[0,3,4,0]]
 const data = (tiles: number[][]) => ({ tileSet, tiles })

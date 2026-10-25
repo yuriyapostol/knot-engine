@@ -1,7 +1,8 @@
+import { resolveKnot } from '../src/core/resolve'
 import { expect, it } from 'vitest'
 import { createSSRApp } from 'vue'
 import { renderToString } from 'vue/server-renderer'
-import { KnotViewer, resolveKnot, type RawKnot } from '../src'
+import { KnotViewer, type RawKnot } from '../src'
 import { buildGeometry } from '../src/geometry/build'
 import open from '../v1/examples/knots/open-rope.json'
 it('builds finite geometry for all supported interpolation modes',()=>{

@@ -1,7 +1,10 @@
+import { selectKnot } from '../src/core/knotParts'
+import { composeKnot } from '../src/core/knotParts'
+import { validateKnot } from '../src/core/validateKnot'
 import { expect, it } from 'vitest'
 import multi from '../v1/examples/knots/procedures.json'
 import grid from '../v1/examples/knots/grid-diagram.json'
-import { selectKnot, composeKnot, validateKnot, STANDARD_RESOURCES } from '../src/core'
+import { STANDARD_RESOURCES } from '../src/core'
 it('extracts a procedure with its representations, construction and type definitions',()=>{
   const source=structuredClone(multi)
   const part=selectKnot(source,{procedures:['sequence-b']})

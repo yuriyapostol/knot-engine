@@ -1,7 +1,11 @@
+import { validateKnot } from '../src/core/validateKnot'
+import { selectKnot } from '../src/core/knotParts'
+import { composeKnot } from '../src/core/knotParts'
+import { resolveKnot } from '../src/core/resolve'
 import { expect, it } from 'vitest'
 import Ajv2020 from 'ajv/dist/2020.js'
 import schema from '../v1/schema/dt-code.schema.json'
-import { DT_CODE, DT_SIGNED_EVEN as convention, validateDTCode, validateKnot, validateRepresentationDocument, selectKnot, composeKnot, STANDARD_RESOURCES, resolveKnot } from '../src/core'
+import { DT_CODE, DT_SIGNED_EVEN as convention, validateDTCode, validateRepresentationDocument, STANDARD_RESOURCES } from '../src/core'
 const dt=(code:number[] | number[][])=>({convention,code})
 const knot=(code:number[] | number[][])=>({schema:'Knot',schemaVersion:1,id:'dt',subject:{id:'s'},representations:[{id:'dt',type:DT_CODE,data:dt(code)}]})
 const options={registries:[STANDARD_RESOURCES]}

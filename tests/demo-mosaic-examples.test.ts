@@ -1,8 +1,9 @@
+import { validateKnot } from '../src/core/validateKnot'
 import { expect, it } from 'vitest'
 import overhand from '../v1/examples/knots/overhand.json'
 import twistedLoop from '../v1/examples/knots/twisted-loop.json'
 import { normalizeKnot } from '../src/core/validateKnot'
-import { MOSAIC_DIAGRAM, SPATIAL_CURVE, expandURI, validateKnot, validateMosaicDiagram, selectRepresentation, type RawKnot } from '../src/core'
+import { MOSAIC_DIAGRAM, SPATIAL_CURVE, expandURI, validateMosaicDiagram, selectRepresentation, type RawKnot } from '../src/core'
 
 for (const fixture of [overhand, twistedLoop]) {
   const knot = fixture as unknown as RawKnot

@@ -1,6 +1,8 @@
+import { validateKnot } from '../src/core/validateKnot'
+import { selectKnot } from '../src/core/knotParts'
 import { expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { KNOT_NAMESPACE, validateKnot, validateRepresentationDocument, validateResourceDocument, validateResourceRegistry, selectKnot, STANDARD_RESOURCES, type RawKnot, type RawResourceRegistry } from '../src/core'
+import { KNOT_NAMESPACE, validateRepresentationDocument, validateResourceDocument, validateResourceRegistry, STANDARD_RESOURCES, type RawKnot, type RawResourceRegistry } from '../src/core'
 import { normalizeKnot } from '../src/core/validateKnot'
 
 for (const name of ['dt-trefoil', 'pd-trefoil', 'mosaic-diagram']) {

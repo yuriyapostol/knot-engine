@@ -1,7 +1,8 @@
+import { resolveKnot } from '../src/core/resolve'
 import { expect, it } from 'vitest'
 import * as THREE from 'three'
 import { prepareCamera, cameraView } from '../src/renderer/camera'
-import { resolveKnot, type Camera3D, type RawKnot } from '../src/core'
+import { type Camera3D, type RawKnot } from '../src/core'
 import open from '../v1/examples/knots/open-rope.json'
 const bounds=new THREE.Box3(new THREE.Vector3(-2,-1,-3),new THREE.Vector3(2,1,3))
 it('fits the entire bounding box for both projections in wide and narrow viewports',()=>{

@@ -1,6 +1,9 @@
+import { validateKnot } from '../src/core/validateKnot'
+import { selectKnot } from '../src/core/knotParts'
+import { composeKnot } from '../src/core/knotParts'
 import { expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { validateKnot, validateRepresentationDocument, validateResourceDocument, validateResourceRegistry, selectKnot, composeKnot, STANDARD_RESOURCES, type RawKnot, type RawResourceRegistry } from '../src/core'
+import { validateRepresentationDocument, validateResourceDocument, validateResourceRegistry, STANDARD_RESOURCES, type RawKnot, type RawResourceRegistry } from '../src/core'
 const source={id:'book',title:'Example publication',authors:[{name:'Original Author',email:'author@example.org'}],license:{name:'Source terms',url:'https://example.org/terms'},note:'Source-level note'}
 const contribution={name:'Editor',email:'editor@example.org',url:'https://example.org/editor',roles:['editing','validation'],date:'2026-10-18',note:'Corrected and checked data'}
 function knot(): RawKnot {

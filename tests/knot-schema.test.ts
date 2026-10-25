@@ -1,3 +1,4 @@
+import { validateKnot } from '../src/core/validateKnot'
 import { expect, it } from 'vitest'
 import Ajv2020 from 'ajv/dist/2020'
 import { readFileSync,readdirSync } from 'node:fs'
@@ -7,7 +8,7 @@ import mosaicSchema from '../v1/schema/mosaic-diagram.schema.json'
 import dtSchema from '../v1/schema/dt-code.schema.json'
 import pdSchema from '../v1/schema/pd-code.schema.json'
 import gridSchema from '../v1/schema/grid-diagram.schema.json'
-import { validateKnot } from '../src/core'
+
 import { normalizeKnot } from '../src/core/validateKnot'
 const ajv=new Ajv2020({strict:false}),knot=ajv.compile(knotSchema),spatial=ajv.compile(spatialSchema),grid=ajv.compile(gridSchema),mosaic=ajv.compile(mosaicSchema),pd=ajv.compile(pdSchema),dt=ajv.compile(dtSchema)
 for(const f of readdirSync('v1/examples/knots').filter(f=>f.endsWith('.json')))it(`schema/runtime align for ${f}`,()=>{

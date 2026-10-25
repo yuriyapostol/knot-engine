@@ -1,8 +1,10 @@
+import { validateKnot } from '../src/core/validateKnot'
+import { resolveKnot } from '../src/core/resolve'
 import { describe, expect, it } from 'vitest'
 import { readFileSync, readdirSync } from 'node:fs'
 import open from '../v1/examples/knots/open-rope.json'
 import multi from '../v1/examples/knots/procedures.json'
-import { validateKnot, resolveKnot, validateGridDiagram, validateSpatialCurve, validateView, STANDARD_RESOURCES, expandURI, validateResourceRegistry, validateResourceDocument, validateRepresentationDocument, SPATIAL_CURVE, type RawKnot } from '../src/core'
+import { validateGridDiagram, validateSpatialCurve, validateView, STANDARD_RESOURCES, expandURI, validateResourceRegistry, validateResourceDocument, validateRepresentationDocument, SPATIAL_CURVE, type RawKnot } from '../src/core'
 const copy = () => structuredClone(open)
 describe('RawKnot generation 1', () => {
   for(const file of readdirSync('v1/examples/knots').filter(f=>f.endsWith('.json'))) it(`validates ${file}`,()=>{

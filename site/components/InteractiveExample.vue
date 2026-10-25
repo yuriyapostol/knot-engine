@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
-import { KnotViewer, validateKnot, selectRepresentation, ViewerError, type RawKnot, SPATIAL_CURVE, MOSAIC_DIAGRAM, expandURI, type Camera3D, type CaptureOptions } from 'knot-engine'
+import {  KnotViewer, Knot, selectRepresentation, ViewerError, type RawKnot, SPATIAL_CURVE, MOSAIC_DIAGRAM, expandURI, type Camera3D, type CaptureOptions  } from 'knot-engine'
 import loop from '../../v1/examples/knots/twisted-loop.json'
 import overhand from '../../v1/examples/knots/overhand.json'
 import knotFixture from '../../v1/examples/knots/procedures.json'
@@ -107,7 +107,7 @@ function applyDraft() {
   try {
     const data: unknown = JSON.parse(draft.value)
     if (!data || typeof data !== 'object' || Array.isArray(data)) { issue.value = content.value.invalidFormat; return }
-    const result = validateKnot(data)
+    const result = Knot.validate(data)
     if (!result.valid) { issue.value = result.issues.map(i => `${i.path}: ${i.message}`).join('\n'); return }
     setCurrent({ kind: 'knot', data: result.knot })
     issue.value = ''; selected.value = 'custom'

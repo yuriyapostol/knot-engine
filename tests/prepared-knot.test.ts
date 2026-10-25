@@ -1,5 +1,6 @@
+import { validateKnot } from '../src/core/validateKnot'
 import { describe, expect, it } from 'vitest'
-import { Knot, configureLocalization, validateKnot, STANDARD_RESOURCES } from '../src/core'
+import { Knot, configureLocalization, STANDARD_RESOURCES } from '../src/core'
 import raw from '../v1/examples/knots/open-rope.json'
 
 describe('prepared Knot model', () => {

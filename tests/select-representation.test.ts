@@ -1,3 +1,4 @@
+import { resolveKnot } from '../src/core/resolve'
 import { describe, expect, it } from 'vitest'
 import open from '../v1/examples/knots/open-rope.json'
 import { selectRepresentation, SPATIAL_CURVE, MOSAIC_DIAGRAM, type RawKnot } from '../src/core'
