@@ -7,7 +7,7 @@
 - [Почніть використовувати пакет](guide/getting-started.uk.md).
 - [Розберіться з даними та ресурсами](guide/concepts.uk.md).
 - [Прочитайте чинний контракт `Knot`](specifications/knot.uk.md).
-- [Перегляньте запропоновані зміни](../design/knot-knot-draft.uk.md).
+- [Перегляньте запропоновані зміни](../design/knot-draft.uk.md).
 
 ## Спробуйте
 

@@ -1,6 +1,6 @@
 # Knot evolution
 
-**Historical proposal, superseded by the [current redesign](knot-knot-draft.md).** The separate diagrams/notations collections suggested below are not the agreed target architecture.
+**Historical proposal, superseded by the [current redesign](knot-draft.md).** The separate diagrams/notations collections suggested below are not the agreed target architecture.
 
 The implemented format separates physical elements, geometric states, tying algorithms and camera settings. Its main limitation was treating coordinates as the only way to describe a knot. Grid diagrams do not need splines, physical diameter or meters. A standalone `GridDiagram` and reduced self-contained knots were therefore added.
 

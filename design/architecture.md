@@ -1,6 +1,6 @@
 # knot-engine architecture
 
-The initial `Knot` redesign profile is implemented. The authoritative current contracts are [data](../v1/specifications/knot.md), [functions](../v1/specifications/functions.md) and [component](../v1/specifications/components.md). The [broader design](knot-knot-draft.md) still contains future work; it does not mean every proposed field is accepted.
+The initial `Knot` redesign profile is implemented. The authoritative current contracts are [data](../v1/specifications/knot.md), [functions](../v1/specifications/functions.md) and [component](../v1/specifications/components.md). The [broader design](knot-draft.md) still contains future work; it does not mean every proposed field is accepted.
 
 ```text
 Knot / standalone data / explicitly provided registries
