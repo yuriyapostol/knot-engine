@@ -150,7 +150,7 @@
       "dataSchema": {
         "ref": "knot-engine:schema/rope-object.schema.json"
       },
-      "specification": "knot-engine:specifications/knot-asset.html"
+      "specification": "knot-engine:specifications/asset.html"
     }
   ],
   "representationTypes": [
@@ -161,7 +161,7 @@
       "dataSchema": {
         "ref": "knot-engine:schema/spatial-curve.schema.json"
       },
-      "specification": "knot-engine:specifications/knot-asset.html",
+      "specification": "knot-engine:specifications/asset.html",
       "viewSpace": "space"
     },
     {

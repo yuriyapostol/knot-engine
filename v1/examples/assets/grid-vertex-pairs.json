@@ -32,7 +32,7 @@
       "dataSchema": {
         "ref": "knot-engine:schema/grid-diagram.schema.json"
       },
-      "specification": "knot-engine:specifications/knot-asset.html",
+      "specification": "knot-engine:specifications/asset.html",
       "viewSpace": "plane"
     }
   ]
