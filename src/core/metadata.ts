@@ -1,4 +1,4 @@
-import type { Contribution, License, SourceFields } from './asset'
+import type { Contribution, License, SourceFields } from './knot'
 import { issue } from './validation'
 import type { ValidationIssue } from './errors'
 

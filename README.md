@@ -2,7 +2,7 @@
 
 [English](README.md) | [Українська](README.uk.md)
 
-Knot modeling and rendering package with Vue 3 `KnotViewer`. The current `Asset` supports spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, states, procedures and explicit resource registries. The component renders static 3D representations with perspective/orthographic cameras, SSR fallback and PNG capture.
+Knot modeling and rendering package with Vue 3 `KnotViewer`. The current `Knot` supports spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, states, procedures and explicit resource registries. The component renders static 3D representations with perspective/orthographic cameras, SSR fallback and PNG capture.
 
 ## Run locally
 
@@ -25,7 +25,7 @@ npm run test:package
 npm pack --dry-run
 ```
 
-Generate a card PNG with `npm run preview:model -- --model v1/examples/assets/twisted-loop.json --out /tmp/knot-preview.png`. The script uses local Chrome (or `CHROME_PATH`) and caches output by model, size, browser and renderer version.
+Generate a card PNG with `npm run preview:model -- --model v1/examples/knots/twisted-loop.json --out /tmp/knot-preview.png`. The script uses local Chrome (or `CHROME_PATH`) and caches output by model, size, browser and renderer version.
 
 The working package name is `knot-engine`; no npm release has been published. The library build is in `dist/`, and the demo build is in `site-runtime-dist/`. To build the demo for a project subpath, set `BASE_PATH=/your-path/`.
 
@@ -35,7 +35,7 @@ To preview the complete site locally, run `npm run preview:site` and open `http:
 
 Run `npm run build:site` to build `site-dist/`. The site includes the guide at `/v1/guide.html`, specifications with schemas and examples at `/v1/specifications.html`, resources at `/v1/resources.html`, and design material at `/design/index.html`. The interactive editor is embedded in the generation home page and guide. English is the default; page URLs retain `.html`, and Ukrainian pages use `.uk.html`, for example `/v1/guide/getting-started.uk.html` and `/design/architecture.uk.html`. Version `v1` includes pre-1.0 packages. Existing snapshots from `site/releases/` are preserved under `/releases/<package-version>/`.
 
-The [Pages workflow](.github/workflows/pages.yml) publishes the complete site after a push to `main`, or a manual run on `main`, after typecheck and tests. In **Settings → Pages**, select **GitHub Actions**. The default site address is [Knot Engine](https://yuriyapostol.github.io/knot-engine/). Pages and demo assets use relative links and also work under a custom domain.
+The [Pages workflow](.github/workflows/pages.yml) publishes the complete site after a push to `main`, or a manual run on `main`, after typecheck and tests. In **Settings → Pages**, select **GitHub Actions**. The default site address is [Knot Engine](https://yuriyapostol.github.io/knot-engine/). Pages and demo knots use relative links and also work under a custom domain.
 
 For an explicitly prepared release, `npm run site:archive` creates a snapshot of the current package version. Review and commit `site/releases/<version>/` with that release. Existing snapshots cannot be overwritten by the command; ordinary builds do not create releases or change version numbers. See [archive instructions](site/README.md) and [publication policy](design/publication.md). Local builds do not deploy the site.
 
@@ -43,23 +43,23 @@ For an explicitly prepared release, `npm run site:archive` creates a snapshot of
 
 ```vue
 <script setup lang="ts">
-import { KnotViewer, type Asset } from 'knot-engine'
+import { KnotViewer, type Knot } from 'knot-engine'
 import 'knot-engine/styles.css'
-defineProps<{ asset: Asset }>()
+defineProps<{ knot: Knot }>()
 </script>
 
 <template>
-  <KnotViewer :asset="asset" label="Rope model" locale="en" />
+  <KnotViewer :knot="knot" label="Rope model" locale="en" />
 </template>
 ```
 
-Import `validateAsset`, `resolveAsset` and types from `knot-engine/core`: this entry point loads no Vue, Three.js or DOM. Validation separately reports `valid`, `complete`, `missingDependencies` and `uncheckedTypes`; rendering requires complete validation. Unknown fields are rejected. Registries are passed explicitly; URI references do not fetch data.
+Import `validateKnot`, `resolveKnot` and types from `knot-engine/core`: this entry point loads no Vue, Three.js or DOM. Validation separately reports `valid`, `complete`, `missingDependencies` and `uncheckedTypes`; rendering requires complete validation. Unknown fields are rejected. Registries are passed explicitly; URI references do not fetch data.
 
-`representation-id` selects one static representation; by default the first `spatial-curve` is selected. Constructions contain objects and states; procedures reference representations. There is no animation. Replace the asset object to update geometry.
+`representation-id` selects one static representation; by default the first `spatial-curve` is selected. Constructions contain objects and states; procedures reference representations. There is no animation. Replace the knot object to update geometry.
 
-Methods: `resetView()`, `fitToView()`, `capture({width,height,view,transparent})`. PNG defaults to 512×512 with a 2048×2048 maximum. Capture modes are `current` and `model-preview`. Events: `ready({assetId,schemaVersion,warnings})`, `error`, `camera-change`. `initialCamera` accepts complete fit/fixed modes with perspective or orthographic projection; FOV is in radians.
+Methods: `resetView()`, `fitToView()`, `capture({width,height,view,transparent})`. PNG defaults to 512×512 with a 2048×2048 maximum. Capture modes are `current` and `model-preview`. Events: `ready({knotId,schemaVersion,warnings})`, `error`, `camera-change`. `initialCamera` accepts complete fit/fixed modes with perspective or orthographic projection; FOV is in radians.
 
-[Data contract](v1/specifications/asset.md) · [Functions](v1/specifications/functions.md) · [Component](v1/specifications/components.md) · [JSON Schema](v1/schema/asset.schema.json) · [Examples](v1/examples/assets)
+[Data contract](v1/specifications/knot.md) · [Functions](v1/specifications/functions.md) · [Component](v1/specifications/components.md) · [JSON Schema](v1/schema/knot.schema.json) · [Examples](v1/examples/knots)
 
 Styling uses `.knot-engine-v1-viewer…` classes and inherited `--knot-engine-v1-viewer-*` variables. The package namespace includes the major generation and component name, allowing different major versions on the same page; initial development requires no backward compatibility, including CSS. See [current variables, defaults and examples](v1/specifications/components.md#css-namespace-and-styling).
 
@@ -71,7 +71,7 @@ Explain consequential contract decisions in the relevant specifications, with so
 
 | Document | Scope |
 | --- | --- |
-| [`Asset` v1](v1/specifications/asset.md) | Authoritative domain-data specification |
+| [`Knot` v1](v1/specifications/knot.md) | Authoritative domain-data specification |
 | [Architecture and migration](design/architecture.md) | Implementation policies, compatibility and current limits |
 | [`KnotViewer` specification](v1/specifications/components.md) | Component API and retained acceptance criteria |
 | [Demo application](design/interactive-example-requirements.md) | Demo behavior and acceptance plan |

@@ -1,9 +1,9 @@
 import { expect, it } from 'vitest'
 import Ajv2020 from 'ajv/dist/2020.js'
 import schema from '../v1/schema/dt-code.schema.json'
-import { DT_CODE, DT_SIGNED_EVEN as convention, validateDTCode, validateAsset, validateRepresentationDocument, selectAsset, composeAsset, STANDARD_RESOURCES, resolveAsset } from '../src/core'
+import { DT_CODE, DT_SIGNED_EVEN as convention, validateDTCode, validateKnot, validateRepresentationDocument, selectKnot, composeKnot, STANDARD_RESOURCES, resolveKnot } from '../src/core'
 const dt=(code:number[] | number[][])=>({convention,code})
-const asset=(code:number[] | number[][])=>({schema:'Asset',schemaVersion:1,id:'dt',subject:{id:'s'},representations:[{id:'dt',type:DT_CODE,data:dt(code)}]})
+const knot=(code:number[] | number[][])=>({schema:'Knot',schemaVersion:1,id:'dt',subject:{id:'s'},representations:[{id:'dt',type:DT_CODE,data:dt(code)}]})
 const options={registries:[STANDARD_RESOURCES]}
 it('validates sourced DT examples, both signs, reducible diagrams and the empty unknot',()=>{
   for (const code of [[],[2],[2,4],[4,6,2],[4,6,8,2],[4,6,2,10,12,8],[6,10,14,12,16,2,18,4,8],[4,8,10,-14,2,-16,-18,-6,-12],[16,18,20,-22,4,2,8,-6,12,10,-14]]) {
@@ -61,18 +61,18 @@ it('agrees with independently enumerated planar rotations for all even permutati
   expect(invalid).toBeGreaterThan(0)
 })
 it('supports metadata, standalone documents, scopes and preserves code order/signs without claiming renderer support',()=>{
-  const a={...asset([4,6,2]),sources:[{id:'atlas',title:'Knot Atlas'}],license:{name:'Example terms'}}
+  const a={...knot([4,6,2]),sources:[{id:'atlas',title:'Knot Atlas'}],license:{name:'Example terms'}}
   const rep={...a.representations[0],sources:[{id:'atlas',locator:'DT example',note:'Signs retained'}],contributions:[{name:'Editor',roles:['validation']}]}
   a.representations=[rep]
-  expect(validateAsset(a,options)).toMatchObject({valid:true,complete:true,uncheckedTypes:[]})
-  expect(validateAsset(a)).toMatchObject({valid:true,complete:false})
-  expect(validateRepresentationDocument({schema:'KnotRepresentationDocument',schemaVersion:1,sources:a.sources,representation:rep},options)).toMatchObject({valid:true,complete:true})
-  expect(validateAsset({...a,namespaces:{r:'https://yuriyapostol.github.io/knot-engine/v1/representation-types/'},representations:[{...rep,type:'r:dt-code'}]},options)).toMatchObject({valid:true,complete:true})
-  expect(validateAsset({...a,representations:[{...rep,target:{kind:'construction',construction:{id:'missing'}}}]},options).valid).toBe(false)
-  const selected=selectAsset(a,{representations:['dt']},options)
-  expect(JSON.parse(JSON.stringify(composeAsset([selected,selected]))).representations[0]).toEqual(rep)
-  expect(()=>resolveAsset(a,{representationId:'dt'},options)).toThrow(/spatial-curve/)
-  for(const change of [{preferredView:{direction:[0,0,1],up:[0,1,0]}},{views:[{id:'p',name:'Plane',space:'plane',camera:{mode:'plane',center:[0,0],height:1,rotation:0}}]}])expect(validateAsset({...a,representations:[{...rep,...change}]},options).valid).toBe(false)
+  expect(validateKnot(a,options)).toMatchObject({valid:true,complete:true,uncheckedTypes:[]})
+  expect(validateKnot(a)).toMatchObject({valid:true,complete:false})
+  expect(validateRepresentationDocument({schema:'RawRepresentationDocument',schemaVersion:1,sources:a.sources,representation:rep},options)).toMatchObject({valid:true,complete:true})
+  expect(validateKnot({...a,namespaces:{r:'https://yuriyapostol.github.io/knot-engine/v1/representation-types/'},representations:[{...rep,type:'r:dt-code'}]},options)).toMatchObject({valid:true,complete:true})
+  expect(validateKnot({...a,representations:[{...rep,target:{kind:'construction',construction:{id:'missing'}}}]},options).valid).toBe(false)
+  const selected=selectKnot(a,{representations:['dt']},options)
+  expect(JSON.parse(JSON.stringify(composeKnot([selected,selected]))).representations[0]).toEqual(rep)
+  expect(()=>resolveKnot(a,{representationId:'dt'},options)).toThrow(/spatial-curve/)
+  for(const change of [{preferredView:{direction:[0,0,1],up:[0,1,0]}},{views:[{id:'p',name:'Plane',space:'plane',camera:{mode:'plane',center:[0,0],height:1,rotation:0}}]}])expect(validateKnot({...a,representations:[{...rep,...change}]},options).valid).toBe(false)
   const frozen=dt([4,-6,2]);Object.freeze(frozen.code);Object.freeze(frozen)
   expect(validateDTCode(frozen)).toMatchObject({valid:true,data:frozen})
 })
@@ -80,8 +80,8 @@ it('bounds matrix work before analysis including compact type references',()=>{
   const max=Array.from({length:512},(_,i)=>2*i+2)
   expect(validateDTCode(dt(max))).toMatchObject({valid:true,crossingCount:512})
   expect(validateDTCode(dt([...max,1026])).valid).toBe(false)
-  const a=asset(max)
-  expect(validateAsset({...a,namespaces:{r:'https://yuriyapostol.github.io/knot-engine/v1/representation-types/'},representations:[{...a.representations[0],type:'r:dt-code'},{...a.representations[0],id:'other'}]},options)).toMatchObject({valid:false,issues:[{code:'LIMIT_EXCEEDED'}]})
+  const a=knot(max)
+  expect(validateKnot({...a,namespaces:{r:'https://yuriyapostol.github.io/knot-engine/v1/representation-types/'},representations:[{...a.representations[0],type:'r:dt-code'},{...a.representations[0],id:'other'}]},options)).toMatchObject({valid:false,issues:[{code:'LIMIT_EXCEEDED'}]})
 })
 it('checks nontrivial interlacement across packed 32-bit row boundaries',()=>{
   // Odd two-strand torus shadows have the complete interlacement graph K_n.
@@ -96,7 +96,7 @@ it('checks nontrivial interlacement across packed 32-bit row boundaries',()=>{
 it('validates links, split subdiagrams and explicit crossing-free components',()=>{
   for(const code of [[[4],[2]],[[6,-8],[-10,12,-14,2,-4]],[[2],[4]],[[],[4],[2],[]],[[],[]],[[]]]) {
     expect(validateDTCode(dt(code)),JSON.stringify(code)).toMatchObject({valid:true,componentCount:code.length,crossingCount:code.flat().length})
-    expect(validateAsset(asset(code),options)).toMatchObject({valid:true,complete:true,uncheckedTypes:[]})
+    expect(validateKnot(knot(code),options)).toMatchObject({valid:true,complete:true,uncheckedTypes:[]})
   }
   expect(validateDTCode(dt([[4],[2]]))).toMatchObject({valid:true,componentCount:2,crossingCount:2})
   // Concatenation describes one different component even when both codes are planar.
@@ -104,10 +104,10 @@ it('validates links, split subdiagrams and explicit crossing-free components',()
   const frozen=dt([Object.freeze([4]),Object.freeze([2])] as unknown as number[][])
   Object.freeze(frozen.code);Object.freeze(frozen)
   expect(validateDTCode(frozen)).toMatchObject({valid:true,data:frozen})
-  const a=asset([[],[4],[2]])
-  const selected=selectAsset(a,{representations:['dt']},options)
-  expect(composeAsset([selected,selected]).representations?.[0].data).toEqual(a.representations[0].data)
-  expect(validateRepresentationDocument({schema:'KnotRepresentationDocument',schemaVersion:1,representation:a.representations[0]},options)).toMatchObject({valid:true,complete:true})
+  const a=knot([[],[4],[2]])
+  const selected=selectKnot(a,{representations:['dt']},options)
+  expect(composeKnot([selected,selected]).representations?.[0].data).toEqual(a.representations[0].data)
+  expect(validateRepresentationDocument({schema:'RawRepresentationDocument',schemaVersion:1,representation:a.representations[0]},options)).toMatchObject({valid:true,complete:true})
 })
 it('agrees with an independent rotation oracle for every component partition through five crossings',()=>{
   let count=0,invalid=0
@@ -133,6 +133,6 @@ it('bounds total link crossings, components and reduced-word work',()=>{
   const star:number[][]=[[]]
   for(let i=0;i<256;i++){star[0].push(514+2*i);star.push([2+2*i])}
   expect(validateDTCode(dt(star))).toMatchObject({valid:false,issues:[{code:'LIMIT_EXCEEDED'}]})
-  expect(validateAsset(asset(star),options)).toMatchObject({valid:false,issues:[{code:'LIMIT_EXCEEDED'}]})
-  expect(validateAsset({...asset(star),namespaces:{r:'https://yuriyapostol.github.io/knot-engine/v1/representation-types/'},representations:[{...asset(star).representations[0],type:'r:dt-code'}]},options)).toMatchObject({valid:false,issues:[{code:'LIMIT_EXCEEDED'}]})
+  expect(validateKnot(knot(star),options)).toMatchObject({valid:false,issues:[{code:'LIMIT_EXCEEDED'}]})
+  expect(validateKnot({...knot(star),namespaces:{r:'https://yuriyapostol.github.io/knot-engine/v1/representation-types/'},representations:[{...knot(star).representations[0],type:'r:dt-code'}]},options)).toMatchObject({valid:false,issues:[{code:'LIMIT_EXCEEDED'}]})
 })

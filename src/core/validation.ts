@@ -2,7 +2,7 @@ import Ajv2020, { type ValidateFunction } from 'ajv/dist/2020.js'
 import contracts from './contracts.json'
 import type { ValidationIssue } from './errors'
 
-export const ASSET_LIMITS = { depth: 64, entries: 262144, points: 65536, mosaicCells: 65536, pdCrossings: 16384, dtCrossings: 512, dtComponents: 512, dtWork: 4194304, stringLength: 1048576 } as const
+export const KNOT_LIMITS = { depth: 64, entries: 262144, points: 65536, mosaicCells: 65536, pdCrossings: 16384, dtCrossings: 512, dtComponents: 512, dtWork: 4194304, stringLength: 1048576 } as const
 export const canonical = (value: unknown): string => JSON.stringify(value, (_, v) => v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map(k => [k, v[k]])) : v)
 export const issue = (path: string, message: string, code: ValidationIssue['code'] = 'INVALID_MODEL'): ValidationIssue => ({ path, message, code })
 /** Bound traversal before any schema validator, also rejecting non-JSON values/cycles. */
@@ -10,17 +10,17 @@ export function preflight(value: unknown): ValidationIssue[] {
   let entries = 0
   const active = new Set<object>()
   function walk(v: unknown, path: string, depth: number): ValidationIssue | undefined {
-    if (++entries > ASSET_LIMITS.entries || depth > ASSET_LIMITS.depth) return issue(path, 'Resource budget exceeded', 'LIMIT_EXCEEDED')
+    if (++entries > KNOT_LIMITS.entries || depth > KNOT_LIMITS.depth) return issue(path, 'Resource budget exceeded', 'LIMIT_EXCEEDED')
     if (v === null || typeof v === 'boolean') return
     if (typeof v === 'number') return Number.isFinite(v) ? undefined : issue(path, 'Expected finite number')
-    if (typeof v === 'string') return v.length <= ASSET_LIMITS.stringLength ? undefined : issue(path, 'String budget exceeded', 'LIMIT_EXCEEDED')
+    if (typeof v === 'string') return v.length <= KNOT_LIMITS.stringLength ? undefined : issue(path, 'String budget exceeded', 'LIMIT_EXCEEDED')
     if (typeof v !== 'object' || (!Array.isArray(v) && Object.getPrototypeOf(v) !== Object.prototype && Object.getPrototypeOf(v) !== null)) return issue(path, 'Expected JSON data')
     if (active.has(v)) return issue(path, 'Cyclic input is not JSON')
     active.add(v)
-    if (Array.isArray(v) && v.length + entries > ASSET_LIMITS.entries) return issue(path, 'Resource budget exceeded', 'LIMIT_EXCEEDED')
+    if (Array.isArray(v) && v.length + entries > KNOT_LIMITS.entries) return issue(path, 'Resource budget exceeded', 'LIMIT_EXCEEDED')
     const keys = Object.keys(v)
     if (Array.isArray(v) && (keys.length !== v.length || keys.some((k,i) => k !== String(i)))) return issue(path, 'Expected a dense JSON array')
-    if (keys.length + entries > ASSET_LIMITS.entries) return issue(path, 'Resource budget exceeded', 'LIMIT_EXCEEDED')
+    if (keys.length + entries > KNOT_LIMITS.entries) return issue(path, 'Resource budget exceeded', 'LIMIT_EXCEEDED')
     for (const key of keys) {
       const descriptor = Object.getOwnPropertyDescriptor(v, key)!
       if (!('value' in descriptor)) return issue(path, 'Accessors are not JSON data')

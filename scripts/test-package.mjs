@@ -21,19 +21,19 @@ try {
   assert.ok(pack.files.some(f => f.path.startsWith('v1/schema/')))
   assert.ok(pack.files.every(f => !/^v(?!1\/)[0-9]+\//.test(f.path)))
   assert.ok(pack.files.every(f => !f.path.startsWith('site/')))
-  for (const schema of ['asset', 'spatial-curve', 'grid-diagram', 'pd-code', 'dt-code', 'source', 'contribution', 'license', 'knot-resource-registry']) assert.ok(JSON.parse(readFileSync(join(installed, 'v1', 'schema', `${schema}.schema.json`), 'utf8')).$id)
+  for (const schema of ['knot', 'spatial-curve', 'grid-diagram', 'pd-code', 'dt-code', 'source', 'contribution', 'license', 'knot-resource-registry']) assert.ok(JSON.parse(readFileSync(join(installed, 'v1', 'schema', `${schema}.schema.json`), 'utf8')).$id)
   writeFileSync(join(temp, 'core-loader.mjs'), `export async function resolve(id, context, next) { if (['vue', 'three'].some(name => id === name || id.startsWith(name + '/'))) throw new Error('Core imported '+id); return next(id, context) }`)
   writeFileSync(join(temp, 'core.mjs'), `
     import assert from 'node:assert/strict'
     assert.equal(import.meta.resolve('knot-engine/schema/dt-code.schema.json'), new URL('./node_modules/knot-engine/v1/schema/dt-code.schema.json', import.meta.url).href)
-    assert.equal(import.meta.resolve('knot-engine/schema/asset.schema.json'), new URL('./node_modules/knot-engine/v1/schema/asset.schema.json', import.meta.url).href)
+    assert.equal(import.meta.resolve('knot-engine/schema/knot.schema.json'), new URL('./node_modules/knot-engine/v1/schema/knot.schema.json', import.meta.url).href)
     for (const key of ['window','document','WebGLRenderingContext']) Object.defineProperty(globalThis, key, { get() { throw new Error('DOM access: '+key) } })
     const core = await import('knot-engine/core')
-    assert.equal(core.validateAsset(${readFileSync('v1/examples/assets/open-rope.json', 'utf8')}).valid, true)
+    assert.equal(core.validateKnot(${readFileSync('v1/examples/knots/open-rope.json', 'utf8')}).valid, true)
     assert.equal(core.validateDTCode({convention: core.DT_SIGNED_EVEN, code: [4,6,2]}).valid, true)
     assert.equal(core.validateDTCode({convention: core.DT_SIGNED_EVEN, code: [[4],[2]]}).componentCount, 2)
     assert.equal(core.validatePDCode({convention: core.PD_CCW_UNDER_FIRST, crossings: [], unlinkedComponents: 1}).componentCount, 1)
-    assert.equal(core.resolveAsset(${readFileSync('v1/examples/assets/open-rope.json', 'utf8')}).curves.length, 1)
+    assert.equal(core.resolveKnot(${readFileSync('v1/examples/knots/open-rope.json', 'utf8')}).curves.length, 1)
   `)
   execFileSync(process.execPath, ['--no-warnings', '--experimental-loader', join(temp, 'core-loader.mjs'), join(temp, 'core.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
   writeFileSync(join(temp, 'subpaths.mjs'), `
@@ -53,22 +53,22 @@ try {
     import { createSSRApp } from 'vue'
     import { renderToString } from 'vue/server-renderer'
     import { KnotViewer } from 'knot-engine'
-    const html = await renderToString(createSSRApp(KnotViewer, { asset: ${readFileSync('v1/examples/assets/open-rope.json', 'utf8')}, label: 'Tarball asset' }))
-    assert.ok(html.includes('Tarball asset') && !html.includes('<canvas'))
+    const html = await renderToString(createSSRApp(KnotViewer, { knot: ${readFileSync('v1/examples/knots/open-rope.json', 'utf8')}, label: 'Tarball knot' }))
+    assert.ok(html.includes('Tarball knot') && !html.includes('<canvas'))
   `)
   execFileSync(process.execPath, [join(temp, 'ssr.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
   writeFileSync(join(temp, 'check.ts'), `
-    import { KnotViewer, type RawAsset, type CameraView } from 'knot-engine'
+    import { KnotViewer, type RawKnot, type CameraView } from 'knot-engine'
     import { Knot3DViewer } from 'knot-engine/3d'
     import { KnotMosaicViewer } from 'knot-engine/mosaic'
-    import { validateAsset, resolveAsset, type RawRepresentation, type DTCode, DT_SIGNED_EVEN, validateDTCode, type PDCode, type SourceDefinition, type Contribution, type License, validatePDCode, PD_CCW_UNDER_FIRST } from 'knot-engine/core'
+    import { validateKnot, resolveKnot, type RawRepresentation, type DTCode, DT_SIGNED_EVEN, validateDTCode, type PDCode, type SourceDefinition, type Contribution, type License, validatePDCode, PD_CCW_UNDER_FIRST } from 'knot-engine/core'
     const representation: RawRepresentation = { id: 'r', type: 'urn:example:representation', data: {} }
-    const asset: RawAsset = { schema: 'Asset', schemaVersion: 1, id: 'a', subject: { id: 's' }, representations: [representation] }
+    const knot: RawKnot = { schema: 'Knot', schemaVersion: 1, id: 'a', subject: { id: 's' }, representations: [representation] }
     const camera: CameraView = { mode: 'fixed', position: [0,0,1], target: [0,0,0], up: [0,1,0], projection: { kind: 'perspective', fovY: 1 } }
     type Props = InstanceType<typeof KnotViewer>['$props']
-    const props: Props = { asset, representationId: 'r', label: 'a', initialCamera: camera }
-    const threeProps: InstanceType<typeof Knot3DViewer>['$props'] = { label: '3d', asset }
-    const mosaicProps: InstanceType<typeof KnotMosaicViewer>['$props'] = { label: 'mosaic', asset }
+    const props: Props = { knot, representationId: 'r', label: 'a', initialCamera: camera }
+    const threeProps: InstanceType<typeof Knot3DViewer>['$props'] = { label: '3d', knot }
+    const mosaicProps: InstanceType<typeof KnotMosaicViewer>['$props'] = { label: 'mosaic', knot }
     void threeProps; void mosaicProps
     const pd: PDCode = { convention: PD_CCW_UNDER_FIRST, crossings: [[1,1,2,2]] }
     validatePDCode(pd)
@@ -77,12 +77,12 @@ try {
     const source: SourceDefinition = { id: 'book', title: 'Book' }
     const contribution: Contribution = { name: 'Editor', roles: ['editing'] }
     const license: License = { name: 'Example terms' }
-    validateAsset({ ...asset, sources: [source], contributions: [contribution], license })
-    validateAsset(props.asset); resolveAsset(asset)
+    validateKnot({ ...knot, sources: [source], contributions: [contribution], license })
+    validateKnot(props.knot); resolveKnot(knot)
   `)
   execFileSync(process.execPath, [resolve('node_modules/typescript/bin/tsc'), '--noEmit', '--strict', '--skipLibCheck', '--module', 'ESNext', '--moduleResolution', 'Bundler', '--target', 'ES2022', join(temp, 'check.ts')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
   writeFileSync(join(temp, 'index.html'), '<div id="app"></div><script type="module" src="/client.js"></script>')
-  writeFileSync(join(temp, 'client.js'), `import { createApp, h } from 'vue'; import { KnotViewer } from 'knot-engine'; import 'knot-engine/styles.css'; createApp({render:()=>h(KnotViewer,{asset:null,label:'Tarball viewer'})}).mount('#app')`)
+  writeFileSync(join(temp, 'client.js'), `import { createApp, h } from 'vue'; import { KnotViewer } from 'knot-engine'; import 'knot-engine/styles.css'; createApp({render:()=>h(KnotViewer,{knot:null,label:'Tarball viewer'})}).mount('#app')`)
   await build({ configFile: false, root: temp, logLevel: 'warn', build: { outDir: join(temp, 'build'), minify: false } })
   console.log('Tarball: package identity, independent schemas, core without Vue/Three/DOM, SSR, public declarations, and client CSS/build passed')
 } finally { rmSync(temp, { recursive: true, force: true }) }

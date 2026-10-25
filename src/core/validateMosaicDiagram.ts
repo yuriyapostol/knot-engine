@@ -1,5 +1,5 @@
-import type { MosaicDiagram } from './asset'
-import { issue, ASSET_LIMITS, standalone } from './validation'
+import type { MosaicDiagram } from './knot'
+import { issue, KNOT_LIMITS, standalone } from './validation'
 import type { ValidationIssue } from './errors'
 
 // Ports N/E/S/W = 0/1/2/3. Each pair is a separate arc, including crossings.
@@ -12,7 +12,7 @@ export function validateMosaicDiagram(value: unknown, _options: { strict?: boole
   const result = standalone<MosaicDiagram>('mosaic', value, diagram => {
     const { tiles } = diagram, n = tiles.length
     const cells = tiles.reduce((sum, row) => sum + row.length, 0)
-    if (cells > ASSET_LIMITS.mosaicCells) return [issue('tiles', 'Mosaic cell budget exceeded', 'LIMIT_EXCEEDED')]
+    if (cells > KNOT_LIMITS.mosaicCells) return [issue('tiles', 'Mosaic cell budget exceeded', 'LIMIT_EXCEEDED')]
     if (tiles.some(row => row.length !== n)) return [issue('tiles', 'Expected a square matrix')]
     const issues: ValidationIssue[] = []
     const has = (r: number, c: number, port: number) => arcs[tiles[r][c]].some(pair => pair.includes(port))

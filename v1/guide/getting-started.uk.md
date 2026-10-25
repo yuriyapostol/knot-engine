@@ -19,15 +19,15 @@ npm run dev
 <script setup lang="ts">
 import { KnotViewer } from 'knot-engine'
 import 'knot-engine/styles.css'
-import asset from './open-rope.json'
+import knot from './open-rope.json'
 </script>
 
 <template>
-  <KnotViewer :asset="asset" locale="uk" label="Мотузка" />
+  <KnotViewer :knot="knot" locale="uk" label="Мотузка" />
 </template>
 ```
 
-Використайте [`Asset` відкритої мотузки](../examples/assets/open-rope.json) як `open-rope.json`. Параметри вибору, події та методи знімків описані в [контракті компонента](../specifications/components.uk.md). Пакет використовує лише поточний контракт `Asset`. Статичне представлення вибирається через `representation-id`.
+Використайте [`Knot` відкритої мотузки](../examples/knots/open-rope.json) як `open-rope.json`. Параметри вибору, події та методи знімків описані в [контракті компонента](../specifications/components.uk.md). Пакет використовує лише поточний контракт `Knot`. Статичне представлення вибирається через `representation-id`.
 
 ## Редагування даних
 

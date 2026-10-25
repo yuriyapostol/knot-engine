@@ -1,4 +1,4 @@
-import type { RawKnotResourceRegistry, Reference, ViewDefinition } from './asset'
+import type { RawResourceRegistry, Reference, ViewDefinition } from './knot'
 import { expandURI } from './resources'
 import { validateView } from './validateSpatial'
 
@@ -7,13 +7,13 @@ export type ViewResolution =
   | { ok: false; message: string }
 
 /** Resolve an explicitly requested view from application-owned presets.
- * RawAsset representations are never consulted for camera defaults or presets.
+ * RawKnot representations are never consulted for camera defaults or presets.
  * Registry lookup is explicit and never performs network access.
  */
 export function resolveRepresentationView(
   requested: Reference | ViewDefinition | undefined,
   views: readonly ViewDefinition[] = [],
-  registries: readonly RawKnotResourceRegistry[] = [],
+  registries: readonly RawResourceRegistry[] = [],
   namespaces: Readonly<Record<string, string>> = {},
 ): ViewResolution {
   if (!requested) return { ok: true, view: null }

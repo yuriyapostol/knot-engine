@@ -2,7 +2,7 @@
 
 [English](README.md) | [Українська](README.uk.md)
 
-Пакет для моделювання та рендерингу вузлів із Vue 3 компонентом `KnotViewer`. Поточний `Asset` підтримує просторові криві, сіткові діаграми, мозаїчні діаграми, коди планарних діаграм, коди Даукера–Тістлетвейта, конструкції, стани, процедури й явні реєстри ресурсів. Компонент відображає статичні 3D-представлення, має перспективну/ортографічну камеру, SSR fallback та PNG.
+Пакет для моделювання та рендерингу вузлів із Vue 3 компонентом `KnotViewer`. Поточний `Knot` підтримує просторові криві, сіткові діаграми, мозаїчні діаграми, коди планарних діаграм, коди Даукера–Тістлетвейта, конструкції, стани, процедури й явні реєстри ресурсів. Компонент відображає статичні 3D-представлення, має перспективну/ортографічну камеру, SSR fallback та PNG.
 
 ## Локальний запуск
 
@@ -25,7 +25,7 @@ npm run test:package
 npm pack --dry-run
 ```
 
-Щоб згенерувати PNG для картки, виконайте `npm run preview:model -- --model v1/examples/assets/twisted-loop.json --out /tmp/knot-preview.png`. Скрипт використовує локальний Chrome (або `CHROME_PATH`) і кешує результат за моделлю, розміром, браузером та версією засобу візуалізації.
+Щоб згенерувати PNG для картки, виконайте `npm run preview:model -- --model v1/examples/knots/twisted-loop.json --out /tmp/knot-preview.png`. Скрипт використовує локальний Chrome (або `CHROME_PATH`) і кешує результат за моделлю, розміром, браузером та версією засобу візуалізації.
 
 Робоча назва пакета — `knot-engine`; реліз у npm ще не публікувався. Збірка бібліотеки міститься в `dist/`, а збірка демо — у `site-runtime-dist/`. Для збірки демо за підшляхом проєкту задайте `BASE_PATH=/your-path/`.
 
@@ -43,23 +43,23 @@ npm pack --dry-run
 
 ```vue
 <script setup lang="ts">
-import { KnotViewer, type Asset } from 'knot-engine'
+import { KnotViewer, type Knot } from 'knot-engine'
 import 'knot-engine/styles.css'
-defineProps<{ asset: Asset }>()
+defineProps<{ knot: Knot }>()
 </script>
 
 <template>
-  <KnotViewer :asset="asset" label="Rope model" locale="en" />
+  <KnotViewer :knot="knot" label="Rope model" locale="en" />
 </template>
 ```
 
-Імпортуйте `validateAsset`, `resolveAsset` і типи з `knot-engine/core`: ця точка входу не завантажує Vue, Three.js або DOM. Валідація повертає окремі `valid`, `complete`, `missingDependencies`, `uncheckedTypes`; показ вимагає повної перевірки. Невідомі поля відхиляються. Реєстри передаються явно, мережевого завантаження за URI немає.
+Імпортуйте `validateKnot`, `resolveKnot` і типи з `knot-engine/core`: ця точка входу не завантажує Vue, Three.js або DOM. Валідація повертає окремі `valid`, `complete`, `missingDependencies`, `uncheckedTypes`; показ вимагає повної перевірки. Невідомі поля відхиляються. Реєстри передаються явно, мережевого завантаження за URI немає.
 
-`representation-id` вибирає статичне представлення; без нього використовується перше представлення просторових кривих. Конструкція містить предмети й стани, а процедура посилається на представлення. Анімації немає. Для оновлення геометрії замініть об’єкт `Asset`.
+`representation-id` вибирає статичне представлення; без нього використовується перше представлення просторових кривих. Конструкція містить предмети й стани, а процедура посилається на представлення. Анімації немає. Для оновлення геометрії замініть об’єкт `Knot`.
 
-Методи: `resetView()`, `fitToView()`, `capture({width,height,view,transparent})`. PNG має типовий розмір 512×512 і максимум 2048×2048. Режими знімка — `current` і `model-preview`. Події: `ready({assetId,schemaVersion,warnings})`, `error`, `camera-change`. `initialCamera` приймає повний fit/fixed режим із перспективною або ортографічною проєкцією; FOV у радіанах.
+Методи: `resetView()`, `fitToView()`, `capture({width,height,view,transparent})`. PNG має типовий розмір 512×512 і максимум 2048×2048. Режими знімка — `current` і `model-preview`. Події: `ready({knotId,schemaVersion,warnings})`, `error`, `camera-change`. `initialCamera` приймає повний fit/fixed режим із перспективною або ортографічною проєкцією; FOV у радіанах.
 
-[Контракт даних](v1/specifications/asset.uk.md) · [Функції](v1/specifications/functions.uk.md) · [Компонент](v1/specifications/components.uk.md) · [JSON Schema](v1/schema/asset.schema.json) · [Приклади](v1/examples/assets)
+[Контракт даних](v1/specifications/knot.uk.md) · [Функції](v1/specifications/functions.uk.md) · [Компонент](v1/specifications/components.uk.md) · [JSON Schema](v1/schema/knot.schema.json) · [Приклади](v1/examples/knots)
 
 Оформлення використовує класи `.knot-engine-v1-viewer…` та наслідувані змінні `--knot-engine-v1-viewer-*`. Простір імен пакета містить мажорне покоління й назву компонента та дозволяє використовувати різні мажорні версії на одній сторінці; зворотна сумісність на початковій стадії не вимагається, включно з CSS. [Поточні змінні, типові значення та приклади](v1/specifications/components.uk.md#простір-імен-css-та-оформлення).
 
@@ -71,7 +71,7 @@ defineProps<{ asset: Asset }>()
 
 | Документ | Зміст |
 | --- | --- |
-| [`Asset` v1](v1/specifications/asset.uk.md) | Авторитетна специфікація доменних даних |
+| [`Knot` v1](v1/specifications/knot.uk.md) | Авторитетна специфікація доменних даних |
 | [Архітектура та міграція](design/architecture.uk.md) | Політики реалізації, сумісність і поточні обмеження |
 | [Специфікація `KnotViewer`](v1/specifications/components.uk.md) | API компонента та збережені критерії приймання |
 | [Демонстраційний застосунок](design/interactive-example-requirements.uk.md) | Поведінка демо та план приймання |

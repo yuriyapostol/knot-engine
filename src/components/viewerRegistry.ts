@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import type { RawAsset, SelectionResult } from '../core'
+import type { RawKnot, SelectionResult } from '../core'
 import { expandURI, selectRepresentation } from '../core'
 
 export interface ViewerCapabilities {
@@ -26,8 +26,8 @@ export function createViewerRegistry(entries: readonly ViewerRegistration[]): Vi
   return result
 }
 
-export function findViewer(asset: RawAsset, type: string, registry: ViewerRegistry): ViewerRegistration | undefined {
-  return registry.get(expandURI(type, asset.namespaces))
+export function findViewer(knot: RawKnot, type: string, registry: ViewerRegistry): ViewerRegistration | undefined {
+  return registry.get(expandURI(type, knot.namespaces))
 }
 
 /**
@@ -36,12 +36,12 @@ export function findViewer(asset: RawAsset, type: string, registry: ViewerRegist
  * A custom registry is authoritative: it replaces, rather than extends, built-ins.
  */
 export function selectViewerRepresentation(
-  asset: RawAsset,
+  knot: RawKnot,
   registry: ViewerRegistry,
   representationId?: string,
 ): SelectionResult {
   if (representationId !== undefined) {
-    const result = selectRepresentation(asset, { representationId })
+    const result = selectRepresentation(knot, { representationId })
     if (result.ok && !registry.has(result.typeUri)) return {
       ok: false,
       issues: [{ code: 'UNSUPPORTED_REPRESENTATION', message: `No viewer registered for ${result.typeUri}` }],
@@ -49,19 +49,19 @@ export function selectViewerRepresentation(
     return result
   }
   // Run core validation even for a missing/malformed representation collection.
-  if (!Array.isArray(asset?.representations) || asset.representations.length === 0) {
-    return selectRepresentation(asset)
+  if (!Array.isArray(knot?.representations) || knot.representations.length === 0) {
+    return selectRepresentation(knot)
   }
   let candidates: string[]
   try {
-    candidates = asset.representations.filter(rep =>
-      typeof rep.type === 'string' && registry.has(expandURI(rep.type, asset.namespaces)),
+    candidates = knot.representations.filter(rep =>
+      typeof rep.type === 'string' && registry.has(expandURI(rep.type, knot.namespaces)),
     ).map(rep => rep.id)
   } catch {
     // Let core return its own structured diagnostic for invalid namespaces.
-    return selectRepresentation(asset)
+    return selectRepresentation(knot)
   }
-  if (candidates.length === 1) return selectRepresentation(asset, { representationId: candidates[0] })
+  if (candidates.length === 1) return selectRepresentation(knot, { representationId: candidates[0] })
   if (candidates.length > 1) return {
     ok: false,
     issues: [{ code: 'AMBIGUOUS_REPRESENTATION', message: 'Specify representationId: multiple supported representations are available' }],

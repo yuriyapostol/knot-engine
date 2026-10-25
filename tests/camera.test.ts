@@ -1,8 +1,8 @@
 import { expect, it } from 'vitest'
 import * as THREE from 'three'
 import { prepareCamera, cameraView } from '../src/renderer/camera'
-import { resolveAsset, type Camera3D, type RawAsset } from '../src/core'
-import open from '../v1/examples/assets/open-rope.json'
+import { resolveKnot, type Camera3D, type RawKnot } from '../src/core'
+import open from '../v1/examples/knots/open-rope.json'
 const bounds=new THREE.Box3(new THREE.Vector3(-2,-1,-3),new THREE.Vector3(2,1,3))
 it('fits the entire bounding box for both projections in wide and narrow viewports',()=>{
   for(const aspect of [0.25,1,4])for(const projection of [{kind:'orthographic' as const},{kind:'perspective' as const,fovY:Math.PI/3}]) {
@@ -19,8 +19,8 @@ it('preserves fixed framing and radians through camera events',()=>{
   const {camera,target}=prepareCamera(view,bounds,2)
   expect(cameraView(camera,target)).toEqual(view)
 })
-it('uses only explicitly supplied application views, never asset view presets',()=>{
-  const a=structuredClone(open) as unknown as RawAsset
-  expect(resolveAsset(a).camera).toBeUndefined()
-  expect(resolveAsset(a,{view:{id:'app',name:'App',space:'space',camera:{mode:'fit',direction:[0,1,0],up:[0,0,1],projection:{kind:'perspective',fovY:1}}}}).camera).toMatchObject({direction:[0,1,0]})
+it('uses only explicitly supplied application views, never knot view presets',()=>{
+  const a=structuredClone(open) as unknown as RawKnot
+  expect(resolveKnot(a).camera).toBeUndefined()
+  expect(resolveKnot(a,{view:{id:'app',name:'App',space:'space',camera:{mode:'fit',direction:[0,1,0],up:[0,0,1],projection:{kind:'perspective',fovY:1}}}}).camera).toMatchObject({direction:[0,1,0]})
 })

@@ -21,7 +21,7 @@ The standard type uses `viewSpace: "plane"` and references the standalone [JSON 
 
 Size is `tiles.length`; every row has that length. No duplicated `size`, per-tile rotation, scale or coordinate-system fields are stored. Only the tile set above is supported. Its URI identifies the fixed convention defined here; it is not a new registry resource kind and never triggers network access.
 
-The `tileSet` value is type-specific data, not a generic resource reference. This profile requires the absolute URI, even if the enclosing asset declares namespaces. Compact forms are not accepted or silently rewritten. Representation `type` still follows ordinary `Asset` namespace expansion.
+The `tileSet` value is type-specific data, not a generic resource reference. This profile requires the absolute URI, even if the enclosing knot declares namespaces. Compact forms are not accepted or silently rewritten. Representation `type` still follows ordinary `Knot` namespace expansion.
 
 A 1×1 blank matrix is structurally a square matrix but is semantically invalid: at least one closed component is required. Blank border tiles are allowed and preserved; no trimming, padding, rotation or reflection occurs during validation, extraction or composition.
 
@@ -49,7 +49,7 @@ The mathematical model follows Lomonaco and Kauffman, [Quantum Knots and Mosaics
 
 ## Semantic validation
 
-A complete validator shall perform these checks in addition to the existing bounded JSON and asset validation:
+A complete validator shall perform these checks in addition to the existing bounded JSON and knot validation:
 
 1. Require exactly the fields above, the supported tile-set URI, a nonempty square matrix and integer codes in 0–10. Reject ragged/sparse rows, non-JSON values, fractions and unknown fields.
 2. For every horizontal neighbor pair, require E-port presence on the left to equal W-port presence on the right. For every vertical pair, require S-port presence above to equal N-port presence below. Two absent ports match.
@@ -59,11 +59,11 @@ A complete validator shall perform these checks in addition to the existing boun
 
 Occupied tile count is the number of nonzero cells. Diagram crossing count is the number of cells with code 9 or 10. Component count comes from tracing, not from counting crossings. These are derived values, not fields accepted in `data`. They are not minimum crossing number, mosaic number or tile number invariants, and validation does not prove the subject's knot type or equivalence to another representation.
 
-Traversal is iterative. `ASSET_LIMITS.mosaicCells` limits each document (or standalone diagram) to 65,536 aggregate cells before tracing, allowing squares up to 256×256. General JSON budgets also apply: 262,144 entries and depth 64. The mathematical contract itself imposes no maximum size.
+Traversal is iterative. `KNOT_LIMITS.mosaicCells` limits each document (or standalone diagram) to 65,536 aggregate cells before tracing, allowing squares up to 256×256. General JSON budgets also apply: 262,144 entries and depth 64. The mathematical contract itself imposes no maximum size.
 
-## Asset integration
+## Knot integration
 
-Use the ordinary `Representation` envelope: `id`, `type`, `data`, optional `target`, `views` and `defaultView`. An omitted target describes the asset subject. Explicit targets follow the existing scoped target rules; this profile supplies no mapping from traced components to construction objects.
+Use the ordinary `Representation` envelope: `id`, `type`, `data`, optional `target`, `views` and `defaultView`. An omitted target describes the knot subject. Explicit targets follow the existing scoped target rules; this profile supplies no mapping from traced components to construction objects.
 
 Views must have `space: "plane"` and `rotation: 0` for this viewer; nonzero rotation is rejected, not applied. `preferredView` is a 3D hint and is not accepted for this type. For plane camera coordinates, tile (row r, column c) occupies x in [c,c+1] and y in [n-r-1,n-r], with Y upward. Thus the unrotated mosaic fills [0,n] × [0,n], its center is [n/2,n/2], and a plane view with that center, height n and rotation 0 shows its full vertical extent. Aspect ratio and padding remain viewer concerns. Row indexing stays downward; this mapping is not a data reflection.
 
@@ -75,7 +75,7 @@ The type is semantically checked without `uncheckedTypes`; completeness still re
 
 ## Examples and acceptance cases
 
-The following is a representation fragment; see also the self-contained [mosaic-diagram.json](../examples/assets/mosaic-diagram.json) asset.
+The following is a representation fragment; see also the self-contained [mosaic-diagram.json](../examples/knots/mosaic-diagram.json) knot.
 
 ```json
 {
@@ -139,12 +139,12 @@ A rotation or reflection must remap tile codes as well as matrix positions. Swap
 
 ## Attribution of concrete data
 
-Optional `sources` and `contributions` belong to the `Representation` envelope, outside `data`. Shared source definitions and the global license belong to the Asset. Convention references in this specification explain the contract; representation sources identify where its concrete data came from. See the [shared metadata specification](sources.md).
+Optional `sources` and `contributions` belong to the `Representation` envelope, outside `data`. Shared source definitions and the global license belong to the Knot. Convention references in this specification explain the contract; representation sources identify where its concrete data came from. See the [shared metadata specification](sources.md).
 
 
 ### Explicit external view resources
 
-The mosaic viewer resolves a local view by ID, or a declared external view by absolute URI through an explicitly supplied `KnotResourceRegistry`. If `view` is omitted, `defaultView` is used. Missing, undeclared and conflicting resources are reported; no network requests are made. The shared headless `resolveRepresentationView` operation is available through `knot-engine/core`.
+The mosaic viewer resolves a local view by ID, or a declared external view by absolute URI through an explicitly supplied `ResourceRegistry`. If `view` is omitted, `defaultView` is used. Missing, undeclared and conflicting resources are reported; no network requests are made. The shared headless `resolveRepresentationView` operation is available through `knot-engine/core`.
 
 
 The SVG viewer pans using the actual square viewport scale under `preserveAspectRatio="xMidYMid meet"`, including non-square host containers. Pointer dragging changes only the viewer's local center; it never edits tile data.

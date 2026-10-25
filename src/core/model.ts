@@ -1,7 +1,7 @@
-import type { RawAsset, RawRepresentation, RawProcedure, RawStep, RawSubject, RawKnotResourceRegistry, ResourceEntry } from './asset'
+import type { RawKnot, RawRepresentation, RawProcedure, RawStep, RawSubject, RawResourceRegistry, ResourceEntry } from './knot'
 import { STANDARD_RESOURCES, expandURI } from './resources'
-import { validateAsset } from './validateAsset'
-import { selectAsset, composeAsset } from './assetParts'
+import { validateKnot } from './validateKnot'
+import { selectKnot, composeKnot } from './knotParts'
 
 export type RawLocalizedTexts = { language: string; value: string }[]
 export type PreparedResource = ResourceEntry['resource'] & { getName(locale?: string): string | undefined; getDescription(locale?: string): string | undefined }
@@ -16,9 +16,9 @@ export class LocalizedTexts extends Array<{ language: string; value: string }> {
     return this.getExact(language) ?? this.getExact(config.fallbackLocale) ?? this.getExact('en')
   }
 }
-const owner = new WeakMap<object, Asset>()
-const contexts = new WeakMap<Asset, Map<string, PreparedResource>>()
-const registries = new WeakMap<Asset, readonly RawKnotResourceRegistry[]>()
+const owner = new WeakMap<object, Knot>()
+const contexts = new WeakMap<Knot, Map<string, PreparedResource>>()
+const registries = new WeakMap<Knot, readonly RawResourceRegistry[]>()
 function texts(values?: RawLocalizedTexts): LocalizedTexts | undefined {
   if (!values) return undefined
   Object.setPrototypeOf(values, LocalizedTexts.prototype)
@@ -81,25 +81,25 @@ export class Procedure implements RawProcedure {
   getName(language?: string): string | undefined { return this.names?.get(language) }
   getDescription(language?: string): string | undefined { return this.descriptions?.get(language) }
 }
-export class Asset implements RawAsset {
-  schema!: 'Asset'
+export class Knot implements RawKnot {
+  schema!: 'Knot'
   schemaVersion!: 1
   id!: string
   subject!: Subject
   representations?: Representation[]
   procedures?: Procedure[]
-  namespaces?: RawAsset['namespaces']
-  catalogs?: RawAsset['catalogs']
-  representationTypes?: RawAsset['representationTypes']
-  objectTypes?: RawAsset['objectTypes']
-  static from(input: RawAsset | Asset, options: { registries?: readonly RawKnotResourceRegistry[] } = {}): Asset {
-    if (input instanceof Asset) return input
-    const result = validateAsset(input, options)
-    if (!result.valid) throw new Error('Invalid Asset: ' + result.issues.map(x => x.message).join('; '))
-    return prepareAsset(result.asset, options.registries)
+  namespaces?: RawKnot['namespaces']
+  catalogs?: RawKnot['catalogs']
+  representationTypes?: RawKnot['representationTypes']
+  objectTypes?: RawKnot['objectTypes']
+  static from(input: RawKnot | Knot, options: { registries?: readonly RawResourceRegistry[] } = {}): Knot {
+    if (input instanceof Knot) return input
+    return prepareKnot(input, options.registries)
   }
-  static compose(parts: readonly (RawAsset | Asset)[], options: { registries?: readonly RawKnotResourceRegistry[] } = {}): Asset {
-    return Asset.from(composeAsset(parts.map(x => x instanceof Asset ? x.toRaw() : x), options), options)
+  static validate(input: unknown, options: { registries?: readonly RawResourceRegistry[] } = {}) { return validateKnot(input, options) }
+  validate(options: { registries?: readonly RawResourceRegistry[] } = {}) { return validateKnot(this.toRaw(), { registries: options.registries ?? registries.get(this) }) }
+  static compose(parts: readonly (RawKnot | Knot)[], options: { registries?: readonly RawResourceRegistry[] } = {}): Knot {
+    return Knot.from(composeKnot(parts.map(x => x instanceof Knot ? x.toRaw() : x), options), options)
   }
   getRepresentation(id: string): Representation | undefined { return this.representations?.find(x => x.id === id) }
   getResource(id: string): PreparedResource | undefined {
@@ -123,27 +123,27 @@ export class Asset implements RawAsset {
     this.representations = Object.freeze((this.representations ?? []).filter(x => x.id !== id)) as unknown as Representation[]
     return true
   }
-  toRaw(): RawAsset { return JSON.parse(JSON.stringify(this)) as RawAsset }
-  clone(): Asset { return prepareAsset(this.toRaw(), registries.get(this)) }
-  select(selection: { representations?: string[]; procedures?: string[] }): Asset {
+  toRaw(): RawKnot { return JSON.parse(JSON.stringify(this)) as RawKnot }
+  clone(): Knot { return prepareKnot(this.toRaw(), registries.get(this)) }
+  select(selection: { representations?: string[]; procedures?: string[] }): Knot {
     const attached = registries.get(this) ?? []
-    return Asset.from(selectAsset(this.toRaw(), selection, { registries: attached }), { registries: attached })
+    return Knot.from(selectKnot(this.toRaw(), selection, { registries: attached }), { registries: attached })
   }
 }
-export function prepareAsset(raw: RawAsset, attached: readonly RawKnotResourceRegistry[] = []): Asset {
-  if (raw instanceof Asset) return raw
-  const asset = structuredClone(raw) as unknown as Asset
-  Object.setPrototypeOf(asset, Asset.prototype)
-  registries.set(asset, attached)
-  decorate(asset.subject)
-  Object.setPrototypeOf(asset.subject, Subject.prototype)
-  for (const representation of asset.representations ?? []) {
+export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry[] = []): Knot {
+  if (raw instanceof Knot) return raw
+  const knot = structuredClone(raw) as unknown as Knot
+  Object.setPrototypeOf(knot, Knot.prototype)
+  registries.set(knot, attached)
+  decorate(knot.subject)
+  Object.setPrototypeOf(knot.subject, Subject.prototype)
+  for (const representation of knot.representations ?? []) {
     decorate(representation)
     Object.setPrototypeOf(representation, Representation.prototype)
-    owner.set(representation, asset)
+    owner.set(representation, knot)
   }
-  if (asset.representations) asset.representations = Object.freeze(asset.representations) as unknown as Representation[]
-  for (const procedure of asset.procedures ?? []) {
+  if (knot.representations) knot.representations = Object.freeze(knot.representations) as unknown as Representation[]
+  for (const procedure of knot.procedures ?? []) {
     decorate(procedure)
     Object.setPrototypeOf(procedure, Procedure.prototype)
     for (const step of procedure.steps) {
@@ -162,13 +162,13 @@ export function prepareAsset(raw: RawAsset, attached: readonly RawKnotResourceRe
     }
   }
   for (const key of ['catalogs', 'representationTypes', 'objectTypes'] as const) {
-    for (const item of (asset[key] ?? []) as { id: string }[]) {
-      const id = item.id.startsWith('https://') || item.id.startsWith('http://') || item.id.startsWith('urn:') ? item.id : expandURI(item.id, asset.namespaces)
+    for (const item of (knot[key] ?? []) as { id: string }[]) {
+      const id = item.id.startsWith('https://') || item.id.startsWith('http://') || item.id.startsWith('urn:') ? item.id : expandURI(item.id, knot.namespaces)
       const defaults = index.get(id) as any
       const enhanced = { ...item, ...(defaults?.names && !('names' in item) ? { names: defaults.names } : {}), ...(defaults?.descriptions && !('descriptions' in item) ? { descriptions: defaults.descriptions } : {}) }
       index.set(id, resource(enhanced))
     }
   }
-  contexts.set(asset, index)
-  return asset
+  contexts.set(knot, index)
+  return knot
 }

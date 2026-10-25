@@ -82,12 +82,12 @@ try {
     await page.waitForFunction(() => window.__previewReady || window.__previewError)
     return page.evaluate(() => window.__previewError)
   }
-  const invalid = fixture('v1/examples/assets/invalid/dimension.json')
-  assert.match(await setInput({ asset: invalid }), /^INVALID_REPRESENTATION:/)
-  assert.equal(await page.evaluate(() => window.__webglContexts), 0, 'Malformed asset must fail before WebGL allocation')
+  const invalid = fixture('v1/examples/knots/invalid/dimension.json')
+  assert.match(await setInput({ knot: invalid }), /^INVALID_REPRESENTATION:/)
+  assert.equal(await page.evaluate(() => window.__webglContexts), 0, 'Malformed knot must fail before WebGL allocation')
 
   for (const model of ['overhand', 'twisted-loop']) {
-    assert.equal(await setInput({ asset: fixture(`v1/examples/assets/${model}.json`) }), undefined)
+    assert.equal(await setInput({ knot: fixture(`v1/examples/knots/${model}.json`) }), undefined)
     const capture = await page.evaluate(async () => {
       const blob = await window.__previewCapture(240, 180)
       const bitmap = await createImageBitmap(blob)
@@ -102,32 +102,32 @@ try {
     assert.ok(capture.size > 1000 && capture.colored > 100, `${model}: capture must contain rendered geometry`)
     console.log(`${model}: render and 240×180 PNG capture passed`)
   }
-  const orthographic = fixture('v1/examples/assets/open-rope.json')
+  const orthographic = fixture('v1/examples/knots/open-rope.json')
   orthographic.representations[0].views = [{ id: 'ortho', name: 'Orthographic', space: 'space', camera: { mode: 'fit', direction: [0,0,1], up: [0,1,0], projection: { kind: 'orthographic' } } }]
   orthographic.representations[0].defaultView = { id: 'ortho' }
-  assert.equal(await setInput({ asset: orthographic }), undefined)
+  assert.equal(await setInput({ knot: orthographic }), undefined)
   assert.ok(await page.evaluate(async () => (await window.__previewCapture(320,180)).size) > 1000)
-  const asset = fixture('v1/examples/assets/procedures.json')
-  assert.equal(await setInput({ asset, selection: { representationId: 'view-3d-rest' } }), undefined)
+  const knot = fixture('v1/examples/knots/procedures.json')
+  assert.equal(await setInput({ knot, selection: { representationId: 'view-3d-rest' } }), undefined)
   const capturePixels = () => page.evaluate(async () => {
     const blob = await window.__previewCapture(240, 180)
     return Array.from(new Uint8Array(await blob.arrayBuffer()))
   })
   const before = await capturePixels()
-  assert.equal(await setInput({ asset, selection: { representationId: 'view-3d-finish' } }), undefined)
+  assert.equal(await setInput({ knot, selection: { representationId: 'view-3d-finish' } }), undefined)
   const after = await capturePixels()
   assert.ok(before.length > 1000 && after.length > 1000)
   assert.notDeepEqual(before, after, 'Representation selection must change the captured geometry')
-  assert.match(await setInput({ asset, selection: { representationId: 'missing' } }), /^REPRESENTATION_NOT_FOUND:/)
+  assert.match(await setInput({ knot, selection: { representationId: 'missing' } }), /^REPRESENTATION_NOT_FOUND:/)
   assert.equal(await page.locator('.knot-engine-v1-viewer').getAttribute('data-state'), 'error')
-  assert.match(await setInput({ asset }), /^AMBIGUOUS_REPRESENTATION:/)
-  assert.equal(await setInput({ asset, selection: { representationId: 'view-3d-rest' } }), undefined)
+  assert.match(await setInput({ knot }), /^AMBIGUOUS_REPRESENTATION:/)
+  assert.equal(await setInput({ knot, selection: { representationId: 'view-3d-rest' } }), undefined)
   assert.deepEqual(failures, [])
-  console.log('Asset: render, representation replacement, PNG capture, invalid selection, and recovery passed')
+  console.log('Knot: render, representation replacement, PNG capture, invalid selection, and recovery passed')
   // Exercise the actual generic compositor in Chromium: SVG, export, failure, recovery, 3D.
-  const mosaic = fixture('v1/examples/assets/mosaic-diagram.json')
+  const mosaic = fixture('v1/examples/knots/mosaic-diagram.json')
   const webglBeforeMosaic = await page.evaluate(() => window.__webglContexts)
-  assert.equal(await setInput({ asset: mosaic }), undefined)
+  assert.equal(await setInput({ knot: mosaic }), undefined)
   assert.equal(await page.locator('.knot-engine-v1-viewer').getAttribute('data-state'), 'ready')
   assert.ok(await page.locator('svg.knot-engine-v1-mosaic path').count() > 0, 'Mosaic SVG must contain strands')
   assert.equal(await page.evaluate(() => window.__webglContexts), webglBeforeMosaic, 'Mosaic must not allocate WebGL')
@@ -138,11 +138,11 @@ try {
   assert.equal(svgExport.type, 'image/svg+xml')
   assert.match(svgExport.content, /<svg[^>]*>/)
   assert.match(svgExport.content, /<path\b/)
-  assert.match(await setInput({ asset: mosaic, selection: { representationId: 'missing' } }), /REPRESENTATION_NOT_FOUND/)
+  assert.match(await setInput({ knot: mosaic, selection: { representationId: 'missing' } }), /REPRESENTATION_NOT_FOUND/)
   assert.equal(await page.locator('.knot-engine-v1-viewer').getAttribute('data-state'), 'error')
-  assert.equal(await setInput({ asset: mosaic, selection: { representationId: 'mosaic' } }), undefined)
+  assert.equal(await setInput({ knot: mosaic, selection: { representationId: 'mosaic' } }), undefined)
   assert.ok(await page.locator('svg.knot-engine-v1-mosaic path').count() > 0)
-  assert.equal(await setInput({ asset: fixture('v1/examples/assets/open-rope.json') }), undefined)
+  assert.equal(await setInput({ knot: fixture('v1/examples/knots/open-rope.json') }), undefined)
   assert.ok(await page.locator('canvas.knot-engine-v1-viewer__canvas').count() > 0)
   assert.equal(await page.evaluate(async () => (await window.__previewCapture(240, 180)).type), 'image/png')
   assert.deepEqual(failures, [])
@@ -150,13 +150,13 @@ try {
   await page.setViewportSize({ width: 1280, height: 1000 })
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/?lang=uk`)
   await page.waitForSelector('.knot-engine-v1-viewer[data-state="ready"]')
-  await page.locator('.knot-engine-v1-demo__model-select select').selectOption('asset')
+  await page.locator('.knot-engine-v1-demo__model-select select').selectOption('knot')
   await page.waitForSelector('.knot-engine-v1-viewer[data-state="ready"]')
   await page.locator('.knot-engine-v1-demo__representation-select').selectOption('view-3d-finish')
   await page.waitForSelector('.knot-engine-v1-viewer[data-state="ready"]')
   assert.deepEqual(failures, [])
   const editor = page.locator('.knot-engine-v1-demo__editor textarea')
-  assert.ok(await editor.isVisible(), 'Asset must use the same visible JSON editor')
+  assert.ok(await editor.isVisible(), 'Knot must use the same visible JSON editor')
   assert.equal(JSON.parse(await editor.inputValue()).representations.length, 3)
   const waitForModel = async id => {
     // Filling the editor scrolls the narrow layout; hidden viewers intentionally pause rendering.
@@ -171,19 +171,19 @@ try {
       throw error
     }
   }
-  const edited = structuredClone(asset)
-  edited.id = 'edited-asset'
+  const edited = structuredClone(knot)
+  edited.id = 'edited-knot'
   edited.representations[2].data.curves[0].points[1][1] += 0.1
   await editor.fill(JSON.stringify(edited))
-  await waitForModel('edited-asset')
+  await waitForModel('edited-knot')
   assert.equal(await page.locator('.knot-engine-v1-demo__representation-select').inputValue(), 'view-3d-finish', 'Editing must preserve selected representation')
   assert.equal(await page.locator('.knot-engine-v1-demo__model-select select').inputValue(), 'custom')
   const invalidDraft = structuredClone(edited); invalidDraft.units = 'relative'
   await editor.fill(JSON.stringify(invalidDraft))
   await page.waitForSelector('.knot-engine-v1-demo__issue[role="alert"]')
-  assert.equal(await page.locator('.knot-engine-v1-viewer').getAttribute('aria-label'), 'edited-asset', 'Invalid edits must retain last valid model')
-  await editor.fill(JSON.stringify({ ...edited, id: 'recovered-asset' }))
-  await waitForModel('recovered-asset')
+  assert.equal(await page.locator('.knot-engine-v1-viewer').getAttribute('aria-label'), 'edited-knot', 'Invalid edits must retain last valid model')
+  await editor.fill(JSON.stringify({ ...edited, id: 'recovered-knot' }))
+  await waitForModel('recovered-knot')
   const saveJSON = async filename => {
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -194,20 +194,20 @@ try {
     for await (const chunk of stream) chunks.push(chunk)
     assert.deepEqual(JSON.parse(Buffer.concat(chunks).toString()), JSON.parse(await editor.inputValue()))
   }
-  await saveJSON('knot-asset.json')
-  const imported = fixture('v1/examples/assets/open-rope.json')
-  imported.id = 'imported-asset'
+  await saveJSON('knot-knot.json')
+  const imported = fixture('v1/examples/knots/open-rope.json')
+  imported.id = 'imported-knot'
   imported.representations[0].id = 'import-view'
   imported.representations.push({ ...structuredClone(imported.representations[0]), id: 'second-view' })
-  await page.locator('input[type="file"]').setInputFiles({ name: 'asset.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(imported)) })
-  await waitForModel('imported-asset')
+  await page.locator('input[type="file"]').setInputFiles({ name: 'knot.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(imported)) })
+  await waitForModel('imported-knot')
   assert.equal(await page.locator('.knot-engine-v1-demo__representation-select').inputValue(), 'import-view')
   await page.locator('.knot-engine-v1-demo__representation-select').selectOption('second-view')
   await page.waitForSelector('.knot-engine-v1-viewer[data-state="ready"]')
   await page.locator('.knot-engine-v1-demo__model-select select').selectOption('loop')
   await waitForModel('twisted-loop')
   assert.equal(await page.locator('.knot-engine-v1-demo__snapshot-select').count(), 0)
-  assert.equal(JSON.parse(await editor.inputValue()).schema, 'Asset')
+  assert.equal(JSON.parse(await editor.inputValue()).schema, 'Knot')
   assert.ok(JSON.parse(await editor.inputValue()).subject)
   assert.deepEqual(failures, [])
   assert.equal(await page.getByRole('button', { name: 'Експорт в PNG', exact: true }).count(), 1)
@@ -231,7 +231,7 @@ try {
   assert.ok(Math.abs(square.width - square.height) < 1, 'Viewer must remain square')
   assert.deepEqual(failures, [])
   console.log('Demo: current-image PNG export and square viewer passed')
-  console.log('Demo: asset JSON editing, validation recovery, representation preservation, representation selection, import and save passed')
+  console.log('Demo: knot JSON editing, validation recovery, representation preservation, representation selection, import and save passed')
 } finally {
   await browser?.close()
   await server.close()

@@ -1,5 +1,5 @@
-import type { DTCode } from './asset'
-import { issue, standalone, ASSET_LIMITS } from './validation'
+import type { DTCode } from './knot'
+import { issue, standalone, KNOT_LIMITS } from './validation'
 
 /** Upper bound in 32-bit row-intersection steps, used before topology analysis. */
 export const dtWork = (n: number) => n*n*Math.ceil(n/32)
@@ -16,7 +16,7 @@ function components(code: number[] | number[][]): number[][] {
 /** Build cyclic words without changing the caller's code or numbering. */
 function paragraph(code: number[] | number[][]): number[][] | undefined {
   const parts = components(code), flat = parts.flat(), n = flat.length
-  if (n > ASSET_LIMITS.dtCrossings || flat.some(e => Math.abs(e) > 2*n) || new Set(flat.map(Math.abs)).size !== n) return
+  if (n > KNOT_LIMITS.dtCrossings || flat.some(e => Math.abs(e) > 2*n) || new Set(flat.map(Math.abs)).size !== n) return
   const visits = new Array<number>(2*n)
   flat.forEach((e,i) => { visits[2*i] = i; visits[Math.abs(e)-1] = i })
   let offset = 0
@@ -47,7 +47,7 @@ function reduceParagraph(input: number[][]): number[][] {
 export function dtAnalysisWork(code: unknown): number {
   if (!Array.isArray(code)) return 0
   const parts = code.length && Array.isArray(code[0]) ? code : [code]
-  if (parts.length > ASSET_LIMITS.dtComponents || parts.some(p => !Array.isArray(p) || p.some(e => !Number.isInteger(e) || !e || e%2))) return 0
+  if (parts.length > KNOT_LIMITS.dtComponents || parts.some(p => !Array.isArray(p) || p.some(e => !Number.isInteger(e) || !e || e%2))) return 0
   const words = paragraph(code)
   return words ? reduceParagraph(words).reduce((sum,w) => sum+dtWork(w.length/2),0) : 0
 }
@@ -58,7 +58,7 @@ export function validateDTCode(value: unknown, _options: { strict?: boolean } = 
     const words = paragraph(data.code)
     if (!words) return [issue('code', 'Absolute DT entries must permute 2, 4, ..., 2n within the crossing limit')]
     const reduced = reduceParagraph(words)
-    if (reduced.reduce((sum,w) => sum+dtWork(w.length/2),0) > ASSET_LIMITS.dtWork) return [issue('code', 'DT analysis budget exceeded', 'LIMIT_EXCEEDED')]
+    if (reduced.reduce((sum,w) => sum+dtWork(w.length/2),0) > KNOT_LIMITS.dtWork) return [issue('code', 'DT analysis budget exceeded', 'LIMIT_EXCEEDED')]
     return reduced.every(realizableWord) ? [] : [issue('code', 'DT traversal is not planar-realizable')]
   })
   return result.valid ? { ...result, code: result.data, componentCount: components(result.data.code).length, crossingCount: components(result.data.code).reduce((sum,p) => sum+p.length,0) } : result

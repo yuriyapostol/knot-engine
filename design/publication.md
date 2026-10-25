@@ -28,13 +28,13 @@ The site directory contains common navigation, localization, rendering and the i
 
 ## Two language editions
 
-English uses name.md and Ukrainian name.uk.md, with identical topic keys. Shared JSON schemas and examples are not duplicated. The site publishes English pages at the canonical topic route and Ukrainian pages with a .uk.html suffix; for example /v1/specifications/knot-asset.html and /v1/specifications/knot-asset.uk.html. Links retain the .html extension. Site and generation home pages use index.uk.html for Ukrainian and index.html for English. Language switches preserve the topic, and navigation, status labels and example controls are localized. HTML lang matches the selected edition. Configuration in site/locales.mjs currently enables only en and uk. A missing counterpart fails the build instead of silently presenting another language as a translation.
+English uses name.md and Ukrainian name.uk.md, with identical topic keys. Shared JSON schemas and examples are not duplicated. The site publishes English pages at the canonical topic route and Ukrainian pages with a .uk.html suffix; for example /v1/specifications/knot-knot.html and /v1/specifications/knot-knot.uk.html. Links retain the .html extension. Site and generation home pages use index.uk.html for Ukrainian and index.html for English. Language switches preserve the topic, and navigation, status labels and example controls are localized. HTML lang matches the selected edition. Configuration in site/locales.mjs currently enables only en and uk. A missing counterpart fails the build instead of silently presenting another language as a translation.
 
 Design materials have the same two-language coverage at /design/architecture.html and /design/architecture.uk.html, for example. They are working material outside the npm package, not versioned runtime contracts. Cross-generation or design links in release snapshots point back to the corresponding site-level pages; the snapshot's own content remains local.
 
 ## One release and stable identities
 
-Package, documentation, specifications, schemas and available data form one release with the package version. v1 includes pre-1.0 packages and later 1.x. Before stabilization, incompatible changes are allowed without bumping the current numbers. `KnotModelV1` support has been removed; the current package uses `Asset` exclusively.
+Package, documentation, specifications, schemas and available data form one release with the package version. v1 includes pre-1.0 packages and later 1.x. Before stabilization, incompatible changes are allowed without bumping the current numbers. `KnotModelV1` support has been removed; the current package uses `Knot` exclusively.
 
 /v1/ is the current first-generation material. /releases/<package-version>/ is an explicitly created immutable snapshot of that generation. Other vN directories are published concurrently; no independent specification-release or data-release numbering is introduced. Current documentation has a visible development label; no /next/ is needed.
 

@@ -1,14 +1,14 @@
 # KnotViewer
 
-Vue 3 компонент для одного статичного просторового представлення [`Asset`](asset.uk.md). Для оновлення геометрії замініть об’єкт `Asset`; глибока зміна на місці не підтримується. Валідація й вибір завершуються до виділення WebGL. Об’єкт `Asset` лише із сітковою діаграмою є допустимим, але не підтримується цим компонентом.
+Vue 3 компонент для одного статичного просторового представлення [`Knot`](knot.uk.md). Для оновлення геометрії замініть об’єкт `Knot`; глибока зміна на місці не підтримується. Валідація й вибір завершуються до виділення WebGL. Об’єкт `Knot` лише із сітковою діаграмою є допустимим, але не підтримується цим компонентом.
 
 | Властивість компонента | Значення |
 | --- | --- |
-| `asset?: Asset \| null` | Вхід; null/відсутність показує порожній стан |
+| `knot?: Knot \| null` | Вхід; null/відсутність показує порожній стан |
 | `label: string` | Обов’язковий доступний підпис |
 | `representationId?: string` | Вибране представлення; типово перше представлення просторових кривих |
 | `view?: Reference \| ViewDefinition` | Вибір ракурсу зі списку або явний повний ракурс |
-| `registries?: KnotResourceRegistry[]` | Явні визначення зовнішніх ресурсів |
+| `registries?: ResourceRegistry[]` | Явні визначення зовнішніх ресурсів |
 | `initialCamera?: Camera3D` | Перевизначення камери застосунком |
 | `description?`, `poster?` | Доступний опис і URL резервного зображення |
 | `locale?: 'uk' \| 'en'`, `messages?` | Мова UI (типово uk) і перевизначення повідомлень |
@@ -16,7 +16,7 @@ Vue 3 компонент для одного статичного простор
 | `quality?: 'low' \| 'medium' \| 'high'` | Типово medium; бюджет трикутників може зменшити якість |
 | `active?`, `interactive?`, `showControls?` | Булеві перемикачі, типово всі true |
 
-Події: `ready({assetId?,schemaVersion:1,warnings})`, `error({code,message,issues?,recoverable})`, `camera-change(CameraView)`. `CameraView` — повний опис камери у фіксованому режимі: `position`, `target`, `up` та `projection`; перспективний FOV у радіанах. Коди помилок: `INVALID_MODEL`, `UNSUPPORTED_SCHEMA`, `LIMIT_EXCEEDED`, `WEBGL_UNAVAILABLE`, `CONTEXT_LOST`, `RENDER_FAILED`, `CAPTURE_FAILED`.
+Події: `ready({knotId?,schemaVersion:1,warnings})`, `error({code,message,issues?,recoverable})`, `camera-change(CameraView)`. `CameraView` — повний опис камери у фіксованому режимі: `position`, `target`, `up` та `projection`; перспективний FOV у радіанах. Коди помилок: `INVALID_MODEL`, `UNSUPPORTED_SCHEMA`, `LIMIT_EXCEEDED`, `WEBGL_UNAVAILABLE`, `CONTEXT_LOST`, `RENDER_FAILED`, `CAPTURE_FAILED`.
 
 Методи: `resetView()`, `fitToView()`, `capture(options?): Promise<Blob>`. Параметри знімка: `width`, `height`, `format:'image/png'`, `view:'current'|'model-preview'`, `transparent`. Типовий розмір 512×512; розміри — цілі числа в 1..2048. Знімок поточного ракурсу (`current`) зберігає поточний вид, коригуючи перспективний FOV для вужчого результату. Знімок попереднього перегляду (`model-preview`) незалежно готує авторський ракурс під пропорції результату. Знімок не змінює камеру на екрані.
 
@@ -57,8 +57,8 @@ Vue 3 компонент для одного статичного простор
 ```vue
 <template>
   <section class="knot-gallery">
-    <KnotViewer :asset="asset" label="Rope" />
-    <KnotViewer :asset="otherAsset" label="Other rope"
+    <KnotViewer :knot="knot" label="Rope" />
+    <KnotViewer :knot="otherKnot" label="Other rope"
       style="--knot-engine-v1-viewer-background: #ffffff" />
   </section>
 </template>

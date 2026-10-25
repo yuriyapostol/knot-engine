@@ -6,8 +6,8 @@ This is the first contract generation, including package versions before 1.0. Th
 
 - [Start using the package](guide/getting-started.md).
 - [Understand the data and resources](guide/concepts.md).
-- [Read the implemented `Asset` contract](specifications/asset.md).
-- [Explore proposed changes](../design/knot-asset-draft.md).
+- [Read the implemented `Knot` contract](specifications/knot.md).
+- [Explore proposed changes](../design/knot-knot-draft.md).
 
 ## Try it
 

@@ -1,0 +1,41 @@
+{
+  "schema": "Knot",
+  "schemaVersion": 1,
+  "namespaces": {
+    "knot-engine": "https://yuriyapostol.github.io/knot-engine/v1/"
+  },
+  "id": "dt-trefoil",
+  "subject": {
+    "id": "dt-trefoil-subject"
+  },
+  "representationTypes": [
+    {
+      "id": "knot-engine:representation-types/dt-code",
+      "name": "dt-code",
+      "description": "Signed even DT code for knot and link diagrams, generation 1",
+      "dataSchema": {
+        "ref": "knot-engine:schema/dt-code.schema.json"
+      },
+      "specification": "knot-engine:specifications/dt-code.html",
+      "viewSpace": "none"
+    }
+  ],
+  "representations": [
+    {
+      "id": "dt",
+      "type": "knot-engine:representation-types/dt-code",
+      "data": {
+        "convention": "knot-engine:conventions/dt-signed-even",
+        "code": [4, 6, 2]
+      },
+      "sources": [
+        {
+          "title": "Knot Atlas: DT Codes",
+          "url": "https://katlas.org/wiki/DT_(Dowker-Thistlethwaite)_Codes",
+          "locator": "PD[DTCode[4, 6, 2]] example",
+          "note": "Code preserved; no chirality or independent identity claim."
+        }
+      ]
+    }
+  ]
+}

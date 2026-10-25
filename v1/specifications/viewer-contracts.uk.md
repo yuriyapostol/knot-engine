@@ -4,29 +4,29 @@
 
 ## Вхід і вибір
 
-Усі компоненти отримують `asset: Asset` (повний або допустимий частковий), `representationId?: string` та окремі `settings`. Наявність схеми, просторів імен, ресурсів, побудов, процедур і станів перевіряється за потребами вибраного представлення. `core` приймає той самий контейнер і не залежить від Vue.
+Усі компоненти отримують `knot: Knot` (повний або допустимий частковий), `representationId?: string` та окремі `settings`. Наявність схеми, просторів імен, ресурсів, побудов, процедур і станів перевіряється за потребами вибраного представлення. `core` приймає той самий контейнер і не залежить від Vue.
 
 Пропоновані операції `core`:
 
 ```ts
 type RepresentationQuery = { representationId?: string; type?: string }
 type SelectionResult =
-  | { ok: true; asset: Asset; representation: Representation; typeUri: string }
+  | { ok: true; knot: Knot; representation: Representation; typeUri: string }
   | { ok: false; issues: SelectionIssue[] }
 type SelectionIssue = {
-  code: 'INVALID_ASSET' | 'REPRESENTATION_NOT_FOUND' | 'AMBIGUOUS_REPRESENTATION'
+  code: 'INVALID_KNOT' | 'REPRESENTATION_NOT_FOUND' | 'AMBIGUOUS_REPRESENTATION'
       | 'UNSUPPORTED_REPRESENTATION' | 'MISSING_DEPENDENCY' | 'INVALID_REPRESENTATION'
   message: string
   path?: string
 }
-function selectRepresentation(asset: Asset, query?: RepresentationQuery, options?: SelectionOptions): SelectionResult
+function selectRepresentation(knot: Knot, query?: RepresentationQuery, options?: SelectionOptions): SelectionResult
 ```
 
-Функція повертає дані, не створює UI, не мутує аргументи та не завантажує ресурси. Тип у запиті порівнюється за розгорнутим URI. Явний ID має збігатися з потрібним типом; відсутність збігів і кілька збігів діагностуються окремо. Універсальний компонент без ID може вибрати представлення лише за однозначним правилом; прихований вибір першого за порядком заборонений. Для часткового активу перевіряється мінімально достатній замкнений набір залежностей. Кореневий контейнер повинен відповідати структурі `Asset` v1; необов'язкові секції можуть бути відсутні. За замовчуванням перевіряються вибране представлення та потрібний йому контекст, а не всі представлення й процедури. `scope: 'all'` вимагає перевірки всього документа. Відсутні залежності вибраного представлення залишаються помилкою.
+Функція повертає дані, не створює UI, не мутує аргументи та не завантажує ресурси. Тип у запиті порівнюється за розгорнутим URI. Явний ID має збігатися з потрібним типом; відсутність збігів і кілька збігів діагностуються окремо. Універсальний компонент без ID може вибрати представлення лише за однозначним правилом; прихований вибір першого за порядком заборонений. Для часткового активу перевіряється мінімально достатній замкнений набір залежностей. Кореневий контейнер повинен відповідати структурі `Knot` v1; необов'язкові секції можуть бути відсутні. За замовчуванням перевіряються вибране представлення та потрібний йому контекст, а не всі представлення й процедури. `scope: 'all'` вимагає перевірки всього документа. Відсутні залежності вибраного представлення залишаються помилкою.
 
 ## Контракт UI
 
-`KnotViewer` визначає компонент за `typeUri`; спеціалізовані переглядачі викликають `selectRepresentation` із фіксованим типом. Спільні стани: `empty | initializing | ready | error`; події: `ready`, `error`, `view-change`. Спільні методи: `resetView()`, `fitToView()`, `capture(options?)`. `camera-change` належить 3D. Події не змінюють `asset`.
+`KnotViewer` визначає компонент за `typeUri`; спеціалізовані переглядачі викликають `selectRepresentation` із фіксованим типом. Спільні стани: `empty | initializing | ready | error`; події: `ready`, `error`, `view-change`. Спільні методи: `resetView()`, `fitToView()`, `capture(options?)`. `camera-change` належить 3D. Події не змінюють `knot`.
 
 ```ts
 type ViewerRegistration = {
@@ -45,7 +45,7 @@ type ViewerRegistry = ReadonlyMap<string, ViewerRegistration>
 
 ## Налаштування й міграція
 
-Налаштування переглядача винесено за межі `Asset`. Застосунок передає `view`, необов'язкові локальні ракурси `views`, `initialCamera` для 3D та параметри рендерингу. Поля представлення `views`, `defaultView`, `preferredView` видалено без шару сумісності.
+Налаштування переглядача винесено за межі `Knot`. Застосунок передає `view`, необов'язкові локальні ракурси `views`, `initialCamera` для 3D та параметри рендерингу. Поля представлення `views`, `defaultView`, `preferredView` видалено без шару сумісності.
 
 ## Перевірки
 

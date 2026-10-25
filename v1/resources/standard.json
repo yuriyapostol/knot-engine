@@ -1,5 +1,5 @@
 {
-  "schema": "KnotResourceRegistry",
+  "schema": "ResourceRegistry",
   "schemaVersion": 1,
   "namespaces": {
     "knot-engine": "https://yuriyapostol.github.io/knot-engine/v1/"
@@ -14,7 +14,7 @@
         "dataSchema": {
           "ref": "knot-engine:schema/spatial-curve.schema.json"
         },
-        "specification": "knot-engine:specifications/asset.html",
+        "specification": "knot-engine:specifications/knot.html",
         "viewSpace": "space",
         "names": [
           {
@@ -43,7 +43,7 @@
         "dataSchema": {
           "ref": "knot-engine:schema/rope-object.schema.json"
         },
-        "specification": "knot-engine:specifications/asset.html",
+        "specification": "knot-engine:specifications/knot.html",
         "names": [
           {
             "language": "en",
@@ -71,7 +71,7 @@
         "dataSchema": {
           "ref": "knot-engine:schema/equipment-object.schema.json"
         },
-        "specification": "knot-engine:specifications/asset.html",
+        "specification": "knot-engine:specifications/knot.html",
         "names": [
           {
             "language": "en",
@@ -99,7 +99,7 @@
         "dataSchema": {
           "ref": "knot-engine:schema/grid-diagram.schema.json"
         },
-        "specification": "knot-engine:specifications/asset.html",
+        "specification": "knot-engine:specifications/knot.html",
         "viewSpace": "plane",
         "names": [
           {
@@ -128,7 +128,7 @@
         "dataSchema": {
           "ref": "knot-engine:schema/equipment-object.schema.json"
         },
-        "specification": "knot-engine:specifications/asset.html",
+        "specification": "knot-engine:specifications/knot.html",
         "names": [
           {
             "language": "en",

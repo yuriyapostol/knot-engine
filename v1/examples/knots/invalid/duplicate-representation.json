@@ -1,0 +1,146 @@
+{
+  "schema": "Knot",
+  "schemaVersion": 1,
+  "namespaces": {
+    "knot-engine": "https://yuriyapostol.github.io/knot-engine/v1/"
+  },
+  "id": "open-rope",
+  "subject": {
+    "id": "open-rope"
+  },
+  "representations": [
+    {
+      "id": "view-3d-rest",
+      "type": "knot-engine:representation-types/spatial-curve",
+      "target": {
+        "kind": "state",
+        "construction": {
+          "id": "setup"
+        },
+        "id": "view-3d-rest"
+      },
+      "data": {
+        "coordinateSystem": {
+          "handedness": "right",
+          "upAxis": "y",
+          "scale": {
+            "kind": "physical",
+            "metersPerUnit": 1
+          }
+        },
+        "curves": [
+          {
+            "id": "rope-1",
+            "object": "rope-1",
+            "closed": false,
+            "interpolation": {
+              "type": "catmull-rom",
+              "parameterization": "uniform",
+              "tension": 0.5
+            },
+            "points": [
+              [0, 0, 0],
+              [0.4, 0.3, 0.1],
+              [0.8, 0, 0]
+            ]
+          }
+        ]
+      },
+      "preferredView": {
+        "direction": [0, 0, 1],
+        "up": [0, 1, 0]
+      }
+    },
+    {
+      "id": "view-3d-rest",
+      "type": "knot-engine:representation-types/spatial-curve",
+      "target": {
+        "kind": "state",
+        "construction": {
+          "id": "setup"
+        },
+        "id": "view-3d-rest"
+      },
+      "data": {
+        "coordinateSystem": {
+          "handedness": "right",
+          "upAxis": "y",
+          "scale": {
+            "kind": "physical",
+            "metersPerUnit": 1
+          }
+        },
+        "curves": [
+          {
+            "id": "rope-1",
+            "object": "rope-1",
+            "closed": false,
+            "interpolation": {
+              "type": "catmull-rom",
+              "parameterization": "uniform",
+              "tension": 0.5
+            },
+            "points": [
+              [0, 0, 0],
+              [0.4, 0.3, 0.1],
+              [0.8, 0, 0]
+            ]
+          }
+        ]
+      },
+      "preferredView": {
+        "direction": [0, 0, 1],
+        "up": [0, 1, 0]
+      }
+    }
+  ],
+  "constructions": [
+    {
+      "id": "setup",
+      "objects": [
+        {
+          "id": "rope-1",
+          "type": "knot-engine:object-types/rope",
+          "topology": "open",
+          "ends": [
+            {
+              "id": "a"
+            },
+            {
+              "id": "b"
+            }
+          ],
+          "diameter": 0.01
+        }
+      ],
+      "states": [
+        {
+          "id": "view-3d-rest"
+        }
+      ]
+    }
+  ],
+  "objectTypes": [
+    {
+      "id": "knot-engine:object-types/rope",
+      "name": "rope",
+      "description": "rope contract, generation 1",
+      "dataSchema": {
+        "ref": "knot-engine:schema/rope-object.schema.json"
+      },
+      "specification": "knot-engine:specifications/knot-knot.html"
+    }
+  ],
+  "representationTypes": [
+    {
+      "id": "knot-engine:representation-types/spatial-curve",
+      "name": "spatial-curve",
+      "description": "spatial-curve contract, generation 1",
+      "dataSchema": {
+        "ref": "knot-engine:schema/spatial-curve.schema.json"
+      },
+      "specification": "knot-engine:specifications/knot-knot.html",
+      "viewSpace": "space"
+    }
+  ]
+}

@@ -19,15 +19,15 @@ After installing the package from a local tarball or a published version, import
 <script setup lang="ts">
 import { KnotViewer } from 'knot-engine'
 import 'knot-engine/styles.css'
-import asset from './open-rope.json'
+import knot from './open-rope.json'
 </script>
 
 <template>
-  <KnotViewer :asset="asset" locale="en" label="Rope" />
+  <KnotViewer :knot="knot" locale="en" label="Rope" />
 </template>
 ```
 
-Use the [open-rope asset](../examples/assets/open-rope.json) as `open-rope.json`. Read the [component contract](../specifications/components.md) for selection parameters, events and capture methods. The package uses only the current `Asset` contract. Select a static representation with `representation-id`.
+Use the [open-rope knot](../examples/knots/open-rope.json) as `open-rope.json`. Read the [component contract](../specifications/components.md) for selection parameters, events and capture methods. The package uses only the current `Knot` contract. Select a static representation with `representation-id`.
 
 ## Edit the data
 

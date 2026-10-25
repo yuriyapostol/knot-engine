@@ -1,4 +1,4 @@
-import type { PDCode } from './asset'
+import type { PDCode } from './knot'
 import { issue, standalone } from './validation'
 
 /** Validate the specified spherical rotation system, not merely graph planarity. */
