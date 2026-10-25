@@ -3,7 +3,7 @@
 The serialized document is `RawAsset` (`schema: "Asset"`); the primary runtime object is `Asset`. Other runtime entities include `Representation`, `Procedure`, `Step`, and `Subject`. The serialized variants use the `Raw` prefix. JSON schemas describe only raw data.
 
 ```ts
-import { Asset, configureLocalization, STANDARD_RESOURCES } from '@yuriyapostol/knot-engine/core'
+import { Asset, configureLocalization, STANDARD_RESOURCES } from 'knot-engine/core'
 configureLocalization({ locale: 'uk', fallbackLocale: 'en' })
 const asset = Asset.from(raw, { registries: [STANDARD_RESOURCES] })
 const rep = asset.getRepresentation('view-3d')

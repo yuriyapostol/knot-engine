@@ -3,7 +3,7 @@
 Серіалізований документ має тип `RawAsset` (`schema: "Asset"`), а основна модель під час виконання — `Asset`. Підготовлені сутності: `Representation`, `Procedure`, `Step`, `Subject`. Для серіалізованих варіантів використовується префікс `Raw`. JSON Schema описує тільки сирі дані.
 
 ```ts
-import { Asset, configureLocalization, STANDARD_RESOURCES } from '@yuriyapostol/knot-engine/core'
+import { Asset, configureLocalization, STANDARD_RESOURCES } from 'knot-engine/core'
 configureLocalization({ locale: 'uk', fallbackLocale: 'en' })
 const asset = Asset.from(raw, { registries: [STANDARD_RESOURCES] })
 const rep = asset.getRepresentation('view-3d')
