@@ -72,7 +72,7 @@ Implementation limits: up to 256 source definitions per root, 256 source uses pe
 
 ## Contract rationale and examples
 
-The [Knot design](../../design/knot-knot-draft.md) already separates source collections from catalogs and places source references on representations. This implementation follows that design rather than adding an extra wrapper. Flat contributions cover creation and editing without an identity graph. A global license matches the intended publication unit; source licenses remain separate attribution to external material.
+The [Knot design](../../design/knot-draft.md) already separates source collections from catalogs and places source references on representations. This implementation follows that design rather than adding an extra wrapper. Flat contributions cover creation and editing without an identity graph. A global license matches the intended publication unit; source licenses remain separate attribution to external material.
 
 These are project decisions, not claims that external knot databases expose the same metadata shape. Numeric conventions and dataset examples remain documented in the corresponding representation specifications. Documentation should explain consequential contract choices, cite relevant definitions/implementations, distinguish adopted conventions from local decisions and include checked examples. Absence of an external source must not be disguised as external standardization.
 
