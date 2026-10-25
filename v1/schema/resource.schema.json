@@ -7,7 +7,7 @@
       "type": "object",
       "properties": {
         "schema": {
-          "const": "KnotResourceDocument"
+          "const": "ResourceDocument"
         },
         "schemaVersion": {
           "const": 1
@@ -212,12 +212,44 @@
           },
           "required": [],
           "additionalProperties": false
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
         }
       },
       "required": [
         "id",
         "name",
         "description"
+      ],
+      "additionalProperties": false
+    },
+    "name": {
+      "type": "object",
+      "properties": {
+        "language": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "language",
+        "value"
       ],
       "additionalProperties": false
     },
@@ -275,6 +307,20 @@
             "plane",
             "space"
           ]
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
         }
       },
       "required": [
@@ -333,6 +379,20 @@
         "specification": {
           "type": "string",
           "minLength": 1
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
         }
       },
       "required": [
@@ -366,6 +426,20 @@
             },
             "camera": {
               "$ref": "#/$defs/camera3"
+            },
+            "names": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/name"
+              },
+              "maxItems": 128
+            },
+            "descriptions": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/name"
+              },
+              "maxItems": 128
             }
           },
           "required": [
@@ -419,6 +493,20 @@
                 "height"
               ],
               "additionalProperties": false
+            },
+            "names": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/name"
+              },
+              "maxItems": 128
+            },
+            "descriptions": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/name"
+              },
+              "maxItems": 128
             }
           },
           "required": [
@@ -619,6 +707,20 @@
           },
           "minItems": 0,
           "maxItems": 256
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
         }
       },
       "required": [
