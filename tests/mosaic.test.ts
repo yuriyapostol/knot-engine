@@ -1,11 +1,11 @@
 import { expect, it } from 'vitest'
 import Ajv2020 from 'ajv/dist/2020.js'
 import schema from '../v1/schema/mosaic-diagram.schema.json'
-import { validateMosaicDiagram, LOMONACO_KAUFFMAN_11 as tileSet, MOSAIC_DIAGRAM, STANDARD_RESOURCES, validateKnotAsset, validateRepresentationDocument, selectKnotAsset, composeKnotAsset } from '../src/core'
+import { validateMosaicDiagram, LOMONACO_KAUFFMAN_11 as tileSet, MOSAIC_DIAGRAM, STANDARD_RESOURCES, validateAsset, validateRepresentationDocument, selectAsset, composeAsset } from '../src/core'
 const loop = [[2,1],[3,4]]
 const source = [[0,2,1,0],[2,9,10,1],[3,10,8,4],[0,3,4,0]]
 const data = (tiles: number[][]) => ({ tileSet, tiles })
-const asset = {schema:'KnotAsset',schemaVersion:1,id:'mosaic',subject:{id:'s'},representations:[{id:'m',type:MOSAIC_DIAGRAM,data:data(source)}]}
+const asset = {schema:'RawAsset',schemaVersion:1,id:'mosaic',subject:{id:'s'},representations:[{id:'m',type:MOSAIC_DIAGRAM,data:data(source)}]}
 it('traces loops, separate components and crossing strands', () => {
   expect(validateMosaicDiagram(data(loop))).toMatchObject({valid:true,componentCount:1,occupiedTileCount:4,crossingCount:0})
   expect(validateMosaicDiagram(data([[2,1,2,1],[3,4,3,4],[0,0,0,0],[0,0,0,0]]))).toMatchObject({valid:true,componentCount:2})
@@ -28,15 +28,15 @@ it('bounds cells before tracing', () => {
 })
 it('integrates completeness, compact type names and standalone documents', () => {
   const options={registries:[STANDARD_RESOURCES]}
-  expect(validateKnotAsset(asset,options)).toMatchObject({valid:true,complete:true,uncheckedTypes:[]})
-  expect(validateKnotAsset(asset)).toMatchObject({valid:true,complete:false,uncheckedTypes:[]})
-  expect(validateKnotAsset({...asset,namespaces:{k:'https://yuriyapostol.github.io/knot-engine/v1/representation-types/'},representations:[{...asset.representations[0],type:'k:mosaic-diagram'}]},options)).toMatchObject({valid:true,complete:true})
+  expect(validateAsset(asset,options)).toMatchObject({valid:true,complete:true,uncheckedTypes:[]})
+  expect(validateAsset(asset)).toMatchObject({valid:true,complete:false,uncheckedTypes:[]})
+  expect(validateAsset({...asset,namespaces:{k:'https://yuriyapostol.github.io/knot-engine/v1/representation-types/'},representations:[{...asset.representations[0],type:'k:mosaic-diagram'}]},options)).toMatchObject({valid:true,complete:true})
   const rep={...asset.representations[0]}
   expect(validateRepresentationDocument({schema:'KnotRepresentationDocument',schemaVersion:1,representation:rep},options)).toMatchObject({valid:true,complete:true})
-  expect(validateKnotAsset({...asset,representations:[{...rep,preferredView:{direction:[0,0,1],up:[0,1,0]}}]},options).valid).toBe(false)
-  const part=selectKnotAsset(asset,{representations:['m']},options)
-  expect(validateKnotAsset(part)).toMatchObject({valid:true,complete:true})
-  expect(JSON.parse(JSON.stringify(composeKnotAsset([part,part]))).representations[0].data).toEqual(data(source))
+  expect(validateAsset({...asset,representations:[{...rep,preferredView:{direction:[0,0,1],up:[0,1,0]}}]},options).valid).toBe(false)
+  const part=selectAsset(asset,{representations:['m']},options)
+  expect(validateAsset(part)).toMatchObject({valid:true,complete:true})
+  expect(JSON.parse(JSON.stringify(composeAsset([part,part]))).representations[0].data).toEqual(data(source))
 })
 it('preserves both disjoint-arc tiles under reflection and enforces aggregate budget', () => {
   const joined=[[2,1,0],[3,7,1],[0,3,4]]
@@ -44,5 +44,5 @@ it('preserves both disjoint-arc tiles under reflection and enforces aggregate bu
   expect(validateMosaicDiagram(data(joined.map(row=>[...row].reverse().map(t=>mirror[t]))))).toMatchObject({valid:true,componentCount:1,crossingCount:0})
   const large=Array.from({length:182},()=>Array(182).fill(0));large[0][0]=2;large[0][1]=1;large[1][0]=3;large[1][1]=4
   expect(validateMosaicDiagram(data(large)).valid).toBe(true)
-  expect(validateKnotAsset({...asset,representations:['a','b'].map(id=>({id,type:MOSAIC_DIAGRAM,data:data(large)}))},{registries:[STANDARD_RESOURCES]})).toMatchObject({valid:false,issues:[{code:'LIMIT_EXCEEDED'}]})
+  expect(validateAsset({...asset,representations:['a','b'].map(id=>({id,type:MOSAIC_DIAGRAM,data:data(large)}))},{registries:[STANDARD_RESOURCES]})).toMatchObject({valid:false,issues:[{code:'LIMIT_EXCEEDED'}]})
 })

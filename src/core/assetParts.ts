@@ -1,15 +1,15 @@
-import { type KnotAsset, type Construction, type Reference } from './asset'
-import { validateKnotAsset, normalizeAsset, indexAsset, constructionFor, type ValidationOptions } from './validateAsset'
+import { type RawAsset, type Construction, type Reference } from './asset'
+import { validateAsset, normalizeAsset, indexAsset, constructionFor, type ValidationOptions } from './validateAsset'
 import { canonical } from './validation'
 import { ViewerError } from './errors'
-function checked(value: unknown, options: ValidationOptions): KnotAsset {
-  const result = validateKnotAsset(value, options)
-  if(!result.valid) throw new ViewerError('INVALID_MODEL','Invalid KnotAsset',result.issues,false)
+function checked(value: unknown, options: ValidationOptions): RawAsset {
+  const result = validateAsset(value, options)
+  if(!result.valid) throw new ViewerError('INVALID_MODEL','Invalid RawAsset',result.issues,false)
   if(!result.complete) throw new ViewerError('UNSUPPORTED_SCHEMA','Operation requires resolved dependencies and supported semantics',undefined,false)
   return normalizeAsset(result.asset)
 }
 /** Extracts a self-contained fragment; only explicitly selected procedures and representations. */
-export function selectKnotAsset(value: unknown, selection: { representations?: string[]; procedures?: string[] }, options: ValidationOptions = {}): KnotAsset {
+export function selectAsset(value: unknown, selection: { representations?: string[]; procedures?: string[] }, options: ValidationOptions = {}): RawAsset {
   const asset = checked(value,options), index = indexAsset(asset,options.registries)
   const reps = new Set(selection.representations ?? []), procs = new Set(selection.procedures ?? [])
   for(const id of procs) if(!asset.procedures?.some(p=>p.id === id)) throw new ViewerError('INVALID_MODEL',`Unknown procedure: ${id}`,undefined,false)
@@ -21,7 +21,7 @@ export function selectKnotAsset(value: unknown, selection: { representations?: s
   const includeConstruction = (r: Reference) => { const c=constructionFor(asset,index,r); if(c) constructions.set(c.id,c) }
   for(const r of representations) if(r.target && r.target.kind !== 'subject') includeConstruction(r.target.construction)
   for(const p of procedures) if(p.construction) includeConstruction(p.construction)
-  const output: KnotAsset = { schema:'KnotAsset',schemaVersion:1,id:asset.id,subject:asset.subject,representations,procedures,constructions:[...constructions.values()] }
+  const output: RawAsset = { schema:'RawAsset',schemaVersion:1,id:asset.id,subject:asset.subject,representations,procedures,constructions:[...constructions.values()] }
   if (asset.contributions) output.contributions = asset.contributions
   if (asset.license) output.license = asset.license
   const included = new Set<string>()
@@ -50,7 +50,7 @@ export function selectKnotAsset(value: unknown, selection: { representations?: s
   return structuredClone(checked(output,{}))
 }
 /** Joins fragments of one document. Order-insensitive object equality; array order is significant. */
-export function composeKnotAsset(values: readonly unknown[], options: ValidationOptions = {}): KnotAsset {
+export function composeAsset(values: readonly unknown[], options: ValidationOptions = {}): RawAsset {
   if(!values.length) throw new ViewerError('INVALID_MODEL','Expected at least one asset',undefined,false)
   const parts=values.map(v=>checked(v,options)), out=structuredClone(parts[0])
   for(const p of parts.slice(1)) {

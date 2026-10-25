@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { MOSAIC_DIAGRAM, selectRepresentation, validateMosaicDiagram, resolveRepresentationView, type KnotAsset, type MosaicDiagram, type KnotResourceRegistry, type Reference, type ViewDefinition } from '../core'
+import { MOSAIC_DIAGRAM, selectRepresentation, validateMosaicDiagram, resolveRepresentationView, type RawAsset, type MosaicDiagram, type KnotResourceRegistry, type Reference, type ViewDefinition } from '../core'
 import { mosaicPaths } from './mosaicGeometry'
 import { mosaicPanCenter } from './mosaicViewport'
 import type { CaptureOptions } from './captureOptions'
 
 export interface MosaicView { center: [number, number]; height: number }
 const props = withDefaults(defineProps<{
-  asset?: KnotAsset | null
+  asset?: RawAsset | null
   representationId?: string
   view?: Reference | ViewDefinition
   views?: ViewDefinition[]

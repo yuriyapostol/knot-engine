@@ -1,4 +1,4 @@
-# KnotAsset evolution
+# Asset evolution
 
 **Historical proposal, superseded by the [current redesign](knot-asset-draft.md).** The separate diagrams/notations collections suggested below are not the agreed target architecture.
 
@@ -19,4 +19,4 @@ These collections were not implemented. An arbitrary metadata bag would blur mis
 
 Schema names identify document kinds; `schemaVersion` identifies the contract and `$schema` the editor schema. Nested values obtain their type from context/`type` without repeating envelopes. Subschema entry points share definitions to avoid duplicated rules. Independent versioning was an earlier possibility, superseded by the agreed shared release policy.
 
-`composeKnotAsset` merges self-contained fragments for one knot and validates IDs/conflicts/results; `selectKnotAsset` extracts requested data with dependencies. These are in-memory operations, not manifest/storage/loading mechanisms. `validateGridDiagram` checks grid diagram data without an asset. The current 3D renderer still handles coordinate representations only; a specialized grid diagram viewer need not understand every asset section.
+`composeAsset` merges self-contained fragments for one knot and validates IDs/conflicts/results; `selectAsset` extracts requested data with dependencies. These are in-memory operations, not manifest/storage/loading mechanisms. `validateGridDiagram` checks grid diagram data without an asset. The current 3D renderer still handles coordinate representations only; a specialized grid diagram viewer need not understand every asset section.

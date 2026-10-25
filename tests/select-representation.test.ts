@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import open from '../v1/examples/assets/open-rope.json'
-import { selectRepresentation, SPATIAL_CURVE, MOSAIC_DIAGRAM, type KnotAsset } from '../src/core'
+import { selectRepresentation, SPATIAL_CURVE, MOSAIC_DIAGRAM, type RawAsset } from '../src/core'
 
-const copy = (): KnotAsset => structuredClone(open) as unknown as KnotAsset
+const copy = (): RawAsset => structuredClone(open) as unknown as RawAsset
 describe('independent representation selection', () => {
   it('selects by type or explicit ID without changing input', () => {
     const asset = copy(), before = JSON.stringify(asset)
@@ -42,7 +42,7 @@ describe('independent representation selection', () => {
     })
   })
   it('rejects malformed assets without throwing', () => {
-    expect(selectRepresentation({ schema: 'KnotAsset' } as KnotAsset)).toMatchObject({
+    expect(selectRepresentation({ schema: 'RawAsset' } as RawAsset)).toMatchObject({
       ok: false, issues: [{ code: 'INVALID_ASSET' }],
     })
   })
@@ -82,16 +82,16 @@ describe('targeted validation', () => {
 
 describe('scoped spatial resolution', () => {
   it('ignores unrelated unsupported sibling while preserving strict default', async () => {
-    const { resolveKnotAsset } = await import('../src/core')
+    const { resolveAsset } = await import('../src/core')
     const asset = copy()
     asset.representations!.push({ id: 'future', type: 'urn:example:future', data: {} })
-    expect(() => resolveKnotAsset(asset, { representationId: 'view-3d-rest' })).toThrow()
-    expect(resolveKnotAsset(asset, { representationId: 'view-3d-rest' }, { scope: 'selected' }).curves.length).toBeGreaterThan(0)
+    expect(() => resolveAsset(asset, { representationId: 'view-3d-rest' })).toThrow()
+    expect(resolveAsset(asset, { representationId: 'view-3d-rest' }, { scope: 'selected' }).curves.length).toBeGreaterThan(0)
   })
   it('rejects invalid selected data', async () => {
-    const { resolveKnotAsset } = await import('../src/core')
+    const { resolveAsset } = await import('../src/core')
     const asset = copy()
     asset.representations![0].data = {}
-    expect(() => resolveKnotAsset(asset, { representationId: asset.representations![0].id }, { scope: 'selected' })).toThrow()
+    expect(() => resolveAsset(asset, { representationId: asset.representations![0].id }, { scope: 'selected' })).toThrow()
   })
 })

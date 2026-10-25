@@ -1,5 +1,5 @@
 {
-  "schema": "KnotAsset",
+  "schema": "Asset",
   "schemaVersion": 1,
   "namespaces": {
     "knot-engine": "https://yuriyapostol.github.io/knot-engine/v1/"

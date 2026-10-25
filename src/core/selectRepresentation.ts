@@ -1,7 +1,8 @@
-import { type KnotAsset, type Representation } from './asset'
+import { Asset } from './model'
+import { type RawAsset, type RawRepresentation } from './asset'
 import { expandURI } from './resources'
 import { preflight } from './validation'
-import { validateKnotAsset, normalizeAsset, type ValidationOptions } from './validateAsset'
+import { validateAsset, normalizeAsset, type ValidationOptions } from './validateAsset'
 
 export type RepresentationQuery = { representationId?: string; type?: string }
 export type SelectionIssueCode =
@@ -9,7 +10,7 @@ export type SelectionIssueCode =
   | 'UNSUPPORTED_REPRESENTATION' | 'MISSING_DEPENDENCY' | 'INVALID_REPRESENTATION'
 export interface SelectionIssue { code: SelectionIssueCode; message: string; path?: string }
 export type SelectionResult =
-  | { ok: true; asset: KnotAsset; representation: Representation; typeUri: string }
+  | { ok: true; asset: RawAsset; representation: RawRepresentation; typeUri: string }
   | { ok: false; issues: SelectionIssue[] }
 export interface SelectionOptions extends ValidationOptions {
   /** Validate only the selected representation and its context (default), or the entire asset. */
@@ -21,25 +22,26 @@ const failure = (code: SelectionIssueCode, message: string, path?: string): Sele
 
 /**
  * Independently select and validate a representation. The root must satisfy
- * the v1 KnotAsset structure; unrelated representations and procedures do not
+ * the v1 RawAsset structure; unrelated representations and procedures do not
  * prevent targeted selection. The returned asset retains the full context.
  */
 export function selectRepresentation(
-  asset: KnotAsset,
+  asset: RawAsset | Asset,
   query: RepresentationQuery = {},
   options: SelectionOptions = {},
 ): SelectionResult {
+  if (asset instanceof Asset) asset = asset.toRaw()
   // Reject non-JSON values and malformed root structures before inspecting fields.
   const structural = preflight(asset)
   if (!structural.length && (!asset || typeof asset !== 'object' || !Array.isArray(asset.representations))) {
-    return failure('INVALID_ASSET', 'Expected KnotAsset with representations')
+    return failure('INVALID_ASSET', 'Expected RawAsset with representations')
   }
   if (structural.length) return {
     ok: false,
     issues: structural.map(i => ({ code: 'INVALID_ASSET', message: i.message, path: i.path })),
   }
 
-  let normalized: KnotAsset, requestedType: string | undefined
+  let normalized: RawAsset, requestedType: string | undefined
   try {
     normalized = normalizeAsset(asset)
     requestedType = query.type === undefined ? undefined : expandURI(query.type, asset.namespaces)
@@ -61,7 +63,7 @@ export function selectRepresentation(
   const target = selected.target
   const localConstructionId = target && target.kind !== 'subject' && target.construction.id
   const sourceIds = new Set((selected.sources ?? []).flatMap(s => 'id' in s && s.id ? [s.id] : []))
-  const validationAsset: KnotAsset = options.scope === 'all' ? asset : {
+  const validationAsset: RawAsset = options.scope === 'all' ? asset : {
     ...asset,
     representations: [asset.representations!.find(r => r.id === selected.id)!],
     procedures: [],
@@ -72,7 +74,7 @@ export function selectRepresentation(
     sources: (asset.sources ?? []).filter(s => sourceIds.has(s.id)),
     // Catalog identifiers belong to subject metadata and remain in scope.
   }
-  const checked = validateKnotAsset(validationAsset, options)
+  const checked = validateAsset(validationAsset, options)
   if (!checked.valid) return {
     ok: false,
     issues: checked.issues.map(i => ({

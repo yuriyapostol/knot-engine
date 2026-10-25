@@ -1,6 +1,6 @@
 # KnotInfo representations: source data and proposed contracts
 
-Status: research for the [`KnotAsset` redesign](knot-asset-draft.md). Sources were checked on 12 October 2026. Original formats and proposed JSON adaptations are distinguished below; documentation does not imply implemented importers or renderers.
+Status: research for the [`Asset` redesign](knot-asset-draft.md). Sources were checked on 12 October 2026. Original formats and proposed JSON adaptations are distinguished below; documentation does not imply implemented importers or renderers.
 
 ## 1. What the page actually provides
 

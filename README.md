@@ -2,7 +2,7 @@
 
 [English](README.md) | [Українська](README.uk.md)
 
-Knot modeling and rendering package with Vue 3 `KnotViewer`. The current `KnotAsset` supports spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, states, procedures and explicit resource registries. The component renders static 3D representations with perspective/orthographic cameras, SSR fallback and PNG capture.
+Knot modeling and rendering package with Vue 3 `KnotViewer`. The current `Asset` supports spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, states, procedures and explicit resource registries. The component renders static 3D representations with perspective/orthographic cameras, SSR fallback and PNG capture.
 
 ## Run locally
 
@@ -43,9 +43,9 @@ For an explicitly prepared release, `npm run site:archive` creates a snapshot of
 
 ```vue
 <script setup lang="ts">
-import { KnotViewer, type KnotAsset } from 'knot-engine'
+import { KnotViewer, type Asset } from 'knot-engine'
 import 'knot-engine/styles.css'
-defineProps<{ asset: KnotAsset }>()
+defineProps<{ asset: Asset }>()
 </script>
 
 <template>
@@ -53,13 +53,13 @@ defineProps<{ asset: KnotAsset }>()
 </template>
 ```
 
-Import `validateKnotAsset`, `resolveKnotAsset` and types from `knot-engine/core`: this entry point loads no Vue, Three.js or DOM. Validation separately reports `valid`, `complete`, `missingDependencies` and `uncheckedTypes`; rendering requires complete validation. Unknown fields are rejected. Registries are passed explicitly; URI references do not fetch data.
+Import `validateAsset`, `resolveAsset` and types from `knot-engine/core`: this entry point loads no Vue, Three.js or DOM. Validation separately reports `valid`, `complete`, `missingDependencies` and `uncheckedTypes`; rendering requires complete validation. Unknown fields are rejected. Registries are passed explicitly; URI references do not fetch data.
 
 `representation-id` selects one static representation; by default the first `spatial-curve` is selected. Constructions contain objects and states; procedures reference representations. There is no animation. Replace the asset object to update geometry.
 
 Methods: `resetView()`, `fitToView()`, `capture({width,height,view,transparent})`. PNG defaults to 512×512 with a 2048×2048 maximum. Capture modes are `current` and `model-preview`. Events: `ready({assetId,schemaVersion,warnings})`, `error`, `camera-change`. `initialCamera` accepts complete fit/fixed modes with perspective or orthographic projection; FOV is in radians.
 
-[Data contract](v1/specifications/knot-asset.md) · [Functions](v1/specifications/functions.md) · [Component](v1/specifications/components.md) · [JSON Schema](v1/schema/knot-asset.schema.json) · [Examples](v1/examples/assets)
+[Data contract](v1/specifications/asset.md) · [Functions](v1/specifications/functions.md) · [Component](v1/specifications/components.md) · [JSON Schema](v1/schema/asset.schema.json) · [Examples](v1/examples/assets)
 
 Styling uses `.knot-engine-v1-viewer…` classes and inherited `--knot-engine-v1-viewer-*` variables. The package namespace includes the major generation and component name, allowing different major versions on the same page; initial development requires no backward compatibility, including CSS. See [current variables, defaults and examples](v1/specifications/components.md#css-namespace-and-styling).
 
@@ -71,7 +71,7 @@ Explain consequential contract decisions in the relevant specifications, with so
 
 | Document | Scope |
 | --- | --- |
-| [`KnotAsset` v1](v1/specifications/knot-asset.md) | Authoritative domain-data specification |
+| [`Asset` v1](v1/specifications/asset.md) | Authoritative domain-data specification |
 | [Architecture and migration](design/architecture.md) | Implementation policies, compatibility and current limits |
 | [`KnotViewer` specification](v1/specifications/components.md) | Component API and retained acceptance criteria |
 | [Demo application](design/interactive-example-requirements.md) | Demo behavior and acceptance plan |

@@ -2,13 +2,13 @@
 import { afterEach, expect, it, vi } from 'vitest'
 import { createSSRApp, nextTick } from 'vue'
 import { renderToString } from 'vue/server-renderer'
-import { KnotViewer, type KnotAsset } from '../src'
+import { KnotViewer, type RawAsset } from '../src'
 import open from '../v1/examples/assets/open-rope.json'
 
 afterEach(() => { document.body.innerHTML = ''; vi.restoreAllMocks() })
 
 it.each([
-  { asset: open as unknown as KnotAsset, label: 'Hydration model' }
+  { asset: open as unknown as RawAsset, label: 'Hydration model' }
 ])('hydrates the server fallback without a mismatch before WebGL initialization (%j)', async props => {
   const serverHtml = await renderToString(createSSRApp(KnotViewer, props))
   document.body.innerHTML = `<div id="app">${serverHtml}</div>`

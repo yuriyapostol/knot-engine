@@ -1,18 +1,19 @@
+import { Asset } from './model'
 import { contributionIssues, licenseIssues, sourceIssues } from './metadata'
 import Ajv2020 from 'ajv/dist/2020.js'
-import { SPATIAL_CURVE, GRID_DIAGRAM, MOSAIC_DIAGRAM, PD_CODE, DT_CODE, ROPE_TYPE, type KnotAsset, type KnotResourceRegistry, type Reference, type Construction, type ResourceEntry, type Representation, type RepresentationTypeDefinition, type Dependency, type SpatialCurveData, type KnotRepresentationDocument } from './asset'
+import { SPATIAL_CURVE, GRID_DIAGRAM, MOSAIC_DIAGRAM, PD_CODE, DT_CODE, ROPE_TYPE, type RawAsset, type RawKnotResourceRegistry, type Reference, type Construction, type ResourceEntry, type RawRepresentation, type RawRepresentationTypeDefinition, type Dependency, type SpatialCurveData, type KnotRepresentationDocument } from './asset'
 import { createResourceIndex, expandURI, normalizeResource, addResource, namespaceIssues, resourceIssues, type ResourceIndex } from './resources'
-import { duplicates, issue, preflight, structure, KNOT_ASSET_LIMITS } from './validation'
+import { duplicates, issue, preflight, structure, ASSET_LIMITS } from './validation'
 import { validateMosaicDiagram } from './validateMosaicDiagram'
 import { validateDTCode, dtAnalysisWork } from './validateDTCode'
 import { validatePDCode } from './validatePDCode'
 import { validateGridDiagram } from './validateGridDiagram'
 import { validateSpatialCurve } from './validateSpatial'
 import type { ValidationIssue } from './errors'
-export interface ValidationOptions { strict?: boolean; registries?: readonly KnotResourceRegistry[]; schemas?: readonly Record<string, unknown>[] }
+export interface ValidationOptions { strict?: boolean; registries?: readonly RawKnotResourceRegistry[]; schemas?: readonly Record<string, unknown>[] }
 export interface ValidationReport { missingDependencies: Dependency[]; uncheckedTypes: string[]; complete: boolean; warnings: string[] }
-export type AssetValidationResult = ({ valid: true; asset: KnotAsset } & ValidationReport) | { valid: false; issues: ValidationIssue[] }
-export function normalizeAsset(asset: KnotAsset): KnotAsset {
+export type AssetValidationResult = ({ valid: true; asset: RawAsset } & ValidationReport) | { valid: false; issues: ValidationIssue[] }
+export function normalizeAsset(asset: RawAsset): RawAsset {
   const a = structuredClone(asset), ns = a.namespaces ?? {}
   const uri = (v: string) => expandURI(v, ns)
   // Local document/subject IDs remain permitted; cross-document references require URI identities.
@@ -48,7 +49,7 @@ export function normalizeAsset(asset: KnotAsset): KnotAsset {
   delete a.namespaces
   return a
 }
-export function indexAsset(asset: KnotAsset, registries: readonly KnotResourceRegistry[] = []): ResourceIndex {
+export function indexAsset(asset: RawAsset, registries: readonly RawKnotResourceRegistry[] = []): ResourceIndex {
   const index = createResourceIndex(registries)
   for (const source of asset.sources ?? []) if (source.id.includes(':')) addResource(index,{kind:'source',resource:source})
   for (const c of asset.catalogs ?? []) addResource(index,{ kind:'catalog',resource:c })
@@ -57,19 +58,20 @@ export function indexAsset(asset: KnotAsset, registries: readonly KnotResourceRe
   for (const c of asset.constructions ?? []) if (!('ref' in c) && c.id.includes(':')) addResource(index,{ kind:'construction',resource:c })
   return index
 }
-export function constructionFor(asset: KnotAsset, index: ResourceIndex, ref: Reference): Construction | undefined {
+export function constructionFor(asset: RawAsset, index: ResourceIndex, ref: Reference): Construction | undefined {
   if (ref.ref) { const e = index.get(ref.ref); return e?.kind === 'construction' ? e.resource : undefined }
   return asset.constructions?.find((c): c is Construction => !('ref' in c) && c.id === ref.id)
 }
-export function validateKnotAsset(value: unknown, options: ValidationOptions = {}): AssetValidationResult {
+export function validateAsset(value: unknown, options: ValidationOptions = {}): AssetValidationResult {
+  if (value instanceof Asset) value = value.toRaw()
   let issues = preflight(value)
   if (!issues.length) issues = structure('asset',value)
   if (issues.length) return { valid: false, issues }
-  const original = value as KnotAsset
+  const original = value as RawAsset
   issues.push(...namespaceIssues(original.namespaces))
-  let asset: KnotAsset, index: ResourceIndex
+  let asset: RawAsset, index: ResourceIndex
   try { asset = normalizeAsset(original); index = indexAsset(asset,options.registries) } catch(e) { return { valid:false,issues:[...issues,issue('',(e as Error).message)] } }
-  if (asset.$schema && asset.$schema !== 'https://yuriyapostol.github.io/knot-engine/v1/schema/knot-asset.schema.json') issues.push(issue('$schema','Schema URI contradicts document contract'))
+  if (asset.$schema && asset.$schema !== 'https://yuriyapostol.github.io/knot-engine/v1/schema/asset.schema.json') issues.push(issue('$schema','Schema URI contradicts document contract'))
   const missing = new Map<string,Dependency>(), unchecked = new Set<string>()
   const need = (kind: Dependency['kind'], ref: string, path: string): ResourceEntry | undefined => {
     const found = index.get(ref)
@@ -140,7 +142,7 @@ export function validateKnotAsset(value: unknown, options: ValidationOptions = {
     const code = (r.data as { code?: unknown })?.code
     return sum + dtAnalysisWork(code)
   }, 0)
-  if (totalDTWork > KNOT_ASSET_LIMITS.dtWork) return { valid: false, issues: [issue('representations', 'Total DT analysis budget exceeded', 'LIMIT_EXCEEDED')] }
+  if (totalDTWork > ASSET_LIMITS.dtWork) return { valid: false, issues: [issue('representations', 'Total DT analysis budget exceeded', 'LIMIT_EXCEEDED')] }
   let totalPoints = 0
   for (const rep of asset.representations ?? []) {
     const path = `representations.${rep.id}`, entry = need('representation-type',rep.type,`${path}.type`)
@@ -151,7 +153,7 @@ export function validateKnotAsset(value: unknown, options: ValidationOptions = {
       if ('ref' in source && source.ref) need('source',source.ref,sourcePath)
       else if ('id' in source && source.id && !asset.sources?.some(s=>s.id === source.id)) issues.push(issue(sourcePath,'Unknown local source'))
     }
-    const definition = entry?.resource as RepresentationTypeDefinition | undefined
+    const definition = entry?.resource as RawRepresentationTypeDefinition | undefined
     checkData(rep.type,rep.data,entry,`${path}.data`)
     let construction: Construction | undefined
     if(rep.target && rep.target.kind !== 'subject') {
@@ -187,6 +189,6 @@ export function validateRepresentationDocument(value: unknown, options: Validati
   if(issues.length) return {valid:false as const,issues}
   const doc = value as KnotRepresentationDocument
   if (doc.$schema && doc.$schema !== 'https://yuriyapostol.github.io/knot-engine/v1/schema/knot-representation.schema.json') return { valid: false as const, issues: [issue('$schema','Schema URI contradicts document contract')] }
-  const result = validateKnotAsset({schema:'KnotAsset',schemaVersion:1,id:'standalone',subject:doc.subject ?? {id:'standalone'},...(doc.namespaces ? {namespaces:doc.namespaces}:{}),...(doc.dependencies ? {dependencies:doc.dependencies}:{}),...(doc.sources ? {sources:doc.sources}:{}),representations:[doc.representation]},options)
+  const result = validateAsset({schema:'RawAsset',schemaVersion:1,id:'standalone',subject:doc.subject ?? {id:'standalone'},...(doc.namespaces ? {namespaces:doc.namespaces}:{}),...(doc.dependencies ? {dependencies:doc.dependencies}:{}),...(doc.sources ? {sources:doc.sources}:{}),representations:[doc.representation]},options)
   return result.valid ? {...result,document:doc} : result
 }

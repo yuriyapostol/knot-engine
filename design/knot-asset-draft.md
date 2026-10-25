@@ -1,10 +1,10 @@
-# KnotAsset: proposed contract revision
+# Asset: proposed contract revision
 
-**Implementation status:** the initial profile (spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, procedures, resources and cameras) is described in the [current specification](../v1/specifications/knot-asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
+**Implementation status:** the initial profile (spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, procedures, resources and cameras) is described in the [current specification](../v1/specifications/asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
 
 Sources, flat contributions at asset/representation level and a global license are implemented under the [shared contract](../v1/specifications/sources.md); the broader structure below also contains deferred features.
 
-**Status: architectural draft for discussion.** This records agreed principles and a possible structure. It does not replace the [implemented contract](../v1/specifications/knot-asset.md) or claim that the proposed API exists. The transition from `KnotModelV1` is complete for the initial profile. Features beyond the current specification remain under design.
+**Status: architectural draft for discussion.** This records agreed principles and a possible structure. It does not replace the [implemented contract](../v1/specifications/asset.md) or claim that the proposed API exists. The transition from `KnotModelV1` is complete for the initial profile. Features beyond the current specification remain under design.
 
 **Current policy: keep version numbers unchanged and do not preserve compatibility with old contracts.** The project has no external users yet. Revisions remain within `schemaVersion: 1` and package `0.1.0`. `KnotModelV1` APIs, schemas, adapters and dual-format support have been removed. Field names and example shapes are proposals except where explicitly agreed.
 
@@ -55,7 +55,7 @@ A practical knot, mathematical object and physical specimen must not be silently
 ## 3. Root structure
 
 ```text
-KnotAsset
+Asset
 ├── schema, schemaVersion
 ├── namespaces?
 ├── id
@@ -125,7 +125,7 @@ The following is a fictional training catalog, not a verified KnotInfo definitio
 
 ```json
 {
-  "schema": "KnotAsset",
+  "schema": "Asset",
   "schemaVersion": 1,
   "namespaces": {
     "knot-engine": "https://yuriyapostol.github.io/knot-engine/v1/"
@@ -255,7 +255,7 @@ Grid / geometry / notation contracts
                   ↓
           Representation contract
                   ↓
-             KnotAsset
+             Asset
 ```
 
 A narrow validator checks its own contract without manufacturing an asset. Root schemas refer to independent subschemas. Consumers may accept: type-specific data; a representation with required context; or a reduced asset containing subject information and selected representations/procedures.
@@ -272,7 +272,7 @@ These are syntactically complete proposed JSON documents, not inputs to the curr
 
 ```json
 {
-  "schema": "KnotAsset",
+  "schema": "Asset",
   "schemaVersion": 1,
   "namespaces": {
     "knot-engine": "https://yuriyapostol.github.io/knot-engine/v1/"
@@ -344,7 +344,7 @@ This deliberately models bending a rope, not a verified practical knot. The two 
 
 ```json
 {
-  "schema": "KnotAsset",
+  "schema": "Asset",
   "schemaVersion": 1,
   "namespaces": {
     "knot-engine": "https://yuriyapostol.github.io/knot-engine/v1/"
@@ -450,7 +450,7 @@ No claim is made about physical length, length preservation or valid interpolati
 
 ## 11. Versions, extensions and validation
 
-See [publication policy](publication.md). Until stabilization, keep package and schema versions unchanged, allow structural/API changes, update examples and tests together, and keep examples and tools on the current `KnotAsset` contract. `KnotModelV1` runtime, schemas, APIs, adapters and demo support have been removed. One-time data conversion does not require permanent compatibility adapters.
+See [publication policy](publication.md). Until stabilization, keep package and schema versions unchanged, allow structural/API changes, update examples and tests together, and keep examples and tools on the current `Asset` contract. `KnotModelV1` runtime, schemas, APIs, adapters and demo support have been removed. One-time data conversion does not require permanent compatibility adapters.
 
 Shared contract generations do not require a monolithic schema. Fragment entry points remain separate. `schema`, `schemaVersion` and editor `$schema` have defined roles in the resource proposal. Contract generation and package release number differ, but documentation, specifications, schemas and data are published as one package release.
 

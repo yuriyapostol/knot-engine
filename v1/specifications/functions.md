@@ -4,7 +4,7 @@ Import core APIs from `knot-engine/core`; this entry point uses no Vue, Three.js
 
 | Function | Result |
 | --- | --- |
-| `validateKnotAsset(value, options?)` | `{valid:true,asset,warnings,complete,missingDependencies,uncheckedTypes}` or `{valid:false,issues}` |
+| `validateAsset(value, options?)` | `{valid:true,asset,warnings,complete,missingDependencies,uncheckedTypes}` or `{valid:false,issues}` |
 | `validateGridDiagram(value)` | `{valid:true,data,diagram,warnings,componentCount,crossingCount}` or issues; independent grid diagram validation with `xo` or `vertex-pairs` encoding |
 | `validateDTCode(value)` | `{valid:true,data,code,warnings,componentCount,crossingCount}` or issues; numeric knot/link DT with planar-realizability validation |
 | `validatePDCode(value)` | `{valid:true,data,code,warnings,componentCount,crossingCount}` or issues; independent planar diagram code validation |
@@ -14,13 +14,13 @@ Import core APIs from `knot-engine/core`; this entry point uses no Vue, Three.js
 | `validateResourceDocument(value)` | Validated resource envelope or issues; does not establish dependency closure |
 | `validateResourceRegistry(value)` | Validated registry and conflict check or issues; does not establish dependency closure |
 | `validateRepresentationDocument(value, options?)` | Standalone representation validation report |
-| `resolveKnotAsset(value, {representationId?,view?}?, options?)` | Internal `RenderableModel`; throws `ViewerError` on invalid, unresolved or unsupported data |
+| `resolveAsset(value, {representationId?,view?}?, options?)` | Internal `RenderableModel`; throws `ViewerError` on invalid, unresolved or unsupported data |
 | `resolveRepresentation(representation, options?)` | Standalone subject-level spatial representation to rendering data; explicit resource context required |
-| `selectKnotAsset(value, {representations?,procedures?}, options?)` | Cloned self-contained fragment with dependencies |
-| `composeKnotAsset(values, options?)` | Cloned merged fragments of the same document; conflicts are errors |
+| `selectAsset(value, {representations?,procedures?}, options?)` | Cloned self-contained fragment with dependencies |
+| `composeAsset(values, options?)` | Cloned merged fragments of the same document; conflicts are errors |
 | `expandURI(value, namespaces?)` | Exact expanded URI; undeclared prefixes throw |
 
-Validation options accept `registries` (array of `KnotResourceRegistry`) and `schemas` (explicit JSON Schema objects). Known objects are always closed; the retained `strict` option does not relax validation. `STANDARD_RESOURCES` provides the built-in representation and object type definitions when passed explicitly. Type definitions, `ViewerError`, `KNOT_ASSET_LIMITS`, namespace and type URI constants are exported.
+Validation options accept `registries` (array of `KnotResourceRegistry`) and `schemas` (explicit JSON Schema objects). Known objects are always closed; the retained `strict` option does not relax validation. `STANDARD_RESOURCES` provides the built-in representation and object type definitions when passed explicitly. Type definitions, `ViewerError`, `ASSET_LIMITS`, namespace and type URI constants are exported.
 
 The renderer currently supports only `spatial-curve`. `valid:true` alone is insufficient to render or extract: these operations also require `complete:true`. Unknown type data can be preserved with an incomplete report. No operation proves the mathematical identity of a knot.
 

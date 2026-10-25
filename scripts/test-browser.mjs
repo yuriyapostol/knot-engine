@@ -123,7 +123,7 @@ try {
   assert.match(await setInput({ asset }), /^AMBIGUOUS_REPRESENTATION:/)
   assert.equal(await setInput({ asset, selection: { representationId: 'view-3d-rest' } }), undefined)
   assert.deepEqual(failures, [])
-  console.log('KnotAsset: render, representation replacement, PNG capture, invalid selection, and recovery passed')
+  console.log('Asset: render, representation replacement, PNG capture, invalid selection, and recovery passed')
   // Exercise the actual generic compositor in Chromium: SVG, export, failure, recovery, 3D.
   const mosaic = fixture('v1/examples/assets/mosaic-diagram.json')
   const webglBeforeMosaic = await page.evaluate(() => window.__webglContexts)
@@ -156,7 +156,7 @@ try {
   await page.waitForSelector('.knot-engine-v1-viewer[data-state="ready"]')
   assert.deepEqual(failures, [])
   const editor = page.locator('.knot-engine-v1-demo__editor textarea')
-  assert.ok(await editor.isVisible(), 'KnotAsset must use the same visible JSON editor')
+  assert.ok(await editor.isVisible(), 'Asset must use the same visible JSON editor')
   assert.equal(JSON.parse(await editor.inputValue()).representations.length, 3)
   const waitForModel = async id => {
     // Filling the editor scrolls the narrow layout; hidden viewers intentionally pause rendering.
@@ -207,7 +207,7 @@ try {
   await page.locator('.knot-engine-v1-demo__model-select select').selectOption('loop')
   await waitForModel('twisted-loop')
   assert.equal(await page.locator('.knot-engine-v1-demo__snapshot-select').count(), 0)
-  assert.equal(JSON.parse(await editor.inputValue()).schema, 'KnotAsset')
+  assert.equal(JSON.parse(await editor.inputValue()).schema, 'Asset')
   assert.ok(JSON.parse(await editor.inputValue()).subject)
   assert.deepEqual(failures, [])
   assert.equal(await page.getByRole('button', { name: 'Експорт в PNG', exact: true }).count(), 1)

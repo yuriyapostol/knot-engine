@@ -1,12 +1,12 @@
 import { createApp, h, ref, shallowRef } from 'vue'
-import { KnotViewer, type KnotAsset, type RepresentationSelection } from 'knot-engine'
+import { KnotViewer, type RawAsset, type RepresentationSelection } from 'knot-engine'
 import '../../src/styles.css'
 
 declare global {
   interface Window {
-    __previewAsset?: KnotAsset
+    __previewAsset?: RawAsset
     __previewSelection?: RepresentationSelection
-    __previewSetInput?: (input: { asset?: KnotAsset; selection?: RepresentationSelection }) => void
+    __previewSetInput?: (input: { asset?: RawAsset; selection?: RepresentationSelection }) => void
     __previewReady?: boolean
     __previewError?: string
     __previewCapture?: (width: number, height: number) => Promise<Blob>

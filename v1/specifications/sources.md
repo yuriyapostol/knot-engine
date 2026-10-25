@@ -6,7 +6,7 @@ Implemented optional metadata shared by all representation types. These fields d
 
 | Owner | Optional fields |
 | --- | --- |
-| KnotAsset | `sources`, `contributions`, `license` |
+| Asset | `sources`, `contributions`, `license` |
 | Representation | `sources`, `contributions` |
 | KnotRepresentationDocument | `sources` definitions for references used by its representation |
 
@@ -27,9 +27,9 @@ A source describes material used to obtain data. An inline source has at least `
 | `accessed` | Valid calendar date `YYYY-MM-DD` |
 | `note` | Source description or explanation of its use |
 
-Sources need not be published: a title can describe an original drawing, private measurements or a printed book. An author's identity is not automatically a contribution to the current KnotAsset.
+Sources need not be published: a title can describe an original drawing, private measurements or a printed book. An author's identity is not automatically a contribution to the current Asset.
 
-Root `KnotAsset.sources` contains reusable definitions with an additional required `id`, local or global under ordinary URI rules. Representation `sources` entries are either:
+Root `Asset.sources` contains reusable definitions with an additional required `id`, local or global under ordinary URI rules. Representation `sources` entries are either:
 
 * A complete inline source without an `id`.
 * A reference `{id:...}` to a root definition, or `{ref:...}` to an explicitly supplied global source resource. Reference entries may also include `locator`, `accessed` and `note` for this use. They cannot also redefine the source's title, URL, authors, version or license.
@@ -54,15 +54,15 @@ A standalone representation document may embed root-like `sources` definitions t
 
 Supported roles: `creation` (created data), `import` (copied from a source), `conversion` (changed format/conventions), `editing` (modified/corrected data), `validation` (checked data). A name and note alone are sufficient. Email is contact information, not an identity key. Contacts and roles are declarations, not verified credentials.
 
-Root contributions concern work on the KnotAsset as a whole. Representation contributions concern that representation only. Neither list is implicitly copied to the other level. Repeated work by one person can have separate entries; this is attribution, not an immutable revision log or a reversible edit history.
+Root contributions concern work on the Asset as a whole. Representation contributions concern that representation only. Neither list is implicitly copied to the other level. Repeated work by one person can have separate entries; this is attribution, not an immutable revision log or a reversible edit history.
 
 ## License
 
-`KnotAsset.license` is `{name,url?}` with a required nonblank name and optional absolute HTTP(S) URL. It states the declared license of the assembled KnotAsset. `source.license` describes the original material. Neither automatically overrides or supplies the other. Absence means no license stated, not unrestricted use. Compatibility and permission to relicense are not inferred or checked. A license may be identified by a name/code; there is no built-in license catalog or imposed vocabulary.
+`Asset.license` is `{name,url?}` with a required nonblank name and optional absolute HTTP(S) URL. It states the declared license of the assembled Asset. `source.license` describes the original material. Neither automatically overrides or supplies the other. Absence means no license stated, not unrestricted use. Compatibility and permission to relicense are not inferred or checked. A license may be identified by a name/code; there is no built-in license catalog or imposed vocabulary.
 
 ## Preservation and validation
 
-Selection retains root contributions and license, representation metadata and required source definitions. Global source references are made self-contained by embedding their definitions in the selected KnotAsset's `sources`, with global IDs retained. Unused definitions are omitted. Metadata is cloned; input objects, order and source URLs are not rewritten. Only source identity fields use normal namespace expansion.
+Selection retains root contributions and license, representation metadata and required source definitions. Global source references are made self-contained by embedding their definitions in the selected Asset's `sources`, with global IDs retained. Unused definitions are omitted. Metadata is cloned; input objects, order and source URLs are not rewritten. Only source identity fields use normal namespace expansion.
 
 Composition keeps ordinary identity/conflict rules for source definitions and representations. Root contribution lists are merged in input order, deduplicating only exactly equal records (object key order ignored). Name/email equality does not merge different contributions. Differing representation metadata under the same representation ID is a conflict. If only one fragment has a license, retain it; two differing license objects are a conflict. There is no automatic legal equivalence check or relicense operation.
 
@@ -72,7 +72,7 @@ Implementation limits: up to 256 source definitions per root, 256 source uses pe
 
 ## Contract rationale and examples
 
-The [KnotAsset design](../../design/knot-asset-draft.md) already separates source collections from catalogs and places source references on representations. This implementation follows that design rather than adding an extra wrapper. Flat contributions cover creation and editing without an identity graph. A global license matches the intended publication unit; source licenses remain separate attribution to external material.
+The [Asset design](../../design/knot-asset-draft.md) already separates source collections from catalogs and places source references on representations. This implementation follows that design rather than adding an extra wrapper. Flat contributions cover creation and editing without an identity graph. A global license matches the intended publication unit; source licenses remain separate attribution to external material.
 
 These are project decisions, not claims that external knot databases expose the same metadata shape. Numeric conventions and dataset examples remain documented in the corresponding representation specifications. Documentation should explain consequential contract choices, cite relevant definitions/implementations, distinguish adopted conventions from local decisions and include checked examples. Absence of an external source must not be disguised as external standardization.
 

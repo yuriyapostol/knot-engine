@@ -5,11 +5,11 @@ import KnotViewer from '../src/components/KnotViewer.vue'
 import KnotMosaicViewer from '../src/components/KnotMosaicViewer.vue'
 import open from '../v1/examples/assets/open-rope.json'
 import mosaic from '../v1/examples/assets/mosaic-diagram.json'
-import { LOMONACO_KAUFFMAN_11, type KnotAsset } from '../src/core'
+import { LOMONACO_KAUFFMAN_11, type RawAsset } from '../src/core'
 
-const spatial = () => structuredClone(open) as unknown as KnotAsset
+const spatial = () => structuredClone(open) as unknown as RawAsset
 const diagram = () => {
-  const asset = structuredClone(mosaic) as unknown as KnotAsset
+  const asset = structuredClone(mosaic) as unknown as RawAsset
   ;(asset.representations![0].data as { tileSet: string }).tileSet = LOMONACO_KAUFFMAN_11
   return asset
 }

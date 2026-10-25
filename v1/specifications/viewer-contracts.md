@@ -4,14 +4,14 @@
 
 ## Input and selection
 
-All viewer components receive `asset: KnotAsset` (complete or permitted partial), `representationId?: string` and separate `settings`. Schema, namespaces, resources, constructions, procedures and states are checked according to the selected representation's needs. Core uses the same asset container without depending on Vue.
+All viewer components receive `asset: Asset` (complete or permitted partial), `representationId?: string` and separate `settings`. Schema, namespaces, resources, constructions, procedures and states are checked according to the selected representation's needs. Core uses the same asset container without depending on Vue.
 
 Proposed core operations:
 
 ```ts
 type RepresentationQuery = { representationId?: string; type?: string }
 type SelectionResult =
-  | { ok: true; asset: KnotAsset; representation: Representation; typeUri: string }
+  | { ok: true; asset: Asset; representation: Representation; typeUri: string }
   | { ok: false; issues: SelectionIssue[] }
 type SelectionIssue = {
   code: 'INVALID_ASSET' | 'REPRESENTATION_NOT_FOUND' | 'AMBIGUOUS_REPRESENTATION'
@@ -19,10 +19,10 @@ type SelectionIssue = {
   message: string
   path?: string
 }
-function selectRepresentation(asset: KnotAsset, query?: RepresentationQuery, options?: SelectionOptions): SelectionResult
+function selectRepresentation(asset: Asset, query?: RepresentationQuery, options?: SelectionOptions): SelectionResult
 ```
 
-This operation returns data without UI, mutation or resource fetching. Type matching uses expanded URIs. An explicit ID must also match the requested type; missing and ambiguous matches have distinct diagnostics. Without an ID, the generic viewer may select only under an unambiguous rule; silently choosing the first representation is forbidden. Partial assets require validation of a minimally sufficient dependency closure. The root must conform to the v1 `KnotAsset` structure; optional sections may be omitted. By default, only the selected representation and required context are validated, not unrelated representations or procedures. `scope: 'all'` validates the entire document. Missing dependencies of the selected representation remain errors.
+This operation returns data without UI, mutation or resource fetching. Type matching uses expanded URIs. An explicit ID must also match the requested type; missing and ambiguous matches have distinct diagnostics. Without an ID, the generic viewer may select only under an unambiguous rule; silently choosing the first representation is forbidden. Partial assets require validation of a minimally sufficient dependency closure. The root must conform to the v1 `Asset` structure; optional sections may be omitted. By default, only the selected representation and required context are validated, not unrelated representations or procedures. `scope: 'all'` validates the entire document. Missing dependencies of the selected representation remain errors.
 
 ## UI contract
 
@@ -45,7 +45,7 @@ Registry is explicit or locally assembled from built-ins, never mutable global s
 
 ## Settings and migration
 
-Viewer settings are external to `KnotAsset`. The application provides `view`, optional local presets `views`, `initialCamera` for 3D, and rendering props. Representation-level `views`, `defaultView`, and `preferredView` are removed; no compatibility fallback is provided.
+Viewer settings are external to `Asset`. The application provides `view`, optional local presets `views`, `initialCamera` for 3D, and rendering props. Representation-level `views`, `defaultView`, and `preferredView` are removed; no compatibility fallback is provided.
 
 ## Tests
 

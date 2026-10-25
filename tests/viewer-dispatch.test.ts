@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import open from '../v1/examples/assets/open-rope.json'
 import { createViewerRegistry, selectViewerRepresentation } from '../src/components/viewerRegistry'
-import { SPATIAL_CURVE, MOSAIC_DIAGRAM, type KnotAsset } from '../src/core'
+import { SPATIAL_CURVE, MOSAIC_DIAGRAM, type RawAsset } from '../src/core'
 import type { Component } from 'vue'
 
 const component = {} as Component
@@ -9,7 +9,7 @@ const registry = createViewerRegistry([
   { typeUri: SPATIAL_CURVE, component, capabilities: { zoom: true } },
   { typeUri: MOSAIC_DIAGRAM, component, capabilities: { zoom: true } },
 ])
-const copy = () => structuredClone(open) as unknown as KnotAsset
+const copy = () => structuredClone(open) as unknown as RawAsset
 describe('generic viewer dispatch', () => {
   it('selects a unique supported representation despite an unsupported sibling', () => {
     const asset = copy()

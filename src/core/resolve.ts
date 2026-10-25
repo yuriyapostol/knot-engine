@@ -1,5 +1,5 @@
-import { SPATIAL_CURVE, ROPE_TYPE, type Camera3D, type SpatialCurveData, type SpatialCurve, type Reference, type ViewDefinition, type KnotAsset, type Representation } from './asset'
-import { validateKnotAsset, normalizeAsset, indexAsset, constructionFor, type ValidationOptions } from './validateAsset'
+import { SPATIAL_CURVE, ROPE_TYPE, type Camera3D, type SpatialCurveData, type SpatialCurve, type Reference, type ViewDefinition, type RawAsset, type RawRepresentation } from './asset'
+import { validateAsset, normalizeAsset, indexAsset, constructionFor, type ValidationOptions } from './validateAsset'
 import { selectRepresentation } from './selectRepresentation'
 import { ViewerError } from './errors'
 import { validateView } from './validateSpatial'
@@ -7,15 +7,15 @@ export type CameraView = Extract<Camera3D,{mode:'fixed'}>
 export interface RenderableCurve extends SpatialCurve { radius: number }
 export interface RenderableModel { id?: string; curves: RenderableCurve[]; camera?: Camera3D; warnings: string[] }
 export interface RepresentationSelection { representationId?: string; view?: Reference | ViewDefinition }
-export function resolveKnotAsset(value: unknown, selection: RepresentationSelection = {}, options: ValidationOptions & { scope?: 'selected' | 'all' } = {}): RenderableModel {
-  let asset: KnotAsset
+export function resolveAsset(value: unknown, selection: RepresentationSelection = {}, options: ValidationOptions & { scope?: 'selected' | 'all' } = {}): RenderableModel {
+  let asset: RawAsset
   if (options.scope === 'selected') {
-    const result = selectRepresentation(value as KnotAsset, { representationId: selection.representationId, type: SPATIAL_CURVE }, options)
+    const result = selectRepresentation(value as RawAsset, { representationId: selection.representationId, type: SPATIAL_CURVE }, options)
     if (!result.ok) throw new ViewerError('INVALID_MODEL', result.issues[0]?.message ?? 'Invalid representation', undefined, false)
     asset = result.asset
   } else {
-    const checked=validateKnotAsset(value,options)
-    if(!checked.valid) throw new ViewerError(checked.issues[0].code,'Invalid KnotAsset',checked.issues,false)
+    const checked=validateAsset(value,options)
+    if(!checked.valid) throw new ViewerError(checked.issues[0].code,'Invalid RawAsset',checked.issues,false)
     if(!checked.complete) throw new ViewerError('UNSUPPORTED_SCHEMA',`Incomplete validation: ${checked.missingDependencies.map(d=>d.ref).concat(checked.uncheckedTypes).join(', ')}`,undefined,false)
     asset=normalizeAsset(checked.asset)
   }
@@ -49,7 +49,7 @@ export function resolveKnotAsset(value: unknown, selection: RepresentationSelect
   return {id:asset.id,curves,camera,warnings}
 }
 /** Standalone representation convenience, with explicitly supplied resource context. */
-export function resolveRepresentation(representation: Representation, options: ValidationOptions = {}): RenderableModel {
-  const asset: KnotAsset={schema:'KnotAsset',schemaVersion:1,id:representation.id,subject:{id:representation.id},representations:[representation]}
-  return resolveKnotAsset(asset,{},options)
+export function resolveRepresentation(representation: RawRepresentation, options: ValidationOptions = {}): RenderableModel {
+  const asset: RawAsset={schema:'RawAsset',schemaVersion:1,id:representation.id,subject:{id:representation.id},representations:[representation]}
+  return resolveAsset(asset,{},options)
 }

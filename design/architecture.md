@@ -1,9 +1,9 @@
 # knot-engine architecture
 
-The initial `KnotAsset` redesign profile is implemented. The authoritative current contracts are [data](../v1/specifications/knot-asset.md), [functions](../v1/specifications/functions.md) and [component](../v1/specifications/components.md). The [broader design](knot-asset-draft.md) still contains future work; it does not mean every proposed field is accepted.
+The initial `Asset` redesign profile is implemented. The authoritative current contracts are [data](../v1/specifications/asset.md), [functions](../v1/specifications/functions.md) and [component](../v1/specifications/components.md). The [broader design](knot-asset-draft.md) still contains future work; it does not mean every proposed field is accepted.
 
 ```text
-KnotAsset / standalone data / explicitly provided registries
+Asset / standalone data / explicitly provided registries
   → bounded structural validation
   → URI expansion, reference and domain validation
   → completeness report
@@ -33,7 +33,7 @@ Develop separate viewer components for the different representation types. The m
 
 The viewers must have a consistent API for representation data and required domain context, separately supplied view settings, accessible labels, locale/theme, lifecycle and error events, and applicable methods such as reset, fit and capture. Shared behavior and error meanings must be consistent. Type-specific settings and capabilities must be explicit; a textual or planar viewer need not pretend to support a 3D camera. The main component forwards settings, methods and events through this common contract.
 
-Separate presentation settings from knot/domain data. The application will pass view settings as a separate viewer input rather than embedding them in `KnotAsset` or representation data. This includes camera position and orientation, projection, framing, zoom/pan, visual styling and interaction settings. Review the existing `Representation.views`, `defaultView` and `preferredView` fields and move their presentation role into the separate settings contract. Named view presets may be stored independently and associated with a representation ID; their storage and exact API remain to be designed. Changing a camera, selecting a preset or interacting with a viewer must not mutate knot data. Viewport rendering and capture must use the separately supplied settings consistently.
+Separate presentation settings from knot/domain data. The application will pass view settings as a separate viewer input rather than embedding them in `Asset` or representation data. This includes camera position and orientation, projection, framing, zoom/pan, visual styling and interaction settings. Review the existing `Representation.views`, `defaultView` and `preferredView` fields and move their presentation role into the separate settings contract. Named view presets may be stored independently and associated with a representation ID; their storage and exact API remain to be designed. Changing a camera, selecting a preset or interacting with a viewer must not mutate knot data. Viewport rendering and capture must use the separately supplied settings consistently.
 
 Coordinate systems, units, authored geometry, topology, mathematical conventions and meaningful construction states remain domain data. A camera orientation is a view setting; the orientation convention that gives coordinates or a diagram their meaning is domain data. Knot files must remain valid and useful without saved view settings; viewers supply documented defaults when settings are absent.
 

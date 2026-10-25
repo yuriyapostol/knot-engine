@@ -31,15 +31,15 @@ After bounded JSON and structural validation:
 
 A component with an underpass has its orientation constrained by slot 0. Components passing only over other strands have no such constraint; numerical labels are treated as identities, not as an extra orientation rule. Do not claim complete oriented-link reconstruction for every code, or equivalence to source-specific orientation/order conventions. Explicit orientation metadata or a stricter convention can be introduced separately.
 
-The algorithm is iterative, using O(n) time and storage for n crossings. `KNOT_ASSET_LIMITS.pdCrossings` is 16,384 crossings per code and in aggregate per KnotAsset, checked before topology analysis. The structural schema also bounds crossing arrays at 16,384 and `unlinkedComponents` at 16,384. General JSON limits remain depth 64, 262,144 entries and strings up to 1,048,576 characters. These are implementation budgets, not knot invariants.
+The algorithm is iterative, using O(n) time and storage for n crossings. `ASSET_LIMITS.pdCrossings` is 16,384 crossings per code and in aggregate per Asset, checked before topology analysis. The structural schema also bounds crossing arrays at 16,384 and `unlinkedComponents` at 16,384. General JSON limits remain depth 64, 262,144 entries and strings up to 1,048,576 characters. These are implementation budgets, not knot invariants.
 
 `validatePDCode(data)` returns `{valid:false,issues}` or `{valid:true,data,code,warnings,componentCount,crossingCount}`. Counts describe this diagram, not a minimum crossing number or a proof of knot identity. No writhe, chirality, catalog identity or polynomial invariant is inferred.
 
-## KnotAsset integration
+## Asset integration
 
 Use the ordinary representation envelope, including scoped targets and dependencies. The standard resource has `viewSpace:"none"`: PD has no layout or coordinate system. Nonempty `views`, a `defaultView` without a member view and `preferredView` are rejected by the ordinary view rules. No mapping from counted link components to construction objects is implied.
 
-Both standalone representation documents and KnotAsset use the supported semantic validator. Completeness additionally requires resource closure, for example via `STANDARD_RESOURCES`; supported PD does not enter `uncheckedTypes`. The [standalone JSON Schema](../schema/pd-code.schema.json) checks structure only; repeated-label multiplicity, planarity, direction consistency and component existence require runtime validation.
+Both standalone representation documents and Asset use the supported semantic validator. Completeness additionally requires resource closure, for example via `STANDARD_RESOURCES`; supported PD does not enter `uncheckedTypes`. The [standalone JSON Schema](../schema/pd-code.schema.json) checks structure only; repeated-label multiplicity, planarity, direction consistency and component existence require runtime validation.
 
 Validation, extraction, JSON round trips and same-document composition preserve labels, crossing order and explicit `unlinkedComponents` without normalization. Equivalent relabelings are not automatically deduplicated. The existing 3D resolver and `KnotViewer` still require spatial curves; validation completeness does not imply renderer support.
 
@@ -64,4 +64,4 @@ Acceptance tests include sourced knots and links, reflections with corresponding
 
 ## Attribution of concrete data
 
-Optional `sources` and `contributions` belong to the `Representation` envelope, outside `data`. Shared source definitions and the global license belong to the KnotAsset. Convention references in this specification explain the contract; representation sources identify where its concrete data came from. See the [shared metadata specification](sources.md).
+Optional `sources` and `contributions` belong to the `Representation` envelope, outside `data`. Shared source definitions and the global license belong to the Asset. Convention references in this specification explain the contract; representation sources identify where its concrete data came from. See the [shared metadata specification](sources.md).

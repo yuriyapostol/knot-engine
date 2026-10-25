@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import type { KnotAsset, SelectionResult } from '../core'
+import type { RawAsset, SelectionResult } from '../core'
 import { expandURI, selectRepresentation } from '../core'
 
 export interface ViewerCapabilities {
@@ -26,7 +26,7 @@ export function createViewerRegistry(entries: readonly ViewerRegistration[]): Vi
   return result
 }
 
-export function findViewer(asset: KnotAsset, type: string, registry: ViewerRegistry): ViewerRegistration | undefined {
+export function findViewer(asset: RawAsset, type: string, registry: ViewerRegistry): ViewerRegistration | undefined {
   return registry.get(expandURI(type, asset.namespaces))
 }
 
@@ -36,7 +36,7 @@ export function findViewer(asset: KnotAsset, type: string, registry: ViewerRegis
  * A custom registry is authoritative: it replaces, rather than extends, built-ins.
  */
 export function selectViewerRepresentation(
-  asset: KnotAsset,
+  asset: RawAsset,
   registry: ViewerRegistry,
   representationId?: string,
 ): SelectionResult {

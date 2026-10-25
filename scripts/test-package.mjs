@@ -26,14 +26,14 @@ try {
   writeFileSync(join(temp, 'core.mjs'), `
     import assert from 'node:assert/strict'
     assert.equal(import.meta.resolve('knot-engine/schema/dt-code.schema.json'), new URL('./node_modules/knot-engine/v1/schema/dt-code.schema.json', import.meta.url).href)
-    assert.equal(import.meta.resolve('knot-engine/schema/knot-asset.schema.json'), new URL('./node_modules/knot-engine/v1/schema/knot-asset.schema.json', import.meta.url).href)
+    assert.equal(import.meta.resolve('knot-engine/schema/asset.schema.json'), new URL('./node_modules/knot-engine/v1/schema/asset.schema.json', import.meta.url).href)
     for (const key of ['window','document','WebGLRenderingContext']) Object.defineProperty(globalThis, key, { get() { throw new Error('DOM access: '+key) } })
     const core = await import('knot-engine/core')
-    assert.equal(core.validateKnotAsset(${readFileSync('v1/examples/assets/open-rope.json', 'utf8')}).valid, true)
+    assert.equal(core.validateAsset(${readFileSync('v1/examples/assets/open-rope.json', 'utf8')}).valid, true)
     assert.equal(core.validateDTCode({convention: core.DT_SIGNED_EVEN, code: [4,6,2]}).valid, true)
     assert.equal(core.validateDTCode({convention: core.DT_SIGNED_EVEN, code: [[4],[2]]}).componentCount, 2)
     assert.equal(core.validatePDCode({convention: core.PD_CCW_UNDER_FIRST, crossings: [], unlinkedComponents: 1}).componentCount, 1)
-    assert.equal(core.resolveKnotAsset(${readFileSync('v1/examples/assets/open-rope.json', 'utf8')}).curves.length, 1)
+    assert.equal(core.resolveAsset(${readFileSync('v1/examples/assets/open-rope.json', 'utf8')}).curves.length, 1)
   `)
   execFileSync(process.execPath, ['--no-warnings', '--experimental-loader', join(temp, 'core-loader.mjs'), join(temp, 'core.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
   writeFileSync(join(temp, 'subpaths.mjs'), `
@@ -58,12 +58,12 @@ try {
   `)
   execFileSync(process.execPath, [join(temp, 'ssr.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
   writeFileSync(join(temp, 'check.ts'), `
-    import { KnotViewer, type KnotAsset, type CameraView } from 'knot-engine'
+    import { KnotViewer, type Asset, type CameraView } from 'knot-engine'
     import { Knot3DViewer } from 'knot-engine/3d'
     import { KnotMosaicViewer } from 'knot-engine/mosaic'
-    import { validateKnotAsset, resolveKnotAsset, type Representation, type DTCode, DT_SIGNED_EVEN, validateDTCode, type PDCode, type SourceDefinition, type Contribution, type License, validatePDCode, PD_CCW_UNDER_FIRST } from 'knot-engine/core'
+    import { validateAsset, resolveAsset, type Representation, type DTCode, DT_SIGNED_EVEN, validateDTCode, type PDCode, type SourceDefinition, type Contribution, type License, validatePDCode, PD_CCW_UNDER_FIRST } from 'knot-engine/core'
     const representation: Representation = { id: 'r', type: 'urn:example:representation', data: {} }
-    const asset: KnotAsset = { schema: 'KnotAsset', schemaVersion: 1, id: 'a', subject: { id: 's' }, representations: [representation] }
+    const asset: Asset = { schema: 'Asset', schemaVersion: 1, id: 'a', subject: { id: 's' }, representations: [representation] }
     const camera: CameraView = { mode: 'fixed', position: [0,0,1], target: [0,0,0], up: [0,1,0], projection: { kind: 'perspective', fovY: 1 } }
     type Props = InstanceType<typeof KnotViewer>['$props']
     const props: Props = { asset, representationId: 'r', label: 'a', initialCamera: camera }
@@ -77,8 +77,8 @@ try {
     const source: SourceDefinition = { id: 'book', title: 'Book' }
     const contribution: Contribution = { name: 'Editor', roles: ['editing'] }
     const license: License = { name: 'Example terms' }
-    validateKnotAsset({ ...asset, sources: [source], contributions: [contribution], license })
-    validateKnotAsset(props.asset); resolveKnotAsset(asset)
+    validateAsset({ ...asset, sources: [source], contributions: [contribution], license })
+    validateAsset(props.asset); resolveAsset(asset)
   `)
   execFileSync(process.execPath, [resolve('node_modules/typescript/bin/tsc'), '--noEmit', '--strict', '--skipLibCheck', '--module', 'ESNext', '--moduleResolution', 'Bundler', '--target', 'ES2022', join(temp, 'check.ts')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
   writeFileSync(join(temp, 'index.html'), '<div id="app"></div><script type="module" src="/client.js"></script>')

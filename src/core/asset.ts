@@ -1,4 +1,4 @@
-/** KnotAsset contracts, generation 1. See v1/specifications/knot-asset.md. */
+/** RawAsset contracts, generation 1. See v1/specifications/knot-asset.md. */
 export const KNOT_NAMESPACE = 'https://yuriyapostol.github.io/knot-engine/v1/'
 export const SPATIAL_CURVE = `${KNOT_NAMESPACE}representation-types/spatial-curve`
 export const GRID_DIAGRAM = `${KNOT_NAMESPACE}representation-types/grid-diagram`
@@ -20,7 +20,7 @@ export const ROPE_TYPE = `${KNOT_NAMESPACE}object-types/rope`
 export type Point3D = [number, number, number]
 export type Reference = { id: string; ref?: never } | { ref: string; id?: never }
 export type Namespaces = Record<string, string>
-export interface Subject { id: string; names?: { language: string; value: string }[]; descriptions?: { language: string; value: string }[]; identifiers?: { catalog: string; value: string }[] }
+export interface RawSubject { id: string; names?: { language: string; value: string }[]; descriptions?: { language: string; value: string }[]; identifiers?: { catalog: string; value: string }[] }
 export type Target = { kind: 'subject' } | { kind: 'construction'; construction: Reference } | { kind: 'state' | 'object'; construction: Reference; id: string }
 export type Interpolation = { type: 'polyline' } | { type: 'catmull-rom'; parameterization: 'uniform'; tension: number } | { type: 'catmull-rom'; parameterization: 'centripetal' | 'chordal' }
 export interface SpatialCurve { id: string; object?: string; closed: boolean; interpolation: Interpolation; points: Point3D[] }
@@ -40,10 +40,10 @@ export type Camera3D =
 export type ViewDefinition = { id: string; name: string; description?: string } & (
   { space: 'space'; camera: Camera3D } | { space: 'plane'; camera: { mode: 'plane'; center: [number, number]; height: number } }
 )
-export interface CatalogDefinition { id: string; name: string; description: string; homepage?: string; edition?: string; identifierRules?: { caseSensitive?: boolean; pattern?: string } }
+export interface RawCatalogDefinition { id: string; name: string; description: string; homepage?: string; edition?: string; identifierRules?: { caseSensitive?: boolean; pattern?: string } }
 export type DataSchema = { ref: string; inline?: never } | { inline: Record<string, unknown>; ref?: never }
-export interface ObjectTypeDefinition { id: string; name: string; description: string; dataSchema: DataSchema; specification: string }
-export interface RepresentationTypeDefinition extends ObjectTypeDefinition { viewSpace?: 'none' | 'plane' | 'space' }
+export interface RawObjectTypeDefinition { id: string; name: string; description: string; dataSchema: DataSchema; specification: string }
+export interface RawRepresentationTypeDefinition extends RawObjectTypeDefinition { viewSpace?: 'none' | 'plane' | 'space' }
 export interface ConstructionObject { id: string; type: string; [key: string]: unknown }
 export interface RopeObject extends ConstructionObject { topology: 'open' | 'closed'; ends: { id: string }[]; length?: number; diameter?: number }
 export interface Construction { id: string; name?: string; description?: string; objects: ConstructionObject[]; states?: { id: string; name?: string; description?: string }[] }
@@ -56,19 +56,19 @@ export type Source = SourceFields & ({ title: string } | { url: string })
 export type SourceDefinition = Source & { id: string }
 export type SourceReference = Reference & { locator?: string; accessed?: string; note?: string }
 export type SourceUse = Source | SourceReference
-export interface Representation { names?: { language: string; value: string }[]; descriptions?: { language: string; value: string }[]; sources?: SourceUse[]; contributions?: Contribution[]; id: string; type: string; target?: Target; data: unknown }
-export interface Step { names?: { language: string; value: string }[]; id: string; instructions?: { language: string; value: string }[]; representations?: Reference[] }
-export interface Procedure { id: string; names?: { language: string; value: string }[]; descriptions?: { language: string; value: string }[]; construction?: Reference; steps: Step[] }
-export type ResourceEntry = { kind: 'source'; resource: SourceDefinition } | { kind: 'catalog'; resource: CatalogDefinition } | { kind: 'representation-type'; resource: RepresentationTypeDefinition } | { kind: 'object-type'; resource: ObjectTypeDefinition } | { kind: 'construction'; resource: Construction } | { kind: 'view'; resource: ViewDefinition }
+export interface RawRepresentation { names?: { language: string; value: string }[]; descriptions?: { language: string; value: string }[]; sources?: SourceUse[]; contributions?: Contribution[]; id: string; type: string; target?: Target; data: unknown }
+export interface RawStep { names?: { language: string; value: string }[]; id: string; instructions?: { language: string; value: string }[]; representations?: Reference[] }
+export interface RawProcedure { id: string; names?: { language: string; value: string }[]; descriptions?: { language: string; value: string }[]; construction?: Reference; steps: RawStep[] }
+export type ResourceEntry = { kind: 'source'; resource: SourceDefinition } | { kind: 'catalog'; resource: RawCatalogDefinition } | { kind: 'representation-type'; resource: RawRepresentationTypeDefinition } | { kind: 'object-type'; resource: RawObjectTypeDefinition } | { kind: 'construction'; resource: Construction } | { kind: 'view'; resource: ViewDefinition }
 export type ResourceKind = ResourceEntry['kind']
 export interface Dependency { kind: ResourceKind; ref: string }
 export interface DocumentContext { schemaVersion: 1; $schema?: string; namespaces?: Namespaces; dependencies?: Dependency[] }
-export interface KnotAsset extends DocumentContext {
-  schema: 'KnotAsset'; id: string; subject: Subject
+export interface RawAsset extends DocumentContext {
+  schema: 'RawAsset'; id: string; subject: RawSubject
   sources?: SourceDefinition[]; contributions?: Contribution[]; license?: License
-  catalogs?: CatalogDefinition[]; representationTypes?: RepresentationTypeDefinition[]; objectTypes?: ObjectTypeDefinition[]
-  constructions?: (Construction | { ref: string })[]; representations?: Representation[]; procedures?: Procedure[]
+  catalogs?: RawCatalogDefinition[]; representationTypes?: RawRepresentationTypeDefinition[]; objectTypes?: RawObjectTypeDefinition[]
+  constructions?: (Construction | { ref: string })[]; representations?: RawRepresentation[]; procedures?: RawProcedure[]
 }
 export type KnotResourceDocument = DocumentContext & ResourceEntry & { schema: 'KnotResourceDocument' }
-export interface KnotResourceRegistry extends Omit<DocumentContext, 'dependencies'> { schema: 'KnotResourceRegistry'; id?: string; resources: ResourceEntry[] }
-export interface KnotRepresentationDocument extends DocumentContext { schema: 'KnotRepresentationDocument'; subject?: Subject; representation: Representation; sources?: SourceDefinition[] }
+export interface RawKnotResourceRegistry extends Omit<DocumentContext, 'dependencies'> { schema: 'RawKnotResourceRegistry'; id?: string; resources: ResourceEntry[] }
+export interface KnotRepresentationDocument extends DocumentContext { schema: 'KnotRepresentationDocument'; subject?: RawSubject; representation: RawRepresentation; sources?: SourceDefinition[] }

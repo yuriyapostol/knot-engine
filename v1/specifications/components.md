@@ -1,10 +1,10 @@
 # KnotViewer
 
-Vue 3 component for one static spatial representation of a [`KnotAsset`](knot-asset.md). Replace the asset object to update geometry; deep mutation is unsupported. Validation and selection finish before WebGL allocation. A Grid-only asset is valid data but is unsupported by this component.
+Vue 3 component for one static spatial representation of a [`Asset`](knot-asset.md). Replace the asset object to update geometry; deep mutation is unsupported. Validation and selection finish before WebGL allocation. A Grid-only asset is valid data but is unsupported by this component.
 
 | Prop | Meaning |
 | --- | --- |
-| `asset?: KnotAsset \| null` | Input; null/omitted displays the empty state |
+| `asset?: Asset \| null` | Input; null/omitted displays the empty state |
 | `label: string` | Required accessible label |
 | `representationId?: string` | Selected representation; defaults to first `spatial-curve` |
 | `view?: Reference \| ViewDefinition` | Select a listed view or supply an explicit complete view |
