@@ -3,7 +3,7 @@ import { resolveRepresentationView, type RawKnotResourceRegistry, type ViewDefin
 
 const plane: ViewDefinition = { id: 'urn:test:view', name: 'Plane', space: 'plane', camera: { mode: 'plane', center: [2,2], height: 4 } }
 const registry: RawKnotResourceRegistry = {
-  schema: 'RawKnotResourceRegistry', schemaVersion: 1,
+  schema: 'KnotResourceRegistry', schemaVersion: 1,
   resources: [{ kind: 'view', resource: plane }],
 }
 describe('application view resolution', () => {
