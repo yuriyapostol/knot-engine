@@ -70,5 +70,5 @@ export interface RawAsset extends DocumentContext {
   constructions?: (Construction | { ref: string })[]; representations?: RawRepresentation[]; procedures?: RawProcedure[]
 }
 export type KnotResourceDocument = DocumentContext & ResourceEntry & { schema: 'KnotResourceDocument' }
-export interface RawKnotResourceRegistry extends Omit<DocumentContext, 'dependencies'> { schema: 'RawKnotResourceRegistry'; id?: string; resources: ResourceEntry[] }
+export interface RawKnotResourceRegistry extends Omit<DocumentContext, 'dependencies'> { schema: 'KnotResourceRegistry'; id?: string; resources: ResourceEntry[] }
 export interface KnotRepresentationDocument extends DocumentContext { schema: 'KnotRepresentationDocument'; subject?: RawSubject; representation: RawRepresentation; sources?: SourceDefinition[] }

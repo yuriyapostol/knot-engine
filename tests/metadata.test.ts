@@ -51,7 +51,7 @@ it('resolves only explicit source resource references and normalizes IDs without
   a.sources=[]
   a.representations![0].sources=[{ref:'ex:book'}]
   expect(validateAsset(a)).toMatchObject({valid:true,complete:false,missingDependencies:[{kind:'source',ref:global.id}]})
-  const registry: RawKnotResourceRegistry={schema:'RawKnotResourceRegistry',schemaVersion:1,resources:[{kind:'source',resource:global}]}
+  const registry: RawKnotResourceRegistry={schema: 'KnotResourceRegistry',schemaVersion:1,resources:[{kind:'source',resource:global}]}
   const options={registries:[registry]}
   expect(validateResourceRegistry(registry).valid).toBe(true)
   expect(validateResourceDocument({schema:'KnotResourceDocument',schemaVersion:1,kind:'source',resource:global}).valid).toBe(true)

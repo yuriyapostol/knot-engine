@@ -164,7 +164,9 @@ export function prepareAsset(raw: RawAsset, attached: readonly RawKnotResourceRe
   for (const key of ['catalogs', 'representationTypes', 'objectTypes'] as const) {
     for (const item of (asset[key] ?? []) as { id: string }[]) {
       const id = item.id.startsWith('https://') || item.id.startsWith('http://') || item.id.startsWith('urn:') ? item.id : expandURI(item.id, asset.namespaces)
-      index.set(id, resource(item))
+      const defaults = index.get(id) as any
+      const enhanced = { ...item, ...(defaults?.names && !('names' in item) ? { names: defaults.names } : {}), ...(defaults?.descriptions && !('descriptions' in item) ? { descriptions: defaults.descriptions } : {}) }
+      index.set(id, resource(enhanced))
     }
   }
   contexts.set(asset, index)

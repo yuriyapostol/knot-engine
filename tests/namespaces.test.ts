@@ -26,7 +26,7 @@ for (const name of ['dt-trefoil', 'pd-trefoil', 'mosaic-diagram']) {
 it('resolves compact schema references using each resource document or registry namespace', () => {
   const namespaces = { ex: 'urn:example:', schema: 'https://example.org/schema/' }
   const resource = { id: 'ex:custom', name: 'Custom', description: 'Custom integer', specification: 'ex:spec', dataSchema: { ref: 'schema:integer' } }
-  const registry: RawKnotResourceRegistry = { schema: 'RawKnotResourceRegistry', schemaVersion: 1, namespaces, resources: [{ kind: 'representation-type', resource }] }
+  const registry: RawKnotResourceRegistry = { schema: 'KnotResourceRegistry', schemaVersion: 1, namespaces, resources: [{ kind: 'representation-type', resource }] }
   const document = { schema: 'KnotResourceDocument', schemaVersion: 1, namespaces, kind: 'representation-type', resource }
   expect(validateResourceRegistry(registry).valid).toBe(true)
   expect(validateResourceDocument(document).valid).toBe(true)
