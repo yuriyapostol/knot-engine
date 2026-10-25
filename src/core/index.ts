@@ -2,7 +2,7 @@ export * from './errors'
 export * from './knot'
 export { validateRepresentationDocument } from './validateKnot'
 export type { ValidationOptions, ValidationReport, KnotValidationResult } from './validateKnot'
-export type { CameraView } from './resolve'
+export type { CameraView, RepresentationSelection } from './resolve'
 
 export * from './validateGridDiagram'
 export { validateSpatialCurve, validateView } from './validateSpatial'

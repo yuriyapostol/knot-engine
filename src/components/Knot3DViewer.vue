@@ -1,5 +1,5 @@
-import type { RenderableModel } from '../core/resolve'
 <script setup lang="ts">
+import type { RenderableModel } from '../core/resolve'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import type { CameraView, Camera3D, RawKnot, RawResourceRegistry, Reference, ViewDefinition, ViewerErrorCode, ValidationIssue } from '../core'
 import { resolveKnot } from '../core/resolve'
