@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { validateAsset, validateRepresentationDocument, validateResourceDocument, validateResourceRegistry, selectAsset, composeAsset, STANDARD_RESOURCES, type RawAsset, type KnotResourceRegistry } from '../src/core'
+import { validateAsset, validateRepresentationDocument, validateResourceDocument, validateResourceRegistry, selectAsset, composeAsset, STANDARD_RESOURCES, type RawAsset, type RawKnotResourceRegistry } from '../src/core'
 const source={id:'book',title:'Example publication',authors:[{name:'Original Author',email:'author@example.org'}],license:{name:'Source terms',url:'https://example.org/terms'},note:'Source-level note'}
 const contribution={name:'Editor',email:'editor@example.org',url:'https://example.org/editor',roles:['editing','validation'],date:'2026-10-18',note:'Corrected and checked data'}
 function asset(): RawAsset {
@@ -51,7 +51,7 @@ it('resolves only explicit source resource references and normalizes IDs without
   a.sources=[]
   a.representations![0].sources=[{ref:'ex:book'}]
   expect(validateAsset(a)).toMatchObject({valid:true,complete:false,missingDependencies:[{kind:'source',ref:global.id}]})
-  const registry: KnotResourceRegistry={schema:'KnotResourceRegistry',schemaVersion:1,resources:[{kind:'source',resource:global}]}
+  const registry: RawKnotResourceRegistry={schema:'RawKnotResourceRegistry',schemaVersion:1,resources:[{kind:'source',resource:global}]}
   const options={registries:[registry]}
   expect(validateResourceRegistry(registry).valid).toBe(true)
   expect(validateResourceDocument({schema:'KnotResourceDocument',schemaVersion:1,kind:'source',resource:global}).valid).toBe(true)

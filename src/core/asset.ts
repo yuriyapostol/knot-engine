@@ -64,7 +64,7 @@ export type ResourceKind = ResourceEntry['kind']
 export interface Dependency { kind: ResourceKind; ref: string }
 export interface DocumentContext { schemaVersion: 1; $schema?: string; namespaces?: Namespaces; dependencies?: Dependency[] }
 export interface RawAsset extends DocumentContext {
-  schema: 'RawAsset'; id: string; subject: RawSubject
+  schema: 'Asset'; id: string; subject: RawSubject
   sources?: SourceDefinition[]; contributions?: Contribution[]; license?: License
   catalogs?: RawCatalogDefinition[]; representationTypes?: RawRepresentationTypeDefinition[]; objectTypes?: RawObjectTypeDefinition[]
   constructions?: (Construction | { ref: string })[]; representations?: RawRepresentation[]; procedures?: RawProcedure[]

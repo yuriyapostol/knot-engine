@@ -89,6 +89,9 @@ export class Asset implements RawAsset {
   representations?: Representation[]
   procedures?: Procedure[]
   namespaces?: RawAsset['namespaces']
+  catalogs?: RawAsset['catalogs']
+  representationTypes?: RawAsset['representationTypes']
+  objectTypes?: RawAsset['objectTypes']
   static from(input: RawAsset | Asset, options: { registries?: readonly RawKnotResourceRegistry[] } = {}): Asset {
     if (input instanceof Asset) return input
     const result = validateAsset(input, options)
@@ -129,7 +132,7 @@ export class Asset implements RawAsset {
 }
 export function prepareAsset(raw: RawAsset, attached: readonly RawKnotResourceRegistry[] = []): Asset {
   if (raw instanceof Asset) return raw
-  const asset = structuredClone(raw) as Asset
+  const asset = structuredClone(raw) as unknown as Asset
   Object.setPrototypeOf(asset, Asset.prototype)
   registries.set(asset, attached)
   decorate(asset.subject)

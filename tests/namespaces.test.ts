@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { KNOT_NAMESPACE, validateAsset, validateRepresentationDocument, validateResourceDocument, validateResourceRegistry, selectAsset, STANDARD_RESOURCES, type RawAsset, type KnotResourceRegistry } from '../src/core'
+import { KNOT_NAMESPACE, validateAsset, validateRepresentationDocument, validateResourceDocument, validateResourceRegistry, selectAsset, STANDARD_RESOURCES, type RawAsset, type RawKnotResourceRegistry } from '../src/core'
 import { normalizeAsset } from '../src/core/validateAsset'
 
 for (const name of ['dt-trefoil', 'pd-trefoil', 'mosaic-diagram']) {
@@ -26,7 +26,7 @@ for (const name of ['dt-trefoil', 'pd-trefoil', 'mosaic-diagram']) {
 it('resolves compact schema references using each resource document or registry namespace', () => {
   const namespaces = { ex: 'urn:example:', schema: 'https://example.org/schema/' }
   const resource = { id: 'ex:custom', name: 'Custom', description: 'Custom integer', specification: 'ex:spec', dataSchema: { ref: 'schema:integer' } }
-  const registry: KnotResourceRegistry = { schema: 'KnotResourceRegistry', schemaVersion: 1, namespaces, resources: [{ kind: 'representation-type', resource }] }
+  const registry: RawKnotResourceRegistry = { schema: 'RawKnotResourceRegistry', schemaVersion: 1, namespaces, resources: [{ kind: 'representation-type', resource }] }
   const document = { schema: 'KnotResourceDocument', schemaVersion: 1, namespaces, kind: 'representation-type', resource }
   expect(validateResourceRegistry(registry).valid).toBe(true)
   expect(validateResourceDocument(document).valid).toBe(true)

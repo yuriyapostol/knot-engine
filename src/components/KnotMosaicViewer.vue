@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { MOSAIC_DIAGRAM, selectRepresentation, validateMosaicDiagram, resolveRepresentationView, type RawAsset, type MosaicDiagram, type KnotResourceRegistry, type Reference, type ViewDefinition } from '../core'
+import { MOSAIC_DIAGRAM, selectRepresentation, validateMosaicDiagram, resolveRepresentationView, type RawAsset, type MosaicDiagram, type RawKnotResourceRegistry, type Reference, type ViewDefinition } from '../core'
 import { mosaicPaths } from './mosaicGeometry'
 import { mosaicPanCenter } from './mosaicViewport'
 import type { CaptureOptions } from './captureOptions'
@@ -11,7 +11,7 @@ const props = withDefaults(defineProps<{
   representationId?: string
   view?: Reference | ViewDefinition
   views?: ViewDefinition[]
-  registries?: KnotResourceRegistry[]
+  registries?: RawKnotResourceRegistry[]
   label: string
   description?: string
   locale?: 'uk' | 'en'

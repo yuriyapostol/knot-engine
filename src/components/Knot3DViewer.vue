@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import type { CameraView, Camera3D, RawAsset, KnotResourceRegistry, Reference, ViewDefinition, RenderableModel, ViewerErrorCode, ValidationIssue } from '../core'
+import type { CameraView, Camera3D, RawAsset, RawKnotResourceRegistry, Reference, ViewDefinition, RenderableModel, ViewerErrorCode, ValidationIssue } from '../core'
 import { resolveAsset, resolveRepresentationView, selectRepresentation, SPATIAL_CURVE, validateView, ViewerError } from '../core'
 import type { Quality } from '../geometry/build'
 import { ViewerEngine, type CaptureOptions } from '../renderer/ViewerEngine'
@@ -8,7 +8,7 @@ import { messages as builtInMessages, type ViewerMessages } from '../locales'
 
 export interface ViewerErrorEvent { code: ViewerErrorCode; message: string; issues?: ValidationIssue[]; recoverable: boolean }
 const props = withDefaults(defineProps<{
-  asset?: RawAsset | null; representationId?: string; view?: Reference | ViewDefinition; views?: ViewDefinition[]; registries?: KnotResourceRegistry[]; label: string; description?: string; poster?: string
+  asset?: RawAsset | null; representationId?: string; view?: Reference | ViewDefinition; views?: ViewDefinition[]; registries?: RawKnotResourceRegistry[]; label: string; description?: string; poster?: string
   locale?: 'uk' | 'en'; messages?: Partial<ViewerMessages>; theme?: 'light' | 'dark'
   quality?: Quality; active?: boolean; interactive?: boolean; showControls?: boolean; initialCamera?: Camera3D
 }>(), { locale: 'uk', theme: 'light', quality: 'medium', active: true, interactive: true, showControls: true })

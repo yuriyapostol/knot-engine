@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import Knot3DViewer from './Knot3DViewer.vue'
 import KnotMosaicViewer from './KnotMosaicViewer.vue'
-import { MOSAIC_DIAGRAM, SPATIAL_CURVE, type RawAsset, type Camera3D, type KnotResourceRegistry, type Reference, type ViewDefinition } from '../core'
+import { MOSAIC_DIAGRAM, SPATIAL_CURVE, type RawAsset, type Camera3D, type RawKnotResourceRegistry, type Reference, type ViewDefinition } from '../core'
 import type { ViewerMessages } from '../locales'
 import type { ViewerRegistry } from './viewerRegistry'
 import { createViewerRegistry, selectViewerRepresentation } from './viewerRegistry'
@@ -13,7 +13,7 @@ const props = withDefaults(defineProps<{
   representationId?: string
   view?: Reference | ViewDefinition
   views?: ViewDefinition[]
-  registries?: KnotResourceRegistry[]
+  registries?: RawKnotResourceRegistry[]
   initialCamera?: Camera3D
   messages?: Partial<ViewerMessages>
   registry?: ViewerRegistry
