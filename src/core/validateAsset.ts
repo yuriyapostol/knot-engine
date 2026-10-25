@@ -189,6 +189,6 @@ export function validateRepresentationDocument(value: unknown, options: Validati
   if(issues.length) return {valid:false as const,issues}
   const doc = value as KnotRepresentationDocument
   if (doc.$schema && doc.$schema !== 'https://yuriyapostol.github.io/knot-engine/v1/schema/knot-representation.schema.json') return { valid: false as const, issues: [issue('$schema','Schema URI contradicts document contract')] }
-  const result = validateAsset({schema:'RawAsset',schemaVersion:1,id:'standalone',subject:doc.subject ?? {id:'standalone'},...(doc.namespaces ? {namespaces:doc.namespaces}:{}),...(doc.dependencies ? {dependencies:doc.dependencies}:{}),...(doc.sources ? {sources:doc.sources}:{}),representations:[doc.representation]},options)
+  const result = validateAsset({schema:'Asset',schemaVersion:1,id:'standalone',subject:doc.subject ?? {id:'standalone'},...(doc.namespaces ? {namespaces:doc.namespaces}:{}),...(doc.dependencies ? {dependencies:doc.dependencies}:{}),...(doc.sources ? {sources:doc.sources}:{}),representations:[doc.representation]},options)
   return result.valid ? {...result,document:doc} : result
 }
