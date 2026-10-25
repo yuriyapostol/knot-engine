@@ -24,6 +24,6 @@ Validation options accept `registries` (array of `KnotResourceRegistry`) and `sc
 
 The renderer currently supports only `spatial-curve`. `valid:true` alone is insufficient to render or extract: these operations also require `complete:true`. Unknown type data can be preserved with an incomplete report. No operation proves the mathematical identity of a knot.
 
-See [data semantics](knot-asset.md) and [component API](components.md).
+See [data semantics](asset.md) and [component API](components.md).
 
 Sources, flat contributions and licenses are optional metadata. Validation checks structure, contacts and calendar dates, not authorship or license compatibility. Selection retains required sources, root contributions and license; composition checks license conflicts. See the [shared contract](sources.md).
