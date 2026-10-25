@@ -21,7 +21,7 @@ try {
   assert.ok(pack.files.some(f => f.path.startsWith('v1/schema/')))
   assert.ok(pack.files.every(f => !/^v(?!1\/)[0-9]+\//.test(f.path)))
   assert.ok(pack.files.every(f => !f.path.startsWith('site/')))
-  for (const schema of ['knot', 'spatial-curve', 'grid-diagram', 'pd-code', 'dt-code', 'source', 'contribution', 'license', 'knot-resource-registry']) assert.ok(JSON.parse(readFileSync(join(installed, 'v1', 'schema', `${schema}.schema.json`), 'utf8')).$id)
+  for (const schema of ['knot', 'spatial-curve', 'grid-diagram', 'pd-code', 'dt-code', 'source', 'contribution', 'license', 'resource-registry']) assert.ok(JSON.parse(readFileSync(join(installed, 'v1', 'schema', `${schema}.schema.json`), 'utf8')).$id)
   writeFileSync(join(temp, 'core-loader.mjs'), `export async function resolve(id, context, next) { if (['vue', 'three'].some(name => id === name || id.startsWith(name + '/'))) throw new Error('Core imported '+id); return next(id, context) }`)
   writeFileSync(join(temp, 'core.mjs'), `
     import assert from 'node:assert/strict'
@@ -29,11 +29,11 @@ try {
     assert.equal(import.meta.resolve('knot-engine/schema/knot.schema.json'), new URL('./node_modules/knot-engine/v1/schema/knot.schema.json', import.meta.url).href)
     for (const key of ['window','document','WebGLRenderingContext']) Object.defineProperty(globalThis, key, { get() { throw new Error('DOM access: '+key) } })
     const core = await import('knot-engine/core')
-    assert.equal(core.validateKnot(${readFileSync('v1/examples/knots/open-rope.json', 'utf8')}).valid, true)
+    assert.equal(core.Knot.validate(${readFileSync('v1/examples/knots/open-rope.json', 'utf8')}).valid, true)
     assert.equal(core.validateDTCode({convention: core.DT_SIGNED_EVEN, code: [4,6,2]}).valid, true)
     assert.equal(core.validateDTCode({convention: core.DT_SIGNED_EVEN, code: [[4],[2]]}).componentCount, 2)
     assert.equal(core.validatePDCode({convention: core.PD_CCW_UNDER_FIRST, crossings: [], unlinkedComponents: 1}).componentCount, 1)
-    assert.equal(core.resolveKnot(${readFileSync('v1/examples/knots/open-rope.json', 'utf8')}).curves.length, 1)
+    assert.equal(core.Knot.from(${readFileSync('v1/examples/knots/open-rope.json', 'utf8')}).representations.length, 1)
   `)
   execFileSync(process.execPath, ['--no-warnings', '--experimental-loader', join(temp, 'core-loader.mjs'), join(temp, 'core.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
   writeFileSync(join(temp, 'subpaths.mjs'), `
@@ -61,7 +61,7 @@ try {
     import { KnotViewer, type RawKnot, type CameraView } from 'knot-engine'
     import { Knot3DViewer } from 'knot-engine/3d'
     import { KnotMosaicViewer } from 'knot-engine/mosaic'
-    import { validateKnot, resolveKnot, type RawRepresentation, type DTCode, DT_SIGNED_EVEN, validateDTCode, type PDCode, type SourceDefinition, type Contribution, type License, validatePDCode, PD_CCW_UNDER_FIRST } from 'knot-engine/core'
+    import { Knot, type RawRepresentation, type DTCode, DT_SIGNED_EVEN, validateDTCode, type PDCode, type SourceDefinition, type Contribution, type License, validatePDCode, PD_CCW_UNDER_FIRST } from 'knot-engine/core'
     const representation: RawRepresentation = { id: 'r', type: 'urn:example:representation', data: {} }
     const knot: RawKnot = { schema: 'Knot', schemaVersion: 1, id: 'a', subject: { id: 's' }, representations: [representation] }
     const camera: CameraView = { mode: 'fixed', position: [0,0,1], target: [0,0,0], up: [0,1,0], projection: { kind: 'perspective', fovY: 1 } }
@@ -77,8 +77,8 @@ try {
     const source: SourceDefinition = { id: 'book', title: 'Book' }
     const contribution: Contribution = { name: 'Editor', roles: ['editing'] }
     const license: License = { name: 'Example terms' }
-    validateKnot({ ...knot, sources: [source], contributions: [contribution], license })
-    validateKnot(props.knot); resolveKnot(knot)
+    Knot.validate({ ...knot, sources: [source], contributions: [contribution], license })
+    Knot.validate(props.knot); Knot.from(knot).getRepresentation('r')
   `)
   execFileSync(process.execPath, [resolve('node_modules/typescript/bin/tsc'), '--noEmit', '--strict', '--skipLibCheck', '--module', 'ESNext', '--moduleResolution', 'Bundler', '--target', 'ES2022', join(temp, 'check.ts')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
   writeFileSync(join(temp, 'index.html'), '<div id="app"></div><script type="module" src="/client.js"></script>')
