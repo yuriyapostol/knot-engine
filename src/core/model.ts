@@ -82,7 +82,7 @@ export class Representation implements RawRepresentation {
     const target = language ?? languageFor(knot)
     const def = this.getTypeDefinition() as any
     return overrideFor(knot, resourceKey.get(this) ?? this.id, 'names', target) ?? exact(this.names, target)
-      ?? (def ? overrideFor(knot, def.id, 'names', target) : undefined) ?? exact(def?.names, target)
+      ?? (def ? overrideFor(knot, resourceKey.get(def) ?? def.id, 'names', target) : undefined) ?? exact(def?.names, target)
       ?? exact(this.names, fallbackFor(knot)) ?? exact(def?.names, fallbackFor(knot))
       ?? exact(this.names, 'en') ?? exact(def?.names, 'en') ?? def?.name ?? this.id
   }
@@ -91,7 +91,7 @@ export class Representation implements RawRepresentation {
     const target = language ?? languageFor(knot)
     const def = this.getTypeDefinition() as any
     return overrideFor(knot, resourceKey.get(this) ?? this.id, 'descriptions', target) ?? exact(this.descriptions, target)
-      ?? (def ? overrideFor(knot, def.id, 'descriptions', target) : undefined) ?? exact(def?.descriptions, target)
+      ?? (def ? overrideFor(knot, resourceKey.get(def) ?? def.id, 'descriptions', target) : undefined) ?? exact(def?.descriptions, target)
       ?? exact(this.descriptions, fallbackFor(knot)) ?? exact(def?.descriptions, fallbackFor(knot))
       ?? exact(this.descriptions, 'en') ?? exact(def?.descriptions, 'en') ?? def?.description
   }
