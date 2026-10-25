@@ -1,4 +1,3 @@
-import { resolveKnot } from '../src/core/resolve'
 import { describe, expect, it } from 'vitest'
 import open from '../v1/examples/knots/open-rope.json'
 import { selectRepresentation, SPATIAL_CURVE, MOSAIC_DIAGRAM, type RawKnot } from '../src/core'
@@ -83,14 +82,14 @@ describe('targeted validation', () => {
 
 describe('scoped spatial resolution', () => {
   it('ignores unrelated unsupported sibling while preserving strict default', async () => {
-    const { resolveKnot } = await import('../src/core')
+    const { resolveKnot } = await import('../src/core/resolve')
     const knot = copy()
     knot.representations!.push({ id: 'future', type: 'urn:example:future', data: {} })
     expect(() => resolveKnot(knot, { representationId: 'view-3d-rest' })).toThrow()
     expect(resolveKnot(knot, { representationId: 'view-3d-rest' }, { scope: 'selected' }).curves.length).toBeGreaterThan(0)
   })
   it('rejects invalid selected data', async () => {
-    const { resolveKnot } = await import('../src/core')
+    const { resolveKnot } = await import('../src/core/resolve')
     const knot = copy()
     knot.representations![0].data = {}
     expect(() => resolveKnot(knot, { representationId: knot.representations![0].id }, { scope: 'selected' })).toThrow()
