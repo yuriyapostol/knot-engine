@@ -16,7 +16,7 @@ for (const name of ['dt-trefoil', 'pd-trefoil', 'mosaic-diagram']) {
     expect(selectKnot(compact, { representations: [representation.id] })).toEqual(selectKnot(absolute, { representations: [representation.id] }))
     const data = absolute.representations![0].data as Record<string, unknown>
     expect(data.convention ?? data.tileSet).toMatch(/^https:\/\//)
-    expect(validateRepresentationDocument({ schema: 'RawRepresentationDocument', schemaVersion: 1, namespaces: compact.namespaces, representation }, { registries: [STANDARD_RESOURCES] })).toMatchObject({ valid: true, complete: true })
+    expect(validateRepresentationDocument({ schema: 'RepresentationDocument', schemaVersion: 1, namespaces: compact.namespaces, representation }, { registries: [STANDARD_RESOURCES] })).toMatchObject({ valid: true, complete: true })
     expect(JSON.stringify(compact)).toBe(before)
     const invalid = structuredClone(compact)
     const invalidData = invalid.representations![0].data as Record<string, unknown>
@@ -29,7 +29,7 @@ it('resolves compact schema references using each resource document or registry 
   const namespaces = { ex: 'urn:example:', schema: 'https://example.org/schema/' }
   const resource = { id: 'ex:custom', name: 'Custom', description: 'Custom integer', specification: 'ex:spec', dataSchema: { ref: 'schema:integer' } }
   const registry: RawResourceRegistry = { schema: 'ResourceRegistry', schemaVersion: 1, namespaces, resources: [{ kind: 'representation-type', resource }] }
-  const document = { schema: 'RawResourceDocument', schemaVersion: 1, namespaces, kind: 'representation-type', resource }
+  const document = { schema: 'ResourceDocument', schemaVersion: 1, namespaces, kind: 'representation-type', resource }
   expect(validateResourceRegistry(registry).valid).toBe(true)
   expect(validateResourceDocument(document).valid).toBe(true)
   const knot = { schema: 'Knot', schemaVersion: 1, id: 'a', subject: { id: 's' }, namespaces: { ex: 'urn:example:', schema: 'urn:different:' }, representations: [{ id: 'r', type: 'ex:custom', data: 3 }] }

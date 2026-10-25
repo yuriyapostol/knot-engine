@@ -35,7 +35,7 @@ it('integrates completeness, compact type names and standalone documents', () =>
   expect(validateKnot(knot)).toMatchObject({valid:true,complete:false,uncheckedTypes:[]})
   expect(validateKnot({...knot,namespaces:{k:'https://yuriyapostol.github.io/knot-engine/v1/representation-types/'},representations:[{...knot.representations[0],type:'k:mosaic-diagram'}]},options)).toMatchObject({valid:true,complete:true})
   const rep={...knot.representations[0]}
-  expect(validateRepresentationDocument({schema:'RawRepresentationDocument',schemaVersion:1,representation:rep},options)).toMatchObject({valid:true,complete:true})
+  expect(validateRepresentationDocument({schema:'RepresentationDocument',schemaVersion:1,representation:rep},options)).toMatchObject({valid:true,complete:true})
   expect(validateKnot({...knot,representations:[{...rep,preferredView:{direction:[0,0,1],up:[0,1,0]}}]},options).valid).toBe(false)
   const part=selectKnot(knot,{representations:['m']},options)
   expect(validateKnot(part)).toMatchObject({valid:true,complete:true})

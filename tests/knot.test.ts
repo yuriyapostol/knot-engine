@@ -112,13 +112,13 @@ describe('independent contracts',()=>{
   })
   it('validates resource registry/document and standalone representation',()=>{
     expect(validateResourceRegistry(STANDARD_RESOURCES).valid).toBe(true)
-    expect(validateResourceDocument({schema:'RawResourceDocument',schemaVersion:1,namespaces:STANDARD_RESOURCES.namespaces,...STANDARD_RESOURCES.resources[0]}).valid).toBe(true)
+    expect(validateResourceDocument({schema:'ResourceDocument',schemaVersion:1,namespaces:STANDARD_RESOURCES.namespaces,...STANDARD_RESOURCES.resources[0]}).valid).toBe(true)
     const rep={id:'grid',type:'https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram',data:{encoding:'xo',size:2,x:[0,1],o:[1,0]}}
-    expect(validateRepresentationDocument({schema:'RawRepresentationDocument',schemaVersion:1,representation:rep},{registries:[STANDARD_RESOURCES]})).toMatchObject({valid:true,complete:true})
+    expect(validateRepresentationDocument({schema:'RepresentationDocument',schemaVersion:1,representation:rep},{registries:[STANDARD_RESOURCES]})).toMatchObject({valid:true,complete:true})
   })
 })
 it('validates all schema wrappers and dependency scopes without network access',()=>{
-  const resource={schema:'RawResourceDocument',schemaVersion:1,kind:'catalog',resource:{id:'urn:test:catalog',name:'Catalog',description:'Test'}}
+  const resource={schema:'ResourceDocument',schemaVersion:1,kind:'catalog',resource:{id:'urn:test:catalog',name:'Catalog',description:'Test'}}
   expect(validateResourceDocument({...resource,resource:{...resource.resource,unexpected:true}}).valid).toBe(false)
   expect(validateResourceDocument({...resource,resource:{...resource.resource,id:'local-only'}}).valid).toBe(false)
   const a=copy();a.constructions[0].objects[0].ends[0].id='a';a.constructions[0].objects[0].ends[1].id='b'

@@ -32,7 +32,7 @@ it('preserves viewer-independent representations and complete standalone and com
   const options={registries:[STANDARD_RESOURCES]}
   expect(validateKnot(knot,options)).toMatchObject({valid:true,complete:true,uncheckedTypes:[]})
   expect(validateKnot(knot)).toMatchObject({valid:true,complete:false})
-  expect(validateRepresentationDocument({schema:'RawRepresentationDocument',schemaVersion:1,representation:rep},options)).toMatchObject({valid:true,complete:true})
+  expect(validateRepresentationDocument({schema:'RepresentationDocument',schemaVersion:1,representation:rep},options)).toMatchObject({valid:true,complete:true})
   expect(validateKnot({...knot,representations:[{...rep,preferredView:{direction:[0,0,1],up:[0,1,0]}}]},options).valid).toBe(false)
   const part=selectKnot(knot,{representations:['g']},options)
   expect(validateKnot(part)).toMatchObject({valid:true,complete:true})
@@ -76,7 +76,7 @@ it('validates zero-based unoriented vertex pairs and preserves input order',()=>
 it('checks vertex distribution, JSON structure and standalone documents',()=>{
   const d={encoding:'vertex-pairs',size:3,vertices:[[0,0],[0,1],[1,1],[1,2],[2,2],[2,0]]}
   const rep={id:'v',type:GRID_DIAGRAM,data:d}
-  expect(validateRepresentationDocument({schema:'RawRepresentationDocument',schemaVersion:1,representation:rep},{registries:[STANDARD_RESOURCES]})).toMatchObject({valid:true,complete:true})
+  expect(validateRepresentationDocument({schema:'RepresentationDocument',schemaVersion:1,representation:rep},{registries:[STANDARD_RESOURCES]})).toMatchObject({valid:true,complete:true})
   for(const vertices of [[[0,0],[0,1],[0,2],[1,0],[1,1],[2,2]],[[0,0],[0,1],[1,0],[1,1],[2,0],[2,2]],[[0,0],[0,1],[1,1],[1,2],[2,2],[2,NaN]],Array(6)])expect(validateGridDiagram({...d,vertices}).valid).toBe(false)
   const before=JSON.stringify(d)
   Object.freeze(d.vertices);Object.freeze(d)

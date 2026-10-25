@@ -27,9 +27,9 @@ it('publishes independent compilable schemas and exact resource-kind dispatch',(
     const schema=JSON.parse(readFileSync(`v1/schema/${file}`,'utf8'))
     expect(()=>new Ajv2020({strict:false}).compile(schema),file).not.toThrow()
   }
-  const schema=JSON.parse(readFileSync('v1/schema/knot-resource.schema.json','utf8'))
+  const schema=JSON.parse(readFileSync('v1/schema/resource.schema.json','utf8'))
   const check=new Ajv2020({strict:false}).compile(schema)
-  expect(check({schema:'RawResourceDocument',schemaVersion:1,kind:'view',resource:{id:'urn:example:bad'}})).toBe(false)
+  expect(check({schema:'ResourceDocument',schemaVersion:1,kind:'view',resource:{id:'urn:example:bad'}})).toBe(false)
 })
 
 it('accepts localized subject names and descriptions but rejects malformed records',()=>{

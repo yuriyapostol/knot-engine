@@ -43,7 +43,7 @@ it('retains required sources and both contribution levels and license in selecte
 })
 it('supports standalone representation documents with source definitions',()=>{
   const a=knot()
-  expect(validateRepresentationDocument({schema:'RawRepresentationDocument',schemaVersion:1,namespaces:a.namespaces,sources:a.sources,representation:a.representations![0]}, {registries:[STANDARD_RESOURCES]})).toMatchObject({valid:true,complete:true})
+  expect(validateRepresentationDocument({schema:'RepresentationDocument',schemaVersion:1,namespaces:a.namespaces,sources:a.sources,representation:a.representations![0]}, {registries:[STANDARD_RESOURCES]})).toMatchObject({valid:true,complete:true})
 })
 it('resolves only explicit source resource references and normalizes IDs without rewriting URLs',()=>{
   const a=knot(),global={...source,id:'https://example.org/sources/book'}
@@ -57,7 +57,7 @@ it('resolves only explicit source resource references and normalizes IDs without
   const registry: RawResourceRegistry={schema: 'ResourceRegistry',schemaVersion:1,resources:[{kind:'source',resource:global}]}
   const options={registries:[registry]}
   expect(validateResourceRegistry(registry).valid).toBe(true)
-  expect(validateResourceDocument({schema:'RawResourceDocument',schemaVersion:1,kind:'source',resource:global}).valid).toBe(true)
+  expect(validateResourceDocument({schema:'ResourceDocument',schemaVersion:1,kind:'source',resource:global}).valid).toBe(true)
   const selected=selectKnot(a,{representations:['pd']},options)
   expect(selected.sources).toEqual([global]);expect(validateKnot(selected)).toMatchObject({valid:true,complete:true})
   a.representations![0].sources=[{id:'missing'}]

@@ -70,7 +70,7 @@ it('supports metadata, standalone documents, scopes and preserves code order/sig
   a.representations=[rep]
   expect(validateKnot(a,options)).toMatchObject({valid:true,complete:true,uncheckedTypes:[]})
   expect(validateKnot(a)).toMatchObject({valid:true,complete:false})
-  expect(validateRepresentationDocument({schema:'RawRepresentationDocument',schemaVersion:1,sources:a.sources,representation:rep},options)).toMatchObject({valid:true,complete:true})
+  expect(validateRepresentationDocument({schema:'RepresentationDocument',schemaVersion:1,sources:a.sources,representation:rep},options)).toMatchObject({valid:true,complete:true})
   expect(validateKnot({...a,namespaces:{r:'https://yuriyapostol.github.io/knot-engine/v1/representation-types/'},representations:[{...rep,type:'r:dt-code'}]},options)).toMatchObject({valid:true,complete:true})
   expect(validateKnot({...a,representations:[{...rep,target:{kind:'construction',construction:{id:'missing'}}}]},options).valid).toBe(false)
   const selected=selectKnot(a,{representations:['dt']},options)
@@ -111,7 +111,7 @@ it('validates links, split subdiagrams and explicit crossing-free components',()
   const a=knot([[],[4],[2]])
   const selected=selectKnot(a,{representations:['dt']},options)
   expect(composeKnot([selected,selected]).representations?.[0].data).toEqual(a.representations[0].data)
-  expect(validateRepresentationDocument({schema:'RawRepresentationDocument',schemaVersion:1,representation:a.representations[0]},options)).toMatchObject({valid:true,complete:true})
+  expect(validateRepresentationDocument({schema:'RepresentationDocument',schemaVersion:1,representation:a.representations[0]},options)).toMatchObject({valid:true,complete:true})
 })
 it('agrees with an independent rotation oracle for every component partition through five crossings',()=>{
   let count=0,invalid=0

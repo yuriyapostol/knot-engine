@@ -41,7 +41,7 @@ it('integrates resources, standalone documents, targets, selection and compositi
   const data=pd(link,1), a=knot(data)
   expect(validateKnot(a,options)).toMatchObject({valid:true,complete:true,uncheckedTypes:[]})
   expect(validateKnot(a)).toMatchObject({valid:true,complete:false,uncheckedTypes:[]})
-  expect(validateRepresentationDocument({schema:'RawRepresentationDocument',schemaVersion:1,representation:a.representations[0]},options)).toMatchObject({valid:true,complete:true})
+  expect(validateRepresentationDocument({schema:'RepresentationDocument',schemaVersion:1,representation:a.representations[0]},options)).toMatchObject({valid:true,complete:true})
   expect(validateKnot({...a,namespaces:{r:'https://yuriyapostol.github.io/knot-engine/v1/representation-types/'},representations:[{...a.representations[0],type:'r:pd-code'}]},options)).toMatchObject({valid:true,complete:true})
   const construction={id:'setup',objects:[{id:'rope',type:ROPE_TYPE,topology:'closed',ends:[]}],states:[{id:'tied'}]}
   const targeted={...a,constructions:[construction],representations:[{...a.representations[0],target:{kind:'state',construction:{id:'setup'},id:'tied'}}]}
