@@ -21,7 +21,7 @@ try {
   assert.ok(pack.files.some(f => f.path.startsWith('v1/schema/')))
   assert.ok(pack.files.every(f => !/^v(?!1\/)[0-9]+\//.test(f.path)))
   assert.ok(pack.files.every(f => !f.path.startsWith('site/')))
-  for (const schema of ['knot-asset', 'spatial-curve', 'grid-diagram', 'pd-code', 'dt-code', 'source', 'contribution', 'license', 'knot-resource-registry']) assert.ok(JSON.parse(readFileSync(join(installed, 'v1', 'schema', `${schema}.schema.json`), 'utf8')).$id)
+  for (const schema of ['asset', 'spatial-curve', 'grid-diagram', 'pd-code', 'dt-code', 'source', 'contribution', 'license', 'knot-resource-registry']) assert.ok(JSON.parse(readFileSync(join(installed, 'v1', 'schema', `${schema}.schema.json`), 'utf8')).$id)
   writeFileSync(join(temp, 'core-loader.mjs'), `export async function resolve(id, context, next) { if (['vue', 'three'].some(name => id === name || id.startsWith(name + '/'))) throw new Error('Core imported '+id); return next(id, context) }`)
   writeFileSync(join(temp, 'core.mjs'), `
     import assert from 'node:assert/strict'
@@ -58,12 +58,12 @@ try {
   `)
   execFileSync(process.execPath, [join(temp, 'ssr.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
   writeFileSync(join(temp, 'check.ts'), `
-    import { KnotViewer, type Asset, type CameraView } from 'knot-engine'
+    import { KnotViewer, type RawAsset, type CameraView } from 'knot-engine'
     import { Knot3DViewer } from 'knot-engine/3d'
     import { KnotMosaicViewer } from 'knot-engine/mosaic'
-    import { validateAsset, resolveAsset, type Representation, type DTCode, DT_SIGNED_EVEN, validateDTCode, type PDCode, type SourceDefinition, type Contribution, type License, validatePDCode, PD_CCW_UNDER_FIRST } from 'knot-engine/core'
-    const representation: Representation = { id: 'r', type: 'urn:example:representation', data: {} }
-    const asset: Asset = { schema: 'Asset', schemaVersion: 1, id: 'a', subject: { id: 's' }, representations: [representation] }
+    import { validateAsset, resolveAsset, type RawRepresentation, type DTCode, DT_SIGNED_EVEN, validateDTCode, type PDCode, type SourceDefinition, type Contribution, type License, validatePDCode, PD_CCW_UNDER_FIRST } from 'knot-engine/core'
+    const representation: RawRepresentation = { id: 'r', type: 'urn:example:representation', data: {} }
+    const asset: RawAsset = { schema: 'Asset', schemaVersion: 1, id: 'a', subject: { id: 's' }, representations: [representation] }
     const camera: CameraView = { mode: 'fixed', position: [0,0,1], target: [0,0,0], up: [0,1,0], projection: { kind: 'perspective', fovY: 1 } }
     type Props = InstanceType<typeof KnotViewer>['$props']
     const props: Props = { asset, representationId: 'r', label: 'a', initialCamera: camera }
