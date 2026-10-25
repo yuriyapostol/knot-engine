@@ -5,7 +5,7 @@ import { validateMosaicDiagram, LOMONACO_KAUFFMAN_11 as tileSet, MOSAIC_DIAGRAM,
 const loop = [[2,1],[3,4]]
 const source = [[0,2,1,0],[2,9,10,1],[3,10,8,4],[0,3,4,0]]
 const data = (tiles: number[][]) => ({ tileSet, tiles })
-const asset = {schema:'RawAsset',schemaVersion:1,id:'mosaic',subject:{id:'s'},representations:[{id:'m',type:MOSAIC_DIAGRAM,data:data(source)}]}
+const asset = {schema:'Asset',schemaVersion:1,id:'mosaic',subject:{id:'s'},representations:[{id:'m',type:MOSAIC_DIAGRAM,data:data(source)}]}
 it('traces loops, separate components and crossing strands', () => {
   expect(validateMosaicDiagram(data(loop))).toMatchObject({valid:true,componentCount:1,occupiedTileCount:4,crossingCount:0})
   expect(validateMosaicDiagram(data([[2,1,2,1],[3,4,3,4],[0,0,0,0],[0,0,0,0]]))).toMatchObject({valid:true,componentCount:2})

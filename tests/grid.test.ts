@@ -25,7 +25,7 @@ it('rejects malformed values and enforces size boundaries',()=>{
 })
 it('preserves viewer-independent representations and complete standalone and composed assets',()=>{
   const rep={id:'g',type:GRID_DIAGRAM,data:grid([0,1],[1,0])}
-  const asset={schema:'RawAsset',schemaVersion:1,id:'g',subject:{id:'s'},representations:[rep]}
+  const asset={schema:'Asset',schemaVersion:1,id:'g',subject:{id:'s'},representations:[rep]}
   const options={registries:[STANDARD_RESOURCES]}
   expect(validateAsset(asset,options)).toMatchObject({valid:true,complete:true,uncheckedTypes:[]})
   expect(validateAsset(asset)).toMatchObject({valid:true,complete:false})
@@ -40,7 +40,7 @@ it('preserves different grid encodings as separate representations of one subjec
     {id:'xo',type:GRID_DIAGRAM,data:grid([0,1],[1,0])},
     {id:'pairs',type:GRID_DIAGRAM,data:{encoding:'vertex-pairs',size:2,vertices:[[1,1],[0,0],[1,0],[0,1]]}},
   ]
-  const asset={schema:'RawAsset',schemaVersion:1,id:'mixed-grid',subject:{id:'s'},representations}
+  const asset={schema:'Asset',schemaVersion:1,id:'mixed-grid',subject:{id:'s'},representations}
   const options={registries:[STANDARD_RESOURCES]}
   expect(validateAsset(asset,options)).toMatchObject({valid:true,complete:true,uncheckedTypes:[]})
   const selected=selectAsset(asset,{representations:['xo','pairs']},options)
@@ -55,7 +55,7 @@ it('validates zero-based unoriented vertex pairs and preserves input order',()=>
   const vertices:[[number,number],[number,number],[number,number],[number,number]]=[[1,1],[0,0],[1,0],[0,1]]
   const d={encoding:'vertex-pairs',size:2,vertices}
   expect(validateGridDiagram(d)).toMatchObject({valid:true,componentCount:1,crossingCount:0,data:d})
-  const asset={schema:'RawAsset',schemaVersion:1,id:'v',subject:{id:'s'},representations:[{id:'v',type:GRID_DIAGRAM,data:d}]}
+  const asset={schema:'Asset',schemaVersion:1,id:'v',subject:{id:'s'},representations:[{id:'v',type:GRID_DIAGRAM,data:d}]}
   const options={registries:[STANDARD_RESOURCES]}
   expect(validateAsset(asset,options)).toMatchObject({valid:true,complete:true})
   const part=selectAsset(asset,{representations:['v']},options)

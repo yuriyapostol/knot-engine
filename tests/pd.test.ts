@@ -6,7 +6,7 @@ const trefoil = [[1,5,2,4],[3,1,4,6],[5,3,6,2]]
 const link = [[6,1,7,2],[8,3,5,4],[2,5,3,6],[4,7,1,8]]
 const pd=(crossings:number[][],unlinkedComponents?:number)=>({convention,crossings,...(unlinkedComponents===undefined?{}:{unlinkedComponents})})
 const options={registries:[STANDARD_RESOURCES]}
-const asset=(data:unknown)=>({schema:'RawAsset',schemaVersion:1,id:'pd',subject:{id:'s'},representations:[{id:'pd',type:PD_CODE,data}]})
+const asset=(data:unknown)=>({schema:'Asset',schemaVersion:1,id:'pd',subject:{id:'s'},representations:[{id:'pd',type:PD_CODE,data}]})
 it('checks sourced knot and link examples, mirrors, split diagrams and crossing-free components',()=>{
   expect(validatePDCode(pd(trefoil))).toMatchObject({valid:true,componentCount:1,crossingCount:3})
   expect(validatePDCode(pd(link))).toMatchObject({valid:true,componentCount:2,crossingCount:4})

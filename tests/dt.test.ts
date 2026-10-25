@@ -3,7 +3,7 @@ import Ajv2020 from 'ajv/dist/2020.js'
 import schema from '../v1/schema/dt-code.schema.json'
 import { DT_CODE, DT_SIGNED_EVEN as convention, validateDTCode, validateAsset, validateRepresentationDocument, selectAsset, composeAsset, STANDARD_RESOURCES, resolveAsset } from '../src/core'
 const dt=(code:number[] | number[][])=>({convention,code})
-const asset=(code:number[] | number[][])=>({schema:'RawAsset',schemaVersion:1,id:'dt',subject:{id:'s'},representations:[{id:'dt',type:DT_CODE,data:dt(code)}]})
+const asset=(code:number[] | number[][])=>({schema:'Asset',schemaVersion:1,id:'dt',subject:{id:'s'},representations:[{id:'dt',type:DT_CODE,data:dt(code)}]})
 const options={registries:[STANDARD_RESOURCES]}
 it('validates sourced DT examples, both signs, reducible diagrams and the empty unknot',()=>{
   for (const code of [[],[2],[2,4],[4,6,2],[4,6,8,2],[4,6,2,10,12,8],[6,10,14,12,16,2,18,4,8],[4,8,10,-14,2,-16,-18,-6,-12],[16,18,20,-22,4,2,8,-6,12,10,-14]]) {

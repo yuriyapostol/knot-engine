@@ -49,8 +49,11 @@ export type ResourceIndex = Map<string, ResourceEntry>
 export function addResource(index: ResourceIndex, entry: ResourceEntry, global = true) {
   if (global) expandURI(entry.resource.id)
   const previous = index.get(entry.resource.id)
-  if (previous && canonical(previous) !== canonical(entry)) throw new ViewerError('INVALID_MODEL', `Conflicting resource: ${entry.resource.id}`, undefined, false)
-  index.set(entry.resource.id, entry)
+  const contract = (value: ResourceEntry) => { const { names, descriptions, ...fields } = value.resource as typeof value.resource & { names?: unknown; descriptions?: unknown }; return canonical({ kind: value.kind, resource: fields }) }
+  if (previous && contract(previous) !== contract(entry)) throw new ViewerError('INVALID_MODEL', `Conflicting resource: ${entry.resource.id}`, undefined, false)
+  const old = previous?.resource as { names?: unknown; descriptions?: unknown } | undefined
+  const incoming = entry.resource as typeof entry.resource & { names?: unknown; descriptions?: unknown }
+  index.set(entry.resource.id, previous ? { ...entry, resource: { ...entry.resource, ...(incoming.names === undefined && old?.names !== undefined ? { names: old.names } : {}), ...(incoming.descriptions === undefined && old?.descriptions !== undefined ? { descriptions: old.descriptions } : {}) } } as ResourceEntry : entry)
 }
 export function createResourceIndex(registries: readonly RawKnotResourceRegistry[] = []): ResourceIndex {
   const index: ResourceIndex = new Map()

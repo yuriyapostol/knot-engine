@@ -33,7 +33,7 @@ it('closes external construction dependencies without copying viewer presets',()
   const a=structuredClone(multi)
   const construction={...a.constructions[0],id:'urn:example:setup'}
   const rep={...a.representations[0],target:{kind:'state' as const,construction:{ref:construction.id},id:a.representations[0].target.id}}
-  const asset={schema:'RawAsset',schemaVersion:1,namespaces:a.namespaces,id:'external',subject:{id:'s'},representations:[rep]}
+  const asset={schema:'Asset',schemaVersion:1,namespaces:a.namespaces,id:'external',subject:{id:'s'},representations:[rep]}
   const registry:import('../src/core').RawKnotResourceRegistry={schema:'RawKnotResourceRegistry',schemaVersion:1,namespaces:STANDARD_RESOURCES.namespaces,resources:[...STANDARD_RESOURCES.resources,{kind:'construction',resource:construction}]}
   const part=selectAsset(asset,{representations:[rep.id]},{registries:[registry]})
   expect(validateAsset(part)).toMatchObject({valid:true,complete:true})

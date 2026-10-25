@@ -156,7 +156,9 @@ export function prepareAsset(raw: RawAsset, attached: readonly RawKnotResourceRe
     for (const entry of registry.resources) {
       const item = structuredClone(entry.resource)
       const id = item.id.startsWith('https://') || item.id.startsWith('http://') || item.id.startsWith('urn:') ? item.id : expandURI(item.id, registry.namespaces)
-      index.set(id, resource(item))
+      const defaults = index.get(id) as any
+      const enhanced = { ...item, ...(defaults?.names && !('names' in item) ? { names: defaults.names } : {}), ...(defaults?.descriptions && !('descriptions' in item) ? { descriptions: defaults.descriptions } : {}) }
+      index.set(id, resource(enhanced))
     }
   }
   for (const key of ['catalogs', 'representationTypes', 'objectTypes'] as const) {

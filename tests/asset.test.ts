@@ -12,7 +12,7 @@ describe('RawAsset generation 1', () => {
   })
   for(const file of readdirSync('v1/examples/assets/invalid')) it(`rejects ${file}`,()=>expect(validateAsset(JSON.parse(readFileSync(`v1/examples/assets/invalid/${file}`,'utf8'))).valid).toBe(false))
   it('accepts metadata-only documents and rejects old roots',()=>{
-    expect(validateAsset({schema:'RawAsset',schemaVersion:1,id:'document',subject:{id:'subject'}})).toMatchObject({valid:true,complete:true})
+    expect(validateAsset({schema:'Asset',schemaVersion:1,id:'document',subject:{id:'subject'}})).toMatchObject({valid:true,complete:true})
     expect(validateAsset({schemaVersion:1,curves:[]} ).valid).toBe(false)
     expect(validateAsset({...open,units:'m'}).valid).toBe(false)
   })
@@ -37,12 +37,12 @@ describe('RawAsset generation 1', () => {
     expect(()=>resolveAsset(a)).toThrow(/Incomplete/)
   })
   it('retains unknown extensions as unchecked, never claims renderer support',()=>{
-    const a={schema:'RawAsset',schemaVersion:1,id:'a',subject:{id:'s'},representations:[{id:'r',type:'urn:example:custom',data:{x:1}}]}
+    const a={schema:'Asset',schemaVersion:1,id:'a',subject:{id:'s'},representations:[{id:'r',type:'urn:example:custom',data:{x:1}}]}
     expect(validateAsset(a)).toMatchObject({valid:true,complete:false,uncheckedTypes:['urn:example:custom']})
   })
   it('validates supplied inline schemas without loading URI references',()=>{
     const definition={id:'urn:example:custom',name:'Custom',description:'Custom data',specification:'urn:example:spec',dataSchema:{inline:{$schema:'https://json-schema.org/draft/2020-12/schema',type:'integer'}}}
-    const a={schema:'RawAsset',schemaVersion:1,id:'a',subject:{id:'s'},representationTypes:[definition],representations:[{id:'r',type:definition.id,data:'bad'}]}
+    const a={schema:'Asset',schemaVersion:1,id:'a',subject:{id:'s'},representationTypes:[definition],representations:[{id:'r',type:definition.id,data:'bad'}]}
     expect(validateAsset(a).valid).toBe(false)
     expect(validateAsset({...a,representations:[{...a.representations[0],data:3}]})).toMatchObject({valid:true,complete:false})
   })
@@ -126,6 +126,6 @@ it('validates all schema wrappers and dependency scopes without network access',
 })
 it('keeps missing custom schema references incomplete without fetching',()=>{
   const type={id:'urn:example:custom',name:'Custom',description:'Test',specification:'urn:example:spec',dataSchema:{inline:{$schema:'https://json-schema.org/draft/2020-12/schema',$ref:'https://example.invalid/unavailable.schema.json'}}}
-  const a={schema:'RawAsset',schemaVersion:1,id:'a',subject:{id:'s'},representationTypes:[type],representations:[{id:'r',type:type.id,data:{}}]}
+  const a={schema:'Asset',schemaVersion:1,id:'a',subject:{id:'s'},representationTypes:[type],representations:[{id:'r',type:type.id,data:{}}]}
   expect(validateAsset(a)).toMatchObject({valid:true,complete:false,uncheckedTypes:[type.id]})
 })
