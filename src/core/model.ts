@@ -110,6 +110,20 @@ export class Procedure implements RawProcedure {
   descriptions?: LocalizedTexts
   getName(language?: string): string | undefined { return this.names?.get(language) }
   getDescription(language?: string): string | undefined { return this.descriptions?.get(language) }
+  getStep(id: string): Step | undefined { return this.steps.find(x => x.id === id) }
+  addStep(input: RawStep): Step {
+    if (this.getStep(input.id)) throw new Error('Duplicate step ID: ' + input.id)
+    const step = structuredClone(input) as Step
+    decorate(step)
+    Object.setPrototypeOf(step, Step.prototype)
+    this.steps = Object.freeze([...this.steps, step]) as unknown as Step[]
+    return step
+  }
+  removeStep(id: string): boolean {
+    if (!this.getStep(id)) return false
+    this.steps = Object.freeze(this.steps.filter(x => x.id !== id)) as unknown as Step[]
+    return true
+  }
 }
 export class Knot implements RawKnot {
   schema!: 'Knot'
@@ -132,6 +146,22 @@ export class Knot implements RawKnot {
     return Knot.from(composeKnot(parts.map(x => x instanceof Knot ? x.toRaw() : x), options), options)
   }
   getRepresentation(id: string): Representation | undefined { return this.representations?.find(x => x.id === id) }
+  getProcedure(id: string): Procedure | undefined { return this.procedures?.find(x => x.id === id) }
+  addProcedure(input: RawProcedure): Procedure {
+    if (this.getProcedure(input.id)) throw new Error('Duplicate procedure ID: ' + input.id)
+    const procedure = structuredClone(input) as Procedure
+    decorate(procedure)
+    Object.setPrototypeOf(procedure, Procedure.prototype)
+    for (const step of procedure.steps) { decorate(step); Object.setPrototypeOf(step, Step.prototype) }
+    procedure.steps = Object.freeze(procedure.steps) as unknown as Step[]
+    this.procedures = Object.freeze([...(this.procedures ?? []), procedure]) as unknown as Procedure[]
+    return procedure
+  }
+  removeProcedure(id: string): boolean {
+    if (!this.getProcedure(id)) return false
+    this.procedures = Object.freeze((this.procedures ?? []).filter(x => x.id !== id)) as unknown as Procedure[]
+    return true
+  }
   getResource(id: string): PreparedResource | undefined {
     let uri = id
     if (!id.startsWith('https://') && !id.startsWith('http://') && !id.startsWith('urn:')) {
@@ -181,7 +211,9 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
       decorate(step)
       Object.setPrototypeOf(step, Step.prototype)
     }
+    procedure.steps = Object.freeze(procedure.steps) as unknown as Step[]
   }
+  if (knot.procedures) knot.procedures = Object.freeze(knot.procedures) as unknown as Procedure[]
   const index = new Map<string, PreparedResource>()
   for (const registry of [STANDARD_RESOURCES, ...attached]) {
     for (const entry of registry.resources) {

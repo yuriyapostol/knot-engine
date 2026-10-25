@@ -36,6 +36,22 @@ describe('prepared Knot model', () => {
     const other = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     expect(other.getRepresentation('view-3d-rest')?.getName()).toBe('Spatial curve')
   })
+  it('edits procedures and steps without replacing unrelated entities', () => {
+    const knot = Knot.from(raw as any)
+    const rep = knot.getRepresentation('view-3d-rest')
+    const procedure = knot.addProcedure({ id: 'tie', steps: [{ id: 'first' }] })
+    expect(knot.getProcedure('tie')).toBe(procedure)
+    expect(procedure.getStep('first')).toBe(procedure.steps[0])
+    expect(() => procedure.steps.push(procedure.steps[0])).toThrow()
+    const step = procedure.addStep({ id: 'second' })
+    expect(procedure.getStep('second')).toBe(step)
+    expect(() => procedure.addStep({ id: 'second' })).toThrow()
+    expect(procedure.removeStep('first')).toBe(true)
+    expect(knot.getRepresentation('view-3d-rest')).toBe(rep)
+    expect(knot.toRaw().procedures?.[0].steps.map(x => x.id)).toEqual(['second'])
+    expect(knot.removeProcedure('tie')).toBe(true)
+    expect(knot.getProcedure('tie')).toBeUndefined()
+  })
   it('controls structural changes and preserves stable identity', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const existing = knot.getRepresentation('view-3d-rest')!
