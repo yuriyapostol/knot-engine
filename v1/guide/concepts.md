@@ -8,7 +8,7 @@ The [`Knot` specification](../specifications/knot.md), its [schema](../schema/kn
 
 ## What is proposed
 
-The [broader `Knot` design](../../design/knot-knot-draft.md) also contains future formats and assertions. Unified representations and standalone shared resources are implemented in the [initial profile](../specifications/knot.md). The current specification defines the exact supported fields.
+The [broader `Knot` design](../../design/knot-draft.md) also contains future formats and assertions. Unified representations and standalone shared resources are implemented in the [initial profile](../specifications/knot.md). The current specification defines the exact supported fields.
 
 A catalog defines a system of identifiers, such as a catalog name and its record notation. A registry of representation types contains concrete type definitions. A view stores camera settings. These are different kinds of resources, so `resources/catalogs/` is not an umbrella name for them all.
 

@@ -2,7 +2,7 @@
 
 **Implementation status:** the initial profile (spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, procedures, resources and cameras) is described in the [current specification](../v1/specifications/knot.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
 
-Status: design reference elaborating the [architectural draft](knot-knot-draft.md). Standalone resources and optional embedding are implemented in the initial profile. The [current specification](../v1/specifications/knot.md) defines their supported fields; additional details below remain proposals. Package version and `schemaVersion: 1` stay unchanged; compatibility with the previous structure is not required. See [publication](publication.md).
+Status: design reference elaborating the [architectural draft](knot-draft.md). Standalone resources and optional embedding are implemented in the initial profile. The [current specification](../v1/specifications/knot.md) defines their supported fields; additional details below remain proposals. Package version and `schemaVersion: 1` stay unchanged; compatibility with the previous structure is not required. See [publication](publication.md).
 
 ## 1. Namespace
 
