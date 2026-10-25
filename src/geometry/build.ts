@@ -1,3 +1,4 @@
+import type { RenderableModel } from '../core/resolve'
 import * as THREE from 'three'
 import { ViewerError, type RenderableModel } from '../core'
 
@@ -6,7 +7,7 @@ const profiles = { low: [64, 8], medium: [128, 12], high: [256, 16] } as const
 
 export interface BuiltModel { group: THREE.Group; bounds: THREE.Box3; warnings: string[]; dispose(): void }
 
-export function buildGeometry(model: RenderableModel, quality: Quality, theme: 'light' | 'dark'): BuiltModel {
+export function buildGeometry(model: quality: Quality, theme: 'light' | 'dark'): BuiltModel {
   const warnings: string[] = [...model.warnings]
   let profile: Quality = quality
   const triangles = (p: Quality) => model.curves.length * (profiles[p][0] * profiles[p][1] * 4 + profiles[p][1] * 4)

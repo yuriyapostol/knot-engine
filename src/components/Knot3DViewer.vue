@@ -1,6 +1,7 @@
+import type { RenderableModel } from '../core/resolve'
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import type { CameraView, Camera3D, RawKnot, RawResourceRegistry, Reference, ViewDefinition, RenderableModel, ViewerErrorCode, ValidationIssue } from '../core'
+import type { CameraView, Camera3D, RawKnot, RawResourceRegistry, Reference, ViewDefinition, ViewerErrorCode, ValidationIssue } from '../core'
 import { resolveKnot } from '../core/resolve'
 import { resolveRepresentationView, selectRepresentation, SPATIAL_CURVE, validateView, ViewerError } from '../core'
 import type { Quality } from '../geometry/build'

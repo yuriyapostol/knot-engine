@@ -1,7 +1,8 @@
+import type { RenderableModel } from '../core/resolve'
 import * as THREE from 'three'
 import { verticalDrag } from './touchGesture'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import type { CameraView, Camera3D, RenderableModel } from '../core'
+import type { CameraView, Camera3D } from '../core'
 import { ViewerError, validateView } from '../core'
 import { prepareCamera, cameraView, resizeCamera, DEFAULT_CAMERA, type RenderCamera } from './camera'
 import { buildGeometry, type BuiltModel, type Quality } from '../geometry/build'
@@ -158,7 +159,7 @@ export class ViewerEngine {
     this.requestRender()
   }
   private quality: Quality = 'medium'
-  setModel(model: RenderableModel, quality: Quality, initial?: Camera3D) {
+  setModel(model: quality: Quality, initial?: Camera3D) {
     this.operation++
     this.ready = false
     this.quality = quality
