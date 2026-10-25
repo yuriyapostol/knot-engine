@@ -42,7 +42,7 @@ describe('independent representation selection', () => {
     })
   })
   it('rejects malformed assets without throwing', () => {
-    expect(selectRepresentation({ schema: 'RawAsset' } as RawAsset)).toMatchObject({
+    expect(selectRepresentation({ schema: 'Asset' } as RawAsset)).toMatchObject({
       ok: false, issues: [{ code: 'INVALID_ASSET' }],
     })
   })

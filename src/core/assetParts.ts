@@ -21,7 +21,7 @@ export function selectAsset(value: unknown, selection: { representations?: strin
   const includeConstruction = (r: Reference) => { const c=constructionFor(asset,index,r); if(c) constructions.set(c.id,c) }
   for(const r of representations) if(r.target && r.target.kind !== 'subject') includeConstruction(r.target.construction)
   for(const p of procedures) if(p.construction) includeConstruction(p.construction)
-  const output: RawAsset = { schema:'RawAsset',schemaVersion:1,id:asset.id,subject:asset.subject,representations,procedures,constructions:[...constructions.values()] }
+  const output: RawAsset = { schema:'Asset',schemaVersion:1,id:asset.id,subject:asset.subject,representations,procedures,constructions:[...constructions.values()] }
   if (asset.contributions) output.contributions = asset.contributions
   if (asset.license) output.license = asset.license
   const included = new Set<string>()

@@ -30,7 +30,7 @@ it('resolves compact schema references using each resource document or registry 
   const document = { schema: 'KnotResourceDocument', schemaVersion: 1, namespaces, kind: 'representation-type', resource }
   expect(validateResourceRegistry(registry).valid).toBe(true)
   expect(validateResourceDocument(document).valid).toBe(true)
-  const asset = { schema: 'RawAsset', schemaVersion: 1, id: 'a', subject: { id: 's' }, namespaces: { ex: 'urn:example:', schema: 'urn:different:' }, representations: [{ id: 'r', type: 'ex:custom', data: 3 }] }
+  const asset = { schema: 'Asset', schemaVersion: 1, id: 'a', subject: { id: 's' }, namespaces: { ex: 'urn:example:', schema: 'urn:different:' }, representations: [{ id: 'r', type: 'ex:custom', data: 3 }] }
   const options = { registries: [registry], schemas: [{ $schema: 'https://json-schema.org/draft/2020-12/schema', $id: 'https://example.org/schema/integer', type: 'integer' }] }
   expect(validateAsset(asset, options)).toMatchObject({ valid: true })
   expect(validateAsset({ ...asset, representations: [{ ...asset.representations[0], data: 'bad' }] }, options).valid).toBe(false)
@@ -43,7 +43,7 @@ it('resolves compact schema references using each resource document or registry 
 it('preserves inline schema keywords, literal URI strings and unknown representation data', () => {
   const data = { convention: 'knot-engine:conventions/dt-signed-even', tileSet: 'knot-engine:tile-sets/lomonaco-kauffman-11', url: 'knot-engine:literal', nested: { type: 'knot-engine:literal' } }
   const inline = { $schema: 'https://json-schema.org/draft/2020-12/schema', $id: 'https://example.org/schema/custom', $defs: { literal: { const: data } }, $ref: '#/$defs/literal' }
-  const asset: RawAsset = { schema: 'RawAsset', schemaVersion: 1, id: 'custom', subject: { id: 's' }, namespaces: { 'knot-engine': KNOT_NAMESPACE }, representationTypes: [{ id: 'urn:custom', name: 'Custom', description: 'Literal data', specification: 'urn:spec', dataSchema: { inline } }], representations: [{ id: 'r', type: 'urn:custom', data }] }
+  const asset: RawAsset = { schema: 'Asset', schemaVersion: 1, id: 'custom', subject: { id: 's' }, namespaces: { 'knot-engine': KNOT_NAMESPACE }, representationTypes: [{ id: 'urn:custom', name: 'Custom', description: 'Literal data', specification: 'urn:spec', dataSchema: { inline } }], representations: [{ id: 'r', type: 'urn:custom', data }] }
   const normalized = normalizeAsset(asset)
   expect(normalized.representations![0].data).toEqual(data)
   expect(normalized.representationTypes![0].dataSchema.inline).toEqual(inline)

@@ -50,6 +50,6 @@ export function resolveAsset(value: unknown, selection: RepresentationSelection 
 }
 /** Standalone representation convenience, with explicitly supplied resource context. */
 export function resolveRepresentation(representation: RawRepresentation, options: ValidationOptions = {}): RenderableModel {
-  const asset: RawAsset={schema:'RawAsset',schemaVersion:1,id:representation.id,subject:{id:representation.id},representations:[representation]}
+  const asset: RawAsset={schema:'Asset',schemaVersion:1,id:representation.id,subject:{id:representation.id},representations:[representation]}
   return resolveAsset(asset,{},options)
 }
