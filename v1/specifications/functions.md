@@ -4,7 +4,7 @@ Import core APIs from `knot-engine/core`; this entry point uses no Vue, Three.js
 
 | Function | Result |
 | --- | --- |
-| `validateKnot(value, options?)` | `{valid:true,knot,warnings,complete,missingDependencies,uncheckedTypes}` or `{valid:false,issues}` |
+| `Knot.validate(raw, options?)` / `knot.validate(options?)` | Validation report for raw or prepared data |
 | `validateGridDiagram(value)` | `{valid:true,data,diagram,warnings,componentCount,crossingCount}` or issues; independent grid diagram validation with `xo` or `vertex-pairs` encoding |
 | `validateDTCode(value)` | `{valid:true,data,code,warnings,componentCount,crossingCount}` or issues; numeric knot/link DT with planar-realizability validation |
 | `validatePDCode(value)` | `{valid:true,data,code,warnings,componentCount,crossingCount}` or issues; independent planar diagram code validation |
@@ -14,10 +14,7 @@ Import core APIs from `knot-engine/core`; this entry point uses no Vue, Three.js
 | `validateResourceDocument(value)` | Validated resource envelope or issues; does not establish dependency closure |
 | `validateResourceRegistry(value)` | Validated registry and conflict check or issues; does not establish dependency closure |
 | `validateRepresentationDocument(value, options?)` | Standalone representation validation report |
-| `resolveKnot(value, {representationId?,view?}?, options?)` | Internal `RenderableModel`; throws `ViewerError` on invalid, unresolved or unsupported data |
-| `resolveRepresentation(representation, options?)` | Standalone subject-level spatial representation to rendering data; explicit resource context required |
-| `selectKnot(value, {representations?,procedures?}, options?)` | Cloned self-contained fragment with dependencies |
-| `composeKnot(values, options?)` | Cloned merged fragments of the same document; conflicts are errors |
+| `Knot.from(raw, options?)` / `knot.select(selection)` / `Knot.compose(parts)` | Prepare, select and compose documents |
 | `expandURI(value, namespaces?)` | Exact expanded URI; undeclared prefixes throw |
 
 Validation options accept `registries` (array of `ResourceRegistry`) and `schemas` (explicit JSON Schema objects). Known objects are always closed; the retained `strict` option does not relax validation. `STANDARD_RESOURCES` provides the built-in representation and object type definitions when passed explicitly. Type definitions, `ViewerError`, `KNOT_LIMITS`, namespace and type URI constants are exported.

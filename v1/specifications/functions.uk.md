@@ -4,7 +4,7 @@ API ядра імпортується з `knot-engine/core`; ця точка в�
 
 | Функція | Результат |
 | --- | --- |
-| `validateKnot(value, options?)` | `{valid:true,knot,warnings,complete,missingDependencies,uncheckedTypes}` або `{valid:false,issues}` |
+| `Knot.validate(raw, options?)` / `knot.validate(options?)` | Звіт перевірки сирого або підготовленого документа |
 | `validateGridDiagram(value)` | `{valid:true,data,diagram,warnings,componentCount,crossingCount}` або помилки; незалежна перевірка сіткових діаграм із кодуванням `xo` або `vertex-pairs` |
 | `validateDTCode(value)` | `{valid:true,data,code,warnings,componentCount,crossingCount}` або помилки; числовий DT вузлів і зачеплень із перевіркою планарної реалізовності |
 | `validatePDCode(value)` | `{valid:true,data,code,warnings,componentCount,crossingCount}` або помилки; незалежна перевірка коду планарної діаграми |
@@ -14,10 +14,7 @@ API ядра імпортується з `knot-engine/core`; ця точка в�
 | `validateResourceDocument(value)` | Перевірена оболонка ресурсу або помилки; не встановлює замкненості залежностей |
 | `validateResourceRegistry(value)` | Перевірений реєстр із перевіркою конфліктів або помилки; не встановлює замкненості залежностей |
 | `validateRepresentationDocument(value, options?)` | Звіт перевірки самостійного представлення |
-| `resolveKnot(value, {representationId?,view?}?, options?)` | Внутрішній `RenderableModel`; кидає `ViewerError` для некоректних, нерозв’язаних або непідтримуваних даних |
-| `resolveRepresentation(representation, options?)` | Перетворення самостійного просторового представлення предмета опису на дані візуалізації; потрібний явний ресурсний контекст |
-| `selectKnot(value, {representations?,procedures?}, options?)` | Клонований самодостатній фрагмент із залежностями |
-| `composeKnot(values, options?)` | Клоноване об’єднання фрагментів одного документа; конфлікти є помилками |
+| `Knot.from(raw, options?)` / `knot.select(selection)` / `Knot.compose(parts)` | Підготовка, вибір і об'єднання документів |
 | `expandURI(value, namespaces?)` | Точно розгорнутий URI; неоголошений префікс спричиняє помилку |
 
 Параметри перевірки приймають `registries` (масив `ResourceRegistry`) і `schemas` (явні об’єкти JSON Schema). Відомі об’єкти завжди закриті; збережений параметр `strict` не послаблює перевірку. `STANDARD_RESOURCES` надає визначення вбудованих типів представлень і предметів при явному передаванні. Експортуються типи, `ViewerError`, `KNOT_LIMITS`, константи простору імен і URI типів.

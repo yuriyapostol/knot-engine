@@ -53,7 +53,7 @@ defineProps<{ knot: Knot }>()
 </template>
 ```
 
-Import `validateKnot`, `resolveKnot` and types from `knot-engine/core`: this entry point loads no Vue, Three.js or DOM. Validation separately reports `valid`, `complete`, `missingDependencies` and `uncheckedTypes`; rendering requires complete validation. Unknown fields are rejected. Registries are passed explicitly; URI references do not fetch data.
+Import `Knot` and raw types from `knot-engine/core`: this entry point loads no Vue, Three.js or DOM. Validation separately reports `valid`, `complete`, `missingDependencies` and `uncheckedTypes`; rendering requires complete validation. Unknown fields are rejected. Registries are passed explicitly; URI references do not fetch data.
 
 `representation-id` selects one static representation; by default the first `spatial-curve` is selected. Constructions contain objects and states; procedures reference representations. There is no animation. Replace the knot object to update geometry.
 
