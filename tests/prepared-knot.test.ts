@@ -252,6 +252,28 @@ describe('prepared Knot model', () => {
     expect(knot.getProcedure('guide')!.getStep('first')!.getName()).toBe('Крок')
     expect(knot.toRaw()).toEqual(input)
   })
+  it('preserves per-Knot localization and raw serialization across clone, select and compose', () => {
+    const bilingual = [{ language: 'en', value: 'Original' }, { language: 'uk', value: 'Український' }]
+    const input = { ...raw, subject: { ...raw.subject, names: bilingual } }
+    const options = { registries: [STANDARD_RESOURCES], locale: 'uk', overrides: {
+      [raw.subject.id]: { names: [{ language: 'uk', value: 'Перевизначено' }] },
+      'view-3d-rest': { names: [{ language: 'uk', value: 'Просторовий вигляд' }] },
+    } }
+    const knot = Knot.from(input as any, options)
+    const clone = knot.clone()
+    const selected = knot.select({ representations: ['view-3d-rest'] })
+    for (const item of [knot, clone, selected]) {
+      expect(item.subject.getName()).toBe('Перевизначено')
+      expect(item.getRepresentation('view-3d-rest')!.getName()).toBe('Просторовий вигляд')
+      expect(item.toRaw().subject.names).toEqual(bilingual)
+    }
+    expect(clone.subject).not.toBe(knot.subject)
+    expect(selected.getRepresentation('view-3d-rest')).not.toBe(knot.getRepresentation('view-3d-rest'))
+    const composed = Knot.compose([selected, selected.clone()], options)
+    expect(composed.subject.getName()).toBe('Перевизначено')
+    expect(composed.getRepresentation('view-3d-rest')!.getName()).toBe('Просторовий вигляд')
+    expect(composed.toRaw().subject.names).toEqual(bilingual)
+  })
   it('controls structural changes and preserves stable identity', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const existing = knot.getRepresentation('view-3d-rest')!
