@@ -238,6 +238,20 @@ describe('prepared Knot model', () => {
     expect(uk.toRaw()).toEqual({ ...input, procedures: [{ ...input.procedures[0], steps: [...input.procedures[0].steps, { id: 'second', names: bilingual, instructions: bilingual }] }] })
     expect(en.getProcedure('guide')!.getStep('first')!.getName()).toBe('English')
   })
+  it('applies per-Knot name overrides to subject, procedure and step without changing raw text', () => {
+    const bilingual = [{ language: 'en', value: 'Original' }]
+    const input = { ...raw, subject: { ...raw.subject, names: bilingual },
+      procedures: [{ id: 'guide', names: bilingual, descriptions: bilingual, steps: [{ id: 'first', names: bilingual }] }] }
+    const knot = Knot.from(input as any, { locale: 'uk', overrides: {
+      [raw.subject.id]: { names: [{ language: 'uk', value: 'Предмет' }] },
+      guide: { descriptions: [{ language: 'uk', value: 'Опис' }] },
+      first: { names: [{ language: 'uk', value: 'Крок' }] },
+    } })
+    expect(knot.subject.getName()).toBe('Предмет')
+    expect(knot.getProcedure('guide')!.getDescription()).toBe('Опис')
+    expect(knot.getProcedure('guide')!.getStep('first')!.getName()).toBe('Крок')
+    expect(knot.toRaw()).toEqual(input)
+  })
   it('controls structural changes and preserves stable identity', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const existing = knot.getRepresentation('view-3d-rest')!

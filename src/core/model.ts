@@ -42,10 +42,13 @@ function overrideFor(knot: Knot | undefined, id: string, key: 'names' | 'descrip
 }
 const contexts = new WeakMap<Knot, Map<string, PreparedResource>>()
 const registries = new WeakMap<Knot, readonly RawResourceRegistry[]>()
-function localized(values: RawLocalizedTexts | undefined, entity: object, language?: string): string | undefined {
+function localized(values: RawLocalizedTexts | undefined, entity: object & { id?: string }, key: 'names' | 'descriptions' | 'instructions', language?: string): string | undefined {
   const knot = textOwner.get(entity)
   const target = language ?? languageFor(knot)
-  return exact(values, target) ?? exact(values, fallbackFor(knot)) ?? exact(values, 'en')
+  const overrideKey = key === 'instructions' ? undefined : key
+  const override = (locale: string) => overrideKey && entity.id ? overrideFor(knot, entity.id, overrideKey, locale) : undefined
+  return override(target) ?? exact(values, target) ?? override(fallbackFor(knot))
+    ?? exact(values, fallbackFor(knot)) ?? exact(values, 'en')
 }
 function texts(values?: RawLocalizedTexts): LocalizedTexts | undefined {
   if (!values) return undefined
@@ -88,8 +91,8 @@ export class Subject implements RawSubject {
   names?: LocalizedTexts
   descriptions?: LocalizedTexts
   identifiers?: RawSubject['identifiers']
-  getName(language?: string): string | undefined { return localized(this.names, this, language) }
-  getDescription(language?: string): string | undefined { return localized(this.descriptions, this, language) }
+  getName(language?: string): string | undefined { return localized(this.names, this, 'names', language) }
+  getDescription(language?: string): string | undefined { return localized(this.descriptions, this, 'descriptions', language) }
 }
 export class Representation implements RawRepresentation {
   target?: RawRepresentation['target']
@@ -123,8 +126,8 @@ export class Step implements RawStep {
   representations?: RawStep['representations']
   names?: LocalizedTexts
   instructions?: LocalizedTexts
-  getName(language?: string): string | undefined { return localized(this.names, this, language) }
-  getInstructions(language?: string): string | undefined { return localized(this.instructions, this, language) }
+  getName(language?: string): string | undefined { return localized(this.names, this, 'names', language) }
+  getInstructions(language?: string): string | undefined { return localized(this.instructions, this, 'instructions', language) }
 }
 export class Procedure implements RawProcedure {
   construction?: RawProcedure['construction']
@@ -132,8 +135,8 @@ export class Procedure implements RawProcedure {
   steps!: Step[]
   names?: LocalizedTexts
   descriptions?: LocalizedTexts
-  getName(language?: string): string | undefined { return localized(this.names, this, language) }
-  getDescription(language?: string): string | undefined { return localized(this.descriptions, this, language) }
+  getName(language?: string): string | undefined { return localized(this.names, this, 'names', language) }
+  getDescription(language?: string): string | undefined { return localized(this.descriptions, this, 'descriptions', language) }
   getStep(id: string): Step | undefined { return this.steps.find(x => x.id === id) }
   addStep(input: RawStep): Step {
     if (this.getStep(input.id)) throw new Error('Duplicate step ID: ' + input.id)
