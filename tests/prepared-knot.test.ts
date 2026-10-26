@@ -127,6 +127,29 @@ describe('prepared Knot model', () => {
     expect(knot.getResource(type)).toBeDefined()
     expect(knot.representationTypes?.some(x => x.id === type)).toBe(true)
   })
+  it('protects representations referenced by procedure steps', () => {
+    const knot = Knot.from(raw as any)
+    knot.addProcedure({ id: 'guide', steps: [{ id: 'one', representations: [{ id: 'view-3d-rest' }] }] })
+    expect(() => knot.removeRepresentation('view-3d-rest')).toThrow(/procedure step/)
+    expect(knot.getRepresentation('view-3d-rest')).toBeDefined()
+    knot.getProcedure('guide')!.removeStep('one')
+    expect(knot.removeRepresentation('view-3d-rest')).toBe(true)
+  })
+  it('protects catalogs and object types referenced by local entities', () => {
+    const knot = Knot.from(raw as any)
+    const catalogId = 'https://example.org/catalogs/example'
+    const objectId = 'https://example.org/types/example-object'
+    knot.addResourceDefinition('catalogs', { id: catalogId, name: 'Example', description: 'Example catalog' })
+    knot.subject.identifiers = [{ catalog: catalogId, value: 'K-1' }]
+    expect(() => knot.removeResourceDefinition('catalogs', catalogId)).toThrow(/subject identifier/)
+    knot.subject.identifiers = []
+    expect(knot.removeResourceDefinition('catalogs', catalogId)).toBe(true)
+    knot.addResourceDefinition('objectTypes', { id: objectId, name: 'Example', description: 'Example type', specification: 'https://example.org/spec', dataSchema: { inline: {} } })
+    knot.constructions = [{ id: 'construction', objects: [{ id: 'rope', type: objectId }] }]
+    expect(() => knot.removeResourceDefinition('objectTypes', objectId)).toThrow(/construction object/)
+    knot.constructions = []
+    expect(knot.removeResourceDefinition('objectTypes', objectId)).toBe(true)
+  })
   it('controls structural changes and preserves stable identity', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const existing = knot.getRepresentation('view-3d-rest')!

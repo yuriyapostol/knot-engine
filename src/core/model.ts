@@ -112,6 +112,7 @@ export class Representation implements RawRepresentation {
 }
 export class Step implements RawStep {
   id!: string
+  representations?: RawStep['representations']
   names?: LocalizedTexts
   instructions?: LocalizedTexts
   getName(language?: string): string | undefined { return this.names?.get(language) }
@@ -150,6 +151,7 @@ export class Knot implements RawKnot {
   catalogs?: RawKnot['catalogs']
   representationTypes?: RawKnot['representationTypes']
   objectTypes?: RawKnot['objectTypes']
+  constructions?: RawKnot['constructions']
   static from(input: RawKnot | Knot, options: KnotOptions = {}): Knot {
     if (input instanceof Knot) return input
     return prepareKnot(input, options.registries, options)
@@ -210,10 +212,15 @@ export class Knot implements RawKnot {
     const fallbackRegistry = [STANDARD_RESOURCES, ...(registries.get(this) ?? [])]
       .flatMap(registry => registry.resources.map(entry => ({ entry, registry })))
       .reverse().find(({ entry, registry }) => expandURI(entry.resource.id, registry.namespaces) === uri)
-    // Only reject removal when the referenced type would actually disappear.
-    if (kind === 'representationTypes' && !fallbackInline && !fallbackRegistry &&
-      this.representations?.some(rep => expandURI(rep.type, this.namespaces) === uri)) {
-      throw new Error('Resource is referenced by a representation: ' + id)
+    // Reject removal of the last definition while it is still referenced.
+    if (!fallbackInline && !fallbackRegistry) {
+      if (kind === 'representationTypes' && this.representations?.some(rep => expandURI(rep.type, this.namespaces) === uri))
+        throw new Error('Resource is referenced by a representation: ' + id)
+      if (kind === 'catalogs' && this.subject.identifiers?.some(identifier => expandURI(identifier.catalog, this.namespaces) === uri))
+        throw new Error('Resource is referenced by a subject identifier: ' + id)
+      if (kind === 'objectTypes' && this.constructions?.some(construction =>
+        'objects' in construction && construction.objects.some(object => expandURI(object.type, this.namespaces) === uri)))
+        throw new Error('Resource is referenced by a construction object: ' + id)
     }
     ;(this as any)[kind] = Object.freeze(remaining)
     const fallback = fallbackInline ?? fallbackRegistry?.entry.resource
@@ -239,6 +246,9 @@ export class Knot implements RawKnot {
   }
   removeRepresentation(id: string): boolean {
     if (!this.getRepresentation(id)) return false
+    if (this.procedures?.some(procedure => procedure.steps.some(step =>
+      step.representations?.some(ref => ('id' in ref ? ref.id : ref.ref) === id))))
+      throw new Error('Representation is referenced by a procedure step: ' + id)
     this.representations = Object.freeze((this.representations ?? []).filter(x => x.id !== id)) as unknown as Representation[]
     return true
   }
