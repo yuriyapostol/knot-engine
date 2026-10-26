@@ -42,14 +42,8 @@ Localization of `Subject`, `Procedure`, and `Step` also follows their owning `Kn
 
 For `Subject`, `Procedure`, and `Step`, `overrides` also apply to `names` and `descriptions` by entity ID without changing raw JSON. Step `instructions` use localized values and fallback language; instruction overrides are not part of this contract.
 
-### Adding construction states and objects
+### Mutable prepared model
 
-`knot.addConstructionState(constructionId, state)` and `knot.addConstructionObject(constructionId, object)` edit an existing **local** construction without replacing its prepared instance. They clone their inputs, return the added value, and reject duplicate IDs within the corresponding collection or unknown construction IDs. These methods do not validate arbitrary input data; use `knot.validate()` to check the resulting document. Existing removal guards remain in effect.
+`Knot` is a mutable object model. Its properties and collections may be edited directly; the `add*` / `remove*` helpers provide convenience rather than mandatory transactions or guarantees of referential integrity. Deletion is not blocked by existing references. Call `knot.validate()` after edits when document validation is required. `toRaw()` and `clone()` produce independent data copies.
 
-Local construction references use `{ id: constructionId }`; external registry references use `{ ref: uri }`. Controlled removal checks only local `id` references. An external `ref` does not prevent removal of an inline construction, even if the strings coincide. Registry reference validity is checked separately by `validate()`.
-
-Likewise, `removeRepresentation(id)` is blocked only by step references of the form `{ id }`. A `{ ref }` addresses an external representation and does not create a dependency on a local representation with the same identifier.
-
-When removing an inline resource definition, fallback lookup is restricted to the **same resource kind**. A catalog, object type, or representation type with an identical URI does not substitute for a definition of another kind or bypass dependency guards.
-
-Resource identity combines resource kind and URI. Use `knot.getResource(id, kind)` when the kind is known; `representation.getTypeDefinition()` always selects a representation-type definition even if a different resource kind shares the URI. The one-argument `getResource(id)` is retained for convenient lookups where the URI is unambiguous.
+Resource identity is the pair of resource kind and URI. Use `getResource(id, kind)` for unambiguous lookup; `getResource(id)` remains available when the URI is unambiguous.
