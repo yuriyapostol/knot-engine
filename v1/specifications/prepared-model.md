@@ -37,3 +37,5 @@ Constructions support controlled `knot.getConstruction(id)`, `knot.addConstructi
 `knot.removeConstructionState(constructionId, stateId)` and `knot.removeConstructionObject(constructionId, objectId)` return `false` when the target element does not exist. State removal is blocked when a representation targets that state. Object removal is blocked when a representation targets that object or references it in `data.curves[].object` of a spatial-curve representation within the same construction. When referenced, the operation throws without changing the construction.
 
 These editing guards enforce reference integrity but do not replace `knot.validate()`, which also checks representation data, schemas, and other document constraints.
+
+Localization of `Subject`, `Procedure`, and `Step` also follows their owning `Knot`'s `locale` and `fallbackLocale`, rather than relying solely on global settings. This includes steps created with `Procedure.addStep()`. Raw text values remain unchanged.
