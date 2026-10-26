@@ -191,8 +191,8 @@ export class Knot implements RawKnot {
     if (collection.some(item => expandURI(item.id, this.namespaces) === uri)) throw new Error('Duplicate resource URI: ' + uri)
     const previous = this.getResource(uri)
     const view = resource(value, this, uri)
-    if (previous && !('names' in value)) Object.defineProperty(view, 'names', { get: () => previous.names, enumerable: false })
-    if (previous && !('descriptions' in value)) Object.defineProperty(view, 'descriptions', { get: () => previous.descriptions, enumerable: false })
+    if (previous && !('names' in value)) Object.defineProperty(view, 'names', { get: () => (previous as any).names, enumerable: false })
+    if (previous && !('descriptions' in value)) Object.defineProperty(view, 'descriptions', { get: () => (previous as any).descriptions, enumerable: false })
     ;(this as any)[kind] = Object.freeze([...collection, value])
     contexts.get(this)?.set(uri, view)
     return view
@@ -221,8 +221,8 @@ export class Knot implements RawKnot {
       const view = resource(fallback, this, uri)
       if (fallbackInline && fallbackRegistry) {
         const registryView = resource(fallbackRegistry.entry.resource, this, uri)
-        if (!('names' in fallback)) Object.defineProperty(view, 'names', { get: () => registryView.names, enumerable: false })
-        if (!('descriptions' in fallback)) Object.defineProperty(view, 'descriptions', { get: () => registryView.descriptions, enumerable: false })
+        if (!('names' in fallback)) Object.defineProperty(view, 'names', { get: () => (registryView as any).names, enumerable: false })
+        if (!('descriptions' in fallback)) Object.defineProperty(view, 'descriptions', { get: () => (registryView as any).descriptions, enumerable: false })
       }
       contexts.get(this)?.set(uri, view)
     } else contexts.get(this)?.delete(uri)

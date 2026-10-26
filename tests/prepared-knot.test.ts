@@ -99,7 +99,7 @@ describe('prepared Knot model', () => {
     expect(knot.toRaw().representationTypes?.some(x => x.id === id)).toBe(false)
   })
   it('restores registry definitions after removing an inline override', () => {
-    const source = STANDARD_RESOURCES.resources.find(entry => expandURI(entry.resource.id, STANDARD_RESOURCES.namespaces) === expandURI(raw.representations[0].type, raw.namespaces))!.resource
+    const source = STANDARD_RESOURCES.resources.find(entry => entry.kind === 'representation-type' && expandURI(entry.resource.id, STANDARD_RESOURCES.namespaces) === expandURI(raw.representations[0].type, raw.namespaces))!.resource as any
     const knot = Knot.from({ ...raw, catalogs: [], representationTypes: [], objectTypes: [] } as any, {
       registries: [STANDARD_RESOURCES],
     })
