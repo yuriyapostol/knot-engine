@@ -168,6 +168,37 @@ describe('prepared Knot model', () => {
     expect(knot.removeConstruction('test-construction')).toBe(true)
     expect(knot.getConstruction('test-construction')).toBeUndefined()
   })
+  it('protects referenced construction states and objects during controlled removal', () => {
+    const knot = Knot.from({ ...raw, constructions: [] } as any)
+    const construction = knot.addConstruction({
+      id: 'local-construction', states: [{ id: 'tied' }],
+      objects: [{ id: 'cord', type: 'https://example.org/types/cord' }],
+    })
+    const stateView = knot.addRepresentation({
+      id: 'state-view', type: 'https://example.org/types/view',
+      target: { kind: 'state', construction: { id: construction.id }, id: 'tied' }, data: {},
+    })
+    expect(() => knot.removeConstructionState(construction.id, 'tied')).toThrow(/referenced/)
+    knot.removeRepresentation(stateView.id)
+    expect(knot.removeConstructionState(construction.id, 'tied')).toBe(true)
+    expect(knot.removeConstructionState(construction.id, 'tied')).toBe(false)
+    const objectView = knot.addRepresentation({
+      id: 'object-view', type: 'https://example.org/types/view',
+      target: { kind: 'object', construction: { id: construction.id }, id: 'cord' }, data: {},
+    })
+    expect(() => knot.removeConstructionObject(construction.id, 'cord')).toThrow(/referenced/)
+    knot.removeRepresentation(objectView.id)
+    const curveView = knot.addRepresentation({
+      id: 'curve-view', type: 'https://example.org/types/view',
+      target: { kind: 'construction', construction: { id: construction.id } },
+      data: { curves: [{ object: 'cord' }] },
+    })
+    expect(() => knot.removeConstructionObject(construction.id, 'cord')).toThrow(/referenced/)
+    knot.removeRepresentation(curveView.id)
+    expect(knot.removeConstructionObject(construction.id, 'cord')).toBe(true)
+    expect(knot.removeConstructionObject(construction.id, 'cord')).toBe(false)
+    expect(knot.getConstruction(construction.id)).toBe(construction)
+  })
   it('controls structural changes and preserves stable identity', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const existing = knot.getRepresentation('view-3d-rest')!

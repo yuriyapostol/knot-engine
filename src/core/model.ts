@@ -190,11 +190,39 @@ export class Knot implements RawKnot {
     this.constructions = Object.freeze([...(this.constructions ?? []), value]) as unknown as RawKnot['constructions']
     return value
   }
+  /** Remove a state only if no representation targets it. */
+  removeConstructionState(constructionId: string, stateId: string): boolean {
+    const construction = this.getConstruction(constructionId)
+    if (!construction?.states?.some(state => state.id === stateId)) return false
+    if (this.representations?.some(rep => rep.target?.kind === 'state' &&
+      rep.target.id === stateId && this.referencesConstruction(rep.target.construction, constructionId)))
+      throw new Error('Construction state is referenced by a representation: ' + stateId)
+    construction.states = construction.states.filter(state => state.id !== stateId)
+    return true
+  }
+  /** Remove an object only if no representation target or spatial curve uses it. */
+  removeConstructionObject(constructionId: string, objectId: string): boolean {
+    const construction = this.getConstruction(constructionId)
+    if (!construction?.objects.some(object => object.id === objectId)) return false
+    if (this.representations?.some(rep => {
+      if (!rep.target || rep.target.kind === 'subject' || !this.referencesConstruction(rep.target.construction, constructionId)) return false
+      if (rep.target.kind === 'object' && rep.target.id === objectId) return true
+      const data = rep.data as { curves?: { object?: string }[] } | null
+      return Array.isArray(data?.curves) && data.curves.some(curve => curve.object === objectId)
+    })) throw new Error('Construction object is referenced by a representation: ' + objectId)
+    construction.objects = construction.objects.filter(object => object.id !== objectId)
+    return true
+  }
+  private referencesConstruction(ref: { id?: string; ref?: string }, id: string): boolean {
+    if (ref.id === id) return true
+    if (!ref.ref) return false
+    try { return expandURI(ref.ref, this.namespaces) === expandURI(id, this.namespaces) }
+    catch { return false }
+  }
   removeConstruction(id: string): boolean {
     const target = this.getConstruction(id)
     if (!target) return false
-    const matches = (ref: { id?: string; ref?: string }): boolean =>
-      ref.id === id || (ref.ref !== undefined && expandURI(ref.ref, this.namespaces) === expandURI(id, this.namespaces))
+    const matches = (ref: { id?: string; ref?: string }): boolean => this.referencesConstruction(ref, id)
     if (this.representations?.some(rep => rep.target && rep.target.kind !== 'subject' && matches(rep.target.construction)))
       throw new Error('Construction is referenced by a representation: ' + id)
     if (this.procedures?.some(proc => proc.construction && matches(proc.construction)))
