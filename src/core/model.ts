@@ -299,7 +299,7 @@ export class Knot implements RawKnot {
     const remaining = collection.filter(item => item !== target)
     // A resource URI cannot fall back to a definition of another resource kind.
     const fallbackInline = remaining.find(item => expandURI(item.id, this.namespaces) === uri)
-    const resourceKind = { catalogs: 'catalog', representationTypes: 'representation-type', objectTypes: 'object-type' }[kind]
+    const resourceKind = { catalogs: 'catalog', representationTypes: 'representation-type', objectTypes: 'object-type' }[kind] as ResourceEntry['kind']
     const fallbackRegistry = [STANDARD_RESOURCES, ...(registries.get(this) ?? [])]
       .flatMap(registry => registry.resources.map(entry => ({ entry, registry })))
       .reverse().find(({ entry, registry }) => entry.kind === resourceKind &&
