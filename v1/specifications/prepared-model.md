@@ -27,3 +27,5 @@ Controlled editing covers representations (`knot.addRepresentation()`, `knot.rem
 Inline catalogs and type definitions support `knot.addResourceDefinition(kind, definition)` and `knot.removeResourceDefinition(kind, id)`, where `kind` is `catalogs`, `representationTypes`, or `objectTypes`. External registries are never mutated. Removing a representation type that is still referenced by a representation is blocked. Removing an inline override restores the attached registry definition, if any.
 
 In reactive Vue interfaces, use `useLocalizedText(() => representation.getName())` from the package root. The composable observes `configureLocalization()` changes and unsubscribes when its Vue scope ends. Outside Vue, `subscribeLocalization(listener)` returns an unsubscribe function. Per-`Knot` localization settings still take precedence over global settings.
+
+Attached resource definitions are shared without deep copies. `getResource()` provides a stable per-knot view with localized methods; external registry objects remain unchanged.
