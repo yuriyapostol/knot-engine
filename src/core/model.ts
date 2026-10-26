@@ -65,11 +65,16 @@ const resourceMethods = {
   },
 }
 function resource<T extends object>(input: T, knot: Knot, id: string): T & PreparedResource {
-  decorate(input)
-  Object.setPrototypeOf(input, resourceMethods)
-  resourceOwner.set(input, knot)
-  resourceKey.set(input, id)
-  return input as T & PreparedResource
+  // Share the immutable source definition; only the lightweight view is per-Knot.
+  // Never decorate or change the prototype of definitions supplied by a registry.
+  const view = Object.create(input) as T & PreparedResource
+  Object.defineProperties(view, {
+    getName: { value: resourceMethods.getName, enumerable: false },
+    getDescription: { value: resourceMethods.getDescription, enumerable: false },
+  })
+  resourceOwner.set(view, knot)
+  resourceKey.set(view, id)
+  return view
 }
 export class Subject implements RawSubject {
   id!: string
@@ -207,7 +212,7 @@ export class Knot implements RawKnot {
       .reverse().find(({ entry, registry }) => {
         try { return expandURI(entry.resource.id, registry.namespaces) === uri } catch { return false }
       })
-    if (fallback) contexts.get(this)?.set(uri, resource(structuredClone(fallback.entry.resource), this, uri))
+    if (fallback) contexts.get(this)?.set(uri, resource(fallback.entry.resource, this, uri))
     else contexts.get(this)?.delete(uri)
     return true
   }
@@ -262,19 +267,23 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
   const index = new Map<string, PreparedResource>()
   for (const registry of [STANDARD_RESOURCES, ...attached]) {
     for (const entry of registry.resources) {
-      const item = structuredClone(entry.resource)
+      const item = entry.resource
       const id = item.id.startsWith('https://') || item.id.startsWith('http://') || item.id.startsWith('urn:') ? item.id : expandURI(item.id, registry.namespaces)
       const defaults = index.get(id) as any
-      const enhanced = { ...item, ...(defaults?.names && !('names' in item) ? { names: defaults.names } : {}), ...(defaults?.descriptions && !('descriptions' in item) ? { descriptions: defaults.descriptions } : {}) }
-      index.set(id, resource(enhanced, knot, id))
+      const view = resource(item, knot, id)
+      if (defaults && !('names' in item)) Object.defineProperty(view, 'names', { get: () => defaults.names, enumerable: false })
+      if (defaults && !('descriptions' in item)) Object.defineProperty(view, 'descriptions', { get: () => defaults.descriptions, enumerable: false })
+      index.set(id, view)
     }
   }
   for (const key of ['catalogs', 'representationTypes', 'objectTypes'] as const) {
     for (const item of (knot[key] ?? []) as { id: string }[]) {
       const id = item.id.startsWith('https://') || item.id.startsWith('http://') || item.id.startsWith('urn:') ? item.id : expandURI(item.id, knot.namespaces)
       const defaults = index.get(id) as any
-      const enhanced = { ...item, ...(defaults?.names && !('names' in item) ? { names: defaults.names } : {}), ...(defaults?.descriptions && !('descriptions' in item) ? { descriptions: defaults.descriptions } : {}) }
-      index.set(id, resource(enhanced, knot, id))
+      const view = resource(item, knot, id)
+      if (defaults && !('names' in item)) Object.defineProperty(view, 'names', { get: () => defaults.names, enumerable: false })
+      if (defaults && !('descriptions' in item)) Object.defineProperty(view, 'descriptions', { get: () => defaults.descriptions, enumerable: false })
+      index.set(id, view)
     }
   }
   contexts.set(knot, index)

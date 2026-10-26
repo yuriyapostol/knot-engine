@@ -13,6 +13,22 @@ describe('prepared Knot model', () => {
     configureLocalization({ locale: 'en' })
     expect(notifications).toBe(1)
   })
+  it('shares registry definitions without copying or mutating their prototypes', () => {
+    const id = STANDARD_RESOURCES.resources[0].resource.id
+    const source = STANDARD_RESOURCES.resources[0].resource
+    const originalPrototype = Object.getPrototypeOf(source)
+    const first = Knot.from(raw as any, { registries: [STANDARD_RESOURCES], locale: 'uk' })
+    const second = Knot.from(raw as any, { registries: [STANDARD_RESOURCES], locale: 'en' })
+    const a = first.getResource(id)!
+    const b = second.getResource(id)!
+    expect(a).not.toBe(b)
+    expect(Object.getPrototypeOf(a)).toBe(source)
+    expect(Object.getPrototypeOf(b)).toBe(source)
+    expect(Object.getPrototypeOf(source)).toBe(originalPrototype)
+    expect(first.getResource(id)).toBe(a)
+    expect(second.getResource(id)).toBe(b)
+    expect(JSON.stringify(source)).not.toContain('getName')
+  })
   it('prepares, resolves resources and serializes without methods', () => {
     configureLocalization({ locale: 'uk', fallbackLocale: 'en' })
     const report = validateKnot(raw, { registries: [STANDARD_RESOURCES] })
