@@ -85,6 +85,7 @@ export class Subject implements RawSubject {
   getDescription(language?: string): string | undefined { return this.descriptions?.get(language) }
 }
 export class Representation implements RawRepresentation {
+  target?: RawRepresentation['target']
   id!: string
   type!: string
   data!: unknown
@@ -119,6 +120,7 @@ export class Step implements RawStep {
   getInstructions(language?: string): string | undefined { return this.instructions?.get(language) }
 }
 export class Procedure implements RawProcedure {
+  construction?: RawProcedure['construction']
   id!: string
   steps!: Step[]
   names?: LocalizedTexts
