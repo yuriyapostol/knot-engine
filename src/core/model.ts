@@ -123,7 +123,7 @@ export class Step implements RawStep {
   representations?: RawStep['representations']
   names?: LocalizedTexts
   instructions?: LocalizedTexts
-  getName(language?: string): string | undefined { return this.names?.get(language) }
+  getName(language?: string): string | undefined { return localized(this.names, this, language) }
   getInstructions(language?: string): string | undefined { return localized(this.instructions, this, language) }
 }
 export class Procedure implements RawProcedure {
@@ -132,8 +132,8 @@ export class Procedure implements RawProcedure {
   steps!: Step[]
   names?: LocalizedTexts
   descriptions?: LocalizedTexts
-  getName(language?: string): string | undefined { return this.names?.get(language) }
-  getDescription(language?: string): string | undefined { return this.descriptions?.get(language) }
+  getName(language?: string): string | undefined { return localized(this.names, this, language) }
+  getDescription(language?: string): string | undefined { return localized(this.descriptions, this, language) }
   getStep(id: string): Step | undefined { return this.steps.find(x => x.id === id) }
   addStep(input: RawStep): Step {
     if (this.getStep(input.id)) throw new Error('Duplicate step ID: ' + input.id)
