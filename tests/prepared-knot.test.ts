@@ -235,7 +235,7 @@ describe('prepared Knot model', () => {
     const added = uk.getProcedure('guide')!.addStep({ id: 'second', names: bilingual, instructions: bilingual })
     expect(added.getInstructions()).toBe('Українська')
     expect(uk.clone().getProcedure('guide')!.getStep('second')!.getName()).toBe('Українська')
-    expect(uk.toRaw()).toEqual(input)
+    expect(uk.toRaw()).toEqual({ ...input, procedures: [{ ...input.procedures[0], steps: [...input.procedures[0].steps, { id: 'second', names: bilingual, instructions: bilingual }] }] })
     expect(en.getProcedure('guide')!.getStep('first')!.getName()).toBe('English')
   })
   it('controls structural changes and preserves stable identity', () => {
