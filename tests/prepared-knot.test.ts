@@ -25,6 +25,18 @@ describe('prepared Knot model', () => {
     expect(knot.getResource(uri, 'catalog')).toBeUndefined()
     expect(catalog.getName()).toBe('Catalog')
   })
+  it('restores a same-kind registry resource without overwriting a different-kind untyped view', () => {
+    const uri = 'https://example.org/shared-fallback'
+    const registry = { resources: [
+      { kind: 'catalog', resource: { id: uri, name: 'Registry catalog', description: 'Catalog description' } },
+    ] }
+    const knot = Knot.from(raw as any, { registries: [registry as any] })
+    knot.addResourceDefinition('catalogs', { id: uri, name: 'Local catalog', description: 'Local description' })
+    knot.addResourceDefinition('representationTypes', { id: uri, name: 'Local type' } as any)
+    expect(knot.removeResourceDefinition('catalogs', uri)).toBe(true)
+    expect(knot.getResource(uri, 'catalog')?.getName()).toBe('Registry catalog')
+    expect(knot.getResource(uri)?.getName()).toBe('Local type')
+  })
   it('does not inherit localized metadata across registry resource kinds sharing a URI', () => {
     const uri = 'https://example.org/shared-resource'
     const registry = {
