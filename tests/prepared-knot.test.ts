@@ -16,7 +16,7 @@ describe('prepared Knot model', () => {
   it('preserves the untyped resource view when removing another kind with the same URI', () => {
     const uri = 'https://example.org/shared-removal'
     const knot = Knot.from(raw as any)
-    const catalog = knot.addResourceDefinition('catalogs', { id: uri, name: 'Catalog' })
+    const catalog = knot.addResourceDefinition('catalogs', { id: uri, name: 'Catalog', description: 'Catalog description' })
     knot.addResourceDefinition('representationTypes', { id: uri, name: 'Type' } as any)
     expect(knot.getResource(uri)?.getName()).toBe('Type')
     expect(knot.removeResourceDefinition('catalogs', uri)).toBe(true)
