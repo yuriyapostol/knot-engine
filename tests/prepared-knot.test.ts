@@ -315,6 +315,18 @@ describe('prepared Knot model', () => {
     expect(knot.getRepresentation(externalObject.id)).toBe(externalObject)
     expect(knot.getProcedure(externalProcedure.id)).toBe(externalProcedure)
   })
+  it('distinguishes external representation refs from local representation IDs during removal', () => {
+    const knot = Knot.from(raw as any)
+    knot.addProcedure({ id: 'external-only', steps: [{ id: 'first',
+      representations: [{ ref: 'view-3d-rest' }] }] })
+    expect(knot.removeRepresentation('view-3d-rest')).toBe(true)
+    const local = knot.addRepresentation({ id: 'view-3d-rest', type: 'https://example.org/types/view', data: {} })
+    knot.addProcedure({ id: 'local-guide', steps: [{ id: 'first',
+      representations: [{ id: 'view-3d-rest' }] }] })
+    expect(() => knot.removeRepresentation(local.id)).toThrow(/procedure step/)
+    expect(knot.removeProcedure('local-guide')).toBe(true)
+    expect(knot.removeRepresentation(local.id)).toBe(true)
+  })
   it('controls structural changes and preserves stable identity', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const existing = knot.getRepresentation('view-3d-rest')!

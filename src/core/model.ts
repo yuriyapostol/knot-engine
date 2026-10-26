@@ -334,7 +334,7 @@ export class Knot implements RawKnot {
   removeRepresentation(id: string): boolean {
     if (!this.getRepresentation(id)) return false
     if (this.procedures?.some(procedure => procedure.steps.some(step =>
-      step.representations?.some(ref => ('id' in ref ? ref.id : ref.ref) === id))))
+      step.representations?.some(ref => ref.id === id))))
       throw new Error('Representation is referenced by a procedure step: ' + id)
     this.representations = Object.freeze((this.representations ?? []).filter(x => x.id !== id)) as unknown as Representation[]
     return true
