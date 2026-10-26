@@ -17,8 +17,9 @@ describe('prepared Knot model', () => {
     const id = STANDARD_RESOURCES.resources[0].resource.id
     const source = STANDARD_RESOURCES.resources[0].resource
     const originalPrototype = Object.getPrototypeOf(source)
-    const first = Knot.from(raw as any, { registries: [STANDARD_RESOURCES], locale: 'uk' })
-    const second = Knot.from(raw as any, { registries: [STANDARD_RESOURCES], locale: 'en' })
+    const registryOnly = { ...raw, catalogs: [], representationTypes: [], objectTypes: [] }
+    const first = Knot.from(registryOnly as any, { registries: [STANDARD_RESOURCES], locale: 'uk' })
+    const second = Knot.from(registryOnly as any, { registries: [STANDARD_RESOURCES], locale: 'en' })
     const a = first.getResource(id)!
     const b = second.getResource(id)!
     expect(a).not.toBe(b)
