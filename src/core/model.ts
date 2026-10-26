@@ -250,10 +250,9 @@ export class Knot implements RawKnot {
     catch { return id }
   }
   private referencesConstruction(ref: { id?: string; ref?: string }, id: string): boolean {
-    if (ref.id === id) return true
-    if (!ref.ref) return false
-    try { return expandURI(ref.ref, this.namespaces) === expandURI(id, this.namespaces) }
-    catch { return false }
+    // { id } addresses an inline construction; { ref } addresses a registry resource.
+    // The validator resolves these independently, even if their URI strings coincide.
+    return ref.id === id
   }
   removeConstruction(id: string): boolean {
     const target = this.getConstruction(id)

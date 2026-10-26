@@ -299,6 +299,22 @@ describe('prepared Knot model', () => {
     expect(knot.removeConstructionObject('setup', object.id)).toBe(true)
     expect(knot.validate().valid).toBe(true)
   })
+  it('does not confuse external construction refs with inline construction IDs', () => {
+    const uri = 'https://example.org/constructions/shared'
+    const knot = Knot.from({ ...raw, constructions: [] } as any)
+    knot.addConstruction({ id: uri, states: [{ id: 'ready' }], objects: [{ id: 'rope', type: 'https://example.org/types/rope' }] })
+    const external = knot.addRepresentation({ id: 'external', type: 'https://example.org/types/view',
+      target: { kind: 'state', construction: { ref: uri }, id: 'ready' }, data: {} })
+    const externalObject = knot.addRepresentation({ id: 'external-object', type: 'https://example.org/types/view',
+      target: { kind: 'object', construction: { ref: uri }, id: 'rope' }, data: {} })
+    const externalProcedure = knot.addProcedure({ id: 'external-guide', construction: { ref: uri }, steps: [] })
+    expect(knot.removeConstructionState(uri, 'ready')).toBe(true)
+    expect(knot.removeConstructionObject(uri, 'rope')).toBe(true)
+    expect(knot.removeConstruction(uri)).toBe(true)
+    expect(knot.getRepresentation(external.id)).toBe(external)
+    expect(knot.getRepresentation(externalObject.id)).toBe(externalObject)
+    expect(knot.getProcedure(externalProcedure.id)).toBe(externalProcedure)
+  })
   it('controls structural changes and preserves stable identity', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const existing = knot.getRepresentation('view-3d-rest')!
