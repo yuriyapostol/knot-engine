@@ -29,3 +29,5 @@ Inline catalogs and type definitions support `knot.addResourceDefinition(kind, d
 In reactive Vue interfaces, use `useLocalizedText(() => representation.getName())` from the package root. The composable observes `configureLocalization()` changes and unsubscribes when its Vue scope ends. Outside Vue, `subscribeLocalization(listener)` returns an unsubscribe function. Per-`Knot` localization settings still take precedence over global settings.
 
 Attached resource definitions are shared without deep copies. `getResource()` provides a stable per-knot view with localized methods; external registry objects remain unchanged.
+
+Constructions support controlled `knot.getConstruction(id)`, `knot.addConstruction(definition)`, and `knot.removeConstruction(id)` operations. Removing a construction is blocked while it is targeted by a representation (including state and object targets) or referenced by a procedure. The construction collection array is protected from direct structural mutation.
