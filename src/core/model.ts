@@ -1,4 +1,4 @@
-import type { RawKnot, RawRepresentation, RawProcedure, RawStep, RawSubject, RawResourceRegistry, ResourceEntry } from './knot'
+import type { RawKnot, RawRepresentation, RawProcedure, RawStep, RawSubject, RawResourceRegistry, ResourceEntry, Construction } from './knot'
 import { STANDARD_RESOURCES, expandURI } from './resources'
 import { validateKnot } from './validateKnot'
 import { selectKnot, composeKnot } from './knotParts'
@@ -178,6 +178,28 @@ export class Knot implements RawKnot {
     this.procedures = Object.freeze((this.procedures ?? []).filter(x => x.id !== id)) as unknown as Procedure[]
     return true
   }
+  getConstruction(id: string): Construction | undefined {
+    return this.constructions?.find((construction): construction is Construction =>
+      'id' in construction && construction.id === id)
+  }
+  addConstruction(input: Construction): Construction {
+    if (this.getConstruction(input.id)) throw new Error('Duplicate construction ID: ' + input.id)
+    const value = structuredClone(input)
+    this.constructions = Object.freeze([...(this.constructions ?? []), value]) as unknown as RawKnot['constructions']
+    return value
+  }
+  removeConstruction(id: string): boolean {
+    const target = this.getConstruction(id)
+    if (!target) return false
+    const matches = (ref: { id?: string; ref?: string }): boolean =>
+      ref.id === id || (ref.ref !== undefined && expandURI(ref.ref, this.namespaces) === expandURI(id, this.namespaces))
+    if (this.representations?.some(rep => rep.target && rep.target.kind !== 'subject' && matches(rep.target.construction)))
+      throw new Error('Construction is referenced by a representation: ' + id)
+    if (this.procedures?.some(proc => proc.construction && matches(proc.construction)))
+      throw new Error('Construction is referenced by a procedure: ' + id)
+    this.constructions = Object.freeze((this.constructions ?? []).filter(item => item !== target)) as unknown as RawKnot['constructions']
+    return true
+  }
   getResource(id: string): PreparedResource | undefined {
     let uri = id
     if (!id.startsWith('https://') && !id.startsWith('http://') && !id.startsWith('urn:')) {
@@ -283,6 +305,7 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
     procedure.steps = Object.freeze(procedure.steps) as unknown as Step[]
   }
   if (knot.procedures) knot.procedures = Object.freeze(knot.procedures) as unknown as Procedure[]
+  if (knot.constructions) knot.constructions = Object.freeze(knot.constructions) as unknown as RawKnot['constructions']
   for (const key of ['catalogs', 'representationTypes', 'objectTypes'] as const) {
     if (knot[key]) (knot as any)[key] = Object.freeze(knot[key])
   }

@@ -150,6 +150,24 @@ describe('prepared Knot model', () => {
     knot.constructions = []
     expect(knot.removeResourceDefinition('objectTypes', objectId)).toBe(true)
   })
+  it('preserves construction references across controlled edits', () => {
+    const knot = Knot.from({ ...raw, constructions: [] } as any)
+    const construction = knot.addConstruction({ id: 'test-construction', objects: [], states: [{ id: 'tied' }] })
+    expect(knot.getConstruction('test-construction')).toBe(construction)
+    expect(() => knot.constructions?.push(construction)).toThrow()
+    const rep = knot.addRepresentation({
+      id: 'construction-view', type: 'https://example.org/representation-types/unknown',
+      target: { kind: 'state', construction: { id: 'test-construction' }, id: 'tied' }, data: {},
+    })
+    expect(() => knot.removeConstruction('test-construction')).toThrow(/representation/)
+    expect(knot.getConstruction('test-construction')).toBe(construction)
+    knot.removeRepresentation(rep.id)
+    const procedure = knot.addProcedure({ id: 'construction-procedure', construction: { id: 'test-construction' }, steps: [] })
+    expect(() => knot.removeConstruction('test-construction')).toThrow(/procedure/)
+    knot.removeProcedure(procedure.id)
+    expect(knot.removeConstruction('test-construction')).toBe(true)
+    expect(knot.getConstruction('test-construction')).toBeUndefined()
+  })
   it('controls structural changes and preserves stable identity', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const existing = knot.getRepresentation('view-3d-rest')!
