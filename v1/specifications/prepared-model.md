@@ -31,3 +31,9 @@ In reactive Vue interfaces, use `useLocalizedText(() => representation.getName()
 Attached resource definitions are shared without deep copies. `getResource()` provides a stable per-knot view with localized methods; external registry objects remain unchanged.
 
 Constructions support controlled `knot.getConstruction(id)`, `knot.addConstruction(definition)`, and `knot.removeConstruction(id)` operations. Removing a construction is blocked while it is targeted by a representation (including state and object targets) or referenced by a procedure. The construction collection array is protected from direct structural mutation.
+
+### Editing construction states and objects
+
+`knot.removeConstructionState(constructionId, stateId)` and `knot.removeConstructionObject(constructionId, objectId)` return `false` when the target element does not exist. State removal is blocked when a representation targets that state. Object removal is blocked when a representation targets that object or references it in `data.curves[].object` within the same construction. When referenced, the operation throws without changing the construction.
+
+These editing guards enforce reference integrity but do not replace `knot.validate()`, which also checks representation data, schemas, and other document constraints.
