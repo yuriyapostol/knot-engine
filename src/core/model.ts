@@ -202,6 +202,8 @@ export class Knot implements RawKnot {
   addConstruction(input: Construction): Construction {
     if (this.getConstruction(input.id)) throw new Error('Duplicate construction ID: ' + input.id)
     const value = structuredClone(input)
+    value.objects = Object.freeze(value.objects) as unknown as Construction['objects']
+    if (value.states) value.states = Object.freeze(value.states) as unknown as Construction['states']
     this.constructions = Object.freeze([...(this.constructions ?? []), value]) as unknown as RawKnot['constructions']
     return value
   }
@@ -211,7 +213,7 @@ export class Knot implements RawKnot {
     if (!construction) throw new Error('Unknown local construction: ' + constructionId)
     if (construction.states?.some(state => state.id === input.id)) throw new Error('Duplicate construction state ID: ' + input.id)
     const value = structuredClone(input)
-    construction.states = [...(construction.states ?? []), value]
+    construction.states = Object.freeze([...(construction.states ?? []), value]) as unknown as Construction['states']
     return value
   }
   /** Add an object to a local construction, preserving the construction instance. */
@@ -220,7 +222,7 @@ export class Knot implements RawKnot {
     if (!construction) throw new Error('Unknown local construction: ' + constructionId)
     if (construction.objects.some(object => object.id === input.id)) throw new Error('Duplicate construction object ID: ' + input.id)
     const value = structuredClone(input)
-    construction.objects = [...construction.objects, value]
+    construction.objects = Object.freeze([...construction.objects, value]) as unknown as Construction['objects']
     return value
   }
   /** Remove a state only if no representation targets it. */
@@ -230,7 +232,7 @@ export class Knot implements RawKnot {
     if (this.representations?.some(rep => rep.target?.kind === 'state' &&
       rep.target.id === stateId && this.referencesConstruction(rep.target.construction, constructionId)))
       throw new Error('Construction state is referenced by a representation: ' + stateId)
-    construction.states = construction.states.filter(state => state.id !== stateId)
+    construction.states = Object.freeze(construction.states.filter(state => state.id !== stateId)) as unknown as Construction['states']
     return true
   }
   /** Remove an object only if no representation target or spatial curve uses it. */
@@ -244,7 +246,7 @@ export class Knot implements RawKnot {
       const curves = (rep.data as Partial<SpatialCurveData> | null)?.curves
       return Array.isArray(curves) && curves.some(curve => curve.object === objectId)
     })) throw new Error('Construction object is referenced by a representation: ' + objectId)
-    construction.objects = construction.objects.filter(object => object.id !== objectId)
+    construction.objects = Object.freeze(construction.objects.filter(object => object.id !== objectId)) as unknown as Construction['objects']
     return true
   }
   private resolveURI(id: string): string {
@@ -384,6 +386,10 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
     procedure.steps = Object.freeze(procedure.steps) as unknown as Step[]
   }
   if (knot.procedures) knot.procedures = Object.freeze(knot.procedures) as unknown as Procedure[]
+  for (const construction of knot.constructions ?? []) if ('objects' in construction) {
+    construction.objects = Object.freeze(construction.objects) as unknown as Construction['objects']
+    if (construction.states) construction.states = Object.freeze(construction.states) as unknown as Construction['states']
+  }
   if (knot.constructions) knot.constructions = Object.freeze(knot.constructions) as unknown as RawKnot['constructions']
   for (const key of ['catalogs', 'representationTypes', 'objectTypes'] as const) {
     if (knot[key]) (knot as any)[key] = Object.freeze(knot[key])
