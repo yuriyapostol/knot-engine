@@ -188,8 +188,14 @@ describe('prepared Knot model', () => {
     })
     expect(() => knot.removeConstructionObject(construction.id, 'cord')).toThrow(/referenced/)
     knot.removeRepresentation(objectView.id)
+    const unrelated = knot.addRepresentation({
+      id: 'unrelated-view', type: 'https://example.org/types/view',
+      target: { kind: 'construction', construction: { id: construction.id } },
+      data: { curves: [{ object: 'cord' }] },
+    })
+    expect(knot.removeRepresentation(unrelated.id)).toBe(true)
     const curveView = knot.addRepresentation({
-      id: 'curve-view', type: 'https://example.org/types/view',
+      id: 'curve-view', type: 'knot-engine:representation-types/spatial-curve',
       target: { kind: 'construction', construction: { id: construction.id } },
       data: { curves: [{ object: 'cord' }] },
     })

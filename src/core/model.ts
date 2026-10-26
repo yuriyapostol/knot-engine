@@ -1,5 +1,6 @@
-import type { RawKnot, RawRepresentation, RawProcedure, RawStep, RawSubject, RawResourceRegistry, ResourceEntry, Construction } from './knot'
+import type { RawKnot, RawRepresentation, RawProcedure, RawStep, RawSubject, RawResourceRegistry, ResourceEntry, Construction, SpatialCurveData } from './knot'
 import { STANDARD_RESOURCES, expandURI } from './resources'
+import { SPATIAL_CURVE } from './knot'
 import { validateKnot } from './validateKnot'
 import { selectKnot, composeKnot } from './knotParts'
 
@@ -207,11 +208,16 @@ export class Knot implements RawKnot {
     if (this.representations?.some(rep => {
       if (!rep.target || rep.target.kind === 'subject' || !this.referencesConstruction(rep.target.construction, constructionId)) return false
       if (rep.target.kind === 'object' && rep.target.id === objectId) return true
-      const data = rep.data as { curves?: { object?: string }[] } | null
-      return Array.isArray(data?.curves) && data.curves.some(curve => curve.object === objectId)
+      if (this.resolveURI(rep.type) !== SPATIAL_CURVE) return false
+      const curves = (rep.data as Partial<SpatialCurveData> | null)?.curves
+      return Array.isArray(curves) && curves.some(curve => curve.object === objectId)
     })) throw new Error('Construction object is referenced by a representation: ' + objectId)
     construction.objects = construction.objects.filter(object => object.id !== objectId)
     return true
+  }
+  private resolveURI(id: string): string {
+    try { return expandURI(id, this.namespaces) }
+    catch { return id }
   }
   private referencesConstruction(ref: { id?: string; ref?: string }, id: string): boolean {
     if (ref.id === id) return true
