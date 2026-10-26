@@ -199,6 +199,18 @@ describe('prepared Knot model', () => {
     expect(knot.removeConstructionObject(construction.id, 'cord')).toBe(false)
     expect(knot.getConstruction(construction.id)).toBe(construction)
   })
+  it('keeps validator results consistent with construction reference guards', () => {
+    const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
+    expect(knot.validate().valid).toBe(true)
+    expect(() => knot.removeConstructionState('setup', 'view-3d-rest')).toThrow(/referenced/)
+    expect(() => knot.removeConstructionObject('setup', 'rope-1')).toThrow(/referenced/)
+    expect(knot.validate().valid).toBe(true)
+    expect(knot.removeRepresentation('view-3d-rest')).toBe(true)
+    expect(knot.removeConstructionState('setup', 'view-3d-rest')).toBe(true)
+    expect(knot.validate().valid).toBe(true)
+    expect(knot.removeConstruction('setup')).toBe(true)
+    expect(knot.validate().valid).toBe(true)
+  })
   it('controls structural changes and preserves stable identity', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const existing = knot.getRepresentation('view-3d-rest')!
