@@ -25,6 +25,15 @@ describe('prepared Knot model', () => {
     expect(knot.getResource(uri, 'catalog')).toBeUndefined()
     expect(catalog.getName()).toBe('Catalog')
   })
+  it('does not alter the prepared source when callers mutate returned raw snapshots', () => {
+    const knot = Knot.from(raw as any)
+    const snapshot = knot.toRaw()
+    snapshot.subject.id = 'changed-in-snapshot'
+    expect(knot.subject.id).toBe(raw.subject.id)
+    const clone = knot.clone()
+    clone.subject.id = 'changed-in-clone'
+    expect(knot.subject.id).toBe(raw.subject.id)
+  })
   it('restores a same-kind registry resource without overwriting a different-kind untyped view', () => {
     const uri = 'https://example.org/shared-fallback'
     const registry = { resources: [
