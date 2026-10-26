@@ -13,6 +13,18 @@ describe('prepared Knot model', () => {
     configureLocalization({ locale: 'en' })
     expect(notifications).toBe(1)
   })
+  it('does not inherit localized metadata across registry resource kinds sharing a URI', () => {
+    const uri = 'https://example.org/shared-resource'
+    const registry = {
+      resources: [
+        { kind: 'catalog', resource: { id: uri, names: [{ language: 'en', value: 'Catalog name' }] } },
+        { kind: 'representation-type', resource: { id: uri, name: 'Representation type' } },
+      ],
+    }
+    const knot = Knot.from(raw as any, { registries: [registry as any], locale: 'en' })
+    expect(knot.getResource(uri, 'catalog')?.getName()).toBe('Catalog name')
+    expect(knot.getResource(uri, 'representation-type')?.getName()).toBe('Representation type')
+  })
   it('shares registry definitions without copying or mutating their prototypes', () => {
     const id = STANDARD_RESOURCES.resources[0].resource.id
     const source = STANDARD_RESOURCES.resources[0].resource
