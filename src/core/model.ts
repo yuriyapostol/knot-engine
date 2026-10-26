@@ -27,6 +27,7 @@ export class LocalizedTexts extends Array<{ language: string; value: string }> {
   }
 }
 const owner = new WeakMap<object, Knot>()
+const textOwner = new WeakMap<object, Knot>()
 const resourceOwner = new WeakMap<object, Knot>()
 const resourceKey = new WeakMap<object, string>()
 const localizations = new WeakMap<Knot, LocalizedConfig>()
@@ -41,6 +42,11 @@ function overrideFor(knot: Knot | undefined, id: string, key: 'names' | 'descrip
 }
 const contexts = new WeakMap<Knot, Map<string, PreparedResource>>()
 const registries = new WeakMap<Knot, readonly RawResourceRegistry[]>()
+function localized(values: RawLocalizedTexts | undefined, entity: object, language?: string): string | undefined {
+  const knot = textOwner.get(entity)
+  const target = language ?? languageFor(knot)
+  return exact(values, target) ?? exact(values, fallbackFor(knot)) ?? exact(values, 'en')
+}
 function texts(values?: RawLocalizedTexts): LocalizedTexts | undefined {
   if (!values) return undefined
   Object.setPrototypeOf(values, LocalizedTexts.prototype)
@@ -82,8 +88,8 @@ export class Subject implements RawSubject {
   names?: LocalizedTexts
   descriptions?: LocalizedTexts
   identifiers?: RawSubject['identifiers']
-  getName(language?: string): string | undefined { return this.names?.get(language) }
-  getDescription(language?: string): string | undefined { return this.descriptions?.get(language) }
+  getName(language?: string): string | undefined { return localized(this.names, this, language) }
+  getDescription(language?: string): string | undefined { return localized(this.descriptions, this, language) }
 }
 export class Representation implements RawRepresentation {
   target?: RawRepresentation['target']
@@ -118,7 +124,7 @@ export class Step implements RawStep {
   names?: LocalizedTexts
   instructions?: LocalizedTexts
   getName(language?: string): string | undefined { return this.names?.get(language) }
-  getInstructions(language?: string): string | undefined { return this.instructions?.get(language) }
+  getInstructions(language?: string): string | undefined { return localized(this.instructions, this, language) }
 }
 export class Procedure implements RawProcedure {
   construction?: RawProcedure['construction']
@@ -132,6 +138,8 @@ export class Procedure implements RawProcedure {
   addStep(input: RawStep): Step {
     if (this.getStep(input.id)) throw new Error('Duplicate step ID: ' + input.id)
     const step = structuredClone(input) as Step
+    const knot = textOwner.get(this)
+    if (knot) textOwner.set(step, knot)
     decorate(step)
     Object.setPrototypeOf(step, Step.prototype)
     this.steps = Object.freeze([...this.steps, step]) as unknown as Step[]
@@ -169,9 +177,10 @@ export class Knot implements RawKnot {
   addProcedure(input: RawProcedure): Procedure {
     if (this.getProcedure(input.id)) throw new Error('Duplicate procedure ID: ' + input.id)
     const procedure = structuredClone(input) as Procedure
+    textOwner.set(procedure, this)
     decorate(procedure)
     Object.setPrototypeOf(procedure, Procedure.prototype)
-    for (const step of procedure.steps) { decorate(step); Object.setPrototypeOf(step, Step.prototype) }
+    for (const step of procedure.steps) { textOwner.set(step, this); decorate(step); Object.setPrototypeOf(step, Step.prototype) }
     procedure.steps = Object.freeze(procedure.steps) as unknown as Step[]
     this.procedures = Object.freeze([...(this.procedures ?? []), procedure]) as unknown as Procedure[]
     return procedure
@@ -324,6 +333,7 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
   registries.set(knot, attached)
   localizations.set(knot, localization)
   decorate(knot.subject)
+  textOwner.set(knot.subject, knot)
   Object.setPrototypeOf(knot.subject, Subject.prototype)
   for (const representation of knot.representations ?? []) {
     decorate(representation)
@@ -332,9 +342,11 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
   }
   if (knot.representations) knot.representations = Object.freeze(knot.representations) as unknown as Representation[]
   for (const procedure of knot.procedures ?? []) {
+    textOwner.set(procedure, knot)
     decorate(procedure)
     Object.setPrototypeOf(procedure, Procedure.prototype)
     for (const step of procedure.steps) {
+      textOwner.set(step, knot)
       decorate(step)
       Object.setPrototypeOf(step, Step.prototype)
     }

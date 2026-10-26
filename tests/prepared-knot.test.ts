@@ -218,6 +218,26 @@ describe('prepared Knot model', () => {
     expect(knot.removeConstruction('setup')).toBe(true)
     expect(knot.validate().valid).toBe(true)
   })
+  it('uses per-Knot locale for subject, procedures and steps, including newly added steps', () => {
+    const bilingual = [{ language: 'en', value: 'English' }, { language: 'uk', value: 'Українська' }]
+    const input = {
+      ...raw, subject: { ...raw.subject, names: bilingual },
+      procedures: [{ id: 'guide', names: bilingual, descriptions: bilingual,
+        steps: [{ id: 'first', names: bilingual, instructions: bilingual }] }],
+    }
+    configureLocalization({ locale: 'en', fallbackLocale: 'en' })
+    const uk = Knot.from(input as any, { locale: 'uk' })
+    const en = Knot.from(input as any, { locale: 'en' })
+    expect(uk.subject.getName()).toBe('Українська')
+    expect(en.subject.getName()).toBe('English')
+    expect(uk.getProcedure('guide')!.getDescription()).toBe('Українська')
+    expect(uk.getProcedure('guide')!.getStep('first')!.getInstructions()).toBe('Українська')
+    const added = uk.getProcedure('guide')!.addStep({ id: 'second', names: bilingual, instructions: bilingual })
+    expect(added.getInstructions()).toBe('Українська')
+    expect(uk.clone().getProcedure('guide')!.getStep('second')!.getName()).toBe('Українська')
+    expect(uk.toRaw()).toEqual(input)
+    expect(en.getProcedure('guide')!.getStep('first')!.getName()).toBe('English')
+  })
   it('controls structural changes and preserves stable identity', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const existing = knot.getRepresentation('view-3d-rest')!
