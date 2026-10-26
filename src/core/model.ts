@@ -325,13 +325,17 @@ export class Knot implements RawKnot {
         if (!('names' in fallback)) Object.defineProperty(view, 'names', { get: () => (registryView as any).names, enumerable: false })
         if (!('descriptions' in fallback)) Object.defineProperty(view, 'descriptions', { get: () => (registryView as any).descriptions, enumerable: false })
       }
-      contexts.get(this)?.set(uri, view)
       typedContexts.get(this)?.set(resourceIdentity(resourceKind, uri), view)
+      const current = contexts.get(this)?.get(uri)
+      if (current && Object.getPrototypeOf(current) === target) contexts.get(this)?.set(uri, view)
     } else {
       typedContexts.get(this)?.delete(resourceIdentity(resourceKind, uri))
-      const alternative = [...(typedContexts.get(this)?.entries() ?? [])].reverse().find(([key]) => key.endsWith(':' + uri))?.[1]
-      if (alternative) contexts.get(this)?.set(uri, alternative)
-      else contexts.get(this)?.delete(uri)
+      const current = contexts.get(this)?.get(uri)
+      if (current && Object.getPrototypeOf(current) === target) {
+        const alternative = [...(typedContexts.get(this)?.entries() ?? [])].reverse().find(([key]) => key.endsWith(':' + uri))?.[1]
+        if (alternative) contexts.get(this)?.set(uri, alternative)
+        else contexts.get(this)?.delete(uri)
+      }
     }
     return true
   }
