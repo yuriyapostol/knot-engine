@@ -400,7 +400,7 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
     for (const entry of registry.resources) {
       const item = entry.resource
       const id = item.id.startsWith('https://') || item.id.startsWith('http://') || item.id.startsWith('urn:') ? item.id : expandURI(item.id, registry.namespaces)
-      const defaults = index.get(id) as any
+      const defaults = typedIndex.get(resourceIdentity(entry.kind, id)) as any
       const view = resource(item, knot, id)
       if (defaults && !('names' in item)) Object.defineProperty(view, 'names', { get: () => defaults.names, enumerable: false })
       if (defaults && !('descriptions' in item)) Object.defineProperty(view, 'descriptions', { get: () => defaults.descriptions, enumerable: false })
