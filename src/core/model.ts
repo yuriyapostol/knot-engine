@@ -1,6 +1,5 @@
-import type { RawKnot, RawRepresentation, RawProcedure, RawStep, RawSubject, RawResourceRegistry, ResourceEntry, Construction, SpatialCurveData } from './knot'
+import type { RawKnot, RawRepresentation, RawProcedure, RawStep, RawSubject, RawResourceRegistry, ResourceEntry, Construction } from './knot'
 import { STANDARD_RESOURCES, expandURI } from './resources'
-import { SPATIAL_CURVE } from './knot'
 import { validateKnot } from './validateKnot'
 import { selectKnot, composeKnot } from './knotParts'
 
@@ -147,7 +146,7 @@ export class Procedure implements RawProcedure {
     if (knot) textOwner.set(step, knot)
     decorate(step)
     Object.setPrototypeOf(step, Step.prototype)
-    this.steps = Object.freeze([...this.steps, step]) as unknown as Step[]
+    this.steps = [...this.steps, step] as Step[]
     return step
   }
   removeStep(id: string): boolean {
@@ -187,12 +186,12 @@ export class Knot implements RawKnot {
     Object.setPrototypeOf(procedure, Procedure.prototype)
     for (const step of procedure.steps) { textOwner.set(step, this); decorate(step); Object.setPrototypeOf(step, Step.prototype) }
     procedure.steps = Object.freeze(procedure.steps) as unknown as Step[]
-    this.procedures = Object.freeze([...(this.procedures ?? []), procedure]) as unknown as Procedure[]
+    this.procedures = [...(this.procedures ?? []), procedure] as Procedure[]
     return procedure
   }
   removeProcedure(id: string): boolean {
     if (!this.getProcedure(id)) return false
-    this.procedures = Object.freeze((this.procedures ?? []).filter(x => x.id !== id)) as unknown as Procedure[]
+    this.procedures = (this.procedures ?? []).filter(x => x.id !== id) as Procedure[]
     return true
   }
   getConstruction(id: string): Construction | undefined {
@@ -202,9 +201,9 @@ export class Knot implements RawKnot {
   addConstruction(input: Construction): Construction {
     if (this.getConstruction(input.id)) throw new Error('Duplicate construction ID: ' + input.id)
     const value = structuredClone(input)
-    value.objects = Object.freeze(value.objects) as unknown as Construction['objects']
-    if (value.states) value.states = Object.freeze(value.states) as unknown as Construction['states']
-    this.constructions = Object.freeze([...(this.constructions ?? []), value]) as unknown as RawKnot['constructions']
+    value.objects = value.objects as Construction['objects']
+    if (value.states) value.states = value.states as Construction['states']
+    this.constructions = [...(this.constructions ?? []), value] as RawKnot['constructions']
     return value
   }
   /** Add a state to a local construction, preserving the construction instance. */
@@ -213,7 +212,7 @@ export class Knot implements RawKnot {
     if (!construction) throw new Error('Unknown local construction: ' + constructionId)
     if (construction.states?.some(state => state.id === input.id)) throw new Error('Duplicate construction state ID: ' + input.id)
     const value = structuredClone(input)
-    construction.states = Object.freeze([...(construction.states ?? []), value]) as unknown as Construction['states']
+    construction.states = [...(construction.states ?? []), value] as Construction['states']
     return value
   }
   /** Add an object to a local construction, preserving the construction instance. */
@@ -222,51 +221,25 @@ export class Knot implements RawKnot {
     if (!construction) throw new Error('Unknown local construction: ' + constructionId)
     if (construction.objects.some(object => object.id === input.id)) throw new Error('Duplicate construction object ID: ' + input.id)
     const value = structuredClone(input)
-    construction.objects = Object.freeze([...construction.objects, value]) as unknown as Construction['objects']
+    construction.objects = [...construction.objects, value] as Construction['objects']
     return value
   }
-  /** Remove a state only if no representation targets it. */
   removeConstructionState(constructionId: string, stateId: string): boolean {
     const construction = this.getConstruction(constructionId)
     if (!construction?.states?.some(state => state.id === stateId)) return false
-    if (this.representations?.some(rep => rep.target?.kind === 'state' &&
-      rep.target.id === stateId && this.referencesConstruction(rep.target.construction, constructionId)))
-      throw new Error('Construction state is referenced by a representation: ' + stateId)
-    construction.states = Object.freeze(construction.states.filter(state => state.id !== stateId)) as unknown as Construction['states']
+    construction.states = construction.states.filter(state => state.id !== stateId)
     return true
   }
-  /** Remove an object only if no representation target or spatial curve uses it. */
   removeConstructionObject(constructionId: string, objectId: string): boolean {
     const construction = this.getConstruction(constructionId)
     if (!construction?.objects.some(object => object.id === objectId)) return false
-    if (this.representations?.some(rep => {
-      if (!rep.target || rep.target.kind === 'subject' || !this.referencesConstruction(rep.target.construction, constructionId)) return false
-      if (rep.target.kind === 'object' && rep.target.id === objectId) return true
-      if (this.resolveURI(rep.type) !== SPATIAL_CURVE) return false
-      const curves = (rep.data as Partial<SpatialCurveData> | null)?.curves
-      return Array.isArray(curves) && curves.some(curve => curve.object === objectId)
-    })) throw new Error('Construction object is referenced by a representation: ' + objectId)
-    construction.objects = Object.freeze(construction.objects.filter(object => object.id !== objectId)) as unknown as Construction['objects']
+    construction.objects = construction.objects.filter(object => object.id !== objectId)
     return true
-  }
-  private resolveURI(id: string): string {
-    try { return expandURI(id, this.namespaces) }
-    catch { return id }
-  }
-  private referencesConstruction(ref: { id?: string; ref?: string }, id: string): boolean {
-    // { id } addresses an inline construction; { ref } addresses a registry resource.
-    // The validator resolves these independently, even if their URI strings coincide.
-    return ref.id === id
   }
   removeConstruction(id: string): boolean {
     const target = this.getConstruction(id)
     if (!target) return false
-    const matches = (ref: { id?: string; ref?: string }): boolean => this.referencesConstruction(ref, id)
-    if (this.representations?.some(rep => rep.target && rep.target.kind !== 'subject' && matches(rep.target.construction)))
-      throw new Error('Construction is referenced by a representation: ' + id)
-    if (this.procedures?.some(proc => proc.construction && matches(proc.construction)))
-      throw new Error('Construction is referenced by a procedure: ' + id)
-    this.constructions = Object.freeze((this.constructions ?? []).filter(item => item !== target)) as unknown as RawKnot['constructions']
+    this.constructions = (this.constructions ?? []).filter(item => item !== target)
     return true
   }
   getResource(id: string, kind?: ResourceEntry['kind']): PreparedResource | undefined {
@@ -287,7 +260,7 @@ export class Knot implements RawKnot {
     const view = resource(value, this, uri)
     if (previous && !('names' in value)) Object.defineProperty(view, 'names', { get: () => (previous as any).names, enumerable: false })
     if (previous && !('descriptions' in value)) Object.defineProperty(view, 'descriptions', { get: () => (previous as any).descriptions, enumerable: false })
-    ;(this as any)[kind] = Object.freeze([...collection, value])
+    ;(this as any)[kind] = [...collection, value]
     contexts.get(this)?.set(uri, view)
     typedContexts.get(this)?.set(resourceIdentity(resourceKind, uri), view)
     return view
@@ -306,17 +279,7 @@ export class Knot implements RawKnot {
       .flatMap(registry => registry.resources.map(entry => ({ entry, registry })))
       .reverse().find(({ entry, registry }) => entry.kind === resourceKind &&
         expandURI(entry.resource.id, registry.namespaces) === uri)
-    // Reject removal of the last definition while it is still referenced.
-    if (!fallbackInline && !fallbackRegistry) {
-      if (kind === 'representationTypes' && this.representations?.some(rep => expandURI(rep.type, this.namespaces) === uri))
-        throw new Error('Resource is referenced by a representation: ' + id)
-      if (kind === 'catalogs' && this.subject.identifiers?.some(identifier => expandURI(identifier.catalog, this.namespaces) === uri))
-        throw new Error('Resource is referenced by a subject identifier: ' + id)
-      if (kind === 'objectTypes' && this.constructions?.some(construction =>
-        'objects' in construction && construction.objects.some(object => expandURI(object.type, this.namespaces) === uri)))
-        throw new Error('Resource is referenced by a construction object: ' + id)
-    }
-    ;(this as any)[kind] = Object.freeze(remaining)
+    ;(this as any)[kind] = remaining
     const fallback = fallbackInline ?? fallbackRegistry?.entry.resource
     if (fallback) {
       const view = resource(fallback, this, uri)
@@ -345,15 +308,12 @@ export class Knot implements RawKnot {
     decorate(value)
     Object.setPrototypeOf(value, Representation.prototype)
     owner.set(value, this)
-    this.representations = Object.freeze([...(this.representations ?? []), value]) as unknown as Representation[]
+    this.representations = [...(this.representations ?? []), value] as Representation[]
     return value
   }
   removeRepresentation(id: string): boolean {
     if (!this.getRepresentation(id)) return false
-    if (this.procedures?.some(procedure => procedure.steps.some(step =>
-      step.representations?.some(ref => ref.id === id))))
-      throw new Error('Representation is referenced by a procedure step: ' + id)
-    this.representations = Object.freeze((this.representations ?? []).filter(x => x.id !== id)) as unknown as Representation[]
+    this.representations = (this.representations ?? []).filter(x => x.id !== id)
     return true
   }
   toRaw(): RawKnot { return JSON.parse(JSON.stringify(this)) as RawKnot }
@@ -391,12 +351,12 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
   }
   if (knot.procedures) knot.procedures = Object.freeze(knot.procedures) as unknown as Procedure[]
   for (const construction of knot.constructions ?? []) if ('objects' in construction) {
-    construction.objects = Object.freeze(construction.objects) as unknown as Construction['objects']
-    if (construction.states) construction.states = Object.freeze(construction.states) as unknown as Construction['states']
+    construction.objects = construction.objects as Construction['objects']
+    if (construction.states) construction.states = construction.states as Construction['states']
   }
   if (knot.constructions) knot.constructions = Object.freeze(knot.constructions) as unknown as RawKnot['constructions']
   for (const key of ['catalogs', 'representationTypes', 'objectTypes'] as const) {
-    if (knot[key]) (knot as any)[key] = Object.freeze(knot[key])
+    if (knot[key]) (knot as any)[key] = knot[key]
   }
   const index = new Map<string, PreparedResource>()
   const typedIndex = new Map<string, PreparedResource>()
