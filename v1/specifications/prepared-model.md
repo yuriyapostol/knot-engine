@@ -41,3 +41,7 @@ These editing guards enforce reference integrity but do not replace `knot.valida
 Localization of `Subject`, `Procedure`, and `Step` also follows their owning `Knot`'s `locale` and `fallbackLocale`, rather than relying solely on global settings. This includes steps created with `Procedure.addStep()`. Raw text values remain unchanged.
 
 For `Subject`, `Procedure`, and `Step`, `overrides` also apply to `names` and `descriptions` by entity ID without changing raw JSON. Step `instructions` use localized values and fallback language; instruction overrides are not part of this contract.
+
+### Adding construction states and objects
+
+`knot.addConstructionState(constructionId, state)` and `knot.addConstructionObject(constructionId, object)` edit an existing **local** construction without replacing its prepared instance. They clone their inputs, return the added value, and reject duplicate IDs within the corresponding collection or unknown construction IDs. These methods do not validate arbitrary input data; use `knot.validate()` to check the resulting document. Existing removal guards remain in effect.

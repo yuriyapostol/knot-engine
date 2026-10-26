@@ -274,6 +274,31 @@ describe('prepared Knot model', () => {
     expect(composed.getRepresentation('view-3d-rest')!.getName()).toBe('Просторовий вигляд')
     expect(composed.toRaw().subject.names).toEqual(bilingual)
   })
+  it('edits construction states and objects without replacing the construction or mutating inputs', () => {
+    const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
+    const construction = knot.getConstruction('setup')!
+    const originalRepresentation = knot.getRepresentation('view-3d-rest')
+    const stateInput = { id: 'extra-state', name: 'Extra state' }
+    const objectInput = { id: 'extra-rope', type: 'knot-engine:object-types/rope',
+      topology: 'open', ends: [{ id: 'a' }, { id: 'b' }] }
+    const state = knot.addConstructionState('setup', stateInput)
+    const object = knot.addConstructionObject('setup', objectInput)
+    expect(state).not.toBe(stateInput)
+    expect(object).not.toBe(objectInput)
+    expect(knot.getConstruction('setup')).toBe(construction)
+    expect(knot.getRepresentation('view-3d-rest')).toBe(originalRepresentation)
+    expect(() => knot.addConstructionState('setup', stateInput)).toThrow(/Duplicate/)
+    expect(() => knot.addConstructionObject('setup', objectInput)).toThrow(/Duplicate/)
+    expect(() => knot.addConstructionState('missing', stateInput)).toThrow(/Unknown/)
+    expect(() => knot.addConstructionObject('missing', objectInput)).toThrow(/Unknown/)
+    expect(knot.validate().valid).toBe(true)
+    expect(knot.clone().getConstruction('setup')?.states?.some(x => x.id === state.id)).toBe(true)
+    expect(knot.toRaw().constructions?.some(c => 'id' in c && c.id === 'setup' &&
+      c.objects.some(x => x.id === object.id))).toBe(true)
+    expect(knot.removeConstructionState('setup', state.id)).toBe(true)
+    expect(knot.removeConstructionObject('setup', object.id)).toBe(true)
+    expect(knot.validate().valid).toBe(true)
+  })
   it('controls structural changes and preserves stable identity', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const existing = knot.getRepresentation('view-3d-rest')!

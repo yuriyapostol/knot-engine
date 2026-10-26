@@ -203,6 +203,24 @@ export class Knot implements RawKnot {
     this.constructions = Object.freeze([...(this.constructions ?? []), value]) as unknown as RawKnot['constructions']
     return value
   }
+  /** Add a state to a local construction, preserving the construction instance. */
+  addConstructionState(constructionId: string, input: NonNullable<Construction['states']>[number]): NonNullable<Construction['states']>[number] {
+    const construction = this.getConstruction(constructionId)
+    if (!construction) throw new Error('Unknown local construction: ' + constructionId)
+    if (construction.states?.some(state => state.id === input.id)) throw new Error('Duplicate construction state ID: ' + input.id)
+    const value = structuredClone(input)
+    construction.states = [...(construction.states ?? []), value]
+    return value
+  }
+  /** Add an object to a local construction, preserving the construction instance. */
+  addConstructionObject(constructionId: string, input: Construction['objects'][number]): Construction['objects'][number] {
+    const construction = this.getConstruction(constructionId)
+    if (!construction) throw new Error('Unknown local construction: ' + constructionId)
+    if (construction.objects.some(object => object.id === input.id)) throw new Error('Duplicate construction object ID: ' + input.id)
+    const value = structuredClone(input)
+    construction.objects = [...construction.objects, value]
+    return value
+  }
   /** Remove a state only if no representation targets it. */
   removeConstructionState(constructionId: string, stateId: string): boolean {
     const construction = this.getConstruction(constructionId)
