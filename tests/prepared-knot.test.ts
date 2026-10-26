@@ -357,6 +357,18 @@ describe('prepared Knot model', () => {
     expect(knot.getResource(uri, 'catalog')).toBeUndefined()
     expect(knot.getResource(uri, 'representation-type')).toBe(definition)
   })
+  it('protects nested construction collections from structural mutation', () => {
+    const knot = Knot.from(raw as any)
+    const construction = knot.getConstruction('setup')!
+    expect(() => construction.objects.push(construction.objects[0])).toThrow()
+    expect(() => construction.states?.push({ id: 'rogue' })).toThrow()
+    knot.addConstructionState('setup', { id: 'new-state' })
+    expect(() => construction.states?.pop()).toThrow()
+    knot.addConstructionObject('setup', { id: 'new-object', type: 'https://example.org/types/custom' })
+    expect(() => construction.objects.pop()).toThrow()
+    expect(knot.removeConstructionState('setup', 'new-state')).toBe(true)
+    expect(knot.removeConstructionObject('setup', 'new-object')).toBe(true)
+  })
   it('controls structural changes and preserves stable identity', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const existing = knot.getRepresentation('view-3d-rest')!
