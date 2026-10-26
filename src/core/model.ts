@@ -7,7 +7,16 @@ export type RawLocalizedTexts = { language: string; value: string }[]
 export type PreparedResource = ResourceEntry['resource'] & { getName(locale?: string): string | undefined; getDescription(locale?: string): string | undefined }
 export type LocalizedConfig = { locale?: string; fallbackLocale?: string; overrides?: Record<string, { names?: RawLocalizedTexts; descriptions?: RawLocalizedTexts }> }
 let config: Required<LocalizedConfig> = { locale: 'en', fallbackLocale: 'en', overrides: {} }
-export function configureLocalization(options: LocalizedConfig): void { config = { ...config, ...options } }
+const localizationListeners = new Set<() => void>()
+/** Subscribe to global localization changes; returns an unsubscribe callback. */
+export function subscribeLocalization(listener: () => void): () => void {
+  localizationListeners.add(listener)
+  return () => { localizationListeners.delete(listener) }
+}
+export function configureLocalization(options: LocalizedConfig): void {
+  config = { ...config, ...options }
+  for (const listener of [...localizationListeners]) listener()
+}
 export class LocalizedTexts extends Array<{ language: string; value: string }> {
   getExact(language = config.locale): string | undefined {
     return this.find(x => x.language === language)?.value ?? this.find(x => x.language === language.split('-')[0])?.value

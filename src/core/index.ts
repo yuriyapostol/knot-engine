@@ -15,5 +15,5 @@ export * from './selectRepresentation'
 
 export * from './resolveRepresentationView'
 
-export { Knot, Representation, Procedure, Step, Subject, LocalizedTexts, configureLocalization } from './model'
+export { Knot, Representation, Procedure, Step, Subject, LocalizedTexts, configureLocalization, subscribeLocalization } from './model'
 export type { PreparedResource, RawLocalizedTexts, KnotOptions, LocalizedConfig } from './model'

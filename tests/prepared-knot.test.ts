@@ -1,9 +1,18 @@
 import { validateKnot } from '../src/core/validateKnot'
 import { describe, expect, it } from 'vitest'
-import { Knot, configureLocalization, STANDARD_RESOURCES } from '../src/core'
+import { Knot, configureLocalization, subscribeLocalization, STANDARD_RESOURCES } from '../src/core'
 import raw from '../v1/examples/knots/open-rope.json'
 
 describe('prepared Knot model', () => {
+  it('notifies localization subscribers and supports cleanup', () => {
+    let notifications = 0
+    const unsubscribe = subscribeLocalization(() => { notifications++ })
+    configureLocalization({ locale: 'uk' })
+    expect(notifications).toBe(1)
+    unsubscribe()
+    configureLocalization({ locale: 'en' })
+    expect(notifications).toBe(1)
+  })
   it('prepares, resolves resources and serializes without methods', () => {
     configureLocalization({ locale: 'uk', fallbackLocale: 'en' })
     const report = validateKnot(raw, { registries: [STANDARD_RESOURCES] })
