@@ -172,7 +172,7 @@ describe('prepared Knot model', () => {
     const knot = Knot.from({ ...raw, constructions: [] } as any)
     const construction = knot.addConstruction({
       id: 'local-construction', states: [{ id: 'tied' }],
-      objects: [{ id: 'cord', type: 'https://example.org/types/cord' }],
+      objects: [{ id: 'cord', type: 'https://example.org/types/cord' }, { id: 'unrelated-cord', type: 'https://example.org/types/cord' }],
     })
     const stateView = knot.addRepresentation({
       id: 'state-view', type: 'https://example.org/types/view',
@@ -191,8 +191,9 @@ describe('prepared Knot model', () => {
     const unrelated = knot.addRepresentation({
       id: 'unrelated-view', type: 'https://example.org/types/view',
       target: { kind: 'construction', construction: { id: construction.id } },
-      data: { curves: [{ object: 'cord' }] },
+      data: { curves: [{ object: 'unrelated-cord' }] },
     })
+    expect(knot.removeConstructionObject(construction.id, 'unrelated-cord')).toBe(true)
     expect(knot.removeRepresentation(unrelated.id)).toBe(true)
     const curveView = knot.addRepresentation({
       id: 'curve-view', type: 'knot-engine:representation-types/spatial-curve',
