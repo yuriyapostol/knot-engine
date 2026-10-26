@@ -13,6 +13,18 @@ describe('prepared Knot model', () => {
     configureLocalization({ locale: 'en' })
     expect(notifications).toBe(1)
   })
+  it('preserves the untyped resource view when removing another kind with the same URI', () => {
+    const uri = 'https://example.org/shared-removal'
+    const knot = Knot.from(raw as any)
+    const catalog = knot.addResourceDefinition('catalogs', { id: uri, name: 'Catalog' })
+    knot.addResourceDefinition('representationTypes', { id: uri, name: 'Type' } as any)
+    expect(knot.getResource(uri)?.getName()).toBe('Type')
+    expect(knot.removeResourceDefinition('catalogs', uri)).toBe(true)
+    expect(knot.getResource(uri)?.getName()).toBe('Type')
+    expect(knot.getResource(uri, 'representation-type')?.getName()).toBe('Type')
+    expect(knot.getResource(uri, 'catalog')).toBeUndefined()
+    expect(catalog.getName()).toBe('Catalog')
+  })
   it('does not inherit localized metadata across registry resource kinds sharing a URI', () => {
     const uri = 'https://example.org/shared-resource'
     const registry = {
