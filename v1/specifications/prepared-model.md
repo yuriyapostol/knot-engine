@@ -39,3 +39,5 @@ Constructions support controlled `knot.getConstruction(id)`, `knot.addConstructi
 These editing guards enforce reference integrity but do not replace `knot.validate()`, which also checks representation data, schemas, and other document constraints.
 
 Localization of `Subject`, `Procedure`, and `Step` also follows their owning `Knot`'s `locale` and `fallbackLocale`, rather than relying solely on global settings. This includes steps created with `Procedure.addStep()`. Raw text values remain unchanged.
+
+For `Subject`, `Procedure`, and `Step`, `overrides` also apply to `names` and `descriptions` by entity ID without changing raw JSON. Step `instructions` use localized values and fallback language; instruction overrides are not part of this contract.
