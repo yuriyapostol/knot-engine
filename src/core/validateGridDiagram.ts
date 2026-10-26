@@ -1,4 +1,4 @@
-import type { GridDiagram } from './asset'
+import type { GridDiagram } from './knot'
 import { issue, standalone } from './validation'
 export function validateGridDiagram(value: unknown, _options: { strict?: boolean } = {}) {
   const result = standalone<GridDiagram>('grid', value, grid => {

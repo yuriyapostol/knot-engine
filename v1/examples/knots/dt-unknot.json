@@ -1,0 +1,40 @@
+{
+  "schema": "Knot",
+  "schemaVersion": 1,
+  "namespaces": {
+    "knot-engine": "https://yuriyapostol.github.io/knot-engine/v1/"
+  },
+  "id": "dt-unknot",
+  "subject": {
+    "id": "dt-unknot-subject"
+  },
+  "representationTypes": [
+    {
+      "id": "knot-engine:representation-types/dt-code",
+      "name": "dt-code",
+      "description": "Signed even DT code for knot and link diagrams, generation 1",
+      "dataSchema": {
+        "ref": "knot-engine:schema/dt-code.schema.json"
+      },
+      "specification": "knot-engine:specifications/dt-code.html",
+      "viewSpace": "none"
+    }
+  ],
+  "representations": [
+    {
+      "id": "dt",
+      "type": "knot-engine:representation-types/dt-code",
+      "data": {
+        "convention": "knot-engine:conventions/dt-signed-even",
+        "code": []
+      },
+      "sources": [
+        {
+          "title": "Knot Engine DT contract",
+          "url": "https://yuriyapostol.github.io/knot-engine/v1/specifications/dt-code.html",
+          "note": "Project-defined empty-code convention: one crossing-free unknot."
+        }
+      ]
+    }
+  ]
+}

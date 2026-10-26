@@ -31,6 +31,22 @@
             "$ref": "#/$defs/contribution"
           },
           "maxItems": 1024
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "minItems": 0,
+          "maxItems": 128
         }
       },
       "required": [
@@ -207,277 +223,6 @@
           "additionalProperties": false
         }
       ]
-    },
-    "view": {
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string",
-              "minLength": 1
-            },
-            "name": {
-              "type": "string",
-              "minLength": 1
-            },
-            "description": {
-              "type": "string",
-              "minLength": 1
-            },
-            "space": {
-              "const": "space"
-            },
-            "camera": {
-              "$ref": "#/$defs/camera3"
-            }
-          },
-          "required": [
-            "id",
-            "name",
-            "space",
-            "camera"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string",
-              "minLength": 1
-            },
-            "name": {
-              "type": "string",
-              "minLength": 1
-            },
-            "description": {
-              "type": "string",
-              "minLength": 1
-            },
-            "space": {
-              "const": "plane"
-            },
-            "camera": {
-              "type": "object",
-              "properties": {
-                "mode": {
-                  "const": "plane"
-                },
-                "center": {
-                  "type": "array",
-                  "items": {
-                    "type": "number"
-                  },
-                  "minItems": 2,
-                  "maxItems": 2
-                },
-                "height": {
-                  "type": "number",
-                  "exclusiveMinimum": 0
-                }
-              },
-              "required": [
-                "mode",
-                "center",
-                "height"
-              ],
-              "additionalProperties": false
-            }
-          },
-          "required": [
-            "id",
-            "name",
-            "space",
-            "camera"
-          ],
-          "additionalProperties": false
-        }
-      ]
-    },
-    "camera3": {
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "mode": {
-              "const": "fit"
-            },
-            "direction": {
-              "type": "array",
-              "items": {
-                "type": "number"
-              },
-              "minItems": 3,
-              "maxItems": 3
-            },
-            "up": {
-              "type": "array",
-              "items": {
-                "type": "number"
-              },
-              "minItems": 3,
-              "maxItems": 3
-            },
-            "projection": {
-              "$ref": "#/$defs/projection"
-            },
-            "padding": {
-              "type": "number",
-              "minimum": 1
-            }
-          },
-          "required": [
-            "mode",
-            "direction",
-            "up",
-            "projection"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "mode": {
-              "const": "fixed"
-            },
-            "position": {
-              "type": "array",
-              "items": {
-                "type": "number"
-              },
-              "minItems": 3,
-              "maxItems": 3
-            },
-            "target": {
-              "type": "array",
-              "items": {
-                "type": "number"
-              },
-              "minItems": 3,
-              "maxItems": 3
-            },
-            "up": {
-              "type": "array",
-              "items": {
-                "type": "number"
-              },
-              "minItems": 3,
-              "maxItems": 3
-            },
-            "projection": {
-              "$ref": "#/$defs/fixedProjection"
-            }
-          },
-          "required": [
-            "mode",
-            "position",
-            "target",
-            "up",
-            "projection"
-          ],
-          "additionalProperties": false
-        }
-      ]
-    },
-    "projection": {
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "perspective"
-            },
-            "fovY": {
-              "type": "number",
-              "exclusiveMinimum": 0,
-              "exclusiveMaximum": 3.141592653589793
-            }
-          },
-          "required": [
-            "kind",
-            "fovY"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "orthographic"
-            }
-          },
-          "required": [
-            "kind"
-          ],
-          "additionalProperties": false
-        }
-      ]
-    },
-    "fixedProjection": {
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "perspective"
-            },
-            "fovY": {
-              "type": "number",
-              "exclusiveMinimum": 0,
-              "exclusiveMaximum": 3.141592653589793
-            }
-          },
-          "required": [
-            "kind",
-            "fovY"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "orthographic"
-            },
-            "height": {
-              "type": "number",
-              "exclusiveMinimum": 0
-            }
-          },
-          "required": [
-            "kind",
-            "height"
-          ],
-          "additionalProperties": false
-        }
-      ]
-    },
-    "orientation": {
-      "type": "object",
-      "properties": {
-        "direction": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "minItems": 3,
-          "maxItems": 3
-        },
-        "up": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "minItems": 3,
-          "maxItems": 3
-        }
-      },
-      "required": [
-        "direction",
-        "up"
-      ],
-      "additionalProperties": false
     },
     "sourceUse": {
       "oneOf": [
@@ -683,6 +428,24 @@
       },
       "required": [
         "name"
+      ],
+      "additionalProperties": false
+    },
+    "name": {
+      "type": "object",
+      "properties": {
+        "language": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "language",
+        "value"
       ],
       "additionalProperties": false
     },

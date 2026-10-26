@@ -1,5 +1,5 @@
 {
-  "schema": "KnotResourceRegistry",
+  "schema": "ResourceRegistry",
   "schemaVersion": 1,
   "namespaces": {
     "knot-engine": "https://yuriyapostol.github.io/knot-engine/v1/"
@@ -14,8 +14,24 @@
         "dataSchema": {
           "ref": "knot-engine:schema/spatial-curve.schema.json"
         },
-        "specification": "knot-engine:specifications/knot-asset.html",
-        "viewSpace": "space"
+        "specification": "knot-engine:specifications/knot.html",
+        "viewSpace": "space",
+        "names": [
+          {
+            "language": "en",
+            "value": "Spatial curve"
+          },
+          {
+            "language": "uk",
+            "value": "Просторова крива"
+          }
+        ],
+        "descriptions": [
+          {
+            "language": "en",
+            "value": "spatial-curve contract, generation 1"
+          }
+        ]
       }
     },
     {
@@ -27,7 +43,23 @@
         "dataSchema": {
           "ref": "knot-engine:schema/rope-object.schema.json"
         },
-        "specification": "knot-engine:specifications/knot-asset.html"
+        "specification": "knot-engine:specifications/knot.html",
+        "names": [
+          {
+            "language": "en",
+            "value": "Rope"
+          },
+          {
+            "language": "uk",
+            "value": "Мотузка"
+          }
+        ],
+        "descriptions": [
+          {
+            "language": "en",
+            "value": "rope contract, generation 1"
+          }
+        ]
       }
     },
     {
@@ -39,7 +71,23 @@
         "dataSchema": {
           "ref": "knot-engine:schema/equipment-object.schema.json"
         },
-        "specification": "knot-engine:specifications/knot-asset.html"
+        "specification": "knot-engine:specifications/knot.html",
+        "names": [
+          {
+            "language": "en",
+            "value": "Carabiner"
+          },
+          {
+            "language": "uk",
+            "value": "Карабін"
+          }
+        ],
+        "descriptions": [
+          {
+            "language": "en",
+            "value": "carabiner contract, generation 1"
+          }
+        ]
       }
     },
     {
@@ -51,8 +99,24 @@
         "dataSchema": {
           "ref": "knot-engine:schema/grid-diagram.schema.json"
         },
-        "specification": "knot-engine:specifications/knot-asset.html",
-        "viewSpace": "plane"
+        "specification": "knot-engine:specifications/knot.html",
+        "viewSpace": "plane",
+        "names": [
+          {
+            "language": "en",
+            "value": "Grid diagram"
+          },
+          {
+            "language": "uk",
+            "value": "Сіткова діаграма"
+          }
+        ],
+        "descriptions": [
+          {
+            "language": "en",
+            "value": "grid-diagram contract, generation 1"
+          }
+        ]
       }
     },
     {
@@ -64,7 +128,23 @@
         "dataSchema": {
           "ref": "knot-engine:schema/equipment-object.schema.json"
         },
-        "specification": "knot-engine:specifications/knot-asset.html"
+        "specification": "knot-engine:specifications/knot.html",
+        "names": [
+          {
+            "language": "en",
+            "value": "Support"
+          },
+          {
+            "language": "uk",
+            "value": "Опора"
+          }
+        ],
+        "descriptions": [
+          {
+            "language": "en",
+            "value": "support contract, generation 1"
+          }
+        ]
       }
     },
     {
@@ -77,7 +157,23 @@
           "ref": "knot-engine:schema/mosaic-diagram.schema.json"
         },
         "specification": "knot-engine:specifications/mosaic-diagram.html",
-        "viewSpace": "plane"
+        "viewSpace": "plane",
+        "names": [
+          {
+            "language": "en",
+            "value": "Mosaic diagram"
+          },
+          {
+            "language": "uk",
+            "value": "Мозаїчна діаграма"
+          }
+        ],
+        "descriptions": [
+          {
+            "language": "en",
+            "value": "mosaic-diagram contract, generation 1"
+          }
+        ]
       }
     },
     {
@@ -90,7 +186,23 @@
           "ref": "knot-engine:schema/pd-code.schema.json"
         },
         "specification": "knot-engine:specifications/pd-code.html",
-        "viewSpace": "none"
+        "viewSpace": "none",
+        "names": [
+          {
+            "language": "en",
+            "value": "Planar diagram (PD)"
+          },
+          {
+            "language": "uk",
+            "value": "Планарна діаграма (PD)"
+          }
+        ],
+        "descriptions": [
+          {
+            "language": "en",
+            "value": "Planar diagram code contract, generation 1"
+          }
+        ]
       }
     },
     {
@@ -103,7 +215,23 @@
           "ref": "knot-engine:schema/dt-code.schema.json"
         },
         "specification": "knot-engine:specifications/dt-code.html",
-        "viewSpace": "none"
+        "viewSpace": "none",
+        "names": [
+          {
+            "language": "en",
+            "value": "Dowker–Thistlethwaite code (DT)"
+          },
+          {
+            "language": "uk",
+            "value": "Код Доукера — Тістлтуейта (DT)"
+          }
+        ],
+        "descriptions": [
+          {
+            "language": "en",
+            "value": "Signed even DT code for knot and link diagrams, generation 1"
+          }
+        ]
       }
     }
   ]

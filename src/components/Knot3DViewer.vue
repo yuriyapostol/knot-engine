@@ -1,19 +1,21 @@
 <script setup lang="ts">
+import type { RenderableModel } from '../core/resolve'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import type { CameraView, Camera3D, KnotAsset, KnotResourceRegistry, Reference, ViewDefinition, RenderableModel, ViewerErrorCode, ValidationIssue } from '../core'
-import { resolveKnotAsset, resolveRepresentationView, selectRepresentation, SPATIAL_CURVE, validateView, ViewerError } from '../core'
+import type { CameraView, Camera3D, RawKnot, RawResourceRegistry, Reference, ViewDefinition, ViewerErrorCode, ValidationIssue } from '../core'
+import { resolveKnot } from '../core/resolve'
+import { resolveRepresentationView, selectRepresentation, SPATIAL_CURVE, validateView, ViewerError } from '../core'
 import type { Quality } from '../geometry/build'
 import { ViewerEngine, type CaptureOptions } from '../renderer/ViewerEngine'
 import { messages as builtInMessages, type ViewerMessages } from '../locales'
 
 export interface ViewerErrorEvent { code: ViewerErrorCode; message: string; issues?: ValidationIssue[]; recoverable: boolean }
 const props = withDefaults(defineProps<{
-  asset?: KnotAsset | null; representationId?: string; view?: Reference | ViewDefinition; views?: ViewDefinition[]; registries?: KnotResourceRegistry[]; label: string; description?: string; poster?: string
+  knot?: RawKnot | null; representationId?: string; view?: Reference | ViewDefinition; views?: ViewDefinition[]; registries?: RawResourceRegistry[]; label: string; description?: string; poster?: string
   locale?: 'uk' | 'en'; messages?: Partial<ViewerMessages>; theme?: 'light' | 'dark'
   quality?: Quality; active?: boolean; interactive?: boolean; showControls?: boolean; initialCamera?: Camera3D
 }>(), { locale: 'uk', theme: 'light', quality: 'medium', active: true, interactive: true, showControls: true })
 const emit = defineEmits<{
-  ready: [payload: { assetId?: string; schemaVersion: 1; warnings: string[] }]
+  ready: [payload: { knotId?: string; schemaVersion: 1; warnings: string[] }]
   error: [payload: ViewerErrorEvent]
   'camera-change': [view: CameraView]
   'view-change': [view: CameraView]
@@ -44,10 +46,10 @@ function ensureEngine() {
   try {
     engine = new ViewerEngine(surface.value)
     engine.onReady = warnings => {
-      if ((!props.asset) || !engine) return
+      if ((!props.knot) || !engine) return
       state.value = 'ready'
       error.value = null
-      emit('ready', { assetId: props.asset?.id, schemaVersion: 1, warnings })
+      emit('ready', { knotId: props.knot?.id, schemaVersion: 1, warnings })
     }
     engine.onError = report
     engine.onCameraChange = view => { emit('camera-change', view); emit('view-change', view) }
@@ -64,19 +66,19 @@ function ensureEngine() {
 function onVisibility() { if (!document.hidden) engine?.resize() }
 async function loadModel() {
   const current = ++generation
-  if (!props.asset) { engine?.clear(); state.value = 'empty'; error.value = null; return }
+  if (!props.knot) { engine?.clear(); state.value = 'empty'; error.value = null; return }
   let resolved: RenderableModel
   try {
     if (props.initialCamera) {
       const result = validateView({ id: 'application', name: 'Application', space: 'space', camera: props.initialCamera })
       if (!result.valid) throw new ViewerError('INVALID_MODEL', 'Invalid application camera', result.issues, false)
     }
-    const selection = selectRepresentation(props.asset, { representationId: props.representationId, type: SPATIAL_CURVE }, { registries: props.registries })
+    const selection = selectRepresentation(props.knot, { representationId: props.representationId, type: SPATIAL_CURVE }, { registries: props.registries })
     if (!selection.ok) throw new ViewerError('INVALID_MODEL', selection.issues[0]?.message ?? 'Unable to select representation', undefined, false)
-    const selectedView = resolveRepresentationView(props.view, props.views, props.registries, props.asset.namespaces)
+    const selectedView = resolveRepresentationView(props.view, props.views, props.registries, props.knot.namespaces)
     if (!selectedView.ok) throw new ViewerError('INVALID_MODEL', selectedView.message, undefined, false)
     if (selectedView.view && selectedView.view.space !== 'space') throw new ViewerError('INVALID_MODEL', '3D viewer requires a spatial view', undefined, false)
-    resolved = resolveKnotAsset(props.asset, { representationId: selection.representation.id, view: selectedView.view ?? undefined }, { registries: props.registries, scope: 'selected' })
+    resolved = resolveKnot(props.knot, { representationId: selection.representation.id, view: selectedView.view ?? undefined }, { registries: props.registries, scope: 'selected' })
   } catch (cause) {
     engine?.clear()
     report(cause instanceof ViewerError ? cause : new ViewerError('INVALID_MODEL', 'Unable to resolve input', undefined, false))
@@ -107,7 +109,7 @@ function onKeydown(event: KeyboardEvent) {
   const action = actions[event.key]
   if (action) { event.preventDefault(); action() }
 }
-watch(() => [props.asset, props.representationId, props.view, props.views, props.registries], loadModel)
+watch(() => [props.knot, props.representationId, props.view, props.views, props.registries], loadModel)
 watch(() => props.quality, loadModel)
 watch(() => props.initialCamera, loadModel)
 watch(() => props.theme, value => engine?.setTheme(value))

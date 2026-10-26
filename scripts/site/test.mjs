@@ -25,7 +25,7 @@ try {
  await cp('v1', path.join(sources, 'v1'), { recursive: true })
  for (const section of ['guide', 'specifications', 'schema', 'examples']) await mkdir(path.join(sources, 'v2', section), { recursive: true })
  await writeFile(path.join(sources, 'v2/version.json'), JSON.stringify({ packageVersion: '2.0.0', schemaVersion: 2, status: 'development' }))
- await writeFile(path.join(sources, 'v2/guide/future.md'), '# Future guide\n\n[First generation](../../v1/specifications/knot-asset.md)')
+ await writeFile(path.join(sources, 'v2/guide/future.md'), '# Future guide\n\n[First generation](../../v1/specifications/knot.md)')
  await writeFile(path.join(sources, 'v2/specifications/format.md'), '# Future format')
  await writeFile(path.join(sources, 'v1/guide/cross-generation.md'), '# Generations\n\n[Future format](../../v2/specifications/format.md)')
  await writeFile(path.join(sources, 'v2/schema/marker.json'), '{"generation":2}')
@@ -49,7 +49,7 @@ try {
  assert.equal(JSON.parse(await readFile(path.join(output, 'v2/schema/marker.json'), 'utf8')).generation, 2)
  await assert.rejects(access(path.join(output, 'v1/specifications/schema')))
  await assert.rejects(access(path.join(output, 'v1/specifications/examples')))
- assert.equal(await readFile(path.join(output, 'v1/examples/assets/open-rope.json'), 'utf8'), await readFile(path.join(sources, 'v1/examples/assets/open-rope.json'), 'utf8'))
+ assert.equal(await readFile(path.join(output, 'v1/examples/knots/open-rope.json'), 'utf8'), await readFile(path.join(sources, 'v1/examples/knots/open-rope.json'), 'utf8'))
  for (const name of await readdir(path.join(sources, 'v1/schema'))) {
   const published = await readFile(path.join(output, 'v1/schema', name), 'utf8')
   assert.equal(published, await readFile(path.join(sources, 'v1/schema', name), 'utf8'))
@@ -63,9 +63,9 @@ try {
  await assert.rejects(access(path.join(output, 'releases', version, 'v2')))
 
  for (const bundle of ['v1',`releases/${version}`]) {
-  await access(path.join(output,bundle,'specifications/knot-asset.html'))
-  const schema=JSON.parse(await readFile(path.join(output,bundle,'schema/knot-asset.schema.json'),'utf8'))
-  assert.equal(schema.$id,'https://yuriyapostol.github.io/knot-engine/v1/schema/knot-asset.schema.json')
+  await access(path.join(output,bundle,'specifications/knot.html'))
+  const schema=JSON.parse(await readFile(path.join(output,bundle,'schema/knot.schema.json'),'utf8'))
+  assert.equal(schema.$id,'https://yuriyapostol.github.io/knot-engine/v1/schema/knot.schema.json')
  }
  const english = new JSDOM(await readFile(path.join(output,'v1/guide/getting-started.html'),'utf8'))
  assert.equal(english.window.document.documentElement.lang, 'en')

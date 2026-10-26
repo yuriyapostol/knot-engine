@@ -1,5 +1,5 @@
-import type { SpatialCurveData, ViewDefinition, Construction, RopeObject } from './asset'
-import { ROPE_TYPE } from './asset'
+import type { SpatialCurveData, ViewDefinition, Construction, RopeObject } from './knot'
+import { ROPE_TYPE } from './knot'
 import { duplicates, issue, parallel, standalone, structure } from './validation'
 import type { ValidationIssue } from './errors'
 export function validateSpatialCurve(value: unknown) {

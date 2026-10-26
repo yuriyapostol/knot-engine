@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { MOSAIC_DIAGRAM, selectRepresentation, validateMosaicDiagram, resolveRepresentationView, type KnotAsset, type MosaicDiagram, type KnotResourceRegistry, type Reference, type ViewDefinition } from '../core'
+import { MOSAIC_DIAGRAM, selectRepresentation, validateMosaicDiagram, resolveRepresentationView, type RawKnot, type MosaicDiagram, type RawResourceRegistry, type Reference, type ViewDefinition } from '../core'
 import { mosaicPaths } from './mosaicGeometry'
 import { mosaicPanCenter } from './mosaicViewport'
 import type { CaptureOptions } from './captureOptions'
 
 export interface MosaicView { center: [number, number]; height: number }
 const props = withDefaults(defineProps<{
-  asset?: KnotAsset | null
+  knot?: RawKnot | null
   representationId?: string
   view?: Reference | ViewDefinition
   views?: ViewDefinition[]
-  registries?: KnotResourceRegistry[]
+  registries?: RawResourceRegistry[]
   label: string
   description?: string
   locale?: 'uk' | 'en'
@@ -21,7 +21,7 @@ const props = withDefaults(defineProps<{
   showControls?: boolean
 }>(), { locale: 'uk', theme: 'light', active: true, interactive: true, showControls: true })
 const emit = defineEmits<{
-  ready: [payload: { assetId?: string; schemaVersion: 1; warnings: string[] }]
+  ready: [payload: { knotId?: string; schemaVersion: 1; warnings: string[] }]
   error: [payload: { code: string; message: string; recoverable: boolean }]
   'view-change': [view: MosaicView]
 }>()
@@ -29,8 +29,8 @@ const svg = ref<SVGSVGElement | null>(null)
 const zoom = ref(1)
 const center = ref<[number, number] | null>(null)
 const dragging = ref<{ x: number; y: number; center: [number, number] } | null>(null)
-const selection = computed(() => props.asset
-  ? selectRepresentation(props.asset, { representationId: props.representationId, type: MOSAIC_DIAGRAM }, { registries: props.registries })
+const selection = computed(() => props.knot
+  ? selectRepresentation(props.knot, { representationId: props.representationId, type: MOSAIC_DIAGRAM }, { registries: props.registries })
   : null)
 const diagram = computed((): MosaicDiagram | null => {
   if (!selection.value?.ok) return null
@@ -40,7 +40,7 @@ const diagram = computed((): MosaicDiagram | null => {
 const size = computed(() => diagram.value?.tiles.length ?? 1)
 const resolvedView = computed(() => {
   if (!selection.value?.ok) return null
-  return resolveRepresentationView(props.view, props.views, props.registries, props.asset?.namespaces)
+  return resolveRepresentationView(props.view, props.views, props.registries, props.knot?.namespaces)
 })
 const selectedView = computed(() => resolvedView.value?.ok ? resolvedView.value.view : null)
 const viewError = computed(() => {
@@ -50,7 +50,7 @@ const viewError = computed(() => {
   return null
 })
 const error = computed(() => {
-  if (!props.asset) return null
+  if (!props.knot) return null
   if (!selection.value?.ok) return selection.value?.issues[0]?.message ?? 'Invalid mosaic'
   return viewError.value
 })
@@ -110,7 +110,7 @@ function capture(options: CaptureOptions = {}): Promise<Blob> {
 }
 watch([diagram, selectedView], applyView, { immediate: true })
 watch([ready, error], ([ok, problem]) => {
-  if (ok && props.asset) emit('ready', { assetId: props.asset.id, schemaVersion: 1, warnings: [] })
+  if (ok && props.knot) emit('ready', { knotId: props.knot.id, schemaVersion: 1, warnings: [] })
   else if (problem) emit('error', { code: 'INVALID_MODEL', message: problem, recoverable: false })
 }, { immediate: true })
 defineExpose({ resetView, fitToView, capture })

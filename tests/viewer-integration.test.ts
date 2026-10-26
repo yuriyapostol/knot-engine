@@ -3,15 +3,15 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { createApp, defineComponent, h, nextTick, ref } from 'vue'
 import KnotViewer from '../src/components/KnotViewer.vue'
 import KnotMosaicViewer from '../src/components/KnotMosaicViewer.vue'
-import open from '../v1/examples/assets/open-rope.json'
-import mosaic from '../v1/examples/assets/mosaic-diagram.json'
-import { LOMONACO_KAUFFMAN_11, type KnotAsset } from '../src/core'
+import open from '../v1/examples/knots/open-rope.json'
+import mosaic from '../v1/examples/knots/mosaic-diagram.json'
+import { LOMONACO_KAUFFMAN_11, type RawKnot } from '../src/core'
 
-const spatial = () => structuredClone(open) as unknown as KnotAsset
+const spatial = () => structuredClone(open) as unknown as RawKnot
 const diagram = () => {
-  const asset = structuredClone(mosaic) as unknown as KnotAsset
-  ;(asset.representations![0].data as { tileSet: string }).tileSet = LOMONACO_KAUFFMAN_11
-  return asset
+  const knot = structuredClone(mosaic) as unknown as RawKnot
+  ;(knot.representations![0].data as { tileSet: string }).tileSet = LOMONACO_KAUFFMAN_11
+  return knot
 }
 const containers: Array<{ app: ReturnType<typeof createApp>; element: HTMLElement }> = []
 function mount(component: Parameters<typeof h>[0], props: Record<string, unknown>) {
@@ -27,7 +27,7 @@ afterEach(() => {
 })
 describe('viewer integration', () => {
   it('renders a mosaic standalone and exposes its SVG paths without WebGL', async () => {
-    const element = mount(KnotMosaicViewer, { asset: diagram(), label: 'Mosaic' })
+    const element = mount(KnotMosaicViewer, { knot: diagram(), label: 'Mosaic' })
     await nextTick()
     expect(element.querySelector('[data-state="ready"]')).not.toBeNull()
     expect(element.querySelectorAll('svg path').length).toBeGreaterThan(0)
@@ -37,7 +37,7 @@ describe('viewer integration', () => {
     const exposed = ref<{ capture: (options?: { width?: number; height?: number; format?: string; view?: string }) => Promise<Blob> } | null>(null)
     const element = document.createElement('div')
     document.body.append(element)
-    const app = createApp(defineComponent({ render: () => h(KnotMosaicViewer, { ref: exposed, asset: diagram(), label: 'Mosaic' }) }))
+    const app = createApp(defineComponent({ render: () => h(KnotMosaicViewer, { ref: exposed, knot: diagram(), label: 'Mosaic' }) }))
     app.mount(element)
     containers.push({ app, element })
     await nextTick()
@@ -54,7 +54,7 @@ describe('viewer integration', () => {
   it('dispatches a mosaic and forwards ready and view-change events', async () => {
     const events: string[] = []
     const element = mount(KnotViewer, {
-      asset: diagram(), label: 'Mosaic',
+      knot: diagram(), label: 'Mosaic',
       onReady: () => events.push('ready'),
       'onView-change': () => events.push('view-change'),
     })
@@ -66,13 +66,13 @@ describe('viewer integration', () => {
     expect(events).toContain('view-change')
   })
   it('reports dispatch errors and recovers when the selected representation changes', async () => {
-    const asset = diagram()
+    const knot = diagram()
     const selectedId = ref('missing')
     const errors: string[] = []
     const element = document.createElement('div')
     document.body.append(element)
     const app = createApp(defineComponent({ render: () => h(KnotViewer, {
-      asset, label: 'Mosaic', representationId: selectedId.value,
+      knot, label: 'Mosaic', representationId: selectedId.value,
       onError: (event: { code: string }) => errors.push(event.code),
     }) }))
     app.mount(element)
@@ -85,18 +85,18 @@ describe('viewer integration', () => {
     expect(element.querySelector('svg.knot-engine-v1-mosaic')).not.toBeNull()
     expect(element.querySelector('[data-state="ready"]')).not.toBeNull()
   })
-  it('keeps the selected 3D viewer in its SSR-safe empty state without an asset', async () => {
+  it('keeps the selected 3D viewer in its SSR-safe empty state without an knot', async () => {
     const element = mount(KnotViewer, { label: 'Empty' })
     await nextTick()
     expect(element.querySelector('[data-state="empty"]')).not.toBeNull()
   })
   it('does not mutate the input mosaic during rendering and interaction', async () => {
-    const asset = diagram()
-    const before = JSON.stringify(asset)
-    const element = mount(KnotMosaicViewer, { asset, label: 'Mosaic' })
+    const knot = diagram()
+    const before = JSON.stringify(knot)
+    const element = mount(KnotMosaicViewer, { knot, label: 'Mosaic' })
     await nextTick()
     ;(element.querySelector('[aria-label="Zoom in"]') as HTMLButtonElement).click()
     await nextTick()
-    expect(JSON.stringify(asset)).toBe(before)
+    expect(JSON.stringify(knot)).toBe(before)
   })
 })

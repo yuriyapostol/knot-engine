@@ -1,0 +1,199 @@
+{
+  "schema": "Knot",
+  "schemaVersion": 1,
+  "namespaces": {
+    "knot-engine": "https://yuriyapostol.github.io/knot-engine/v1/"
+  },
+  "id": "overhand",
+  "subject": {
+    "id": "overhand",
+    "names": [
+      {
+        "language": "uk",
+        "value": "Простий вузол"
+      },
+      {
+        "language": "en",
+        "value": "Overhand knot"
+      }
+    ],
+    "descriptions": [
+      {
+        "language": "uk",
+        "value": "Простий стопорний вузол, утворений одним переплетенням мотузки."
+      },
+      {
+        "language": "en",
+        "value": "A simple stopper knot formed by a single overhand turn of the rope."
+      }
+    ]
+  },
+  "representations": [
+    {
+      "id": "view-3d-rest",
+      "type": "knot-engine:representation-types/spatial-curve",
+      "target": {
+        "kind": "state",
+        "construction": {
+          "id": "setup"
+        },
+        "id": "view-3d-rest"
+      },
+      "data": {
+        "coordinateSystem": {
+          "handedness": "right",
+          "upAxis": "y",
+          "scale": {
+            "kind": "physical",
+            "metersPerUnit": 1
+          }
+        },
+        "curves": [
+          {
+            "id": "open",
+            "object": "open",
+            "closed": false,
+            "interpolation": {
+              "type": "catmull-rom",
+              "parameterization": "uniform",
+              "tension": 0.5
+            },
+            "points": [
+              [-0.1, 0, 0],
+              [-0.08, 0, 0.006],
+              [-0.06, 0.001, 0.01],
+              [-0.04, 0.0035, 0.007],
+              [0.005, 0.014, -0.008],
+              [0.037, 0.02, 0.003],
+              [0.058, 0.007, 0.0025],
+              [0.058, -0.02, 0.001],
+              [0.038, -0.044, 0],
+              [0, -0.054, 0],
+              [-0.038, -0.044, 0],
+              [-0.058, -0.02, -0.001],
+              [-0.058, 0.007, -0.0025],
+              [-0.037, 0.02, -0.003],
+              [-0.005, 0.014, 0.008],
+              [0.04, 0.0035, -0.007],
+              [0.06, 0.001, -0.01],
+              [0.08, 0, -0.006],
+              [0.1, 0, 0]
+            ]
+          }
+        ]
+      },
+      "names": [
+        {
+          "language": "uk",
+          "value": "3D-представлення"
+        },
+        {
+          "language": "en",
+          "value": "3D representation"
+        }
+      ],
+      "descriptions": [
+        {
+          "language": "uk",
+          "value": "Просторове представлення мотузки."
+        },
+        {
+          "language": "en",
+          "value": "Spatial representation of the rope."
+        }
+      ]
+    },
+    {
+      "id": "mosaic-closure",
+      "type": "knot-engine:representation-types/mosaic-diagram",
+      "data": {
+        "tileSet": "knot-engine:tile-sets/lomonaco-kauffman-11",
+        "tiles": [
+          [0, 2, 1, 0],
+          [2, 10, 9, 1],
+          [3, 9, 4, 6],
+          [0, 3, 5, 4]
+        ]
+      },
+      "names": [
+        {
+          "language": "uk",
+          "value": "Мозаїчна діаграма"
+        },
+        {
+          "language": "en",
+          "value": "Mosaic diagram"
+        }
+      ],
+      "descriptions": [
+        {
+          "language": "uk",
+          "value": "Мозаїчне представлення вузла."
+        },
+        {
+          "language": "en",
+          "value": "Mosaic representation of the knot."
+        }
+      ]
+    }
+  ],
+  "constructions": [
+    {
+      "id": "setup",
+      "objects": [
+        {
+          "id": "open",
+          "type": "knot-engine:object-types/rope",
+          "topology": "open",
+          "ends": [
+            {
+              "id": "a"
+            },
+            {
+              "id": "b"
+            }
+          ],
+          "diameter": 0.01
+        }
+      ],
+      "states": [
+        {
+          "id": "view-3d-rest"
+        }
+      ]
+    }
+  ],
+  "objectTypes": [
+    {
+      "id": "knot-engine:object-types/rope",
+      "name": "rope",
+      "description": "rope contract, generation 1",
+      "dataSchema": {
+        "ref": "knot-engine:schema/rope-object.schema.json"
+      },
+      "specification": "knot-engine:specifications/knot.html"
+    }
+  ],
+  "representationTypes": [
+    {
+      "id": "knot-engine:representation-types/spatial-curve",
+      "name": "spatial-curve",
+      "description": "spatial-curve contract, generation 1",
+      "dataSchema": {
+        "ref": "knot-engine:schema/spatial-curve.schema.json"
+      },
+      "specification": "knot-engine:specifications/knot.html",
+      "viewSpace": "space"
+    },
+    {
+      "id": "knot-engine:representation-types/mosaic-diagram",
+      "name": "mosaic-diagram",
+      "description": "mosaic-diagram contract, generation 1",
+      "dataSchema": {
+        "ref": "knot-engine:schema/mosaic-diagram.schema.json"
+      },
+      "specification": "knot-engine:specifications/mosaic-diagram.html",
+      "viewSpace": "plane"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
-import { SPATIAL_CURVE, ROPE_TYPE, type Camera3D, type SpatialCurveData, type SpatialCurve, type Reference, type ViewDefinition, type KnotAsset, type Representation } from './asset'
-import { validateKnotAsset, normalizeAsset, indexAsset, constructionFor, type ValidationOptions } from './validateAsset'
+import { SPATIAL_CURVE, ROPE_TYPE, type Camera3D, type SpatialCurveData, type SpatialCurve, type Reference, type ViewDefinition, type RawKnot, type RawRepresentation } from './knot'
+import { validateKnot, normalizeKnot, indexKnot, constructionFor, type ValidationOptions } from './validateKnot'
 import { selectRepresentation } from './selectRepresentation'
 import { ViewerError } from './errors'
 import { validateView } from './validateSpatial'
@@ -7,24 +7,24 @@ export type CameraView = Extract<Camera3D,{mode:'fixed'}>
 export interface RenderableCurve extends SpatialCurve { radius: number }
 export interface RenderableModel { id?: string; curves: RenderableCurve[]; camera?: Camera3D; warnings: string[] }
 export interface RepresentationSelection { representationId?: string; view?: Reference | ViewDefinition }
-export function resolveKnotAsset(value: unknown, selection: RepresentationSelection = {}, options: ValidationOptions & { scope?: 'selected' | 'all' } = {}): RenderableModel {
-  let asset: KnotAsset
+export function resolveKnot(value: unknown, selection: RepresentationSelection = {}, options: ValidationOptions & { scope?: 'selected' | 'all' } = {}): RenderableModel {
+  let knot: RawKnot
   if (options.scope === 'selected') {
-    const result = selectRepresentation(value as KnotAsset, { representationId: selection.representationId, type: SPATIAL_CURVE }, options)
+    const result = selectRepresentation(value as RawKnot, { representationId: selection.representationId, type: SPATIAL_CURVE }, options)
     if (!result.ok) throw new ViewerError('INVALID_MODEL', result.issues[0]?.message ?? 'Invalid representation', undefined, false)
-    asset = result.asset
+    knot = result.knot
   } else {
-    const checked=validateKnotAsset(value,options)
-    if(!checked.valid) throw new ViewerError(checked.issues[0].code,'Invalid KnotAsset',checked.issues,false)
+    const checked=validateKnot(value,options)
+    if(!checked.valid) throw new ViewerError(checked.issues[0].code,'Invalid RawKnot',checked.issues,false)
     if(!checked.complete) throw new ViewerError('UNSUPPORTED_SCHEMA',`Incomplete validation: ${checked.missingDependencies.map(d=>d.ref).concat(checked.uncheckedTypes).join(', ')}`,undefined,false)
-    asset=normalizeAsset(checked.asset)
+    knot=normalizeKnot(checked.knot)
   }
-  const index=indexAsset(asset,options.registries)
-  const rep=selection.representationId === undefined ? asset.representations?.find(r=>r.type === SPATIAL_CURVE) : asset.representations?.find(r=>r.id === selection.representationId)
+  const index=indexKnot(knot,options.registries)
+  const rep=selection.representationId === undefined ? knot.representations?.find(r=>r.type === SPATIAL_CURVE) : knot.representations?.find(r=>r.id === selection.representationId)
   if(!rep) throw new ViewerError('INVALID_MODEL','Requested representation was not found',undefined,false)
   if(rep.type !== SPATIAL_CURVE) throw new ViewerError('UNSUPPORTED_SCHEMA','3D viewer requires spatial-curve',undefined,false)
   const data=rep.data as SpatialCurveData, warnings: string[]=[]
-  const construction=rep.target && rep.target.kind !== 'subject' ? constructionFor(asset,index,rep.target.construction) : undefined
+  const construction=rep.target && rep.target.kind !== 'subject' ? constructionFor(knot,index,rep.target.construction) : undefined
   const scale=data.coordinateSystem.scale
   const points=data.curves.flatMap(c=>c.points)
   const spans=[0,1,2].map(axis=>{let min=Infinity,max=-Infinity; for(const p of points){min=Math.min(min,p[axis]);max=Math.max(max,p[axis])} return max-min})
@@ -46,10 +46,10 @@ export function resolveKnotAsset(value: unknown, selection: RepresentationSelect
   }
   const numbers = camera ? (camera.mode === 'fit' ? [...camera.direction,...camera.up] : [...camera.position,...camera.target,...camera.up]) : []
   if(curves.some(c=>!Number.isFinite(c.radius) || c.radius<=0 || c.radius>1e6 || c.points.some(p=>p.some(n=>Math.abs(n)>1e6))) || numbers.some(n=>Math.abs(n)>1e6)) throw new ViewerError('LIMIT_EXCEEDED','Renderer supports coordinates and radii up to 1000000 data units',undefined,false)
-  return {id:asset.id,curves,camera,warnings}
+  return {id:knot.id,curves,camera,warnings}
 }
 /** Standalone representation convenience, with explicitly supplied resource context. */
-export function resolveRepresentation(representation: Representation, options: ValidationOptions = {}): RenderableModel {
-  const asset: KnotAsset={schema:'KnotAsset',schemaVersion:1,id:representation.id,subject:{id:representation.id},representations:[representation]}
-  return resolveKnotAsset(asset,{},options)
+export function resolveRepresentation(representation: RawRepresentation, options: ValidationOptions = {}): RenderableModel {
+  const knot: RawKnot={schema:'Knot',schemaVersion:1,id:representation.id,subject:{id:representation.id},representations:[representation]}
+  return resolveKnot(knot,{},options)
 }

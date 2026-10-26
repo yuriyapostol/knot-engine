@@ -25,6 +25,20 @@
             },
             "camera": {
               "$ref": "#/$defs/camera3"
+            },
+            "names": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/name"
+              },
+              "maxItems": 128
+            },
+            "descriptions": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/name"
+              },
+              "maxItems": 128
             }
           },
           "required": [
@@ -78,6 +92,20 @@
                 "height"
               ],
               "additionalProperties": false
+            },
+            "names": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/name"
+              },
+              "maxItems": 128
+            },
+            "descriptions": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/name"
+              },
+              "maxItems": 128
             }
           },
           "required": [
@@ -247,6 +275,24 @@
           "additionalProperties": false
         }
       ]
+    },
+    "name": {
+      "type": "object",
+      "properties": {
+        "language": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "language",
+        "value"
+      ],
+      "additionalProperties": false
     }
   }
 }

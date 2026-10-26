@@ -4,11 +4,11 @@ A specification defines the meaning of data and implementation behavior. A JSON 
 
 ## What is implemented
 
-The [`KnotAsset` specification](../specifications/knot-asset.md), its [schema](../schema/knot-asset.schema.json), and the [component contract](../specifications/components.md) describe the current package.
+The [`Knot` specification](../specifications/knot.md), its [schema](../schema/knot.schema.json), and the [component contract](../specifications/components.md) describe the current package.
 
 ## What is proposed
 
-The [broader `KnotAsset` design](../../design/knot-asset-draft.md) also contains future formats and assertions. Unified representations and standalone shared resources are implemented in the [initial profile](../specifications/knot-asset.md). The current specification defines the exact supported fields.
+The [broader `Knot` design](../../design/knot-draft.md) also contains future formats and assertions. Unified representations and standalone shared resources are implemented in the [initial profile](../specifications/knot.md). The current specification defines the exact supported fields.
 
 A catalog defines a system of identifiers, such as a catalog name and its record notation. A registry of representation types contains concrete type definitions. A view stores camera settings. These are different kinds of resources, so `resources/catalogs/` is not an umbrella name for them all.
 
@@ -22,4 +22,4 @@ English and Ukrainian pages describe the same contracts and share machine-readab
 
 ## Sources and contributions
 
-A catalog defines an identifier system; a source records data origin; a contribution records work done by a person or team. These roles are distinct. All metadata is optional; the license is global to the KnotAsset. See the [contract](../specifications/sources.md).
+A catalog defines an identifier system; a source records data origin; a contribution records work done by a person or team. These roles are distinct. All metadata is optional; the license is global to the Knot. See the [contract](../specifications/sources.md).

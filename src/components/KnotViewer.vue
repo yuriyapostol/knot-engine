@@ -2,18 +2,18 @@
 import { computed, ref, watch } from 'vue'
 import Knot3DViewer from './Knot3DViewer.vue'
 import KnotMosaicViewer from './KnotMosaicViewer.vue'
-import { MOSAIC_DIAGRAM, SPATIAL_CURVE, type KnotAsset, type Camera3D, type KnotResourceRegistry, type Reference, type ViewDefinition } from '../core'
+import { MOSAIC_DIAGRAM, SPATIAL_CURVE, type RawKnot, type Camera3D, type RawResourceRegistry, type Reference, type ViewDefinition } from '../core'
 import type { ViewerMessages } from '../locales'
 import type { ViewerRegistry } from './viewerRegistry'
 import { createViewerRegistry, selectViewerRepresentation } from './viewerRegistry'
 import type { CaptureOptions } from './captureOptions'
 
 const props = withDefaults(defineProps<{
-  asset?: KnotAsset | null
+  knot?: RawKnot | null
   representationId?: string
   view?: Reference | ViewDefinition
   views?: ViewDefinition[]
-  registries?: KnotResourceRegistry[]
+  registries?: RawResourceRegistry[]
   initialCamera?: Camera3D
   messages?: Partial<ViewerMessages>
   registry?: ViewerRegistry
@@ -28,7 +28,7 @@ const props = withDefaults(defineProps<{
   showControls?: boolean
 }>(), { locale: 'uk', theme: 'light', quality: 'medium', active: true, interactive: true, showControls: true })
 const emit = defineEmits<{
-  ready: [payload: { assetId?: string; schemaVersion: 1; warnings: string[] }]
+  ready: [payload: { knotId?: string; schemaVersion: 1; warnings: string[] }]
   error: [payload: { code: string; message: string; recoverable: boolean }]
   'camera-change': [view: unknown]
   'view-change': [view: unknown]
@@ -38,19 +38,19 @@ const builtIns = createViewerRegistry([
   { typeUri: MOSAIC_DIAGRAM, component: KnotMosaicViewer, capabilities: { pan: true, zoom: true, capture: ['svg'] } },
 ])
 const viewer = ref<{ resetView: () => void; fitToView: () => void; capture: (options?: CaptureOptions) => Promise<Blob> } | null>(null)
-const selection = computed(() => props.asset ? selectViewerRepresentation(props.asset, props.registry ?? builtIns, props.representationId) : null)
+const selection = computed(() => props.knot ? selectViewerRepresentation(props.knot, props.registry ?? builtIns, props.representationId) : null)
 const selected = computed(() => {
   if (!selection.value?.ok) return null
   return (props.registry ?? builtIns).get(selection.value.typeUri) ?? null
 })
 const failure = computed(() => {
-  if (!props.asset) return null
+  if (!props.knot) return null
   if (!selection.value?.ok) return selection.value?.issues[0]?.message ?? 'Unable to select representation'
   if (!selected.value) return `Unsupported viewer type: ${selection.value.typeUri}`
   return null
 })
 watch(failure, message => {
-  if (!message || !props.asset) return
+  if (!message || !props.knot) return
   const issue = selection.value && !selection.value.ok ? selection.value.issues[0] : undefined
   emit('error', { code: issue?.code ?? 'UNSUPPORTED_REPRESENTATION', message, recoverable: false })
 }, { immediate: true })
@@ -65,9 +65,9 @@ defineExpose({ resetView, fitToView, capture })
 <template>
   <component
     :is="selected.component"
-    v-if="asset && selection?.ok && selected"
+    v-if="knot && selection?.ok && selected"
     ref="viewer"
-    :asset="asset"
+    :knot="knot"
     :representation-id="selection.representation.id"
     :view="view"
     :views="views"

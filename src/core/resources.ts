@@ -1,6 +1,6 @@
 import { sourceIssues } from './metadata'
 import standardResources from '../../v1/resources/standard.json'
-import { KNOT_NAMESPACE, type Namespaces, type ResourceEntry, type KnotResourceRegistry, type KnotResourceDocument } from './asset'
+import { KNOT_NAMESPACE, type Namespaces, type ResourceEntry, type RawResourceRegistry, type RawResourceDocument } from './knot'
 import { canonical, issue, preflight, structure } from './validation'
 import { constructionIssues, viewIssues } from './validateSpatial'
 import { ViewerError, type ValidationIssue } from './errors'
@@ -17,7 +17,7 @@ export function expandURI(value: string, namespaces: Namespaces = {}): string {
 export function namespaceIssues(namespaces: Namespaces = {}): ValidationIssue[] {
   return Object.entries(namespaces).flatMap(([key,value]) => ['http','https','urn'].includes(key.toLowerCase()) || !schemes.test(value) ? [issue(`namespaces.${key}`, 'Reserved prefix or invalid namespace URI')] : [])
 }
-export const STANDARD_RESOURCES = standardResources as unknown as KnotResourceRegistry
+export const STANDARD_RESOURCES = standardResources as unknown as RawResourceRegistry
 /** Only contract-defined URI fields are expanded; inline JSON Schema is untouched. */
 export function normalizeResource(entry: ResourceEntry, namespaces: Namespaces): ResourceEntry {
   const e = structuredClone(entry)
@@ -49,10 +49,13 @@ export type ResourceIndex = Map<string, ResourceEntry>
 export function addResource(index: ResourceIndex, entry: ResourceEntry, global = true) {
   if (global) expandURI(entry.resource.id)
   const previous = index.get(entry.resource.id)
-  if (previous && canonical(previous) !== canonical(entry)) throw new ViewerError('INVALID_MODEL', `Conflicting resource: ${entry.resource.id}`, undefined, false)
-  index.set(entry.resource.id, entry)
+  const contract = (value: ResourceEntry) => { const { names, descriptions, ...fields } = value.resource as typeof value.resource & { names?: unknown; descriptions?: unknown }; return canonical({ kind: value.kind, resource: fields }) }
+  if (previous && contract(previous) !== contract(entry)) throw new ViewerError('INVALID_MODEL', `Conflicting resource: ${entry.resource.id}`, undefined, false)
+  const old = previous?.resource as { names?: unknown; descriptions?: unknown } | undefined
+  const incoming = entry.resource as typeof entry.resource & { names?: unknown; descriptions?: unknown }
+  index.set(entry.resource.id, previous ? { ...entry, resource: { ...entry.resource, ...(incoming.names === undefined && old?.names !== undefined ? { names: old.names } : {}), ...(incoming.descriptions === undefined && old?.descriptions !== undefined ? { descriptions: old.descriptions } : {}) } } as ResourceEntry : entry)
 }
-export function createResourceIndex(registries: readonly KnotResourceRegistry[] = []): ResourceIndex {
+export function createResourceIndex(registries: readonly RawResourceRegistry[] = []): ResourceIndex {
   const index: ResourceIndex = new Map()
   for (const registry of registries) {
     const checked = validateResourceRegistry(registry)
@@ -65,7 +68,7 @@ export function validateResourceRegistry(value: unknown) {
   let issues = preflight(value)
   if (!issues.length) issues = structure('registry', value)
   if (issues.length) return { valid: false as const, issues }
-  const registry = value as KnotResourceRegistry
+  const registry = value as RawResourceRegistry
   if (registry.$schema && registry.$schema !== `${KNOT_NAMESPACE}schema/knot-resource-registry.schema.json`) issues.push(issue('$schema','Schema URI contradicts document contract'))
   issues.push(...namespaceIssues(registry.namespaces))
   const seen: ResourceIndex = new Map()
@@ -82,7 +85,7 @@ export function validateResourceDocument(value: unknown) {
   let issues = preflight(value)
   if (!issues.length) issues = structure('resourceDocument', value)
   if (!issues.length) {
-    const doc = value as KnotResourceDocument
+    const doc = value as RawResourceDocument
     if (doc.$schema && doc.$schema !== `${KNOT_NAMESPACE}schema/knot-resource.schema.json`) issues.push(issue('$schema','Schema URI contradicts document contract'))
     issues.push(...namespaceIssues(doc.namespaces))
     for (const dependency of doc.dependencies ?? []) {
@@ -90,5 +93,5 @@ export function validateResourceDocument(value: unknown) {
     }
     try { const entry = normalizeResource({ kind: doc.kind, resource: doc.resource } as ResourceEntry, doc.namespaces ?? {}); expandURI(entry.resource.id); issues.push(...resourceIssues(entry)) } catch(e) { issues.push(issue('resource',(e as Error).message)) }
   }
-  return issues.length ? { valid: false as const, issues } : { valid: true as const, document: value as KnotResourceDocument, warnings: [] }
+  return issues.length ? { valid: false as const, issues } : { valid: true as const, document: value as RawResourceDocument, warnings: [] }
 }

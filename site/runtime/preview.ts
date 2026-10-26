@@ -1,25 +1,25 @@
 import { createApp, h, ref, shallowRef } from 'vue'
-import { KnotViewer, type KnotAsset, type RepresentationSelection } from 'knot-engine'
+import { KnotViewer, type RawKnot, type RepresentationSelection } from 'knot-engine'
 import '../../src/styles.css'
 
 declare global {
   interface Window {
-    __previewAsset?: KnotAsset
+    __previewKnot?: RawKnot
     __previewSelection?: RepresentationSelection
-    __previewSetInput?: (input: { asset?: KnotAsset; selection?: RepresentationSelection }) => void
+    __previewSetInput?: (input: { knot?: RawKnot; selection?: RepresentationSelection }) => void
     __previewReady?: boolean
     __previewError?: string
     __previewCapture?: (width: number, height: number) => Promise<Blob>
   }
 }
 const viewer = ref<InstanceType<typeof KnotViewer> | null>(null)
-const input = shallowRef({ asset: window.__previewAsset, selection: window.__previewSelection })
-window.__previewSetInput = value => { window.__previewReady = false; window.__previewError = undefined; input.value = { asset: value.asset, selection: value.selection } }
+const input = shallowRef({ knot: window.__previewKnot, selection: window.__previewSelection })
+window.__previewSetInput = value => { window.__previewReady = false; window.__previewError = undefined; input.value = { knot: value.knot, selection: value.selection } }
 createApp({
   setup() {
     return () => h(KnotViewer, {
       ref: viewer,
-      asset: input.value.asset,
+      knot: input.value.knot,
       representationId: input.value.selection?.representationId,
       view: input.value.selection?.view,
       label: 'Model preview',

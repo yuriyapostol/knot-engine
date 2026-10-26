@@ -1,0 +1,74 @@
+{
+  "schema": "Knot",
+  "schemaVersion": 1,
+  "namespaces": {
+    "knot-engine": "https://yuriyapostol.github.io/knot-engine/v1/"
+  },
+  "id": "sources-contributions-example",
+  "subject": {
+    "id": "pd-trefoil-subject"
+  },
+  "representationTypes": [
+    {
+      "id": "knot-engine:representation-types/pd-code",
+      "name": "pd-code",
+      "description": "Planar diagram code contract, generation 1",
+      "dataSchema": {
+        "ref": "knot-engine:schema/pd-code.schema.json"
+      },
+      "specification": "knot-engine:specifications/pd-code.html",
+      "viewSpace": "none"
+    }
+  ],
+  "representations": [
+    {
+      "id": "pd",
+      "type": "knot-engine:representation-types/pd-code",
+      "data": {
+        "convention": "knot-engine:conventions/pd-ccw-under-first",
+        "crossings": [
+          [1, 5, 2, 4],
+          [3, 1, 4, 6],
+          [5, 3, 6, 2]
+        ]
+      },
+      "sources": [
+        {
+          "id": "knotinfo",
+          "locator": "PD Notation",
+          "accessed": "2026-10-18",
+          "note": "Copied edge labels and crossing order without normalization."
+        }
+      ],
+      "contributions": [
+        {
+          "name": "Example importer",
+          "roles": [
+            "import",
+            "validation"
+          ],
+          "date": "2026-10-18",
+          "note": "Illustrative attribution record."
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "knotinfo",
+      "title": "KnotInfo: 3_1",
+      "url": "https://knotinfo.org/results.php?searchmode=singleknot&submittype=singleknot&singleknot=3_1",
+      "note": "Source description; no source license is inferred."
+    }
+  ],
+  "contributions": [
+    {
+      "name": "Example editor",
+      "note": "Illustrative attribution record, not a claim about the original dataset."
+    }
+  ],
+  "license": {
+    "name": "Illustrative license declaration",
+    "url": "https://example.org/license"
+  }
+}

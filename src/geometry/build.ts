@@ -1,5 +1,6 @@
+import type { RenderableModel } from '../core/resolve'
 import * as THREE from 'three'
-import { ViewerError, type RenderableModel } from '../core'
+import { ViewerError } from '../core'
 
 export type Quality = 'low' | 'medium' | 'high'
 const profiles = { low: [64, 8], medium: [128, 12], high: [256, 16] } as const

@@ -1,21 +1,22 @@
+import { validateKnot } from '../src/core/validateKnot'
 import { expect, it } from 'vitest'
-import overhand from '../v1/examples/assets/overhand.json'
-import twistedLoop from '../v1/examples/assets/twisted-loop.json'
-import { normalizeAsset } from '../src/core/validateAsset'
-import { MOSAIC_DIAGRAM, SPATIAL_CURVE, expandURI, validateKnotAsset, validateMosaicDiagram, selectRepresentation, type KnotAsset } from '../src/core'
+import overhand from '../v1/examples/knots/overhand.json'
+import twistedLoop from '../v1/examples/knots/twisted-loop.json'
+import { normalizeKnot } from '../src/core/validateKnot'
+import { MOSAIC_DIAGRAM, SPATIAL_CURVE, expandURI, validateMosaicDiagram, selectRepresentation, type RawKnot } from '../src/core'
 
 for (const fixture of [overhand, twistedLoop]) {
-  const asset = fixture as unknown as KnotAsset
-  it(`${asset.id} provides selectable, valid spatial and mosaic representations`, () => {
-    expect(validateKnotAsset(asset)).toMatchObject({ valid: true, complete: true })
-    expect(asset.representations).toHaveLength(2)
-    const types = asset.representations!.map(rep => expandURI(rep.type, asset.namespaces))
+  const knot = fixture as unknown as RawKnot
+  it(`${knot.id} provides selectable, valid spatial and mosaic representations`, () => {
+    expect(validateKnot(knot)).toMatchObject({ valid: true, complete: true })
+    expect(knot.representations).toHaveLength(2)
+    const types = knot.representations!.map(rep => expandURI(rep.type, knot.namespaces))
     expect(types).toContain(SPATIAL_CURVE)
     expect(types).toContain(MOSAIC_DIAGRAM)
-    for (const rep of asset.representations ?? []) {
-      expect(selectRepresentation(asset, { representationId: rep.id })).toMatchObject({ ok: true })
+    for (const rep of knot.representations ?? []) {
+      expect(selectRepresentation(knot, { representationId: rep.id })).toMatchObject({ ok: true })
     }
-    const mosaic = asset.representations!.find(rep => expandURI(rep.type, asset.namespaces) === MOSAIC_DIAGRAM)!
-    expect(validateMosaicDiagram(normalizeAsset(asset).representations!.find(rep => rep.id === mosaic.id)!.data)).toMatchObject({ valid: true, componentCount: 1 })
+    const mosaic = knot.representations!.find(rep => expandURI(rep.type, knot.namespaces) === MOSAIC_DIAGRAM)!
+    expect(validateMosaicDiagram(normalizeKnot(knot).representations!.find(rep => rep.id === mosaic.id)!.data)).toMatchObject({ valid: true, componentCount: 1 })
   })
 }

@@ -1,8 +1,8 @@
-# Shared and inline KnotAsset resources
+# Shared and inline Knot resources
 
-**Implementation status:** the initial profile (spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, procedures, resources and cameras) is described in the [current specification](../v1/specifications/knot-asset.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
+**Implementation status:** the initial profile (spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, procedures, resources and cameras) is described in the [current specification](../v1/specifications/knot.md). This broader design also contains deferred features; the current specification defines the supported fields precisely.
 
-Status: design reference elaborating the [architectural draft](knot-asset-draft.md). Standalone resources and optional embedding are implemented in the initial profile. The [current specification](../v1/specifications/knot-asset.md) defines their supported fields; additional details below remain proposals. Package version and `schemaVersion: 1` stay unchanged; compatibility with the previous structure is not required. See [publication](publication.md).
+Status: design reference elaborating the [architectural draft](knot-draft.md). Standalone resources and optional embedding are implemented in the initial profile. The [current specification](../v1/specifications/knot.md) defines their supported fields; additional details below remain proposals. Package version and `schemaVersion: 1` stay unchanged; compatibility with the previous structure is not required. See [publication](publication.md).
 
 ## 1. Namespace
 
@@ -25,7 +25,7 @@ These are identifiers, not a claim that all resources are published. Documentati
 
 ### Namespaces: agreed decision
 
-`KnotAsset`, `KnotRepresentationDocument`, `KnotResourceDocument` and `KnotResourceRegistry` support a root namespace dictionary:
+`Knot`, `RawRepresentationDocument`, `RawResourceDocument` and `ResourceRegistry` support a root namespace dictionary:
 
 ```json
 {
@@ -46,17 +46,17 @@ These are identifiers, not a claim that all resources are published. Documentati
 - Extraction retains used mappings or expands the relevant fields. Composition resolves each input in its own context. Conflicting prefix mappings require explicit renaming with rewritten references, or full URIs.
 - Prefixes must not conflict with supported URI schemes. Final grammar is still open; the working rule reserves `http`, `https` and `urn`, and rejects undeclared prefixes rather than silently treating typos as arbitrary schemes.
 
-This is a `KnotAsset` mechanism, not a declaration that documents are JSON-LD. A resolver processes only contract-defined fields. JSON Schema, including embedded schemas, retains standard `$id`/`$ref` rules without custom prefix expansion. Editor `$schema` remains a full URI. Source/image URLs may remain full URLs; this decision introduces no separate relative-file mechanism. Unknown data types cannot be safely rewritten without knowing their identifier fields. Changing a namespace URI changes dependent identities unless references are rewritten to preserve expansion results.
+This is a `Knot` mechanism, not a declaration that documents are JSON-LD. A resolver processes only contract-defined fields. JSON Schema, including embedded schemas, retains standard `$id`/`$ref` rules without custom prefix expansion. Editor `$schema` remains a full URI. Source/image URLs may remain full URLs; this decision introduces no separate relative-file mechanism. Unknown data types cannot be safely rewritten without knowing their identifier fields. Changing a namespace URI changes dependent identities unless references are rewritten to preserve expansion results.
 
 ## 2. One resource, one contract
 
-`CatalogDefinition`, `RepresentationTypeDefinition`, `ViewDefinition` and `Construction` each have independent data contracts. The same resource can be a narrow component argument, a standalone document payload, or an entry in an asset/registry.
+`CatalogDefinition`, `RepresentationTypeDefinition`, `ViewDefinition` and `Construction` each have independent data contracts. The same resource can be a narrow component argument, a standalone document payload, or an entry in an knot/registry.
 
-`KnotResourceDocument` requires `schema`, `schemaVersion`, `kind`, `resource`; optional fields are `$schema`, `namespaces`, `dependencies`. Kind selects `catalog`, `representation-type`, `view` or `construction`. Dependencies are `{kind, ref}` records with global references. The envelope is not repeated inside every embedded value.
+`RawResourceDocument` requires `schema`, `schemaVersion`, `kind`, `resource`; optional fields are `$schema`, `namespaces`, `dependencies`. Kind selects `catalog`, `representation-type`, `view` or `construction`. Dependencies are `{kind, ref}` records with global references. The envelope is not repeated inside every embedded value.
 
-`KnotResourceRegistry` has `schema`, `schemaVersion`, optional `$schema`/`namespaces`/`id`, and `resources` containing `kind`/`resource` pairs. It may be a file or explicit application object; no server or singleton is required.
+`ResourceRegistry` has `schema`, `schemaVersion`, optional `$schema`/`namespaces`/`id`, and `resources` containing `kind`/`resource` pairs. It may be a file or explicit application object; no server or singleton is required.
 
-| Asset field | Content |
+| Knot field | Content |
 | --- | --- |
 | `catalogs[]` | Inline `CatalogDefinition` records |
 | `representationTypes[]` | Inline `RepresentationTypeDefinition` records |
@@ -94,7 +94,7 @@ A type needs structural validation and documented indexing, orientation, topolog
 
 Future direction: the [viewer architecture](architecture.md) separates view settings from knot data and passes them as a distinct input to the main and representation-specific viewers. The embedded view fields and selection rules below describe the current profile; their presentation role must move to the separate settings contract.
 
-Required fields: local or global `id`, `name`, `space` (`plane` or `space`), `camera`. `description` is optional. Views do not require a subject and can be supplied without an asset. Coordinates belong to the representation to which the view is applied.
+Required fields: local or global `id`, `name`, `space` (`plane` or `space`), `camera`. `description` is optional. Views do not require a subject and can be supplied without an knot. Coordinates belong to the representation to which the view is applied.
 
 | Camera mode | Required parameters | Meaning |
 | --- | --- | --- |
@@ -108,7 +108,7 @@ This is a basic camera contract, not a complete lighting/material/animation spec
 
 `Representation.views` embeds or references available views. Optional `defaultView` is `{id: id}` or `{ref: URI}` selecting one of them. `preferredView` remains a compact independent 3D hint `{direction, up}`, without distance/materials or a required registry entry.
 
-Selection order: explicit application view → `defaultView` → `preferredView` with automatic fitting → component default. Each selects a complete camera mode; fields are not silently mixed. Later interaction changes camera state, not the asset. Space views are incompatible with plane/none representations.
+Selection order: explicit application view → `defaultView` → `preferredView` with automatic fitting → component default. Each selects a complete camera mode; fields are not silently mixed. Later interaction changes camera state, not the knot. Space views are incompatible with plane/none representations.
 
 ## 6. Construction
 
@@ -122,7 +122,7 @@ Construction references use `{id: id}` or `{ref: URI}`. State references additio
 
 ## 7. Inline and referenced view examples
 
-This is a representation fragment, not a full asset or a claim that the referenced view has been published:
+This is a representation fragment, not a full knot or a claim that the referenced view has been published:
 
 ```json
 {
@@ -148,7 +148,7 @@ Standalone catalog definition:
 
 ```json
 {
-  "schema": "KnotResourceDocument",
+  "schema": "RawResourceDocument",
   "schemaVersion": 1,
   "namespaces": {
     "knot-engine": "https://yuriyapostol.github.io/knot-engine/v1/"
@@ -163,7 +163,7 @@ Standalone catalog definition:
 }
 ```
 
-The unchanged resource can be placed in `asset.catalogs`. The localized sample names are the same data in both language editions. An actual KnotInfo integration still needs verified record semantics; the training catalog does not claim to be that definition.
+The unchanged resource can be placed in `knot.catalogs`. The localized sample names are the same data in both language editions. An actual KnotInfo integration still needs verified record semantics; the training catalog does not claim to be that definition.
 
 ## Sources as shared resources
 

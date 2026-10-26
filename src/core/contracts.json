@@ -558,6 +558,20 @@
             },
             "camera": {
               "$ref": "#/$defs/camera3"
+            },
+            "names": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/name"
+              },
+              "maxItems": 128
+            },
+            "descriptions": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/name"
+              },
+              "maxItems": 128
             }
           },
           "required": [
@@ -611,6 +625,20 @@
                 "height"
               ],
               "additionalProperties": false
+            },
+            "names": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/name"
+              },
+              "maxItems": 128
+            },
+            "descriptions": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/name"
+              },
+              "maxItems": 128
             }
           },
           "required": [
@@ -659,6 +687,20 @@
           },
           "required": [],
           "additionalProperties": false
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
         }
       },
       "required": [
@@ -722,6 +764,20 @@
             "plane",
             "space"
           ]
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
         }
       },
       "required": [
@@ -780,6 +836,20 @@
         "specification": {
           "type": "string",
           "minLength": 1
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
         }
       },
       "required": [
@@ -965,6 +1035,20 @@
           },
           "minItems": 0,
           "maxItems": 256
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
         }
       },
       "required": [
@@ -1310,140 +1394,11 @@
       ],
       "additionalProperties": false
     },
-    "asset": {
-      "type": "object",
-      "properties": {
-        "schema": {
-          "const": "KnotAsset"
-        },
-        "schemaVersion": {
-          "const": 1
-        },
-        "$schema": {
-          "type": "string",
-          "minLength": 1
-        },
-        "namespaces": {
-          "type": "object",
-          "propertyNames": {
-            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
-          },
-          "additionalProperties": {
-            "type": "string",
-            "minLength": 1
-          }
-        },
-        "dependencies": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/dependency"
-          },
-          "minItems": 0,
-          "maxItems": 2048
-        },
-        "id": {
-          "type": "string",
-          "minLength": 1
-        },
-        "subject": {
-          "$ref": "#/$defs/subject"
-        },
-        "catalogs": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/catalog"
-          },
-          "minItems": 0,
-          "maxItems": 256
-        },
-        "representationTypes": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/representationType"
-          },
-          "minItems": 0,
-          "maxItems": 256
-        },
-        "objectTypes": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/objectType"
-          },
-          "minItems": 0,
-          "maxItems": 256
-        },
-        "constructions": {
-          "type": "array",
-          "items": {
-            "oneOf": [
-              {
-                "$ref": "#/$defs/construction"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "ref": {
-                    "type": "string",
-                    "minLength": 1
-                  }
-                },
-                "required": [
-                  "ref"
-                ],
-                "additionalProperties": false
-              }
-            ]
-          },
-          "minItems": 0,
-          "maxItems": 256
-        },
-        "representations": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/representation"
-          },
-          "minItems": 0,
-          "maxItems": 1024
-        },
-        "procedures": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/procedure"
-          },
-          "minItems": 0,
-          "maxItems": 256
-        },
-        "sources": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/sourceDefinition"
-          },
-          "maxItems": 256
-        },
-        "contributions": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/contribution"
-          },
-          "maxItems": 1024
-        },
-        "license": {
-          "$ref": "#/$defs/license"
-        }
-      },
-      "required": [
-        "schema",
-        "schemaVersion",
-        "id",
-        "subject"
-      ],
-      "additionalProperties": false
-    },
     "resourceDocument": {
       "type": "object",
       "properties": {
         "schema": {
-          "const": "KnotResourceDocument"
+          "const": "ResourceDocument"
         },
         "schemaVersion": {
           "const": 1
@@ -1592,7 +1547,7 @@
       "type": "object",
       "properties": {
         "schema": {
-          "const": "KnotResourceRegistry"
+          "const": "ResourceRegistry"
         },
         "schemaVersion": {
           "const": 1
@@ -1635,7 +1590,7 @@
       "type": "object",
       "properties": {
         "schema": {
-          "const": "KnotRepresentationDocument"
+          "const": "RepresentationDocument"
         },
         "schemaVersion": {
           "const": 1
@@ -2155,6 +2110,135 @@
       "required": [
         "convention",
         "code"
+      ],
+      "additionalProperties": false
+    },
+    "knot": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "const": "Knot"
+        },
+        "schemaVersion": {
+          "const": 1
+        },
+        "$schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "namespaces": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dependency"
+          },
+          "minItems": 0,
+          "maxItems": 2048
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subject": {
+          "$ref": "#/$defs/subject"
+        },
+        "catalogs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/catalog"
+          },
+          "minItems": 0,
+          "maxItems": 256
+        },
+        "representationTypes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/representationType"
+          },
+          "minItems": 0,
+          "maxItems": 256
+        },
+        "objectTypes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/objectType"
+          },
+          "minItems": 0,
+          "maxItems": 256
+        },
+        "constructions": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/construction"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "ref": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "ref"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 256
+        },
+        "representations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/representation"
+          },
+          "minItems": 0,
+          "maxItems": 1024
+        },
+        "procedures": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/procedure"
+          },
+          "minItems": 0,
+          "maxItems": 256
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceDefinition"
+          },
+          "maxItems": 256
+        },
+        "contributions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/contribution"
+          },
+          "maxItems": 1024
+        },
+        "license": {
+          "$ref": "#/$defs/license"
+        }
+      },
+      "required": [
+        "schema",
+        "schemaVersion",
+        "id",
+        "subject"
       ],
       "additionalProperties": false
     }

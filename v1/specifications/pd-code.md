@@ -31,15 +31,15 @@ After bounded JSON and structural validation:
 
 A component with an underpass has its orientation constrained by slot 0. Components passing only over other strands have no such constraint; numerical labels are treated as identities, not as an extra orientation rule. Do not claim complete oriented-link reconstruction for every code, or equivalence to source-specific orientation/order conventions. Explicit orientation metadata or a stricter convention can be introduced separately.
 
-The algorithm is iterative, using O(n) time and storage for n crossings. `KNOT_ASSET_LIMITS.pdCrossings` is 16,384 crossings per code and in aggregate per KnotAsset, checked before topology analysis. The structural schema also bounds crossing arrays at 16,384 and `unlinkedComponents` at 16,384. General JSON limits remain depth 64, 262,144 entries and strings up to 1,048,576 characters. These are implementation budgets, not knot invariants.
+The algorithm is iterative, using O(n) time and storage for n crossings. `KNOT_LIMITS.pdCrossings` is 16,384 crossings per code and in aggregate per Knot, checked before topology analysis. The structural schema also bounds crossing arrays at 16,384 and `unlinkedComponents` at 16,384. General JSON limits remain depth 64, 262,144 entries and strings up to 1,048,576 characters. These are implementation budgets, not knot invariants.
 
 `validatePDCode(data)` returns `{valid:false,issues}` or `{valid:true,data,code,warnings,componentCount,crossingCount}`. Counts describe this diagram, not a minimum crossing number or a proof of knot identity. No writhe, chirality, catalog identity or polynomial invariant is inferred.
 
-## KnotAsset integration
+## Knot integration
 
 Use the ordinary representation envelope, including scoped targets and dependencies. The standard resource has `viewSpace:"none"`: PD has no layout or coordinate system. Nonempty `views`, a `defaultView` without a member view and `preferredView` are rejected by the ordinary view rules. No mapping from counted link components to construction objects is implied.
 
-Both standalone representation documents and KnotAsset use the supported semantic validator. Completeness additionally requires resource closure, for example via `STANDARD_RESOURCES`; supported PD does not enter `uncheckedTypes`. The [standalone JSON Schema](../schema/pd-code.schema.json) checks structure only; repeated-label multiplicity, planarity, direction consistency and component existence require runtime validation.
+Both standalone representation documents and Knot use the supported semantic validator. Completeness additionally requires resource closure, for example via `STANDARD_RESOURCES`; supported PD does not enter `uncheckedTypes`. The [standalone JSON Schema](../schema/pd-code.schema.json) checks structure only; repeated-label multiplicity, planarity, direction consistency and component existence require runtime validation.
 
 Validation, extraction, JSON round trips and same-document composition preserve labels, crossing order and explicit `unlinkedComponents` without normalization. Equivalent relabelings are not automatically deduplicated. The existing 3D resolver and `KnotViewer` still require spatial curves; validation completeness does not imply renderer support.
 
@@ -49,7 +49,7 @@ The local convention follows the crossing order in [KnotInfo PD Notation](https:
 
 KnotInfo numbers edges consecutively along oriented components. Our profile accepts those labels but does not enforce that extra numbering rule. KnotTheory wraps tuples in `PD[X[...],...]`; these tokens are not stored here. [Spherogram](https://snappy.computop.org/spherogram.html) also accepts PD codes, uses zero-based labels by default and documents orientation caveats. Do not assume every external array uses the same indexing, cyclic order or orientation; adapt explicitly. A zero-based source needs explicit positive relabeling for this profile.
 
-The [trefoil example](../examples/assets/pd-trefoil.json) uses the PD value recorded in the project's source research:
+The [trefoil example](../examples/knots/pd-trefoil.json) uses the PD value recorded in the project's source research:
 
 ```json
 {
@@ -58,10 +58,10 @@ The [trefoil example](../examples/assets/pd-trefoil.json) uses the PD value reco
 }
 ```
 
-KnotInfo's documented two-component L4a1{0} example is `[[6,1,7,2],[8,3,5,4],[2,5,3,6],[4,7,1,8]]`. Both examples are checked for planarity and component counts. Catalog labels are source attribution, not independent recognition. The [unlink example](../examples/assets/pd-unlink.json) has `crossings:[]` and `unlinkedComponents:2`.
+KnotInfo's documented two-component L4a1{0} example is `[[6,1,7,2],[8,3,5,4],[2,5,3,6],[4,7,1,8]]`. Both examples are checked for planarity and component counts. Catalog labels are source attribution, not independent recognition. The [unlink example](../examples/knots/pd-unlink.json) has `crossings:[]` and `unlinkedComponents:2`.
 
 Acceptance tests include sourced knots and links, reflections with corresponding cyclic-order changes, split crossing graphs, Reidemeister-I loops, crossing-free components, arbitrary positive relabeling, invalid multiplicities and nonplanar rotation systems, inconsistent directions, malformed JSON, limits, resource completeness, namespace expansion, unsupported views, extraction and composition.
 
 ## Attribution of concrete data
 
-Optional `sources` and `contributions` belong to the `Representation` envelope, outside `data`. Shared source definitions and the global license belong to the KnotAsset. Convention references in this specification explain the contract; representation sources identify where its concrete data came from. See the [shared metadata specification](sources.md).
+Optional `sources` and `contributions` belong to the `Representation` envelope, outside `data`. Shared source definitions and the global license belong to the Knot. Convention references in this specification explain the contract; representation sources identify where its concrete data came from. See the [shared metadata specification](sources.md).

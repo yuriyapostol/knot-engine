@@ -4,29 +4,29 @@
 
 ## Input and selection
 
-All viewer components receive `asset: KnotAsset` (complete or permitted partial), `representationId?: string` and separate `settings`. Schema, namespaces, resources, constructions, procedures and states are checked according to the selected representation's needs. Core uses the same asset container without depending on Vue.
+All viewer components receive `knot: Knot` (complete or permitted partial), `representationId?: string` and separate `settings`. Schema, namespaces, resources, constructions, procedures and states are checked according to the selected representation's needs. Core uses the same knot container without depending on Vue.
 
 Proposed core operations:
 
 ```ts
 type RepresentationQuery = { representationId?: string; type?: string }
 type SelectionResult =
-  | { ok: true; asset: KnotAsset; representation: Representation; typeUri: string }
+  | { ok: true; knot: Knot; representation: Representation; typeUri: string }
   | { ok: false; issues: SelectionIssue[] }
 type SelectionIssue = {
-  code: 'INVALID_ASSET' | 'REPRESENTATION_NOT_FOUND' | 'AMBIGUOUS_REPRESENTATION'
+  code: 'INVALID_KNOT' | 'REPRESENTATION_NOT_FOUND' | 'AMBIGUOUS_REPRESENTATION'
       | 'UNSUPPORTED_REPRESENTATION' | 'MISSING_DEPENDENCY' | 'INVALID_REPRESENTATION'
   message: string
   path?: string
 }
-function selectRepresentation(asset: KnotAsset, query?: RepresentationQuery, options?: SelectionOptions): SelectionResult
+function selectRepresentation(knot: Knot, query?: RepresentationQuery, options?: SelectionOptions): SelectionResult
 ```
 
-This operation returns data without UI, mutation or resource fetching. Type matching uses expanded URIs. An explicit ID must also match the requested type; missing and ambiguous matches have distinct diagnostics. Without an ID, the generic viewer may select only under an unambiguous rule; silently choosing the first representation is forbidden. Partial assets require validation of a minimally sufficient dependency closure. The root must conform to the v1 `KnotAsset` structure; optional sections may be omitted. By default, only the selected representation and required context are validated, not unrelated representations or procedures. `scope: 'all'` validates the entire document. Missing dependencies of the selected representation remain errors.
+This operation returns data without UI, mutation or resource fetching. Type matching uses expanded URIs. An explicit ID must also match the requested type; missing and ambiguous matches have distinct diagnostics. Without an ID, the generic viewer may select only under an unambiguous rule; silently choosing the first representation is forbidden. Partial knots require validation of a minimally sufficient dependency closure. The root must conform to the v1 `Knot` structure; optional sections may be omitted. By default, only the selected representation and required context are validated, not unrelated representations or procedures. `scope: 'all'` validates the entire document. Missing dependencies of the selected representation remain errors.
 
 ## UI contract
 
-`KnotViewer` selects the component by `typeUri`; specialized viewers call `selectRepresentation` with a fixed type. Shared states: `empty | initializing | ready | error`; events: `ready`, `error`, `view-change`; methods: `resetView()`, `fitToView()`, `capture(options?)`. `camera-change` is 3D-specific. Events do not mutate the asset.
+`KnotViewer` selects the component by `typeUri`; specialized viewers call `selectRepresentation` with a fixed type. Shared states: `empty | initializing | ready | error`; events: `ready`, `error`, `view-change`; methods: `resetView()`, `fitToView()`, `capture(options?)`. `camera-change` is 3D-specific. Events do not mutate the knot.
 
 ```ts
 type ViewerRegistration = {
@@ -45,11 +45,11 @@ Registry is explicit or locally assembled from built-ins, never mutable global s
 
 ## Settings and migration
 
-Viewer settings are external to `KnotAsset`. The application provides `view`, optional local presets `views`, `initialCamera` for 3D, and rendering props. Representation-level `views`, `defaultView`, and `preferredView` are removed; no compatibility fallback is provided.
+Viewer settings are external to `Knot`. The application provides `view`, optional local presets `views`, `initialCamera` for 3D, and rendering props. Representation-level `views`, `defaultView`, and `preferredView` are removed; no compatibility fallback is provided.
 
 ## Tests
 
-Cover complete and partial assets; explicit ID; missing and ambiguous selection; prefix expansion; unknown type; missing resources; immutable inputs; independent viewer instances; and procedures without conflating tying steps with camera viewpoints.
+Cover complete and partial knots; explicit ID; missing and ambiguous selection; prefix expansion; unknown type; missing resources; immutable inputs; independent viewer instances; and procedures without conflating tying steps with camera viewpoints.
 
 
 ## Dedicated package entry points
