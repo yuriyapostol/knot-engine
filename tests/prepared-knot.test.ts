@@ -52,6 +52,26 @@ describe('prepared Knot model', () => {
     expect(knot.removeProcedure('tie')).toBe(true)
     expect(knot.getProcedure('tie')).toBeUndefined()
   })
+  it('edits inline resource definitions without losing unrelated prepared references', () => {
+    const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
+    const original = knot.getRepresentation('view-3d-rest')!
+    const type = original.getTypeDefinition()
+    const id = 'https://example.org/types/experimental'
+    const added = knot.addResourceDefinition('representationTypes', {
+      id, name: 'Experimental', description: 'Test type',
+      specification: 'https://example.org/spec', dataSchema: { inline: { $schema: 'https://json-schema.org/draft/2020-12/schema' } },
+    })
+    expect(knot.getResource(id)).toBe(added)
+    expect(knot.getRepresentation('view-3d-rest')).toBe(original)
+    expect(original.getTypeDefinition()).toBe(type)
+    expect(() => knot.representationTypes?.push(knot.representationTypes[0])).toThrow()
+    knot.addRepresentation({ id: 'experimental', type: id, data: {} })
+    expect(() => knot.removeResourceDefinition('representationTypes', id)).toThrow(/referenced/)
+    knot.removeRepresentation('experimental')
+    expect(knot.removeResourceDefinition('representationTypes', id)).toBe(true)
+    expect(knot.getResource(id)).toBeUndefined()
+    expect(knot.toRaw().representationTypes?.some(x => x.id === id)).toBe(false)
+  })
   it('controls structural changes and preserves stable identity', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const existing = knot.getRepresentation('view-3d-rest')!

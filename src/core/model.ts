@@ -169,6 +169,39 @@ export class Knot implements RawKnot {
     }
     return contexts.get(this)?.get(uri)
   }
+  /** Add an inline definition without mutating attached resource registries. */
+  addResourceDefinition(kind: 'catalogs' | 'representationTypes' | 'objectTypes', definition: NonNullable<RawKnot['catalogs']>[number] | NonNullable<RawKnot['representationTypes']>[number] | NonNullable<RawKnot['objectTypes']>[number]): PreparedResource {
+    const collection = (this[kind] ?? []) as { id: string }[]
+    if (collection.some(item => item.id === definition.id)) throw new Error('Duplicate resource ID: ' + definition.id)
+    const value = structuredClone(definition)
+    const uri = expandURI(value.id, this.namespaces)
+    if (collection.some(item => expandURI(item.id, this.namespaces) === uri)) throw new Error('Duplicate resource URI: ' + uri)
+    ;(this as any)[kind] = Object.freeze([...collection, value])
+    const existing = this.getResource(uri) as any
+    const enhanced = { ...value, ...(existing?.names && !('names' in value) ? { names: existing.names } : {}), ...(existing?.descriptions && !('descriptions' in value) ? { descriptions: existing.descriptions } : {}) }
+    const prepared = resource(enhanced, this, uri)
+    contexts.get(this)?.set(uri, prepared)
+    return prepared
+  }
+  /** Remove an inline definition, restoring an attached resource definition if present. */
+  removeResourceDefinition(kind: 'catalogs' | 'representationTypes' | 'objectTypes', id: string): boolean {
+    const collection = (this[kind] ?? []) as { id: string }[]
+    const target = collection.find(item => item.id === id)
+    if (!target) return false
+    const uri = expandURI(target.id, this.namespaces)
+    if (kind === 'representationTypes' && this.representations?.some(rep => {
+      try { return expandURI(rep.type, this.namespaces) === uri } catch { return rep.type === id }
+    })) throw new Error('Resource is referenced by a representation: ' + id)
+    ;(this as any)[kind] = Object.freeze(collection.filter(item => item !== target))
+    const fallback = [STANDARD_RESOURCES, ...(registries.get(this) ?? [])]
+      .flatMap(registry => registry.resources.map(entry => ({ entry, registry })))
+      .reverse().find(({ entry, registry }) => {
+        try { return expandURI(entry.resource.id, registry.namespaces) === uri } catch { return false }
+      })
+    if (fallback) contexts.get(this)?.set(uri, resource(structuredClone(fallback.entry.resource), this, uri))
+    else contexts.get(this)?.delete(uri)
+    return true
+  }
   addRepresentation(input: RawRepresentation): Representation {
     if (this.getRepresentation(input.id)) throw new Error('Duplicate representation ID: ' + input.id)
     const value = structuredClone(input) as Representation
@@ -214,6 +247,9 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
     procedure.steps = Object.freeze(procedure.steps) as unknown as Step[]
   }
   if (knot.procedures) knot.procedures = Object.freeze(knot.procedures) as unknown as Procedure[]
+  for (const key of ['catalogs', 'representationTypes', 'objectTypes'] as const) {
+    if (knot[key]) (knot as any)[key] = Object.freeze(knot[key])
+  }
   const index = new Map<string, PreparedResource>()
   for (const registry of [STANDARD_RESOURCES, ...attached]) {
     for (const entry of registry.resources) {
