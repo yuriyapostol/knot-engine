@@ -138,7 +138,9 @@ describe('prepared Knot model', () => {
     expect(original.getTypeDefinition()).toBe(type)
 
     knot.addRepresentation({ id: 'experimental', type: id, data: {} })
-    expect(() => knot.removeResourceDefinition('representationTypes', id)).toThrow(/referenced/)
+    expect(knot.removeResourceDefinition('representationTypes', id)).toBe(true)
+    expect(knot.validate().valid).toBe(false)
+    knot.addResourceDefinition('representationTypes', { id, name: 'Experimental', description: 'Test type', specification: 'https://example.org/spec', dataSchema: { inline: { $schema: 'https://json-schema.org/draft/2020-12/schema' } } })
     knot.removeRepresentation('experimental')
     expect(knot.removeResourceDefinition('representationTypes', id)).toBe(true)
     expect(knot.getResource(id)).toBeUndefined()
