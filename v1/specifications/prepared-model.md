@@ -51,3 +51,5 @@ Local construction references use `{ id: constructionId }`; external registry re
 Likewise, `removeRepresentation(id)` is blocked only by step references of the form `{ id }`. A `{ ref }` addresses an external representation and does not create a dependency on a local representation with the same identifier.
 
 When removing an inline resource definition, fallback lookup is restricted to the **same resource kind**. A catalog, object type, or representation type with an identical URI does not substitute for a definition of another kind or bypass dependency guards.
+
+Resource identity combines resource kind and URI. Use `knot.getResource(id, kind)` when the kind is known; `representation.getTypeDefinition()` always selects a representation-type definition even if a different resource kind shares the URI. The one-argument `getResource(id)` is retained for convenient lookups where the URI is unambiguous.
