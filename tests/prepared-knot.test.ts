@@ -340,6 +340,23 @@ describe('prepared Knot model', () => {
     expect(knot.removeResourceDefinition('representationTypes', id)).toBe(true)
     expect(knot.representationTypes?.some(x => x.id === id)).toBe(false)
   })
+  it('resolves representation types by kind when another resource shares the URI', () => {
+    const uri = 'https://example.org/shared-kind-uri'
+    const knot = Knot.from(raw as any)
+    knot.addResourceDefinition('catalogs', { id: uri, name: 'Catalog', description: 'Catalog description' })
+    const definition = knot.addResourceDefinition('representationTypes', {
+      id: uri, name: 'Representation type', description: 'Type description',
+      specification: 'https://example.org/spec', dataSchema: { inline: { $schema: 'https://json-schema.org/draft/2020-12/schema' } },
+    })
+    const representation = knot.addRepresentation({ id: 'shared-type-representation', type: uri, data: {} })
+    expect(representation.getTypeDefinition()).toBe(definition)
+    expect(knot.getResource(uri, 'catalog')?.getName()).toBe('Catalog')
+    expect(knot.getResource(uri, 'representation-type')?.getName()).toBe('Representation type')
+    expect(knot.removeResourceDefinition('catalogs', uri)).toBe(true)
+    expect(representation.getTypeDefinition()).toBe(definition)
+    expect(knot.getResource(uri, 'catalog')).toBeUndefined()
+    expect(knot.getResource(uri, 'representation-type')).toBe(definition)
+  })
   it('controls structural changes and preserves stable identity', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const existing = knot.getRepresentation('view-3d-rest')!
