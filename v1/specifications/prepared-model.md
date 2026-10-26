@@ -49,3 +49,5 @@ For `Subject`, `Procedure`, and `Step`, `overrides` also apply to `names` and `d
 Local construction references use `{ id: constructionId }`; external registry references use `{ ref: uri }`. Controlled removal checks only local `id` references. An external `ref` does not prevent removal of an inline construction, even if the strings coincide. Registry reference validity is checked separately by `validate()`.
 
 Likewise, `removeRepresentation(id)` is blocked only by step references of the form `{ id }`. A `{ ref }` addresses an external representation and does not create a dependency on a local representation with the same identifier.
+
+When removing an inline resource definition, fallback lookup is restricted to the **same resource kind**. A catalog, object type, or representation type with an identical URI does not substitute for a definition of another kind or bypass dependency guards.

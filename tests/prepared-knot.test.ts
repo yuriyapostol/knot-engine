@@ -327,6 +327,19 @@ describe('prepared Knot model', () => {
     expect(knot.removeProcedure('local-guide')).toBe(true)
     expect(knot.removeRepresentation(local.id)).toBe(true)
   })
+  it('does not use a resource of another kind as fallback on definition removal', () => {
+    const id = 'https://example.org/shared-resource-uri'
+    const knot = Knot.from(raw as any)
+    knot.addResourceDefinition('catalogs', { id, name: 'Catalog', description: 'Catalog' })
+    knot.addResourceDefinition('representationTypes', { id, name: 'View', description: 'View',
+      specification: 'https://example.org/spec', dataSchema: { inline: {} } })
+    knot.addRepresentation({ id: 'shared-view', type: id, data: {} })
+    expect(() => knot.removeResourceDefinition('representationTypes', id)).toThrow(/referenced/)
+    expect(knot.representationTypes?.some(x => x.id === id)).toBe(true)
+    expect(knot.removeRepresentation('shared-view')).toBe(true)
+    expect(knot.removeResourceDefinition('representationTypes', id)).toBe(true)
+    expect(knot.representationTypes?.some(x => x.id === id)).toBe(false)
+  })
   it('controls structural changes and preserves stable identity', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const existing = knot.getRepresentation('view-3d-rest')!
