@@ -185,7 +185,6 @@ export class Knot implements RawKnot {
     decorate(procedure)
     Object.setPrototypeOf(procedure, Procedure.prototype)
     for (const step of procedure.steps) { textOwner.set(step, this); decorate(step); Object.setPrototypeOf(step, Step.prototype) }
-    procedure.steps = procedure.steps
     this.procedures = [...(this.procedures ?? []), procedure] as Procedure[]
     return procedure
   }
@@ -337,7 +336,6 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
     Object.setPrototypeOf(representation, Representation.prototype)
     owner.set(representation, knot)
   }
-  if (knot.representations) knot.representations = knot.representations
   for (const procedure of knot.procedures ?? []) {
     textOwner.set(procedure, knot)
     decorate(procedure)
@@ -347,14 +345,7 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
       decorate(step)
       Object.setPrototypeOf(step, Step.prototype)
     }
-    procedure.steps = procedure.steps
   }
-  if (knot.procedures) knot.procedures = knot.procedures
-  for (const construction of knot.constructions ?? []) if ('objects' in construction) {
-    construction.objects = construction.objects as Construction['objects']
-    if (construction.states) construction.states = construction.states as Construction['states']
-  }
-  if (knot.constructions) knot.constructions = knot.constructions
   for (const key of ['catalogs', 'representationTypes', 'objectTypes'] as const) {
     if (knot[key]) (knot as any)[key] = knot[key]
   }
