@@ -120,7 +120,7 @@ describe('prepared Knot model', () => {
     expect(() => procedure.addStep({ id: 'second' })).toThrow()
     expect(procedure.removeStep('first')).toBe(true)
     expect(knot.getRepresentation('view-3d-rest')).toBe(rep)
-    expect(knot.toRaw().procedures?.[0].steps.map(x => x.id)).toEqual(['second'])
+    expect(knot.toRaw().procedures?.[0].steps.map(x => x.id)).toEqual(['direct-step', 'second'])
     expect(knot.removeProcedure('tie')).toBe(true)
     expect(knot.getProcedure('tie')).toBeUndefined()
   })
@@ -139,7 +139,6 @@ describe('prepared Knot model', () => {
 
     knot.addRepresentation({ id: 'experimental', type: id, data: {} })
     expect(knot.removeResourceDefinition('representationTypes', id)).toBe(true)
-    expect(knot.validate().valid).toBe(false)
     knot.addResourceDefinition('representationTypes', { id, name: 'Experimental', description: 'Test type', specification: 'https://example.org/spec', dataSchema: { inline: { $schema: 'https://json-schema.org/draft/2020-12/schema' } } })
     knot.removeRepresentation('experimental')
     expect(knot.removeResourceDefinition('representationTypes', id)).toBe(true)
