@@ -183,37 +183,49 @@ export class Knot implements RawKnot {
     }
     return contexts.get(this)?.get(uri)
   }
-  /** Add an inline definition without mutating attached resource registries. */
+  /** Add an inline definition without modifying an attached registry. */
   addResourceDefinition(kind: 'catalogs' | 'representationTypes' | 'objectTypes', definition: NonNullable<RawKnot['catalogs']>[number] | NonNullable<RawKnot['representationTypes']>[number] | NonNullable<RawKnot['objectTypes']>[number]): PreparedResource {
     const collection = (this[kind] ?? []) as { id: string }[]
-    if (collection.some(item => item.id === definition.id)) throw new Error('Duplicate resource ID: ' + definition.id)
     const value = structuredClone(definition)
     const uri = expandURI(value.id, this.namespaces)
     if (collection.some(item => expandURI(item.id, this.namespaces) === uri)) throw new Error('Duplicate resource URI: ' + uri)
+    const previous = this.getResource(uri)
+    const view = resource(value, this, uri)
+    if (previous && !('names' in value)) Object.defineProperty(view, 'names', { get: () => previous.names, enumerable: false })
+    if (previous && !('descriptions' in value)) Object.defineProperty(view, 'descriptions', { get: () => previous.descriptions, enumerable: false })
     ;(this as any)[kind] = Object.freeze([...collection, value])
-    const existing = this.getResource(uri) as any
-    const enhanced = { ...value, ...(existing?.names && !('names' in value) ? { names: existing.names } : {}), ...(existing?.descriptions && !('descriptions' in value) ? { descriptions: existing.descriptions } : {}) }
-    const prepared = resource(enhanced, this, uri)
-    contexts.get(this)?.set(uri, prepared)
-    return prepared
+    contexts.get(this)?.set(uri, view)
+    return view
   }
-  /** Remove an inline definition, restoring an attached resource definition if present. */
+  /** Remove an inline definition, restoring the next applicable resource layer. */
   removeResourceDefinition(kind: 'catalogs' | 'representationTypes' | 'objectTypes', id: string): boolean {
     const collection = (this[kind] ?? []) as { id: string }[]
-    const target = collection.find(item => item.id === id)
+    const uri = expandURI(id, this.namespaces)
+    const target = collection.find(item => expandURI(item.id, this.namespaces) === uri)
     if (!target) return false
-    const uri = expandURI(target.id, this.namespaces)
-    if (kind === 'representationTypes' && this.representations?.some(rep => {
-      try { return expandURI(rep.type, this.namespaces) === uri } catch { return rep.type === id }
-    })) throw new Error('Resource is referenced by a representation: ' + id)
-    ;(this as any)[kind] = Object.freeze(collection.filter(item => item !== target))
-    const fallback = [STANDARD_RESOURCES, ...(registries.get(this) ?? [])]
+    const remaining = collection.filter(item => item !== target)
+    const fallbackInline = (['catalogs', 'representationTypes', 'objectTypes'] as const)
+      .flatMap(key => ((key === kind ? remaining : (this[key] ?? [])) as { id: string }[]))
+      .reverse().find(item => expandURI(item.id, this.namespaces) === uri)
+    const fallbackRegistry = [STANDARD_RESOURCES, ...(registries.get(this) ?? [])]
       .flatMap(registry => registry.resources.map(entry => ({ entry, registry })))
-      .reverse().find(({ entry, registry }) => {
-        try { return expandURI(entry.resource.id, registry.namespaces) === uri } catch { return false }
-      })
-    if (fallback) contexts.get(this)?.set(uri, resource(fallback.entry.resource, this, uri))
-    else contexts.get(this)?.delete(uri)
+      .reverse().find(({ entry, registry }) => expandURI(entry.resource.id, registry.namespaces) === uri)
+    // Only reject removal when the referenced type would actually disappear.
+    if (kind === 'representationTypes' && !fallbackInline && !fallbackRegistry &&
+      this.representations?.some(rep => expandURI(rep.type, this.namespaces) === uri)) {
+      throw new Error('Resource is referenced by a representation: ' + id)
+    }
+    ;(this as any)[kind] = Object.freeze(remaining)
+    const fallback = fallbackInline ?? fallbackRegistry?.entry.resource
+    if (fallback) {
+      const view = resource(fallback, this, uri)
+      if (fallbackInline && fallbackRegistry) {
+        const registryView = resource(fallbackRegistry.entry.resource, this, uri)
+        if (!('names' in fallback)) Object.defineProperty(view, 'names', { get: () => registryView.names, enumerable: false })
+        if (!('descriptions' in fallback)) Object.defineProperty(view, 'descriptions', { get: () => registryView.descriptions, enumerable: false })
+      }
+      contexts.get(this)?.set(uri, view)
+    } else contexts.get(this)?.delete(uri)
     return true
   }
   addRepresentation(input: RawRepresentation): Representation {

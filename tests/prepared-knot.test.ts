@@ -98,6 +98,35 @@ describe('prepared Knot model', () => {
     expect(knot.getResource(id)).toBeUndefined()
     expect(knot.toRaw().representationTypes?.some(x => x.id === id)).toBe(false)
   })
+  it('restores registry definitions after removing an inline override', () => {
+    const source = STANDARD_RESOURCES.resources[0].resource
+    const knot = Knot.from({ ...raw, catalogs: [], representationTypes: [], objectTypes: [] } as any, {
+      registries: [STANDARD_RESOURCES],
+    })
+    const original = knot.getResource(source.id)!
+    const rep = knot.getRepresentation('view-3d-rest')!
+    const local = knot.addResourceDefinition('representationTypes', { ...source, name: 'Temporary type' })
+    expect(knot.getResource(source.id)).toBe(local)
+    expect(rep.getTypeDefinition()).toBe(local)
+    expect(knot.removeResourceDefinition('representationTypes', source.id)).toBe(true)
+    const restored = knot.getResource(source.id)!
+    expect(restored).not.toBe(local)
+    expect(Object.getPrototypeOf(restored)).toBe(source)
+    expect(rep.getTypeDefinition()).toBe(restored)
+    expect(rep).toBe(knot.getRepresentation('view-3d-rest'))
+    expect(knot.removeResourceDefinition('representationTypes', source.id)).toBe(false)
+    expect(original.getName('en')).toBe(restored.getName('en'))
+    expect(source.name).not.toBe('Temporary type')
+  })
+  it('rejects removal of a referenced type only when no fallback exists', () => {
+    const knot = Knot.from({ ...raw, catalogs: [], representationTypes: [], objectTypes: [] } as any)
+    const type = 'https://example.org/types/custom'
+    knot.addResourceDefinition('representationTypes', { id: type, name: 'Custom' } as any)
+    knot.addRepresentation({ id: 'custom', type, data: {} })
+    expect(() => knot.removeResourceDefinition('representationTypes', type)).toThrow(/referenced/)
+    expect(knot.getResource(type)).toBeDefined()
+    expect(knot.representationTypes?.some(x => x.id === type)).toBe(true)
+  })
   it('controls structural changes and preserves stable identity', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const existing = knot.getRepresentation('view-3d-rest')!
