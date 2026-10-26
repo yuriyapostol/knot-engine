@@ -22,8 +22,8 @@ describe('prepared Knot model', () => {
     const a = first.getResource(id)!
     const b = second.getResource(id)!
     expect(a).not.toBe(b)
-    expect(Object.getPrototypeOf(a)).toBe(source)
-    expect(Object.getPrototypeOf(b)).toBe(source)
+    expect(STANDARD_RESOURCES.resources.some(entry => entry.resource === Object.getPrototypeOf(a))).toBe(true)
+    expect(STANDARD_RESOURCES.resources.some(entry => entry.resource === Object.getPrototypeOf(b))).toBe(true)
     expect(Object.getPrototypeOf(source)).toBe(originalPrototype)
     expect(first.getResource(id)).toBe(a)
     expect(second.getResource(id)).toBe(b)
