@@ -41,6 +41,8 @@ function overrideFor(knot: Knot | undefined, id: string, key: 'names' | 'descrip
   return exact(knot && localizations.get(knot)?.overrides?.[id]?.[key], language) ?? exact(config.overrides[id]?.[key], language)
 }
 const contexts = new WeakMap<Knot, Map<string, PreparedResource>>()
+const typedContexts = new WeakMap<Knot, Map<string, PreparedResource>>()
+const resourceIdentity = (kind: ResourceEntry['kind'], id: string) => `${kind}:${id}`
 const registries = new WeakMap<Knot, readonly RawResourceRegistry[]>()
 function localized(values: RawLocalizedTexts | undefined, entity: object & { id?: string }, key: 'names' | 'descriptions' | 'instructions', language?: string): string | undefined {
   const knot = textOwner.get(entity)
@@ -101,7 +103,7 @@ export class Representation implements RawRepresentation {
   data!: unknown
   names?: LocalizedTexts
   descriptions?: LocalizedTexts
-  getTypeDefinition(): PreparedResource | undefined { return owner.get(this)?.getResource(this.type) }
+  getTypeDefinition(): PreparedResource | undefined { return owner.get(this)?.getResource(this.type, 'representation-type') }
   getName(language?: string): string {
     const knot = owner.get(this)
     const target = language ?? languageFor(knot)
@@ -265,12 +267,12 @@ export class Knot implements RawKnot {
     this.constructions = Object.freeze((this.constructions ?? []).filter(item => item !== target)) as unknown as RawKnot['constructions']
     return true
   }
-  getResource(id: string): PreparedResource | undefined {
+  getResource(id: string, kind?: ResourceEntry['kind']): PreparedResource | undefined {
     let uri = id
     if (!id.startsWith('https://') && !id.startsWith('http://') && !id.startsWith('urn:')) {
       try { uri = expandURI(id, this.namespaces) } catch { /* unresolved external reference */ }
     }
-    return contexts.get(this)?.get(uri)
+    return kind ? typedContexts.get(this)?.get(resourceIdentity(kind, uri)) : contexts.get(this)?.get(uri)
   }
   /** Add an inline definition without modifying an attached registry. */
   addResourceDefinition(kind: 'catalogs' | 'representationTypes' | 'objectTypes', definition: NonNullable<RawKnot['catalogs']>[number] | NonNullable<RawKnot['representationTypes']>[number] | NonNullable<RawKnot['objectTypes']>[number]): PreparedResource {
@@ -278,12 +280,14 @@ export class Knot implements RawKnot {
     const value = structuredClone(definition)
     const uri = expandURI(value.id, this.namespaces)
     if (collection.some(item => expandURI(item.id, this.namespaces) === uri)) throw new Error('Duplicate resource URI: ' + uri)
-    const previous = this.getResource(uri)
+    const resourceKind = { catalogs: 'catalog', representationTypes: 'representation-type', objectTypes: 'object-type' }[kind] as ResourceEntry['kind']
+    const previous = this.getResource(uri, resourceKind)
     const view = resource(value, this, uri)
     if (previous && !('names' in value)) Object.defineProperty(view, 'names', { get: () => (previous as any).names, enumerable: false })
     if (previous && !('descriptions' in value)) Object.defineProperty(view, 'descriptions', { get: () => (previous as any).descriptions, enumerable: false })
     ;(this as any)[kind] = Object.freeze([...collection, value])
     contexts.get(this)?.set(uri, view)
+    typedContexts.get(this)?.set(resourceIdentity(resourceKind, uri), view)
     return view
   }
   /** Remove an inline definition, restoring the next applicable resource layer. */
@@ -320,7 +324,13 @@ export class Knot implements RawKnot {
         if (!('descriptions' in fallback)) Object.defineProperty(view, 'descriptions', { get: () => (registryView as any).descriptions, enumerable: false })
       }
       contexts.get(this)?.set(uri, view)
-    } else contexts.get(this)?.delete(uri)
+      typedContexts.get(this)?.set(resourceIdentity(resourceKind, uri), view)
+    } else {
+      typedContexts.get(this)?.delete(resourceIdentity(resourceKind, uri))
+      const alternative = [...(typedContexts.get(this)?.entries() ?? [])].reverse().find(([key]) => key.endsWith(':' + uri))?.[1]
+      if (alternative) contexts.get(this)?.set(uri, alternative)
+      else contexts.get(this)?.delete(uri)
+    }
     return true
   }
   addRepresentation(input: RawRepresentation): Representation {
@@ -379,6 +389,7 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
     if (knot[key]) (knot as any)[key] = Object.freeze(knot[key])
   }
   const index = new Map<string, PreparedResource>()
+  const typedIndex = new Map<string, PreparedResource>()
   for (const registry of [STANDARD_RESOURCES, ...attached]) {
     for (const entry of registry.resources) {
       const item = entry.resource
@@ -388,18 +399,22 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
       if (defaults && !('names' in item)) Object.defineProperty(view, 'names', { get: () => defaults.names, enumerable: false })
       if (defaults && !('descriptions' in item)) Object.defineProperty(view, 'descriptions', { get: () => defaults.descriptions, enumerable: false })
       index.set(id, view)
+      typedIndex.set(resourceIdentity(entry.kind, id), view)
     }
   }
   for (const key of ['catalogs', 'representationTypes', 'objectTypes'] as const) {
     for (const item of (knot[key] ?? []) as { id: string }[]) {
       const id = item.id.startsWith('https://') || item.id.startsWith('http://') || item.id.startsWith('urn:') ? item.id : expandURI(item.id, knot.namespaces)
-      const defaults = index.get(id) as any
+      const resourceKind = { catalogs: 'catalog', representationTypes: 'representation-type', objectTypes: 'object-type' }[key] as ResourceEntry['kind']
+      const defaults = typedIndex.get(resourceIdentity(resourceKind, id)) as any
       const view = resource(item, knot, id)
       if (defaults && !('names' in item)) Object.defineProperty(view, 'names', { get: () => defaults.names, enumerable: false })
       if (defaults && !('descriptions' in item)) Object.defineProperty(view, 'descriptions', { get: () => defaults.descriptions, enumerable: false })
       index.set(id, view)
+      typedIndex.set(resourceIdentity(resourceKind, id), view)
     }
   }
   contexts.set(knot, index)
+  typedContexts.set(knot, typedIndex)
   return knot
 }
