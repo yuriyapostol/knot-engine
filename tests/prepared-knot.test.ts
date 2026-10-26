@@ -1,6 +1,6 @@
 import { validateKnot } from '../src/core/validateKnot'
 import { describe, expect, it } from 'vitest'
-import { Knot, configureLocalization, subscribeLocalization, STANDARD_RESOURCES } from '../src/core'
+import { Knot, configureLocalization, subscribeLocalization, STANDARD_RESOURCES, expandURI } from '../src/core'
 import raw from '../v1/examples/knots/open-rope.json'
 
 describe('prepared Knot model', () => {
@@ -99,7 +99,7 @@ describe('prepared Knot model', () => {
     expect(knot.toRaw().representationTypes?.some(x => x.id === id)).toBe(false)
   })
   it('restores registry definitions after removing an inline override', () => {
-    const source = STANDARD_RESOURCES.resources[0].resource
+    const source = STANDARD_RESOURCES.resources.find(entry => expandURI(entry.resource.id, STANDARD_RESOURCES.namespaces) === expandURI(raw.representations[0].type, raw.namespaces))!.resource
     const knot = Knot.from({ ...raw, catalogs: [], representationTypes: [], objectTypes: [] } as any, {
       registries: [STANDARD_RESOURCES],
     })
