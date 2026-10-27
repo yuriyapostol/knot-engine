@@ -72,9 +72,9 @@ const issue = ref('')
 const viewer = ref<InstanceType<typeof KnotViewer> | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 const content = computed(() => locale.value === 'uk' ? {
-  model: 'Модель', representation: 'Представлення', procedure: 'Спосіб зав’язування', step: 'Крок зав’язування', custom: 'Власна модель', invalidJSON: 'Некоректний JSON', invalidFormat: 'Очікується RawKnot', fileLimit: 'Файл перевищує 1 MiB', export: 'Експорт зображення', editor: 'Код', openFile: 'Відкрити з файлу', saveFile: 'Зберегти в файл'
+  model: 'Модель', representation: 'Представлення', procedure: 'Спосіб формування', step: 'Крок формування', custom: 'Власна модель', invalidJSON: 'Некоректний JSON', invalidFormat: 'Очікується RawKnot', fileLimit: 'Файл перевищує 1 MiB', export: 'Експорт зображення', editor: 'Код', openFile: 'Відкрити з файлу', saveFile: 'Зберегти в файл'
 } : {
-  model: 'Model', representation: 'Representation', procedure: 'Tying procedure', step: 'Tying step', custom: 'Custom model', invalidJSON: 'Invalid JSON', invalidFormat: 'Expected RawKnot', fileLimit: 'File exceeds 1 MiB', export: 'Export image', editor: 'Code', openFile: 'Open from file', saveFile: 'Save to file'
+  model: 'Model', representation: 'Representation', procedure: 'Formation procedure', step: 'Formation step', custom: 'Custom model', invalidJSON: 'Invalid JSON', invalidFormat: 'Expected RawKnot', fileLimit: 'File exceeds 1 MiB', export: 'Export image', editor: 'Code', openFile: 'Open from file', saveFile: 'Save to file'
 })
 function setCurrent(input: DemoInput) {
   const candidates = supportedRepresentations(input.data)
@@ -159,7 +159,7 @@ async function download(options: CaptureOptions, name: string) {
           <label v-if="procedures.length > 1">{{ content.procedure }}<span class="knot-engine-v1-demo__select-field"><select v-model="selectedProcedure" @change="chooseProcedure"><option v-for="procedure in procedures" :key="procedure.id" :value="procedure.id">{{ localizedEntryName(procedure, locale) }}</option></select></span></label>
           <label v-if="steps.length">{{ content.step }}<span class="knot-engine-v1-demo__select-field"><select v-model="selectedStep" @change="chooseStep"><option v-for="step in steps" :key="step.id" :value="step.id">{{ localizedEntryName(step, locale) }}</option></select></span></label>
         </section>
-        <KnotViewer ref="viewer" :show-controls="false" :knot="knot" :representation-id="representationId" :initial-camera="demoCamera" :label="localizedName(current.data, locale)" :locale="locale" :theme="theme" @error="issue = $event.message" />
+        <KnotViewer ref="viewer" :show-controls="false" :knot="knot" :representation-id="representationId" :initial-camera="demoCamera" preserve-camera :label="localizedName(current.data, locale)" :locale="locale" :theme="theme" @error="issue = $event.message" />
         <div class="knot-engine-v1-demo__actions"><button type="button" @click="download({ view: 'current', format: isMosaic ? 'image/svg+xml' : 'image/png' }, isMosaic ? 'knot-current.svg' : 'knot-current.png')">{{ content.export }}</button></div>
       </section>
     </div>

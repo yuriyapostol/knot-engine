@@ -15,6 +15,7 @@ const props = withDefaults(defineProps<{
   views?: ViewDefinition[]
   registries?: RawResourceRegistry[]
   initialCamera?: Camera3D
+  preserveCamera?: boolean
   messages?: Partial<ViewerMessages>
   registry?: ViewerRegistry
   label: string
@@ -73,6 +74,7 @@ defineExpose({ resetView, fitToView, capture })
     :views="views"
     :registries="registries"
     :initial-camera="initialCamera"
+    :preserve-camera="preserveCamera"
     :messages="messages"
     :label="label"
     :description="description"

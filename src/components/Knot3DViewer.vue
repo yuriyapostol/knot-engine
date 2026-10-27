@@ -12,7 +12,7 @@ export interface ViewerErrorEvent { code: ViewerErrorCode; message: string; issu
 const props = withDefaults(defineProps<{
   knot?: RawKnot | null; representationId?: string; view?: Reference | ViewDefinition; views?: ViewDefinition[]; registries?: RawResourceRegistry[]; label: string; description?: string; poster?: string
   locale?: 'uk' | 'en'; messages?: Partial<ViewerMessages>; theme?: 'light' | 'dark'
-  quality?: Quality; active?: boolean; interactive?: boolean; showControls?: boolean; initialCamera?: Camera3D
+  quality?: Quality; active?: boolean; interactive?: boolean; showControls?: boolean; initialCamera?: Camera3D; preserveCamera?: boolean
 }>(), { locale: 'uk', theme: 'light', quality: 'medium', active: true, interactive: true, showControls: true })
 const emit = defineEmits<{
   ready: [payload: { knotId?: string; schemaVersion: 1; warnings: string[] }]
@@ -35,6 +35,8 @@ let engine: ViewerEngine | undefined
 let resize: ResizeObserver | undefined
 let intersection: IntersectionObserver | undefined
 let generation = 0
+function cameraContext() { return [props.knot, props.view, props.views, props.registries, props.initialCamera] as const }
+let loadedCameraContext: ReturnType<typeof cameraContext> | undefined
 
 function report(cause: ViewerError) {
   error.value = { code: cause.code, message: cause.message, issues: cause.issues, recoverable: cause.recoverable }
@@ -66,7 +68,9 @@ function ensureEngine() {
 function onVisibility() { if (!document.hidden) engine?.resize() }
 async function loadModel() {
   const current = ++generation
-  if (!props.knot) { engine?.clear(); state.value = 'empty'; error.value = null; return }
+  if (!props.knot) { loadedCameraContext = undefined; engine?.clear(); state.value = 'empty'; error.value = null; return }
+  const context = cameraContext()
+  const retainedCamera = props.preserveCamera && loadedCameraContext?.every((value, i) => value === context[i]) ? engine?.view() : undefined
   let resolved: RenderableModel
   try {
     if (props.initialCamera) {
@@ -80,6 +84,7 @@ async function loadModel() {
     if (selectedView.view && selectedView.view.space !== 'space') throw new ViewerError('INVALID_MODEL', '3D viewer requires a spatial view', undefined, false)
     resolved = resolveKnot(props.knot, { representationId: selection.representation.id, view: selectedView.view ?? undefined }, { registries: props.registries, scope: 'selected' })
   } catch (cause) {
+    loadedCameraContext = undefined
     engine?.clear()
     report(cause instanceof ViewerError ? cause : new ViewerError('INVALID_MODEL', 'Unable to resolve input', undefined, false))
     return
@@ -91,10 +96,11 @@ async function loadModel() {
   ensureEngine()
   if (!engine) return
   try {
-    engine.setModel(resolved, props.quality, props.initialCamera)
+    engine.setModel(resolved, props.quality, props.initialCamera, retainedCamera)
+    loadedCameraContext = context
     engine.setTheme(props.theme)
     engine.resize()
-  } catch (cause) { engine.clear(); report(cause instanceof ViewerError ? cause : new ViewerError('RENDER_FAILED', 'Unable to build model')) }
+  } catch (cause) { loadedCameraContext = undefined; engine.clear(); report(cause instanceof ViewerError ? cause : new ViewerError('RENDER_FAILED', 'Unable to build model')) }
 }
 function retry() { engine?.dispose(); engine = undefined; resize?.disconnect(); intersection?.disconnect(); document.removeEventListener('visibilitychange', onVisibility); void loadModel() }
 function onPointerDown(event: PointerEvent) { if (event.pointerType === 'mouse' && props.interactive) { root.value?.focus(); engine?.setInteractive(true) } }

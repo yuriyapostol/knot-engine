@@ -18,7 +18,7 @@ References to construction objects/states and procedure steps must carry their s
 
 Material, environmental conditions, object roles, constraints and end accessibility need contracts distinguishing enduring object properties from state and procedure conditions. An inaccessible rope end retains its identity. Material position along a rope differs from a curve parameter; resampling needs an explicit correspondence before promising a stable material coordinate.
 
-Procedures already support reusable states and multiple illustrations through representation references. Sequence representations, interpolation, timing and navigation remain separate work. They must not require equal point counts or one illustration per step for ordinary procedures. Representation selection, tying-state selection and camera selection remain independent.
+Procedures already support reusable states and multiple illustrations through representation references. Sequence representations, interpolation, timing and navigation remain separate work. They must not require equal point counts or one illustration per step for ordinary procedures. Representation selection, formation state selection and camera selection remain independent.
 
 ## Additional representations and import
 
@@ -32,7 +32,7 @@ Current composition combines fragments of the same document. Merging independent
 
 ## Scenarios for the next contracts
 
-- A practical knot with two tying procedures and shared illustrations.
+- A practical knot with two formation procedures and shared illustrations.
 - A construction whose rope-end accessibility changes between states.
 - A decorative composition with several materials and object roles.
 - A mathematical subject with grid/PD representations and sourced properties.

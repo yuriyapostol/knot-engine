@@ -12,6 +12,7 @@
 | `views?: ViewDefinition[]` | Application-owned presets for local view lookup |
 | `registries?: RawResourceRegistry[]` | Explicit external resource definitions |
 | `initialCamera?: Camera3D` | 3D display-camera override |
+| `preserveCamera?: boolean` | Keep the current 3D camera, zoom and target when switching representations or quality within the same input object; default false |
 | `description?`, `poster?` | Accessible description; poster is a 3D fallback image |
 | `locale?: 'uk' \| 'en'`, `messages?` | UI language (default uk); message overrides apply to 3D |
 | `theme?: 'light' \| 'dark'` | Default light |
@@ -19,6 +20,8 @@
 | `active?`, `interactive?`, `showControls?` | Boolean controls, all default true |
 
 Specialized viewers accept the relevant props directly and select only their supported type. The compositor forwards props, methods, events and available slots. View selection, camera modes, registry helpers and error meanings are detailed in [viewer contracts](viewer-contracts.md).
+
+With `preserveCamera`, the first representation sets the framing; later steps keep it instead of fitting each shape again. Replacing `knot`, `view`, `views`, `registries` or `initialCamera`, clearing the input, or a load error resets preservation. `resetView()` and `fitToView()` still explicitly reframe the current shape. Perspective depth can still affect apparent rope thickness; a fixed orthographic camera gives a uniform screen scale at every depth.
 
 Events: `ready({knotId?,schemaVersion:1,warnings})`, `error({code,message,issues?,recoverable})`, `view-change`. 3D also emits `camera-change(CameraView)`; the spatial view is a complete fixed camera with `position`, `target`, `up`, `projection`, and perspective FOV in radians. Mosaic view changes carry `{center:[x,y],height}`. Dispatch errors use core selection codes; specialized viewers use `INVALID_MODEL` for invalid input/view selection. 3D also reports `UNSUPPORTED_SCHEMA`, `LIMIT_EXCEEDED`, `WEBGL_UNAVAILABLE`, `CONTEXT_LOST`, `RENDER_FAILED`, `CAPTURE_FAILED` as applicable.
 

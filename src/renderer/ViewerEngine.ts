@@ -159,7 +159,7 @@ export class ViewerEngine {
     this.requestRender()
   }
   private quality: Quality = 'medium'
-  setModel(model: RenderableModel, quality: Quality, initial?: Camera3D) {
+  setModel(model: RenderableModel, quality: Quality, initial?: Camera3D, retainedCamera?: CameraView) {
     this.operation++
     this.ready = false
     this.quality = quality
@@ -169,7 +169,8 @@ export class ViewerEngine {
     if (this.built) { this.scene.remove(this.built.group); this.built.dispose() }
     this.built = built
     this.scene.add(built.group)
-    this.resetView()
+    if (retainedCamera) this.applyView(retainedCamera)
+    else this.resetView()
   }
   clear() {
     this.operation++

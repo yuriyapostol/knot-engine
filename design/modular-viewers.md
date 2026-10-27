@@ -12,7 +12,7 @@ Core validates domain data, expands namespaces, selects representations and reso
 
 Each viewer accepts a `RawKnot` or prepared `Knot` containing the required domain context. Inputs remain immutable. Presentation is supplied through `view`, `views`, 3D `initialCamera` and rendering props. Coordinate conventions, physical units, geometry, topology and meaningful construction states belong to domain data.
 
-A tying step, representation and camera viewpoint are separate concepts. Sequence navigation needs a future contract; a capability flag does not define its schema or public methods. Additional viewer types must declare their capabilities and preserve explicit diagnostics for unsupported operations.
+A formation step, representation and camera viewpoint are separate concepts. Sequence navigation needs a future contract; a capability flag does not define its schema or public methods. Additional viewer types must declare their capabilities and preserve explicit diagnostics for unsupported operations.
 
 ## Packaging and verification
 
