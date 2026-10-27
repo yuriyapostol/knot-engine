@@ -2,7 +2,7 @@
 
 [English](README.md) | [Українська](README.uk.md)
 
-Пакет для моделювання та рендерингу вузлів із Vue 3 компонентом `KnotViewer`. Поточний `Knot` підтримує просторові криві, сіткові діаграми, мозаїчні діаграми, коди планарних діаграм, коди Даукера–Тістлетвейта, конструкції, стани, процедури й явні реєстри ресурсів. Компонент відображає статичні 3D-представлення, має перспективну/ортографічну камеру, SSR fallback та PNG.
+Пакет для моделювання та рендерингу вузлів із Vue 3 компонентом `KnotViewer`. Поточний `Knot` підтримує просторові криві, сіткові діаграми, мозаїчні діаграми, коди планарних діаграм, коди Даукера–Тістлетвейта, конструкції, стани, процедури й явні реєстри ресурсів. Вбудовані переглядачі відображають статичні 3D-криві з перспективною/ортографічною камерою та PNG-знімками або мозаїки у SVG з панорамуванням, масштабуванням та SVG-знімками.
 
 ## Локальний запуск
 
@@ -43,9 +43,9 @@ npm pack --dry-run
 
 ```vue
 <script setup lang="ts">
-import { KnotViewer, type Knot } from 'knot-engine'
+import { KnotViewer, type RawKnot } from 'knot-engine'
 import 'knot-engine/styles.css'
-defineProps<{ knot: Knot }>()
+defineProps<{ knot: RawKnot }>()
 </script>
 
 <template>
@@ -53,11 +53,11 @@ defineProps<{ knot: Knot }>()
 </template>
 ```
 
-Імпортуйте `Knot` і типи з `knot-engine/core`: ця точка входу не завантажує Vue, Three.js або DOM. Валідація повертає окремі `valid`, `complete`, `missingDependencies`, `uncheckedTypes`; показ вимагає повної перевірки. Невідомі поля відхиляються. Реєстри передаються явно, мережевого завантаження за URI немає.
+Імпортуйте `Knot` і сирі типи з `knot-engine/core`: ця точка входу не завантажує Vue, Three.js або DOM. `Knot.from(raw)` готує редагований об’єкт; `Knot.validate(raw)` повідомляє `valid`, `complete`, `missingDependencies` та `uncheckedTypes`. Відображення вимагає повної перевірки вибраного представлення та його залежностей. Невідомі поля відхиляються. Реєстри передаються явно; URI-посилання не завантажують дані.
 
-`representation-id` вибирає статичне представлення; без нього використовується перше представлення просторових кривих. Конструкція містить предмети й стани, а процедура посилається на представлення. Анімації немає. Для оновлення геометрії замініть об’єкт `Knot`.
+`representation-id` вибирає статичне представлення. Без нього `KnotViewer` вимагає рівно одне представлення, підтримуване його реєстром переглядачів. Використовуйте `Knot3DViewer` із `knot-engine/3d` або `KnotMosaicViewer` із `knot-engine/mosaic` напряму, коли потрібен лише один засіб відображення. Конструкції містять предмети й стани; процедури посилаються на представлення. Для оновлення перегляду замініть об’єкт вузла. Анімацію не реалізовано.
 
-Методи: `resetView()`, `fitToView()`, `capture({width,height,view,transparent})`. PNG має типовий розмір 512×512 і максимум 2048×2048. Режими знімка — `current` і `model-preview`. Події: `ready({knotId,schemaVersion,warnings})`, `error`, `camera-change`. `initialCamera` приймає повний fit/fixed режим із перспективною або ортографічною проєкцією; FOV у радіанах.
+Методи: `resetView()`, `fitToView()`, `capture(options?)`. Знімки підтримують PNG для 3D (типово 512×512) та SVG для мозаїки (типово 1024×1024), з максимумом 2048×2048. Події: `ready`, `error`, `view-change` і 3D `camera-change`. Передавайте `view`, `views` та 3D `initialCamera` окремо від даних вузла. Див. [API компонентів](v1/specifications/components.uk.md) і [контракти вибору/ракурсів](v1/specifications/viewer-contracts.uk.md).
 
 [Контракт даних](v1/specifications/knot.uk.md) · [Функції](v1/specifications/functions.uk.md) · [Компонент](v1/specifications/components.uk.md) · [JSON Schema](v1/schema/knot.schema.json) · [Приклади](v1/examples/knots)
 
@@ -72,9 +72,9 @@ defineProps<{ knot: Knot }>()
 | Документ | Зміст |
 | --- | --- |
 | [`Knot` v1](v1/specifications/knot.uk.md) | Авторитетна специфікація доменних даних |
-| [Архітектура та міграція](design/architecture.uk.md) | Політики реалізації, сумісність і поточні обмеження |
-| [Специфікація `KnotViewer`](v1/specifications/components.uk.md) | API компонента та збережені критерії приймання |
-| [Демонстраційний застосунок](design/interactive-example-requirements.uk.md) | Поведінка демо та план приймання |
+| [Архітектура](design/architecture.uk.md) | Політики реалізації, сумісність і поточні обмеження |
+| [Специфікація `KnotViewer`](v1/specifications/components.uk.md) | API переглядачів та оформлення |
+| [Демонстраційний застосунок](design/interactive-example-requirements.uk.md) | Поведінка редактора й перевірки |
 
 ## Поточні обмеження
 

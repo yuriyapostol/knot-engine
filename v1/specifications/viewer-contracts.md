@@ -1,73 +1,50 @@
 # Representation selection and viewer contracts
 
-**Status:** modular 3D and SVG mosaic viewers, representation dispatch, shared capture options, and application-owned views are implemented.
+The package implements representation selection, registry dispatch, 3D and SVG mosaic viewers, and application-owned view settings. See the [component API](components.md) for props and [data contract](knot.md) for domain semantics.
 
-## Input and selection
-
-All viewer components receive `knot: Knot` (complete or permitted partial), `representationId?: string` and separate `settings`. Schema, namespaces, resources, constructions, procedures and states are checked according to the selected representation's needs. Core uses the same knot container without depending on Vue.
-
-Proposed core operations:
+## Core selection
 
 ```ts
+import { selectRepresentation, type RawKnot, type Knot } from 'knot-engine/core'
+
 type RepresentationQuery = { representationId?: string; type?: string }
-type SelectionResult =
-  | { ok: true; knot: Knot; representation: Representation; typeUri: string }
-  | { ok: false; issues: SelectionIssue[] }
-type SelectionIssue = {
-  code: 'INVALID_KNOT' | 'REPRESENTATION_NOT_FOUND' | 'AMBIGUOUS_REPRESENTATION'
-      | 'UNSUPPORTED_REPRESENTATION' | 'MISSING_DEPENDENCY' | 'INVALID_REPRESENTATION'
-  message: string
-  path?: string
-}
-function selectRepresentation(knot: Knot, query?: RepresentationQuery, options?: SelectionOptions): SelectionResult
+// selectRepresentation(knot: RawKnot | Knot, query?, options?): SelectionResult
+// Success: { ok: true, knot: RawKnot, representation: RawRepresentation, typeUri: string }
+// Failure: { ok: false, issues: SelectionIssue[] }
 ```
 
-This operation returns data without UI, mutation or resource fetching. Type matching uses expanded URIs. An explicit ID must also match the requested type; missing and ambiguous matches have distinct diagnostics. Without an ID, the generic viewer may select only under an unambiguous rule; silently choosing the first representation is forbidden. Partial knots require validation of a minimally sufficient dependency closure. The root must conform to the v1 `Knot` structure; optional sections may be omitted. By default, only the selected representation and required context are validated, not unrelated representations or procedures. `scope: 'all'` validates the entire document. Missing dependencies of the selected representation remain errors.
+The result contains normalized raw data without UI, input mutation or fetching. Type matching uses expanded URIs. An explicit ID must match any requested type. Missing, ambiguous and unsupported matches return distinct issue codes: `INVALID_KNOT`, `REPRESENTATION_NOT_FOUND`, `AMBIGUOUS_REPRESENTATION`, `UNSUPPORTED_REPRESENTATION`, `MISSING_DEPENDENCY`, `INVALID_REPRESENTATION`.
 
-## UI contract
+The root must satisfy the `RawKnot` structure; optional sections may be omitted. By default, validation checks the selected representation and required context, including subject catalog identifiers. Unrelated representations and procedures do not prevent targeted rendering. `scope: 'all'` validates the entire document. `registries` and `schemas` supply explicit dependencies. Success requires complete validation of that scope and retains the full normalized knot context.
 
-`KnotViewer` selects the component by `typeUri`; specialized viewers call `selectRepresentation` with a fixed type. Shared states: `empty | initializing | ready | error`; events: `ready`, `error`, `view-change`; methods: `resetView()`, `fitToView()`, `capture(options?)`. `camera-change` is 3D-specific. Events do not mutate the knot.
+## Viewer dispatch
 
-```ts
-type ViewerRegistration = {
-  typeUri: string
-  component: unknown // Vue component type in UI package
-  capabilities: {
-    orbit?: boolean; pan?: boolean; zoom?: boolean; edit?: boolean
-    capture?: readonly ('png' | 'svg')[]
-    sequences?: boolean
-  }
-}
-type ViewerRegistry = ReadonlyMap<string, ViewerRegistration>
-```
+`KnotViewer` uses a `ViewerRegistry`, a `ReadonlyMap<string, ViewerRegistration>` keyed by expanded absolute type URI. `createViewerRegistry(entries)` rejects duplicate keys; each entry has `typeUri`, Vue `component` and readonly `capabilities`. `findViewer(knot, type, registry)` expands a type in the knot's namespaces. `selectViewerRepresentation(knot, registry, representationId?)` applies compositor selection independently of rendering.
 
-Registry is explicit or locally assembled from built-ins, never mutable global state. Sequence support is a declared capability; step schemas and navigation APIs will be defined separately.
+Built-ins map `spatial-curve` to `Knot3DViewer` and `mosaic-diagram` to `KnotMosaicViewer`. A caller's `registry` replaces the built-ins. Without `representationId`, exactly one registered representation must exist; multiple supported representations require an ID, even of the same type. Unsupported siblings are ignored for dispatch. An explicit ID has no fallback. Zero registered candidates produce `UNSUPPORTED_REPRESENTATION`; missing or malformed representation collections receive core diagnostics.
 
-## Settings and migration
+Specialized viewers call core selection with their fixed type and also require an ID when multiple matches exist. All viewers accept `RawKnot` or prepared `Knot` with the selected representation's required context. A type resource alone does not register a renderer. Registries neither load code nor fetch data.
 
-Viewer settings are external to `Knot`. The application provides `view`, optional local presets `views`, `initialCamera` for 3D, and rendering props. Representation-level `views`, `defaultView`, and `preferredView` are removed; no compatibility fallback is provided.
+Capabilities declare `orbit`, `pan`, `zoom`, `edit`, capture formats `png`/`svg`, and `sequences`. Built-in 3D supports orbit/pan/zoom and PNG; mosaic supports pan/zoom and SVG. Sequence schemas and navigation are not implemented.
 
-## Tests
+## Application-owned views
 
-Cover complete and partial knots; explicit ID; missing and ambiguous selection; prefix expansion; unknown type; missing resources; immutable inputs; independent viewer instances; and procedures without conflating tying steps with camera viewpoints.
+Applications pass `view`, optional local presets `views`, 3D `initialCamera` and presentation props separately from knot data. `resolveRepresentationView(requested, views?, registries?, namespaces?)` resolves an inline `ViewDefinition`, local `{id}` or global `{ref}`. Local lookup requires one matching preset; global lookup expands declared prefixes and reads explicit registries. Missing/conflicting definitions and invalid views are errors. Omitted `view` resolves to `null`, leaving default framing to the viewer.
 
+A `ViewDefinition` requires `id`, `name`, `space`, `camera`; `description` is optional. `space: 'space'` uses `Camera3D`; `space: 'plane'` uses `{mode:'plane',center:[x,y],height:positive}`. Rotation is not accepted. A view must match the specialized viewer's space.
 
-## Dedicated package entry points
+Spatial `fit` requires finite, nonzero, noncollinear `direction` and `up` vectors and `projection`. Direction points from focus to camera. Optional `padding` is at least 1, default 1.1. `fixed` requires distinct `position`/`target`, nonparallel `up` and projection. Perspective uses `0 < fovY < π` radians; fixed orthographic projection additionally requires positive `height`. Viewport aspect and geometry bounds determine fitting. `initialCamera` overrides the 3D display camera after view resolution; invalid requested views are still errors.
 
-The package publishes `knot-engine/core` for headless validation, `knot-engine/3d` for `Knot3DViewer`, and `knot-engine/mosaic` for `KnotMosaicViewer`. The root entry retains `KnotViewer` and both specialized components for compatibility. Import `knot-engine/styles.css` when using the visual components. Each dedicated entry is tested from the packed npm tarball, including its generated TypeScript declarations.
+Camera presets are not part of `RawKnot`. View changes, interaction and capture leave domain data unchanged. Construction states and procedure steps have independent meaning.
 
+## Events, methods and capture
 
-## Generic viewer selection rule
+Shared methods are `resetView()`, `fitToView()` and `capture(options?): Promise<Blob>`. Shared events are `ready`, `error` and `view-change`; 3D additionally emits `camera-change` with the same camera payload. Mosaic `view-change` carries `{center:[x,y],height}`. The compositor forwards events and emits structured dispatch errors itself.
 
-Without `representationId`, `KnotViewer` filters available representations by the effective viewer registry, then selects **only if exactly one supported representation exists**. Unsupported siblings are ignored for dispatch, not deleted or modified. Multiple supported representations require an explicit ID, even when they share a type; zero supported representations return `UNSUPPORTED_REPRESENTATION`. An explicit ID selects that representation without fallback and reports an unsupported viewer if its type is not registered. A caller-provided registry replaces the built-in registry. The selected representation is then validated by `core` using its dependency context.
+`CaptureOptions` contains `width`, `height`, `format`, `view` and `transparent`. Dimensions are integers in 1..2048. 3D produces PNG, default 512×512; mosaic produces SVG, default 1024×1024. Omitted format uses the viewer's format; explicitly unsupported formats reject. `current` captures local viewer state; `model-preview` uses the resolved spatial view/default camera or the full mosaic extent. The 3D `initialCamera` override is not used for preview capture. Capturing leaves the live view unchanged. PNG supports transparent backgrounds; mosaic SVG has no background fill.
 
+## Package entries and checks
 
-### Event forwarding
+`knot-engine/core` provides headless operations, `knot-engine/3d` exports `Knot3DViewer`, and `knot-engine/mosaic` exports `KnotMosaicViewer` without Three.js. The root exports all viewers and registry helpers. Import `knot-engine/styles.css` for visual components.
 
-The generic compositor emits a structured `error` when dispatch itself fails (including ambiguous or unsupported selections), not only when a mounted specialized viewer fails. The 3D viewer emits the shared `view-change` alongside its existing `camera-change`; the compositor forwards both without changing their payloads. No new interaction capability is implied.
-
-
-Integration tests mount the standalone mosaic and the generic compositor in a DOM environment, verify event forwarding, invalid-ID recovery, SVG rendering without WebGL, and input immutability. These complement headless selection and package tests; they do not replace the existing Chromium 3D smoke tests.
-
-
-The Chromium browser suite additionally checks the real generic compositor switching between 3D and SVG mosaic, the absence of new WebGL contexts for mosaic rendering, SVG capture content, invalid-ID error reporting and recovery, and switching back to 3D with PNG capture. Capture output is representation-specific (PNG for 3D, SVG for mosaic); the existing `CaptureOptions` signature is retained for compatibility pending a separate API cleanup.
+Checks cover selected/full validation, complete and partial contexts, URI expansion, ambiguous/unsupported selection, independent settings, immutable inputs, direct/delegated DOM rendering, event forwarding, 3D/mosaic switching in Chromium, SVG/PNG captures and packed JavaScript/TypeScript entry points.

@@ -9,22 +9,22 @@
     "id": "overhand",
     "names": [
       {
-        "language": "uk",
-        "value": "Простий вузол"
-      },
-      {
         "language": "en",
         "value": "Overhand knot"
+      },
+      {
+        "language": "uk",
+        "value": "Простий вузол"
       }
     ],
     "descriptions": [
       {
-        "language": "uk",
-        "value": "Простий стопорний вузол, утворений одним переплетенням мотузки."
-      },
-      {
         "language": "en",
         "value": "A simple stopper knot formed by a single overhand turn of the rope."
+      },
+      {
+        "language": "uk",
+        "value": "Простий стопорний вузол, утворений одним переплетенням мотузки."
       }
     ]
   },
@@ -84,22 +84,22 @@
       },
       "names": [
         {
-          "language": "uk",
-          "value": "3D-представлення"
-        },
-        {
           "language": "en",
           "value": "3D representation"
+        },
+        {
+          "language": "uk",
+          "value": "3D-представлення"
         }
       ],
       "descriptions": [
         {
-          "language": "uk",
-          "value": "Просторове представлення мотузки."
-        },
-        {
           "language": "en",
           "value": "Spatial representation of the rope."
+        },
+        {
+          "language": "uk",
+          "value": "Просторове представлення мотузки."
         }
       ]
     },
@@ -117,22 +117,22 @@
       },
       "names": [
         {
-          "language": "uk",
-          "value": "Мозаїчна діаграма"
-        },
-        {
           "language": "en",
           "value": "Mosaic diagram"
+        },
+        {
+          "language": "uk",
+          "value": "Мозаїчна діаграма"
         }
       ],
       "descriptions": [
         {
-          "language": "uk",
-          "value": "Мозаїчне представлення вузла."
-        },
-        {
           "language": "en",
           "value": "Mosaic representation of the knot."
+        },
+        {
+          "language": "uk",
+          "value": "Мозаїчне представлення вузла."
         }
       ]
     }

@@ -1,6 +1,6 @@
 # Getting started
 
-The package provides `KnotViewer`, public data types, validators and resolvers. The website's interactive editor is a host application using those exports, not another renderer.
+The package provides `KnotViewer`, dedicated 3D/mosaic viewers, raw and prepared data types, validators and resolvers. The website's interactive editor is a host application using those exports, not another renderer.
 
 ## Run the project
 
@@ -27,7 +27,7 @@ import knot from './open-rope.json'
 </template>
 ```
 
-Use the [open-rope knot](../examples/knots/open-rope.json) as `open-rope.json`. Read the [component contract](../specifications/components.md) for selection parameters, events and capture methods. The package uses only the current `Knot` contract. Select a static representation with `representation-id`.
+Use the [open-rope knot](../examples/knots/open-rope.json) as `open-rope.json`. Read the [component contract](../specifications/components.md) for selection parameters, events and capture methods. Select a static representation with `representation-id` when several supported representations exist. Without an ID, exactly one supported representation is required. Use the dedicated `knot-engine/3d` or `knot-engine/mosaic` entry for a single rendering engine.
 
 ## Edit the data
 

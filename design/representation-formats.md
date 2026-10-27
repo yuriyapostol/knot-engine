@@ -1,12 +1,12 @@
-# KnotInfo representations: source data and proposed contracts
+# KnotInfo representations: source data and adaptations
 
-Status: research for the [`Knot` redesign](knot-draft.md). Sources were checked on 12 October 2026. Original formats and proposed JSON adaptations are distinguished below; documentation does not imply implemented importers or renderers.
+Source-format research, checked on 12 October 2026. Implemented adaptations link to their current specifications; image containers and editable planar diagrams remain candidates. This note does not define automatic importers. See [open design questions](knot-draft.md).
 
 ## 1. What the page actually provides
 
 The [3_1 diagrams page](https://knotinfo.org/diagram_display.php?3_1) provides:
 
-| Label | Actual data | Proposed representation |
+| Label | Actual data | Representation mapping |
 | --- | --- | --- |
 | KnotScape | PNG | `diagram-image`; structural diagram separately if original data can be obtained |
 | SnapPy | SVG with cubic Bezier paths | `diagram-image`; SnapPea/PLink projection for editable diagrams |
@@ -64,7 +64,7 @@ The [3_1 record](https://knotinfo.org/results.php?searchmode=singleknot&submitty
 
 This extracts two original values; it does not propose putting both in one `representation.data`. Under the [KnotInfo PD convention](https://knotinfo.org/descriptions/pd_notation.html), four labels go counterclockwise starting at the incoming underpassing arc. Implemented [PD data](../v1/specifications/pd-code.md) has a fixed `convention` URI, `crossings` as positive-integer quadruples and optional `unlinkedComponents`, preserving source labels. It encodes a combinatorial diagram, not drawing coordinates; validation checks repeated labels, the planar rotation system and underpass direction consistency.
 
-The implemented knot-only [DT profile](../v1/specifications/dt-code.md) uses `convention` and `code`, with signs and traversal tied to the [KnotInfo DT description](https://knotinfo.org/descriptions/dt_notation.html). Do not mix package conventions because their arrays look alike. [Spherogram](https://snappy.computop.org/spherogram.html) documents its own PD rules and orientation caveats. The profile checks planar realizability but does not reconstruct a unique PD embedding; `[4,6,2]` is not a universal context-free format. Multicomponent DT and embedding choices remain separate work.
+The implemented knot/link [DT profile](../v1/specifications/dt-code.md) uses `convention` and `code`, with signs and traversal tied to the [KnotInfo DT description](https://knotinfo.org/descriptions/dt_notation.html). Do not mix package conventions because their arrays look alike. [Spherogram](https://snappy.computop.org/spherogram.html) documents its own PD rules and orientation caveats. The profile checks planar realizability but does not reconstruct a unique PD embedding; `[4,6,2]` is not a universal context-free format. Multicomponent DT uses nested component arrays with global numbering; explicit embedding choices remain separate work.
 
 ## 3. Spatial curve
 
@@ -98,7 +98,7 @@ The `3_1` row contains a complete 16-value vector, yielding:
 }
 ```
 
-The `tileSet` and `tiles` wrapper are **our proposed JSON serialization**, not the original CSV format or an already published definition. The numbers come from the table. This is the author's example for the same catalog knot; no byte-level equivalence with the KnotInfo PNG is asserted.
+The `tileSet` and `tiles` wrapper are **our implemented JSON serialization**, defined in the [mosaic specification](../v1/specifications/mosaic-diagram.md), rather than the original CSV format. The numbers come from the table. This is the author's example for the same catalog knot; no byte-level equivalence with the KnotInfo PNG is asserted.
 
 N/E/S/W mean top/right/bottom/left; rows run downwards. The paper and drawing implementation agree on:
 
@@ -112,7 +112,7 @@ N/E/S/W mean top/right/bottom/left; rows run downwards. The paper and drawing im
 | 9 | W–E over N–S |
 | 10 | N–S over W–E |
 
-Mosaic data requires `tileSet` and a nonempty square `tiles` matrix; size is derived rather than duplicated. A tile-set definition specifies allowed codes, ports, over/under and coordinate conventions. Initially only this set is proposed; equal integers do not make another set compatible.
+Mosaic data requires `tileSet` and a nonempty square `tiles` matrix; size is derived rather than duplicated. A tile-set definition specifies allowed codes, ports, over/under and coordinate conventions. The implemented profile supports only this set; equal integers do not make another set compatible.
 
 Validate matrix shape, codes, neighboring ports and closed boundaries, then trace components. The example has 12 occupied tiles, three crossings and one closed component. Minimality is a separate sourced assertion. Minimum-size and minimum-tile examples remain the same representation type with different properties.
 
@@ -128,12 +128,8 @@ These are ten endpoints on a 5×5 grid, two per row/column, not X/O arrays. Vert
 
 One `grid-diagram` type now supports `xo` and `vertex-pairs`, both zero-based with fixed axis and crossing conventions. Source conventions are adapted during import. X/O specifies orientation; `vertex-pairs` does not. See the [grid diagram specification](../v1/specifications/grid-diagram.md) for the implemented contracts.
 
-## 6. Recommended order
+## 6. Implementation and remaining import work
 
-1. `diagram-image` for source appearance and `planar-diagram` for editable geometry with explicit crossings.
-2. `pd-code` for layout-independent combinatorial diagrams; generated layout is not an original source image.
-3. `spatial-curve` with exact closure and parameterization.
-4. `mosaic-diagram` backed by mathematical definitions and real structured fixtures.
-5. Both grid encodings and single-component numeric DT are implemented; multicomponent DT and other notations require separate contracts and convention checks.
+Spatial curves, both grid encodings, mosaics, PD and numeric DT for knots/links have implemented data and validation contracts. Spatial curves and mosaics also have built-in viewers. Image containers, editable planar diagrams, other notations and format converters need separate contracts and tests.
 
-This is a proposed order, not a universal user priority. Practical users may favor geometry and illustrated procedures; researchers may favor combinatorial codes and mosaics. None requires a separate root `diagrams` collection. Each import needs primary-source fixtures and preservation checks for geometry, closure, components, crossings, orientation and provenance. Mathematical equivalence remains a separate task.
+Each import needs primary-source fixtures and preservation checks for geometry, closure, components, crossings, orientation, parameterization and provenance. A generated layout must not be presented as an original source image. Mathematical equivalence remains a separate task.

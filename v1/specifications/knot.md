@@ -1,6 +1,6 @@
 # Knot v1
 
-Implemented initial profile of the [contract redesign](../../design/knot-draft.md). Package version remains 0.1.0; `schemaVersion` remains 1. The previous contracts and APIs have been removed. This profile supports spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, named states, procedures and reusable resources. Other representation formats, animation, properties, relations and classifications remain separate future work; they are not accepted as untyped fields.
+The `Knot` contract supports spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, named states, procedures and reusable resources. `RawKnot` is serialized data; the prepared `Knot` provides runtime methods. Other representation formats, animation, properties, relations and classifications need separate contracts; untyped fields for them are not accepted. See [open design questions](../../design/knot-draft.md).
 
 ## Terminology
 
@@ -21,15 +21,15 @@ Use descriptive concepts in prose. Name `Knot` explicitly when referring to that
 | Named state | `states` |
 | Procedure and step | `Procedure`, `procedures`, `Step`, `steps` |
 | View and camera | Viewer-owned `ViewDefinition`, `view`, `views`, `initialCamera` |
-| Catalog definition | `CatalogDefinition`, `catalogs` |
+| Catalog definition | `RawCatalogDefinition`, `catalogs` |
 | Source and contribution | `SourceDefinition`, `SourceUse`, `Contribution` |
 | License | `License` |
-| Resource registry | `ResourceRegistry` |
+| Resource registry | `RawResourceRegistry` |
 | Viewer component | `KnotViewer` |
 
 ## Documents and identity
 
-`Knot` requires `schema: "Knot"`, `schemaVersion: 1`, `id` and `subject: {id}`. Optional collections are `catalogs`, `representationTypes`, `objectTypes`, `constructions`, `representations`, `procedures`, `dependencies`. `$schema` is optional and, when present, must identify the corresponding published JSON Schema. `namespaces` declares compact URI prefixes. Known objects are closed: unknown fields are errors even if a caller passes `strict: false`.
+`Knot` requires `schema: "Knot"`, `schemaVersion: 1`, `id` and `subject: {id}`. Optional collections are `sources`, `contributions`, `catalogs`, `representationTypes`, `objectTypes`, `constructions`, `representations`, `procedures`, `dependencies`. `$schema` is optional and, when present, must identify the corresponding published JSON Schema. `namespaces` declares compact URI prefixes. Known objects are closed: unknown fields are errors even if a caller passes `strict: false`.
 
 `knot.id` identifies the document; `subject.id` identifies its subject. Initial-profile IDs may be local strings or absolute/compact URIs. Independent documents are not merged by subject identity. `subject.names` and `subject.descriptions` contain `{language,value}` records for localized display names and descriptions; both fields are optional arrays, each limited to 128 records. `language` and `value` are nonempty strings; language tags should follow BCP 47 (`uk`, `en`, etc.). Neither array sets a viewer locale or implies a fallback policy. `subject.identifiers` contains `{catalog,value}` records. A catalog is an identification system, not a collection of all its entries. Its rules validate a designation, not the truth of the author's identification.
 
@@ -43,7 +43,7 @@ Prefixes also apply to our `dataSchema.ref` field, `data.convention` in standard
 
 JSON Schema does not expand data values using our `namespaces`. Before checking extracted `data` with a standalone DT/PD/mosaic schema, expand the corresponding fields. Direct validators `validateDTCode`, `validatePDCode` and `validateMosaicDiagram` accept full URIs; the `Knot` and `RawRepresentationDocument` validators expand them in the document context. Canonical schema `$id` and `const` values remain full URIs.
 
-Local references use `{id: string}`; external resource references use `{ref: URI}`. These forms are exclusive. Local references resolve only in their declared scope; a global resource may be included in an knot and addressed with `{ref}`. JSON Schema `$id`/`$ref` and editor `$schema` retain ordinary URI semantics and do not use compact prefixes.
+Local references use `{id: string}`; external resource references use `{ref: URI}`. These forms are exclusive. Local references resolve only in their declared scope; a global resource may be included in a knot and addressed with `{ref}`. JSON Schema `$id`/`$ref` and editor `$schema` retain ordinary URI semantics and do not use compact prefixes.
 
 Resource registries are explicitly passed as `options.registries`. `STANDARD_RESOURCES` is a convenience registry exported by core; it is not implicitly inserted. Bundled examples embed the definitions they need. Different definitions with the same global ID are an error; identical JSON objects, ignoring key order, may be deduplicated. Array order remains significant. Unknown representation data is preserved without rewriting arbitrary fields.
 
@@ -57,11 +57,11 @@ A representation's omitted `target` means the document subject. Explicit forms a
 
 A procedure requires `id` and nonempty `steps`; optional localized `names` and `descriptions` arrays of `{language,value}` records and `construction` provide context. Each step has a unique local `id`, optional `instructions` (array of `{language,value}` records) and `representations` (local `{id}` references in this profile). A step may have no image or several images. Procedures impose no equality of point counts, interpolation or animation timing. A state can be shared by multiple procedures and representations.
 
-Representations may carry optional `names` and `descriptions` arrays of `{language,value}` records, like `subject`. Procedures may carry optional localized `names` and `descriptions` in the same format, Procedure steps may carry `names` in the same format; actionable text uses `instructions` as an array of `{language,value}` records. These fields do not determine UI locale or fallback language.
+Representations may carry optional `names` and `descriptions` arrays of `{language,value}` records, like `subject`. Procedures may carry optional localized `names` and `descriptions` in the same format. Procedure steps may carry `names` in the same format; actionable text uses `instructions` as an array of `{language,value}` records. These fields do not determine UI locale or fallback language.
 
 ## Representations
 
-A representation requires `id`, URI `type` and `data`; optional fields are `target`, `sources`, `contributions`. IDs are unique in the knot. Type definitions require `id`, `name`, `description`, `dataSchema`, `specification`; optional `viewSpace` is `none` (default), `plane` or `space`. Object type definitions use the same fields except `viewSpace`.
+A representation requires `id`, URI `type` and `data`; optional fields are `target`, `names`, `descriptions`, `sources`, `contributions`. IDs are unique in the knot. Type definitions require `id`, `name`, `description`, `dataSchema`, `specification`; optional `viewSpace` is `none` (default), `plane` or `space`. Object type definitions use the same fields except `viewSpace`.
 
 `dataSchema` is `{ref: absolute-or-compact-schema-URI}` or `{inline: JSON-Schema-object}` with an explicit `$schema` dialect. External schemas must be supplied through `options.schemas`; no network resolver is installed. The current custom schema engine supports draft 2020-12. A schema cannot prove domain semantics. Unknown types may pass structural validation while remaining in `uncheckedTypes`; they cannot be rendered or exported as verified self-contained fragments.
 
@@ -86,13 +86,13 @@ The renderer uses data coordinates. A physical rope diameter becomes radius `dia
 
 Type: `https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram`.
 
-`data` is `{encoding:"xo",size,x,o}`. Size is an integer from 2 to 512; both arrays are permutations of row indices `0..size-1`, indexed by column. X and O must differ in each column. Row zero is the bottom row, columns increase rightward. Horizontal arcs run O→X; vertical arcs run X→O and pass over horizontal arcs. This profile supports multiple components and does not infer knot identity. It is data/validation support; the current `KnotViewer` renders only spatial curves. The alternative `{encoding:"vertex-pairs",size,vertices}` profile stores unoriented distinct `[column,row]` pairs indexed from 0, exactly two per row and column.
+`data` is `{encoding:"xo",size,x,o}`. Size is an integer from 2 to 512; both arrays are permutations of row indices `0..size-1`, indexed by column. X and O must differ in each column. Row zero is the bottom row, columns increase rightward. Horizontal arcs run O→X; vertical arcs run X→O and pass over horizontal arcs. This profile supports multiple components and does not infer knot identity. It is data/validation support; there is no built-in grid viewer. The alternative `{encoding:"vertex-pairs",size,vertices}` profile stores unoriented distinct `[column,row]` pairs indexed from 0, exactly two per row and column.
 
 See the detailed [grid diagram specification](grid-diagram.md) for derived counts, coordinates and KnotInfo interoperability.
 
-### Mosaic diagram (data and validation)
+### Mosaic diagrams
 
-The profile is defined in the [mosaic specification](mosaic-diagram.md). Types, JSON Schema, a standard resource and semantic validation via `validateMosaicDiagram` are implemented. Rendering is deferred.
+The profile is defined in the [mosaic specification](mosaic-diagram.md). Types, JSON Schema, a standard resource and semantic validation via `validateMosaicDiagram` are implemented. `KnotMosaicViewer` renders SVG with pan, zoom, application-owned plane views and SVG capture; `KnotViewer` delegates to it.
 
 ### Planar diagram codes
 
@@ -104,7 +104,7 @@ The [DT specification](dt-code.md) defines `dt-code` for knots and links: an exp
 
 ## Viewer-owned views and settings
 
-`Knot` contains representation data, constructions, states, and procedures, but **no camera presets or rendering settings**. In particular, `views`, `defaultView`, and `preferredView` are not representation fields. Their presence is rejected by the JSON Schema.
+`Knot` contains representation data, constructions, states, and procedures, but **no camera presets or rendering settings**. Presentation fields in a representation are rejected by JSON Schema.
 
 The application passes a `view` (inline `ViewDefinition`, local `{id}`, or registry `{ref}`) and optional `views` preset collection directly to `KnotViewer`, `Knot3DViewer`, or `KnotMosaicViewer`. `initialCamera` is a separate 3D viewer prop. With no requested view, each viewer uses its own default framing. Plane views use `{mode:"plane",center:[x,y],height:positive}`; rotation is not supported. Capture settings belong to the viewer API, not the knot. See [viewer contracts](viewer-contracts.md).
 
@@ -112,7 +112,7 @@ The application passes a `view` (inline `ViewDefinition`, local `{id}`, or regis
 
 Independent schemas are available for grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, spatial curves, representation, construction, view, catalog, representation type, object type and rope/equipment objects. Each published schema includes only its needed definitions and can be compiled without the root knot schema. Generated schemas come from `src/core/contracts.json` via `npm run build:schemas`.
 
-`RawResourceDocument` requires `schema`, `schemaVersion`, `kind`, `resource`; optional `$schema`, `namespaces`, `dependencies`. Kinds: `catalog`, `representation-type`, `object-type`, `view`, `construction`, `source`. A standalone resource requires a global ID. `ResourceRegistry` requires `schema`, `schemaVersion`, `resources:[{kind,resource}]`, with optional `$schema`, `namespaces`, `id`. A registry is an ordinary document, not a server or singleton. `RawRepresentationDocument` requires `schema`, `schemaVersion`, `representation`, with optional `$schema`, `namespaces`, `dependencies`, `subject`, `sources`.
+`RawResourceDocument` requires `schema`, `schemaVersion`, `kind`, `resource`; optional `$schema`, `namespaces`, `dependencies`. Kinds: `catalog`, `representation-type`, `object-type`, `view`, `construction`, `source`. A standalone resource requires a global ID. `RawResourceRegistry` requires `schema`, `schemaVersion`, `resources:[{kind,resource}]`, with optional `$schema`, `namespaces`, `id`. A registry is an ordinary document, not a server or singleton. `RawRepresentationDocument` requires `schema`, `schemaVersion`, `representation`, with optional `$schema`, `namespaces`, `dependencies`, `subject`, `sources`.
 
 Catalog definitions require global `id`, `name`, `description`; optional `homepage`, `edition`, `identifierRules`. Rules support `pattern` (ECMA-262 without flags) and `caseSensitive` (default true). Case-insensitive identity comparison, when needed by a consumer, folds only ASCII A–Z; stored values remain unchanged. The runtime checks patterns as written and does not perform catalog lookup or infer identity. Anchor a pattern with `^`/`$` to match the whole designation.
 
@@ -126,12 +126,12 @@ The [shared metadata contract](sources.md) defines fields, roles, validation, ex
 
 ## Validation and extraction
 
-`validateKnot` returns either `{valid:false,issues}` or `{valid:true,knot,warnings,complete,missingDependencies,uncheckedTypes}`. `valid` means known structures and resolvable references are consistent; `complete` additionally requires all required definitions and supported domain semantics. Rendering and extraction require `complete`. Validation never mutates input or fetches data. JSON Schema is structural; runtime additionally checks scopes, uniqueness, curve continuity, camera vectors, grid diagram permutations and aggregate budgets. It does not prove mathematical identity or practical safety.
+`Knot.validate(raw)` returns either `{valid:false,issues}` or `{valid:true,knot,warnings,complete,missingDependencies,uncheckedTypes}`. `valid` means known structures and resolvable references are consistent; `complete` additionally requires all required definitions and supported domain semantics. Extraction requires complete document validation; rendering requires complete validation of the selected representation and its dependencies. Validation never mutates input or fetches data. JSON Schema is structural; runtime additionally checks scopes, uniqueness, curve continuity, grid diagram permutations and aggregate budgets. It does not prove mathematical identity or practical safety.
 
 Before traversal, a resource profile bounds nesting at 64, total visited values at 262144 and individual strings at 1048576 characters. Non-JSON values, sparse arrays, accessors and cycles are rejected. Additional structural limits include 1024 representations, 256 constructions/objects/states, 256 procedures, 1024 steps per procedure, 4096 points per curve, and 65536 points across the knot. Limits protect this implementation and do not define every possible domain object.
 
-`selectKnot(knot,{representations?,procedures?},options?)` returns a cloned self-contained knot with requested procedures, their referenced representations, required complete constructions and type/catalog definitions. Unrelated procedures and representations are omitted. Global references remain valid after external resources are embedded. Only supported types may be extracted; unknown URI fields cannot be safely rewritten. Assertions are outside this initial profile, so there are no hidden relation traversals or assertion omissions.
+`knot.select({representations?,procedures?})` returns an independent self-contained prepared knot with requested procedures, their referenced representations, required complete constructions and type/catalog definitions. Unrelated procedures and representations are omitted. Global references remain valid after external resources are embedded. Only supported types may be extracted; unknown URI fields cannot be safely rewritten. Assertions are outside this initial profile, so there are no hidden relation traversals or assertion omissions.
 
-`composeKnot(parts,options?)` merges fragments with equal document IDs and equal subjects, after namespace expansion. Conflicting collection IDs are errors; omitted fields do not delete data. It is not a patch format or a merger of independent documents. Both operations return independent copies and revalidate the result.
+`Knot.compose(parts,options?)` merges fragments with equal document IDs and equal subjects, after namespace expansion. Conflicting collection IDs are errors; omitted fields do not delete data. It is not a patch format or a merger of independent documents. Both operations return independent copies and revalidate the result.
 
 [Open rope](../examples/knots/open-rope.json) · [Two procedures sharing states](../examples/knots/procedures.json) · [Grid](../examples/knots/grid-diagram.json) · [API](functions.md)

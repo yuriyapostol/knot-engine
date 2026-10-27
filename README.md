@@ -2,7 +2,7 @@
 
 [English](README.md) | [Українська](README.uk.md)
 
-Knot modeling and rendering package with Vue 3 `KnotViewer`. The current `Knot` supports spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, states, procedures and explicit resource registries. The component renders static 3D representations with perspective/orthographic cameras, SSR fallback and PNG capture.
+Knot modeling and rendering package with Vue 3 `KnotViewer`. The current `Knot` supports spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, states, procedures and explicit resource registries. Built-in viewers render static 3D curves with perspective/orthographic cameras and PNG capture, or mosaics as SVG with pan, zoom and SVG capture.
 
 ## Run locally
 
@@ -43,9 +43,9 @@ For an explicitly prepared release, `npm run site:archive` creates a snapshot of
 
 ```vue
 <script setup lang="ts">
-import { KnotViewer, type Knot } from 'knot-engine'
+import { KnotViewer, type RawKnot } from 'knot-engine'
 import 'knot-engine/styles.css'
-defineProps<{ knot: Knot }>()
+defineProps<{ knot: RawKnot }>()
 </script>
 
 <template>
@@ -53,11 +53,11 @@ defineProps<{ knot: Knot }>()
 </template>
 ```
 
-Import `Knot` and raw types from `knot-engine/core`: this entry point loads no Vue, Three.js or DOM. Validation separately reports `valid`, `complete`, `missingDependencies` and `uncheckedTypes`; rendering requires complete validation. Unknown fields are rejected. Registries are passed explicitly; URI references do not fetch data.
+Import `Knot` and raw types from `knot-engine/core`: this entry point loads no Vue, Three.js or DOM. `Knot.from(raw)` prepares an editable object; `Knot.validate(raw)` reports `valid`, `complete`, `missingDependencies` and `uncheckedTypes`. Rendering requires complete validation of the selected representation and its dependencies. Unknown fields are rejected. Registries are passed explicitly; URI references do not fetch data.
 
-`representation-id` selects one static representation; by default the first `spatial-curve` is selected. Constructions contain objects and states; procedures reference representations. There is no animation. Replace the knot object to update geometry.
+`representation-id` selects a static representation. Without it, `KnotViewer` requires exactly one representation supported by its viewer registry. Use `Knot3DViewer` from `knot-engine/3d` or `KnotMosaicViewer` from `knot-engine/mosaic` directly when only one rendering engine is needed. Constructions contain objects and states; procedures reference representations. Replace the knot object to update the view. Animation is not implemented.
 
-Methods: `resetView()`, `fitToView()`, `capture({width,height,view,transparent})`. PNG defaults to 512×512 with a 2048×2048 maximum. Capture modes are `current` and `model-preview`. Events: `ready({knotId,schemaVersion,warnings})`, `error`, `camera-change`. `initialCamera` accepts complete fit/fixed modes with perspective or orthographic projection; FOV is in radians.
+Methods: `resetView()`, `fitToView()`, `capture(options?)`. Capture supports PNG for 3D (default 512×512) and SVG for mosaic (default 1024×1024), with a 2048×2048 maximum. Events: `ready`, `error`, `view-change`, plus 3D `camera-change`. Pass `view`, `views` and 3D `initialCamera` separately from knot data. See the [component API](v1/specifications/components.md) and [selection/view contracts](v1/specifications/viewer-contracts.md).
 
 [Data contract](v1/specifications/knot.md) · [Functions](v1/specifications/functions.md) · [Component](v1/specifications/components.md) · [JSON Schema](v1/schema/knot.schema.json) · [Examples](v1/examples/knots)
 
@@ -72,9 +72,9 @@ Explain consequential contract decisions in the relevant specifications, with so
 | Document | Scope |
 | --- | --- |
 | [`Knot` v1](v1/specifications/knot.md) | Authoritative domain-data specification |
-| [Architecture and migration](design/architecture.md) | Implementation policies, compatibility and current limits |
-| [`KnotViewer` specification](v1/specifications/components.md) | Component API and retained acceptance criteria |
-| [Demo application](design/interactive-example-requirements.md) | Demo behavior and acceptance plan |
+| [Architecture](design/architecture.md) | Implementation policies, compatibility and current limits |
+| [`KnotViewer` specification](v1/specifications/components.md) | Viewer APIs and styling |
+| [Demo application](design/interactive-example-requirements.md) | Editor behavior and verification |
 
 ## Current limits
 

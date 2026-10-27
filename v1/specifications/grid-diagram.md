@@ -6,13 +6,13 @@ Supported data and validation profile. Rendering is deferred.
 
 Type: `https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram`.
 
-`xo` is the package's primary grid diagram encoding, corresponding to the standard model of grid diagrams with X/O markings. It is the default wherever a grid diagram's encoding is not specified.
+`xo` is the package's primary grid diagram encoding, corresponding to the standard model of grid diagrams with X/O markings. The `encoding` field is required; validation does not infer it.
 
 For `encoding:"xo"`, `data` is exactly `{encoding:"xo",size,x,o}`. Size is an integer from 2 through 512. Arrays `x` and `o` are permutations of `0..size-1`, indexed by column, and must differ at every column. Column zero is leftmost; row zero is bottommost. These conditions give one X and one O in every row and column, with no shared marker position, and guarantee closed components.
 
 Horizontal segments run O→X; vertical segments run X→O and pass over horizontal segments. Connections are ordinary straight planar segments, without wrapping across boundaries. Several oriented closed components are allowed in X/O. Swapping X and O reverses every component's orientation without changing the underlying crossing diagram. Reflecting coordinates without changing crossing conventions can change chirality; it is not an identity-preserving normalization.
 
-For plane views, marker (column c, row r) has coordinates [c+0.5,r+0.5]. The grid occupies [0,n] × [0,n]. Center [n/2,n/2], height n, rotation 0 includes its full vertical extent. This is a display convention, not stored geometry. Views must use `space:"plane"`; `preferredView` is rejected. `KnotViewer` and the 3D resolver remain spatial-curve-only.
+A future plane viewer can map marker (column c, row r) to [c+0.5,r+0.5], with grid extent [0,n] × [0,n]. Camera settings belong to the application. There is no built-in grid viewer.
 
 ## Vertex-pairs encoding
 

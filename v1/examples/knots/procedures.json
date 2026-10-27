@@ -9,12 +9,12 @@
     "id": "variants",
     "names": [
       {
-        "language": "uk",
-        "value": "Мотузка з кількома станами"
-      },
-      {
         "language": "en",
         "value": "Rope with multiple states"
+      },
+      {
+        "language": "uk",
+        "value": "Мотузка з кількома станами"
       }
     ]
   },
@@ -58,22 +58,22 @@
       },
       "names": [
         {
-          "language": "uk",
-          "value": "3D-представлення"
-        },
-        {
           "language": "en",
           "value": "3D representation"
+        },
+        {
+          "language": "uk",
+          "value": "3D-представлення"
         }
       ],
       "descriptions": [
         {
-          "language": "uk",
-          "value": "Просторове представлення мотузки."
-        },
-        {
           "language": "en",
           "value": "Spatial representation of the rope."
+        },
+        {
+          "language": "uk",
+          "value": "Просторове представлення мотузки."
         }
       ]
     },
@@ -116,22 +116,22 @@
       },
       "names": [
         {
-          "language": "uk",
-          "value": "3D — вигин"
-        },
-        {
           "language": "en",
           "value": "3D — bend"
+        },
+        {
+          "language": "uk",
+          "value": "3D — вигин"
         }
       ],
       "descriptions": [
         {
-          "language": "uk",
-          "value": "Просторове представлення мотузки."
-        },
-        {
           "language": "en",
           "value": "Spatial representation of the rope."
+        },
+        {
+          "language": "uk",
+          "value": "Просторове представлення мотузки."
         }
       ]
     },
@@ -174,22 +174,22 @@
       },
       "names": [
         {
-          "language": "uk",
-          "value": "3D — завершення"
-        },
-        {
           "language": "en",
           "value": "3D — finish"
+        },
+        {
+          "language": "uk",
+          "value": "3D — завершення"
         }
       ],
       "descriptions": [
         {
-          "language": "uk",
-          "value": "Просторове представлення мотузки."
-        },
-        {
           "language": "en",
           "value": "Spatial representation of the rope."
+        },
+        {
+          "language": "uk",
+          "value": "Просторове представлення мотузки."
         }
       ]
     }
@@ -253,22 +253,22 @@
           ],
           "names": [
             {
-              "language": "uk",
-              "value": "Початковий стан"
-            },
-            {
               "language": "en",
               "value": "Initial state"
+            },
+            {
+              "language": "uk",
+              "value": "Початковий стан"
             }
           ],
           "instructions": [
             {
-              "language": "uk",
-              "value": "Розмістіть мотузку в початковому положенні."
-            },
-            {
               "language": "en",
               "value": "Place the rope in its initial position."
+            },
+            {
+              "language": "uk",
+              "value": "Розмістіть мотузку в початковому положенні."
             }
           ]
         },
@@ -281,22 +281,22 @@
           ],
           "names": [
             {
-              "language": "uk",
-              "value": "Формування вигину"
-            },
-            {
               "language": "en",
               "value": "Forming the bend"
+            },
+            {
+              "language": "uk",
+              "value": "Формування вигину"
             }
           ],
           "instructions": [
             {
-              "language": "uk",
-              "value": "Сформуйте вигин мотузки."
-            },
-            {
               "language": "en",
               "value": "Form a bend in the rope."
+            },
+            {
+              "language": "uk",
+              "value": "Сформуйте вигин мотузки."
             }
           ]
         },
@@ -309,44 +309,44 @@
           ],
           "names": [
             {
-              "language": "uk",
-              "value": "Завершений стан"
-            },
-            {
               "language": "en",
               "value": "Finished state"
+            },
+            {
+              "language": "uk",
+              "value": "Завершений стан"
             }
           ],
           "instructions": [
             {
-              "language": "uk",
-              "value": "Надайте мотузці завершеної форми."
-            },
-            {
               "language": "en",
               "value": "Arrange the rope into its final shape."
+            },
+            {
+              "language": "uk",
+              "value": "Надайте мотузці завершеної форми."
             }
           ]
         }
       ],
       "names": [
         {
-          "language": "uk",
-          "value": "Послідовне формування вигину"
-        },
-        {
           "language": "en",
           "value": "Forming a bend step by step"
+        },
+        {
+          "language": "uk",
+          "value": "Послідовне формування вигину"
         }
       ],
       "descriptions": [
         {
-          "language": "uk",
-          "value": "Триетапний спосіб із проміжним станом вигину."
-        },
-        {
           "language": "en",
           "value": "Three-step procedure with an intermediate bend state."
+        },
+        {
+          "language": "uk",
+          "value": "Триетапний спосіб із проміжним станом вигину."
         }
       ]
     },
@@ -365,22 +365,22 @@
           ],
           "names": [
             {
-              "language": "uk",
-              "value": "Початковий стан"
-            },
-            {
               "language": "en",
               "value": "Initial state"
+            },
+            {
+              "language": "uk",
+              "value": "Початковий стан"
             }
           ],
           "instructions": [
             {
-              "language": "uk",
-              "value": "Розмістіть мотузку в початковому положенні."
-            },
-            {
               "language": "en",
               "value": "Place the rope in its initial position."
+            },
+            {
+              "language": "uk",
+              "value": "Розмістіть мотузку в початковому положенні."
             }
           ]
         },
@@ -393,44 +393,44 @@
           ],
           "names": [
             {
-              "language": "uk",
-              "value": "Завершений стан"
-            },
-            {
               "language": "en",
               "value": "Finished state"
+            },
+            {
+              "language": "uk",
+              "value": "Завершений стан"
             }
           ],
           "instructions": [
             {
-              "language": "uk",
-              "value": "Надайте мотузці завершеної форми."
-            },
-            {
               "language": "en",
               "value": "Arrange the rope into its final shape."
+            },
+            {
+              "language": "uk",
+              "value": "Надайте мотузці завершеної форми."
             }
           ]
         }
       ],
       "names": [
         {
-          "language": "uk",
-          "value": "Перехід до кінцевого стану"
-        },
-        {
           "language": "en",
           "value": "Direct transition to the final state"
+        },
+        {
+          "language": "uk",
+          "value": "Перехід до кінцевого стану"
         }
       ],
       "descriptions": [
         {
-          "language": "uk",
-          "value": "Скорочений двоетапний спосіб без проміжного стану."
-        },
-        {
           "language": "en",
           "value": "Short two-step procedure without the intermediate state."
+        },
+        {
+          "language": "uk",
+          "value": "Скорочений двоетапний спосіб без проміжного стану."
         }
       ]
     }

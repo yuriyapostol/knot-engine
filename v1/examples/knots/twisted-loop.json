@@ -9,22 +9,22 @@
     "id": "twisted-loop",
     "names": [
       {
-        "language": "uk",
-        "value": "Скручена петля"
-      },
-      {
         "language": "en",
         "value": "Twisted loop"
+      },
+      {
+        "language": "uk",
+        "value": "Скручена петля"
       }
     ],
     "descriptions": [
       {
-        "language": "uk",
-        "value": "Замкнена петля мотузки зі скручуванням, наведена як геометричний приклад."
-      },
-      {
         "language": "en",
         "value": "A closed rope loop with a twist, provided as a geometric example."
+      },
+      {
+        "language": "uk",
+        "value": "Замкнена петля мотузки зі скручуванням, наведена як геометричний приклад."
       }
     ]
   },
@@ -71,22 +71,22 @@
       },
       "names": [
         {
-          "language": "uk",
-          "value": "3D-представлення"
-        },
-        {
           "language": "en",
           "value": "3D representation"
+        },
+        {
+          "language": "uk",
+          "value": "3D-представлення"
         }
       ],
       "descriptions": [
         {
-          "language": "uk",
-          "value": "Просторове представлення мотузки."
-        },
-        {
           "language": "en",
           "value": "Spatial representation of the rope."
+        },
+        {
+          "language": "uk",
+          "value": "Просторове представлення мотузки."
         }
       ]
     },
@@ -103,22 +103,22 @@
       },
       "names": [
         {
-          "language": "uk",
-          "value": "Мозаїчна діаграма"
-        },
-        {
           "language": "en",
           "value": "Mosaic diagram"
+        },
+        {
+          "language": "uk",
+          "value": "Мозаїчна діаграма"
         }
       ],
       "descriptions": [
         {
-          "language": "uk",
-          "value": "Мозаїчне представлення вузла."
-        },
-        {
           "language": "en",
           "value": "Mosaic representation of the knot."
+        },
+        {
+          "language": "uk",
+          "value": "Мозаїчне представлення вузла."
         }
       ]
     }

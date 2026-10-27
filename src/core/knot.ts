@@ -1,4 +1,4 @@
-/** RawKnot contracts, generation 1. See v1/specifications/knot-knot.md. */
+/** RawKnot contracts, generation 1. See v1/specifications/knot.md. */
 export const KNOT_NAMESPACE = 'https://yuriyapostol.github.io/knot-engine/v1/'
 export const SPATIAL_CURVE = `${KNOT_NAMESPACE}representation-types/spatial-curve`
 export const GRID_DIAGRAM = `${KNOT_NAMESPACE}representation-types/grid-diagram`

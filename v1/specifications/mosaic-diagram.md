@@ -21,7 +21,7 @@ The standard type uses `viewSpace: "plane"` and references the standalone [JSON 
 
 Size is `tiles.length`; every row has that length. No duplicated `size`, per-tile rotation, scale or coordinate-system fields are stored. Only the tile set above is supported. Its URI identifies the fixed convention defined here; it is not a new registry resource kind and never triggers network access.
 
-The `tileSet` value is type-specific data, not a generic resource reference. This profile requires the absolute URI, even if the enclosing knot declares namespaces. Compact forms are not accepted or silently rewritten. Representation `type` still follows ordinary `Knot` namespace expansion.
+The `tileSet` value identifies a fixed type-specific convention, not a generic resource dependency. Standalone schema/`validateMosaicDiagram` require its absolute URI. Knot and representation-document validation also accept declared compact forms and expand them before type validation; representation `type` follows the same document namespace rules.
 
 A 1×1 blank matrix is structurally a square matrix but is semantically invalid: at least one closed component is required. Blank border tiles are allowed and preserved; no trimming, padding, rotation or reflection occurs during validation, extraction or composition.
 
@@ -63,11 +63,11 @@ Traversal is iterative. `KNOT_LIMITS.mosaicCells` limits each document (or stand
 
 ## Knot integration
 
-Use the ordinary `Representation` envelope: `id`, `type`, `data`, optional `target`, `views` and `defaultView`. An omitted target describes the knot subject. Explicit targets follow the existing scoped target rules; this profile supplies no mapping from traced components to construction objects.
+Use the ordinary `Representation` envelope: `id`, `type`, `data`, optional `target`, `names`, `descriptions`, `sources` and `contributions`. An omitted target describes the knot subject. Explicit targets follow the existing scoped target rules; this profile supplies no mapping from traced components to construction objects.
 
-Views must have `space: "plane"` and `rotation: 0` for this viewer; nonzero rotation is rejected, not applied. `preferredView` is a 3D hint and is not accepted for this type. For plane camera coordinates, tile (row r, column c) occupies x in [c,c+1] and y in [n-r-1,n-r], with Y upward. Thus the unrotated mosaic fills [0,n] × [0,n], its center is [n/2,n/2], and a plane view with that center, height n and rotation 0 shows its full vertical extent. Aspect ratio and padding remain viewer concerns. Row indexing stays downward; this mapping is not a data reflection.
+Application-owned views must have `space: "plane"` and camera `{mode:"plane",center:[x,y],height:positive}`; rotation is not accepted. For camera coordinates, tile (row r, column c) occupies x in [c,c+1] and y in [n-r-1,n-r], with Y upward. The mosaic fills [0,n] × [0,n]; center [n/2,n/2] and height n show its full vertical extent. Aspect ratio and padding remain viewer concerns. Row indexing stays downward; this mapping does not reflect the data.
 
-Extraction shall retain the representation, its view/type resources and any target dependencies under the ordinary rules, preserving the matrix exactly. The fixed tile-set convention needs no new dependency kind or hidden registry. Composition follows the existing same-document identity and conflict rules; visually equivalent rotated matrices are not automatically deduplicated.
+Extraction shall retain the representation, its type resources and any target dependencies under the ordinary rules, preserving the matrix exactly. The fixed tile-set convention needs no new dependency kind or hidden registry. Composition follows the existing same-document identity and conflict rules; visually equivalent rotated matrices are not automatically deduplicated.
 
 `validateMosaicDiagram(data)` checks structure and semantics. Success returns `diagram`, `data`, `componentCount`, `occupiedTileCount` and `crossingCount`. JSON Schema checks structure; square shape, port matching, boundaries and components are runtime checks.
 
@@ -128,7 +128,7 @@ Acceptance cases:
 | Four-corner loop; two separate loops; sourced 4×4 example | Valid; component counts 1, 2, 1 |
 | Empty matrix; all-zero matrix; ragged rows; code 11; fractional code | Invalid |
 | Change loop's top-left code 2 to code 1 | Invalid: boundary and/or neighbor mismatch |
-| Unknown tile-set URI or compact tile-set URI | Unsupported profile; never complete |
+| Unknown tile-set URI; compact URI passed directly to the standalone validator | Invalid; document validators expand declared prefixes first |
 | Codes 7/8 versus 9/10 | Preserve distinct internal pairings and crossing semantics |
 | Swap 9 and 10 everywhere in the source example | Valid mirror diagram; same port matching and counts, no identity inference |
 | Quarter-turn with correctly remapped codes | Preserve connectivity/counts; 9 and 10 interchange |
@@ -141,10 +141,8 @@ A rotation or reflection must remap tile codes as well as matrix positions. Swap
 
 Optional `sources` and `contributions` belong to the `Representation` envelope, outside `data`. Shared source definitions and the global license belong to the Knot. Convention references in this specification explain the contract; representation sources identify where its concrete data came from. See the [shared metadata specification](sources.md).
 
+## Viewer behavior
 
-### Explicit external view resources
+`KnotMosaicViewer` supports pointer pan, wheel zoom, application-owned plane views, `view-change` and SVG `capture()`. Raster capture is not implemented. It resolves local view IDs from the `views` prop and global references through explicit registries and declared namespaces. Omitted `view` uses full-mosaic framing. Missing/conflicting resources are errors; no network requests are made. The headless resolver is `resolveRepresentationView` from `knot-engine/core`.
 
-The mosaic viewer resolves a local view by ID, or a declared external view by absolute URI through an explicitly supplied `ResourceRegistry`. If `view` is omitted, `defaultView` is used. Missing, undeclared and conflicting resources are reported; no network requests are made. The shared headless `resolveRepresentationView` operation is available through `knot-engine/core`.
-
-
-The SVG viewer pans using the actual square viewport scale under `preserveAspectRatio="xMidYMid meet"`, including non-square host containers. Pointer dragging changes only the viewer's local center; it never edits tile data.
+Pan uses the actual square viewport scale under `preserveAspectRatio="xMidYMid meet"`, including non-square containers. Dragging changes only the local center and never edits tile data. See [component API](components.md) and [capture contracts](viewer-contracts.md).

@@ -1,40 +1,37 @@
 # knot-engine architecture
 
-The initial `Knot` redesign profile is implemented. The authoritative current contracts are [data](../v1/specifications/knot.md), [functions](../v1/specifications/functions.md) and [component](../v1/specifications/components.md). The [broader design](knot-draft.md) still contains future work; it does not mean every proposed field is accepted.
+The package separates domain data, validation and presentation. Current contracts: [data](../v1/specifications/knot.md), [prepared objects](../v1/specifications/prepared-model.md), [functions](../v1/specifications/functions.md) and [components](../v1/specifications/components.md). [Open design questions](knot-draft.md) describe extensions beyond those contracts.
 
 ```text
-Knot / standalone data / explicitly provided registries
+RawKnot / Knot + explicitly supplied resource registries
   → bounded structural validation
-  → URI expansion, reference and domain validation
-  → completeness report
-  → representation and view selection
-  → RenderableModel
-  → geometry builder + camera preparation
-  → KnotViewer / PNG capture
+  → namespace expansion and dependency validation
+  → representation selection
+  → viewer registry dispatch
+      → Knot3DViewer → geometry + camera → WebGL / PNG
+      → KnotMosaicViewer → tile paths + plane view → SVG
 ```
 
-Core contains no Vue, Three.js, browser access or network resolver. JSON Schema contracts share one source, `src/core/contracts.json`; published independent schemas are generated using `npm run build:schemas`. Semantic validation handles cross-record references and geometric/combinatorial rules separately.
+## Core and prepared objects
 
-`KnotViewer` accepts knot, representation selection and optional registry/view context. Old model inputs, adapters, schemas and compatibility tests have been removed. Shared errors and rendering types no longer belong to a legacy module. Geometry supports polyline and explicit uniform/centripetal/chordal Catmull–Rom. Perspective and orthographic cameras share preparation code between viewport and capture.
+`knot-engine/core` contains raw types, prepared `Knot` objects, localization, validation, selection, resource resolution and extraction/composition. It loads no Vue, Three.js or DOM and performs no network access. JSON Schema contracts share `src/core/contracts.json`; `npm run build:schemas` generates the standalone published schemas. Semantic validators separately check references and geometric/combinatorial rules.
 
-The site demo uses only the public API. It edits the whole knot, preserves a still-existing representation selection, and retains the last valid rendered knot when an edit is invalid. Named states belong to constructions; each static representation identifies its state. Procedures select representations without imposing interpolation correspondence.
+`RawKnot` is serialized data; `Knot.from()` prepares a runtime object with methods. `toRaw()` produces an independent serializable copy. Document validation and selected-representation validation have different scopes: rendering requires complete validation of the selected representation and its required context. Unrelated representations do not have to be renderable.
 
-Extraction includes required constructions and resources. Composition is limited to fragments of the same document; independent-author merges are not inferred. Unknown type data is structurally readable but does not receive a complete semantic report. Additional formats, assertions and animation need their own contracts and tests.
+Extraction includes required constructions, type/catalog definitions and source metadata. Composition merges fragments of the same document and rejects conflicts; matching subjects alone do not merge independent documents.
 
-Verification: typecheck, unit/schema tests, library/example builds, browser tests, tarball consumer and site/link tests. Hardware touch, WebView and physical knot correctness are not established by these checks. Versions remain package 0.1.0 and `schemaVersion` 1.
+## Viewers and settings
 
-CSS uses the package namespace `knot-engine`, followed by the major generation and component name: `.knot-engine-v1-viewer…` and `--knot-engine-v1-viewer-*` for `KnotViewer`. Other components receive their own names within the same package/generation namespace. Different major versions can be used on the same page. CSS, like the rest of the package, has no backward compatibility requirement during initial development. See the [publication policy](publication.md#css-namespace-for-major-generations) and [component contract](../v1/specifications/components.md#css-namespace-and-styling).
+`KnotViewer` delegates to a component selected by expanded type URI. The built-in registry contains `Knot3DViewer` and `KnotMosaicViewer`; both also work directly. Without an explicit ID, the compositor selects only when exactly one supported representation exists. A custom registry replaces the built-ins. Resource definitions and viewer registrations serve different purposes: a type definition does not install a renderer.
 
-## Planned viewer composition and separate view settings
+Applications supply `view`, `views`, 3D `initialCamera` and presentation props separately from knot data. Camera changes, pan, zoom and capture do not mutate the input. Coordinate systems, scale, topology and construction states remain domain data. See [viewer composition](modular-viewers.md) and [selection and settings contracts](../v1/specifications/viewer-contracts.md).
 
-This is the agreed direction for future implementation. The current data and component contracts linked above still describe the implemented behavior.
+The 3D viewer builds polyline or uniform/centripetal/chordal Catmull–Rom geometry with perspective/orthographic cameras. The mosaic viewer draws the fixed 11-tile convention as SVG without WebGL. Dedicated `knot-engine/3d` and `knot-engine/mosaic` entries isolate their dependencies. Grid diagrams, PD and DT have validation support without built-in viewers.
 
-Develop separate viewer components for the different representation types. The main `KnotViewer` will select the appropriate component by the expanded representation type URI and delegate rendering to it. Individual viewers must also be usable directly. Adding a representation viewer must not require adding its rendering logic to the main component. A type definition alone does not install a viewer; unsupported types must produce an explicit unsupported-state diagnostic.
+## Site and verification
 
-The viewers must have a consistent API for representation data and required domain context, separately supplied view settings, accessible labels, locale/theme, lifecycle and error events, and applicable methods such as reset, fit and capture. Shared behavior and error meanings must be consistent. Type-specific settings and capabilities must be explicit; a textual or planar viewer need not pretend to support a 3D camera. The main component forwards settings, methods and events through this common contract.
+The site editor uses public package APIs, edits the full knot, preserves a supported representation selection and retains the last valid result after an invalid edit. Procedures select illustrations without imposing animation correspondence. PNG and SVG exports follow the selected viewer's capabilities.
 
-Separate presentation settings from knot/domain data. The application will pass view settings as a separate viewer input rather than embedding them in `Knot` or representation data. This includes camera position and orientation, projection, framing, zoom/pan, visual styling and interaction settings. Review the existing `Representation.views`, `defaultView` and `preferredView` fields and move their presentation role into the separate settings contract. Named view presets may be stored independently and associated with a representation ID; their storage and exact API remain to be designed. Changing a camera, selecting a preset or interacting with a viewer must not mutate knot data. Viewport rendering and capture must use the separately supplied settings consistently.
+Checks cover types, schemas, semantic validation, geometry, SSR/hydration, DOM integration, Chromium rendering/capture, tarball consumers and site links. Hardware touch/WebView behavior and physical knot correctness require separate verification.
 
-Coordinate systems, units, authored geometry, topology, mathematical conventions and meaningful construction states remain domain data. A camera orientation is a view setting; the orientation convention that gives coordinates or a diagram their meaning is domain data. Knot files must remain valid and useful without saved view settings; viewers supply documented defaults when settings are absent.
-
-Before implementation is considered complete, define the common viewer and settings contracts, migrate the existing spatial viewer behind the main component, add the appropriate viewers for supported representation types, update schemas/examples and document the separation from the current embedded view fields. Acceptance must cover direct and delegated use, type switching, unsupported capabilities, independent settings for two viewers of the same data, capture consistency and preservation of the input data.
+Components share `.knot-engine-v1-viewer…` classes and `--knot-engine-v1-viewer-*` styling variables; mosaic SVG also uses `.knot-engine-v1-mosaic`. See [styling](../v1/specifications/components.md#css-namespace-and-styling) and [publication policy](publication.md) for namespaces, generations and releases.

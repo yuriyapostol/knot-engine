@@ -34,7 +34,7 @@ Design materials have the same two-language coverage at /design/architecture.htm
 
 ## One release and stable identities
 
-Package, documentation, specifications, schemas and available data form one release with the package version. v1 includes pre-1.0 packages and later 1.x. Before stabilization, incompatible changes are allowed without bumping the current numbers. `KnotModelV1` support has been removed; the current package uses `Knot` exclusively.
+Package, documentation, specifications, schemas and available data form one release with the package version. v1 includes pre-1.0 packages and later 1.x. Before stabilization, incompatible changes are allowed without bumping the current numbers.
 
 /v1/ is the current first-generation material. /releases/<package-version>/ is an explicitly created immutable snapshot of that generation. Other vN directories are published concurrently; no independent specification-release or data-release numbering is introduced. Current documentation has a visible development label; no /next/ is needed.
 
@@ -45,7 +45,7 @@ Archives preserve canonical IDs. Reproducible validation supplies the chosen sna
 
 ## CSS namespace for major generations
 
-CSS names start with the full package namespace `knot-engine`, followed by the major generation and component name. Classes follow `knot-engine-vN-<component>` / `knot-engine-vN-<component>__<part>`; component variables follow `--knot-engine-vN-<component>-<setting>`. The implemented `KnotViewer` uses `.knot-engine-v1-viewer`, `.knot-engine-v1-viewer__…` and `--knot-engine-v1-viewer-*`. Other components receive distinct names under the same package/generation prefix.
+CSS names start with the full package namespace `knot-engine`, followed by the major generation and component name. Classes follow `knot-engine-vN-<component>` / `knot-engine-vN-<component>__<part>`; component variables follow `--knot-engine-vN-<component>-<setting>`. The built-in viewers share `.knot-engine-v1-viewer`, `.knot-engine-v1-viewer__…` and `--knot-engine-v1-viewer-*`; mosaic SVG also uses `.knot-engine-v1-mosaic`. New component families can receive distinct names under the same package/generation prefix.
 
 Different major versions can be used on the same page. Future `v2`, `v3`, etc. use their own class and variable namespaces; no separate namespace is introduced for each `0.x` release.
 

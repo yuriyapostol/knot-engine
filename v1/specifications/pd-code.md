@@ -16,7 +16,7 @@ Representation type: `https://yuriyapostol.github.io/knot-engine/v1/representati
 
 For each crossing, slots 0–3 list half-edges counterclockwise, starting at the incoming underpassing half-edge. Opposite slots 0/2 form the underpassing strand, slots 1/3 the overpassing strand. A crossing is not a four-way strand junction. Equal labels connect exactly two half-edges; a label may occur twice at the same crossing, as in a Reidemeister-I loop. Requiring four distinct labels would incorrectly reject such diagrams.
 
-Edge labels are positive safe integers (1 through 9,007,199,254,740,991), not array indices. Arbitrary gaps and bijective relabeling are allowed. Labels from source PD codes are preserved, including one-based numbering. The validator does not require consecutive numbering along components or sort crossings. `convention` is an absolute, fixed type-specific URI; it is not expanded through namespaces and creates no resource dependency or network request.
+Edge labels are positive safe integers (1 through 9,007,199,254,740,991), not array indices. Arbitrary gaps and bijective relabeling are allowed. Labels from source PD codes are preserved, including one-based numbering. The validator does not require consecutive numbering along components or sort crossings. `convention` is a fixed type-specific URI. Standalone validation requires its absolute form; document validators expand declared compact prefixes first. It creates no resource dependency or network request.
 
 `unlinkedComponents` explicitly preserves circles that an empty crossing list cannot encode. With no crossings, it must be at least 1. Empty links are outside this profile. It can also accompany a nonempty code. These circles are additional split unknots, not unlabeled edges or virtual crossings; no nesting, position, component names or orientations are stored for them.
 
@@ -37,11 +37,11 @@ The algorithm is iterative, using O(n) time and storage for n crossings. `KNOT_L
 
 ## Knot integration
 
-Use the ordinary representation envelope, including scoped targets and dependencies. The standard resource has `viewSpace:"none"`: PD has no layout or coordinate system. Nonempty `views`, a `defaultView` without a member view and `preferredView` are rejected by the ordinary view rules. No mapping from counted link components to construction objects is implied.
+Use the ordinary representation envelope, including scoped targets and dependencies. The standard resource has `viewSpace:"none"`: PD has no layout or coordinate system. Camera settings belong to the application and are not representation fields. No mapping from counted link components to construction objects is implied.
 
 Both standalone representation documents and Knot use the supported semantic validator. Completeness additionally requires resource closure, for example via `STANDARD_RESOURCES`; supported PD does not enter `uncheckedTypes`. The [standalone JSON Schema](../schema/pd-code.schema.json) checks structure only; repeated-label multiplicity, planarity, direction consistency and component existence require runtime validation.
 
-Validation, extraction, JSON round trips and same-document composition preserve labels, crossing order and explicit `unlinkedComponents` without normalization. Equivalent relabelings are not automatically deduplicated. The existing 3D resolver and `KnotViewer` still require spatial curves; validation completeness does not imply renderer support.
+Validation, extraction, JSON round trips and same-document composition preserve labels, crossing order and explicit `unlinkedComponents` without normalization. Equivalent relabelings are not automatically deduplicated. There is no built-in PD viewer; validation completeness does not imply renderer support.
 
 ## Sources and examples
 
