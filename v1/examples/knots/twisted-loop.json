@@ -20,24 +20,24 @@
     "descriptions": [
       {
         "language": "en",
-        "value": "A closed rope loop with a twist, provided as a geometric example."
+        "value": "A closed rope loop twisted step by step from a simple ring into its final shape."
       },
       {
         "language": "uk",
-        "value": "Замкнена петля мотузки зі скручуванням, наведена як геометричний приклад."
+        "value": "Замкнена петля мотузки з послідовним скручуванням від простого кільця до кінцевої форми."
       }
     ]
   },
   "representations": [
     {
-      "id": "view-3d-rest",
+      "id": "view-3d-finish",
       "type": "knot-engine:representation-types/spatial-curve",
       "target": {
         "kind": "state",
         "construction": {
           "id": "setup"
         },
-        "id": "view-3d-rest"
+        "id": "view-3d-finish"
       },
       "data": {
         "coordinateSystem": {
@@ -72,21 +72,143 @@
       "names": [
         {
           "language": "en",
-          "value": "3D representation"
+          "value": "3D — twisted loop"
         },
         {
           "language": "uk",
-          "value": "3D-представлення"
+          "value": "3D — скручена петля"
         }
       ],
       "descriptions": [
         {
           "language": "en",
-          "value": "Spatial representation of the rope."
+          "value": "The finished loop with one crossing; the strands pass at different depths."
         },
         {
           "language": "uk",
-          "value": "Просторове представлення мотузки."
+          "value": "Готова петля з одним перехрещенням; гілки проходять на різній глибині."
+        }
+      ]
+    },
+    {
+      "id": "view-3d-rest",
+      "type": "knot-engine:representation-types/spatial-curve",
+      "target": {
+        "kind": "state",
+        "construction": {
+          "id": "setup"
+        },
+        "id": "view-3d-rest"
+      },
+      "data": {
+        "coordinateSystem": {
+          "handedness": "right",
+          "upAxis": "y",
+          "scale": {
+            "kind": "physical",
+            "metersPerUnit": 1
+          }
+        },
+        "curves": [
+          {
+            "id": "rope-1",
+            "object": "rope-1",
+            "closed": true,
+            "interpolation": {
+              "type": "catmull-rom",
+              "parameterization": "uniform",
+              "tension": 0.6
+            },
+            "points": [
+              [-0.04, 0.0693, 0],
+              [-0.08, 0, 0],
+              [-0.04, -0.0693, 0],
+              [0.04, -0.0693, 0],
+              [0.08, 0, 0],
+              [0.04, 0.0693, 0]
+            ]
+          }
+        ]
+      },
+      "names": [
+        {
+          "language": "en",
+          "value": "3D — simple ring"
+        },
+        {
+          "language": "uk",
+          "value": "3D — просте кільце"
+        }
+      ],
+      "descriptions": [
+        {
+          "language": "en",
+          "value": "The initial planar ring before twisting."
+        },
+        {
+          "language": "uk",
+          "value": "Початкове плоске кільце перед скручуванням."
+        }
+      ]
+    },
+    {
+      "id": "view-3d-twist",
+      "type": "knot-engine:representation-types/spatial-curve",
+      "target": {
+        "kind": "state",
+        "construction": {
+          "id": "setup"
+        },
+        "id": "view-3d-twist"
+      },
+      "data": {
+        "coordinateSystem": {
+          "handedness": "right",
+          "upAxis": "y",
+          "scale": {
+            "kind": "physical",
+            "metersPerUnit": 1
+          }
+        },
+        "curves": [
+          {
+            "id": "rope-1",
+            "object": "rope-1",
+            "closed": true,
+            "interpolation": {
+              "type": "catmull-rom",
+              "parameterization": "uniform",
+              "tension": 0.65
+            },
+            "points": [
+              [-0.04, 0.04981, -0.00808],
+              [-0.08, 0, 0],
+              [-0.04, -0.04981, 0.00808],
+              [0.04, -0.00808, 0.04981],
+              [0.08, 0, 0],
+              [0.04, 0.00808, -0.04981]
+            ]
+          }
+        ]
+      },
+      "names": [
+        {
+          "language": "en",
+          "value": "3D — partial twist"
+        },
+        {
+          "language": "uk",
+          "value": "3D — часткове скручування"
+        }
+      ],
+      "descriptions": [
+        {
+          "language": "en",
+          "value": "One side of the ring is turned halfway towards the final twist."
+        },
+        {
+          "language": "uk",
+          "value": "Один бік кільця повернуто на половину кута кінцевого скручування."
         }
       ]
     },
@@ -138,6 +260,12 @@
       "states": [
         {
           "id": "view-3d-rest"
+        },
+        {
+          "id": "view-3d-twist"
+        },
+        {
+          "id": "view-3d-finish"
         }
       ]
     }
@@ -173,6 +301,204 @@
       },
       "specification": "knot-engine:specifications/mosaic-diagram.html",
       "viewSpace": "plane"
+    }
+  ],
+  "procedures": [
+    {
+      "id": "sequence-a",
+      "construction": {
+        "id": "setup"
+      },
+      "steps": [
+        {
+          "id": "rest",
+          "representations": [
+            {
+              "id": "view-3d-rest"
+            }
+          ],
+          "names": [
+            {
+              "language": "en",
+              "value": "Simple ring"
+            },
+            {
+              "language": "uk",
+              "value": "Просте кільце"
+            }
+          ],
+          "instructions": [
+            {
+              "language": "en",
+              "value": "Lay out the closed rope as a flat ring."
+            },
+            {
+              "language": "uk",
+              "value": "Розкладіть замкнену мотузку у плоске кільце."
+            }
+          ]
+        },
+        {
+          "id": "twist",
+          "representations": [
+            {
+              "id": "view-3d-twist"
+            }
+          ],
+          "names": [
+            {
+              "language": "en",
+              "value": "Partial twist"
+            },
+            {
+              "language": "uk",
+              "value": "Часткове скручування"
+            }
+          ],
+          "instructions": [
+            {
+              "language": "en",
+              "value": "Hold the left side and turn the right side of the ring by a quarter turn out of its plane."
+            },
+            {
+              "language": "uk",
+              "value": "Утримуючи лівий бік, поверніть правий бік кільця на чверть оберту з його площини."
+            }
+          ]
+        },
+        {
+          "id": "finish",
+          "representations": [
+            {
+              "id": "view-3d-finish"
+            }
+          ],
+          "names": [
+            {
+              "language": "en",
+              "value": "Twisted loop"
+            },
+            {
+              "language": "uk",
+              "value": "Скручена петля"
+            }
+          ],
+          "instructions": [
+            {
+              "language": "en",
+              "value": "Continue turning the right side by another quarter turn to form a crossing, keeping one strand above the other."
+            },
+            {
+              "language": "uk",
+              "value": "Продовжте поворот правого боку ще на чверть оберту, утворюючи перехрещення та залишаючи одну гілку над іншою."
+            }
+          ]
+        }
+      ],
+      "names": [
+        {
+          "language": "en",
+          "value": "Twisting the loop step by step"
+        },
+        {
+          "language": "uk",
+          "value": "Послідовне скручування петлі"
+        }
+      ],
+      "descriptions": [
+        {
+          "language": "en",
+          "value": "Three steps from a flat ring through a partial twist to the finished loop."
+        },
+        {
+          "language": "uk",
+          "value": "Три кроки від плоского кільця через часткове скручування до готової петлі."
+        }
+      ]
+    },
+    {
+      "id": "sequence-b",
+      "construction": {
+        "id": "setup"
+      },
+      "steps": [
+        {
+          "id": "rest",
+          "representations": [
+            {
+              "id": "view-3d-rest"
+            }
+          ],
+          "names": [
+            {
+              "language": "en",
+              "value": "Simple ring"
+            },
+            {
+              "language": "uk",
+              "value": "Просте кільце"
+            }
+          ],
+          "instructions": [
+            {
+              "language": "en",
+              "value": "Lay out the closed rope as a flat ring."
+            },
+            {
+              "language": "uk",
+              "value": "Розкладіть замкнену мотузку у плоске кільце."
+            }
+          ]
+        },
+        {
+          "id": "finish",
+          "representations": [
+            {
+              "id": "view-3d-finish"
+            }
+          ],
+          "names": [
+            {
+              "language": "en",
+              "value": "Twisted loop"
+            },
+            {
+              "language": "uk",
+              "value": "Скручена петля"
+            }
+          ],
+          "instructions": [
+            {
+              "language": "en",
+              "value": "Hold the left side and turn the right side of the ring by half a turn to form a crossing, keeping one strand above the other."
+            },
+            {
+              "language": "uk",
+              "value": "Утримуючи лівий бік, поверніть правий бік кільця на пів оберту, утворюючи перехрещення та залишаючи одну гілку над іншою."
+            }
+          ]
+        }
+      ],
+      "names": [
+        {
+          "language": "en",
+          "value": "Direct transition to the twisted loop"
+        },
+        {
+          "language": "uk",
+          "value": "Безпосереднє формування скрученої петлі"
+        }
+      ],
+      "descriptions": [
+        {
+          "language": "en",
+          "value": "A shortened two-step procedure showing the same initial ring and finished loop."
+        },
+        {
+          "language": "uk",
+          "value": "Скорочений двоетапний спосіб із тим самим початковим кільцем і готовою петлею."
+        }
+      ]
     }
   ]
 }

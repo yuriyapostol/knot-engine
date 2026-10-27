@@ -3,12 +3,10 @@ import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 import {  KnotViewer, Knot, selectRepresentation, ViewerError, type RawKnot, SPATIAL_CURVE, MOSAIC_DIAGRAM, expandURI, type Camera3D, type CaptureOptions  } from 'knot-engine'
 import loop from '../../v1/examples/knots/twisted-loop.json'
 import overhand from '../../v1/examples/knots/overhand.json'
-import knotFixture from '../../v1/examples/knots/procedures.json'
 type DemoInput = { kind: 'knot'; data: RawKnot }
 const examples: Record<string, DemoInput> = {
   overhand: { kind: 'knot', data: overhand as unknown as RawKnot },
-  loop: { kind: 'knot', data: loop as unknown as RawKnot },
-  knot: { kind: 'knot', data: knotFixture as unknown as RawKnot }
+  loop: { kind: 'knot', data: loop as unknown as RawKnot }
 }
 const representationId = ref(overhand.representations[0].id)
 function formatModel(value: unknown, level = 0): string {

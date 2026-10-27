@@ -150,14 +150,14 @@ try {
   await page.setViewportSize({ width: 1280, height: 1000 })
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/?lang=uk`)
   await page.waitForSelector('.knot-engine-v1-viewer[data-state="ready"]')
-  await page.locator('.knot-engine-v1-demo__model-select select').selectOption('knot')
+  await page.locator('.knot-engine-v1-demo__model-select select').selectOption('loop')
   await page.waitForSelector('.knot-engine-v1-viewer[data-state="ready"]')
   await page.locator('.knot-engine-v1-demo__representation-select').selectOption('view-3d-finish')
   await page.waitForSelector('.knot-engine-v1-viewer[data-state="ready"]')
   assert.deepEqual(failures, [])
   const editor = page.locator('.knot-engine-v1-demo__editor textarea')
   assert.ok(await editor.isVisible(), 'Knot must use the same visible JSON editor')
-  assert.equal(JSON.parse(await editor.inputValue()).representations.length, 3)
+  assert.equal(JSON.parse(await editor.inputValue()).representations.length, 4)
   const waitForModel = async id => {
     // Filling the editor scrolls the narrow layout; hidden viewers intentionally pause rendering.
     await page.locator('.knot-engine-v1-viewer').scrollIntoViewIfNeeded()
