@@ -1189,6 +1189,38 @@
               }
             }
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/2d"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/geometry2d"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/3d"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/geometry3d"
+              }
+            }
+          }
         }
       ]
     },
@@ -1222,6 +1254,9 @@
           },
           "minItems": 0,
           "maxItems": 128
+        },
+        "data": {
+          "$ref": "#/$defs/stepData"
         }
       },
       "required": [
@@ -1262,6 +1297,9 @@
           },
           "minItems": 0,
           "maxItems": 128
+        },
+        "base": {
+          "$ref": "#/$defs/reference"
         }
       },
       "required": [
@@ -2240,6 +2278,341 @@
         "id",
         "subject"
       ],
+      "additionalProperties": false
+    },
+    "point2": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        }
+      ],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "curve2": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "curve"
+        },
+        "object": {
+          "type": "string",
+          "minLength": 1
+        },
+        "closed": {
+          "type": "boolean"
+        },
+        "interpolation": {
+          "$ref": "#/$defs/interpolation"
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/point2"
+          },
+          "minItems": 2,
+          "maxItems": 4096
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "closed",
+        "interpolation",
+        "points"
+      ],
+      "additionalProperties": false
+    },
+    "curve3": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "curve"
+        },
+        "object": {
+          "type": "string",
+          "minLength": 1
+        },
+        "closed": {
+          "type": "boolean"
+        },
+        "interpolation": {
+          "$ref": "#/$defs/interpolation"
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/point3"
+          },
+          "minItems": 2,
+          "maxItems": 4096
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "closed",
+        "interpolation",
+        "points"
+      ],
+      "additionalProperties": false
+    },
+    "mesh3": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "mesh"
+        },
+        "object": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vertices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/point3"
+          },
+          "minItems": 3
+        },
+        "faces": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "integer",
+                "minimum": 0
+              }
+            ],
+            "items": false,
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "vertices",
+        "faces"
+      ],
+      "additionalProperties": false
+    },
+    "crossingPassage": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "element": {
+              "type": "string",
+              "minLength": 1
+            },
+            "underElement": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "id",
+            "element",
+            "underElement"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "element": {
+              "type": "string",
+              "minLength": 1
+            },
+            "overElement": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "id",
+            "element",
+            "overElement"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "geometry2d": {
+      "type": "object",
+      "properties": {
+        "coordinateSystem": {
+          "type": "object",
+          "properties": {
+            "xAxis": {
+              "const": "right"
+            },
+            "yAxis": {
+              "const": "up"
+            },
+            "scale": {
+              "$ref": "#/$defs/scale"
+            }
+          },
+          "required": [
+            "xAxis",
+            "yAxis",
+            "scale"
+          ],
+          "additionalProperties": false
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/curve2"
+          },
+          "minItems": 1,
+          "maxItems": 256
+        },
+        "crossings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/crossingPassage"
+          }
+        }
+      },
+      "required": [
+        "coordinateSystem",
+        "elements"
+      ],
+      "additionalProperties": false
+    },
+    "geometry3d": {
+      "type": "object",
+      "properties": {
+        "coordinateSystem": {
+          "type": "object",
+          "properties": {
+            "handedness": {
+              "const": "right"
+            },
+            "upAxis": {
+              "const": "y"
+            },
+            "scale": {
+              "$ref": "#/$defs/scale"
+            }
+          },
+          "required": [
+            "handedness",
+            "upAxis",
+            "scale"
+          ],
+          "additionalProperties": false
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/curve3"
+              },
+              {
+                "$ref": "#/$defs/mesh3"
+              }
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 256
+        }
+      },
+      "required": [
+        "coordinateSystem",
+        "elements"
+      ],
+      "additionalProperties": false
+    },
+    "stepData": {
+      "type": "object",
+      "properties": {
+        "remove": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "replace": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/curve2"
+              },
+              {
+                "$ref": "#/$defs/curve3"
+              },
+              {
+                "$ref": "#/$defs/mesh3"
+              }
+            ]
+          }
+        },
+        "add": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/curve2"
+              },
+              {
+                "$ref": "#/$defs/curve3"
+              },
+              {
+                "$ref": "#/$defs/mesh3"
+              }
+            ]
+          }
+        },
+        "crossings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/crossingPassage"
+          }
+        }
+      },
+      "required": [],
       "additionalProperties": false
     }
   }
