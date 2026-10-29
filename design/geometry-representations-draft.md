@@ -95,3 +95,7 @@ Intermediate animation phases, material coordinates along rope, local transforms
 2. Validate ordered crossing records against geometric intersections, including self-crossings.
 3. Define the concrete JSON layout of step overrides and `replace/add/remove`, including `crossings`.
 4. Migrate `spatial-curve` compatibly and update validators, viewers, examples, and both documentation languages together.
+
+## Step data contract
+
+A procedure may declare `base: Reference` pointing to a complete `2d` or `3d` representation. Each step may declare `data` containing optional `remove` (element IDs), `replace` (complete existing elements), `add` (complete new elements), and, for 2D only, `crossings` (a complete replacement of the crossings array). Every step is evaluated independently against the same base. Omitted operations are empty; omitted `crossings` are inherited. A step with `data` requires a procedure `base`. A step without `data` inherits the base unchanged. Element IDs must not conflict across operations, and the derived representation must remain valid. Steps do not change the representation type or coordinate system. Existing `Step.representations` remain supported. Animation subphases are deferred.
