@@ -2,6 +2,19 @@
 
 The `Knot` contract supports spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, named states, procedures and reusable resources. `RawKnot` is serialized data; the prepared `Knot` provides runtime methods. Other representation formats, animation, properties, relations and classifications need separate contracts; untyped fields for them are not accepted. See [open design questions](../../design/knot-draft.md).
 
+## 2D and 3D geometric representations and step data
+
+The `representation-types/2d` and `representation-types/3d` representation types contain `data.elements`, an array of elements with unique `id`, a `type` discriminator, and optional `object` referencing a construction object. All elements share the representation coordinate system; there are no per-element transforms.
+
+`2d` supports `curve` with `closed`, `interpolation`, and `points: [number,number][]`. `3d` supports `curve` with three-dimensional points and `mesh` with `vertices: [number,number,number][]` and triangular `faces: [number,number,number][]` (zero-based indices). `3d.coordinateSystem` retains the former `spatial-curve` semantics; `2d.coordinateSystem` uses X right, Y up, and the same `scale` rules.
+
+Optional `2d.data.crossings` specifies the order of curve passages through crossings. Each crossing has exactly two records with the same `id`; each record contains `element` and exactly one of `underElement` (the other element is below the current element) or `overElement` (the other element is above it). The subsequence for each `element` is ordered along the curve starting at its first point. A self-crossing uses two passages of the same element with opposite over/under relationships. Crossing positions are computed from geometry, not stored. Tangencies and coincident segments are unsupported.
+
+`RawProcedure.base?: Reference` identifies a base geometric representation, which may be the final state. `RawStep.data?` independently overrides the base using `remove?: string[]` for existing element IDs, `replace?: Element[]` for complete existing elements, and `add?: Element[]` for new complete elements. Optional `crossings?: Crossing[]` entirely replaces the crossing list for 2D (an empty array clears it). Omitted operations have no effect. Steps do not patch each other; the base type and coordinate system are unchanged. `Step.data` requires `Procedure.base`; `Step.representations` remains supported. `Construction.states` is retained.
+
+Other existing representation types remain independent. Migrating `spatial-curve` requires compatibility with existing documents.
+
+
 ## Terminology
 
 Use descriptive concepts in prose. Name `Knot` explicitly when referring to that data object; use “document” for serialized documents or documentation rather than as a blanket replacement for the type name. Use the same code formatting at corresponding locations in both language editions. Headings use plain text, including technical names. Format exact type, function and field names and code values in body text as code; retain product and source names such as KnotInfo and Gridlink. X/O names a marking system; `xo` and `vertex-pairs` are exact `encoding` values. Do not substitute file or type identifiers for descriptive concepts in feature lists.
