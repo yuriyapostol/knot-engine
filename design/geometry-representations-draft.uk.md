@@ -95,12 +95,12 @@
 
 ```json
 {
-  "base": { "resource": "representation", "id": "final-3d" },
+  "base": { "id": "final-3d" },
   "steps": [
     {
       "id": "step-1",
       "data": {
-        "remove": ["temporary-element"],
+        "remove": [],
         "replace": [
           {
             "id": "rope-path",
@@ -126,7 +126,7 @@
 
 ## Перед реалізацією
 
-1. Узгодити точні TypeScript-типи, JSON Schema, 2D-систему координат і межі числових значень.
+1. Втілити точні TypeScript-типи, JSON Schema, 2D-систему координат і межі числових значень.
 2. Перевірити відповідність порядкових записів перетинів реальній геометрії, зокрема для самоперетинів.
-3. Узгодити конкретну JSON-форму геометричних станів `Procedure` та правила `replace/add/remove`, включно з `crossings`.
+3. Реалізувати `Procedure.base` і `Step.data` з операціями `replace/add/remove` та `crossings`.
 4. Визначити міграцію `spatial-curve`, збереження чинних даних, вплив на валідатори, переглядачі, приклади й документацію.
