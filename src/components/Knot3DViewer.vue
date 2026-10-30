@@ -3,7 +3,7 @@ import type { RenderableModel } from '../core/resolve'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import type { CameraView, Camera3D, RawKnot, RawResourceRegistry, Reference, ViewDefinition, ViewerErrorCode, ValidationIssue } from '../core'
 import { resolveKnot } from '../core/resolve'
-import { resolveRepresentationView, selectRepresentation, SPATIAL_CURVE, validateView, ViewerError } from '../core'
+import { resolveRepresentationView, selectRepresentation, SPATIAL_CURVE, GEOMETRY_3D, validateView, ViewerError } from '../core'
 import type { Quality } from '../geometry/build'
 import { ViewerEngine, type CaptureOptions } from '../renderer/ViewerEngine'
 import { messages as builtInMessages, type ViewerMessages } from '../locales'
@@ -77,7 +77,7 @@ async function loadModel() {
       const result = validateView({ id: 'application', name: 'Application', space: 'space', camera: props.initialCamera })
       if (!result.valid) throw new ViewerError('INVALID_MODEL', 'Invalid application camera', result.issues, false)
     }
-    const selection = selectRepresentation(props.knot, { representationId: props.representationId, type: SPATIAL_CURVE }, { registries: props.registries })
+    const selection = selectRepresentation(props.knot, { representationId: props.representationId, ...(props.representationId ? {} : { type: GEOMETRY_3D }) }, { registries: props.registries })
     if (!selection.ok) throw new ViewerError('INVALID_MODEL', selection.issues[0]?.message ?? 'Unable to select representation', undefined, false)
     const selectedView = resolveRepresentationView(props.view, props.views, props.registries, props.knot.namespaces)
     if (!selectedView.ok) throw new ViewerError('INVALID_MODEL', selectedView.message, undefined, false)
