@@ -34,11 +34,6 @@ const result = computed(() => {
       const a = curve.points[p.segment], b = curve.points[(p.segment + 1) % curve.points.length]
       const length = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1
       return { ...p, dx: (b[0] - a[0]) / length, dy: (b[1] - a[1]) / length }
-    }).map(p => {
-      const curve = checked.data.elements.find(e => e.id === p.element)!
-      const a = curve.points[p.segment], b = curve.points[(p.segment + 1) % curve.points.length]
-      const length = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1
-      return { ...p, dx: (b[0] - a[0]) / length, dy: (b[1] - a[1]) / length }
     })
     return { data: { paths, over, bounds: [minX, -maxY, Math.max(maxX - minX, extent * 0.05), Math.max(maxY - minY, extent * 0.05)] as number[], gap }, error: null }
   } catch (e) { return { data: null, error: (e as Error).message } }
