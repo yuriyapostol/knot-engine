@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
-import {  KnotViewer, Knot, selectRepresentation, ViewerError, type RawKnot, GEOMETRY_3D, MOSAIC_DIAGRAM, expandURI, type Camera3D, type CaptureOptions  } from 'knot-engine'
+import {  KnotViewer, Knot, selectRepresentation, applyStepData, ViewerError, type RawKnot, GEOMETRY_3D, MOSAIC_DIAGRAM, expandURI, type Camera3D, type CaptureOptions  } from 'knot-engine'
 import loop from '../../v1/examples/knots/twisted-loop.json'
 import overhand from '../../v1/examples/knots/overhand.json'
 type DemoInput = { kind: 'knot'; data: RawKnot }
@@ -47,10 +47,27 @@ function chooseProcedure() {
 }
 const selectedStep = ref('')
 function chooseStep() {
+  const procedure = procedures.value.find(item => item.id === selectedProcedure.value)
+  const baseId = procedure?.base && 'id' in procedure.base ? procedure.base.id : undefined
+  if (baseId && representations.value.some(rep => rep.id === baseId)) representationId.value = baseId
   const step = steps.value.find(item => item.id === selectedStep.value)
   const id = step?.representations?.find((ref): ref is { id: string } => 'id' in ref && representations.value.some(rep => rep.id === ref.id))
-  if (id && 'id' in id) representationId.value = id.id
+  if (id) representationId.value = id.id
 }
+const displayedKnot = computed<RawKnot | null>(() => {
+  const source = knot.value
+  if (!source) return null
+  const procedure = procedures.value.find(item => item.id === selectedProcedure.value)
+  const step = procedure?.steps.find(item => item.id === selectedStep.value)
+  if (!procedure?.base || !step?.data || !('id' in procedure.base)) return source
+  const base = source.representations?.find(rep => rep.id === procedure.base?.id)
+  if (!base) return source
+  const type = expandURI(base.type, source.namespaces)
+  if (type !== GEOMETRY_3D) return source
+  const result = applyStepData(base.data as Parameters<typeof applyStepData>[0], step.data, GEOMETRY_3D)
+  if (!result.valid) return source
+  return { ...source, representations: source.representations?.map(rep => rep.id === base.id ? { ...rep, data: result.data } : rep) }
+})
 const host = document.documentElement
 const locale = ref<'uk' | 'en'>(host.lang === 'uk' ? 'uk' : 'en')
 const theme = ref<'light' | 'dark'>(host.dataset.theme === 'dark' ? 'dark' : 'light')
@@ -159,7 +176,7 @@ async function download(options: CaptureOptions, name: string) {
           <label v-if="procedures.length > 1">{{ content.procedure }}<span class="knot-engine-v1-demo__select-field"><select v-model="selectedProcedure" @change="chooseProcedure"><option v-for="procedure in procedures" :key="procedure.id" :value="procedure.id">{{ localizedEntryName(procedure, locale) }}</option></select></span></label>
           <label v-if="steps.length">{{ content.step }}<span class="knot-engine-v1-demo__select-field"><select v-model="selectedStep" @change="chooseStep"><option v-for="step in steps" :key="step.id" :value="step.id">{{ localizedEntryName(step, locale) }}</option></select></span></label>
         </section>
-        <KnotViewer ref="viewer" :show-controls="false" :knot="knot" :representation-id="representationId" :initial-camera="demoCamera" preserve-camera :label="localizedName(current.data, locale)" :locale="locale" :theme="theme" @error="issue = $event.message" />
+        <KnotViewer ref="viewer" :show-controls="false" :knot="displayedKnot" :representation-id="representationId" :initial-camera="demoCamera" preserve-camera :label="localizedName(current.data, locale)" :locale="locale" :theme="theme" @error="issue = $event.message" />
         <div class="knot-engine-v1-demo__actions"><button type="button" @click="download({ view: 'current', format: isMosaic ? 'image/svg+xml' : 'image/png' }, isMosaic ? 'knot-current.svg' : 'knot-current.png')">{{ content.export }}</button></div>
       </section>
     </div>
