@@ -26,7 +26,7 @@ const flush = async () => { await nextTick(); await nextTick(); await nextTick()
 async function mount(preserveCamera = false) {
   const props = shallowReactive({
     knot: structuredClone(loop) as RawKnot | null,
-    label: 'Loop', representationId: 'view-3d-rest', preserveCamera,
+    label: 'Loop', representationId: 'view-3d-finish', preserveCamera,
     initialCamera: undefined as Camera3D | undefined,
     view: undefined as ViewDefinition | undefined,
     quality: 'medium' as 'medium' | 'high',
@@ -50,7 +50,7 @@ afterEach(() => { mounts.splice(0).forEach(unmount => unmount()); vi.unstubAllGl
 
 it('keeps refitting representations by default', async () => {
   const props = await mount()
-  props.representationId = 'view-3d-finish'
+  props.knot = { ...props.knot!, representations: props.knot!.representations!.map(rep => rep.id === 'view-3d-finish' ? { ...rep, data: { ...(rep.data as object) } } : rep) }
   await flush()
   expect(calls.setModel).toHaveBeenCalledTimes(2)
   expect(calls.setModel.mock.lastCall?.[3]).toBeUndefined()
@@ -59,8 +59,8 @@ it('keeps refitting representations by default', async () => {
 it('preserves the current camera across steps and quality changes through KnotViewer', async () => {
   const props = await mount(true)
   expect(calls.setModel.mock.lastCall?.[3]).toBeUndefined()
-  for (const id of ['view-3d-twist', 'view-3d-finish', 'view-3d-rest']) {
-    props.representationId = id
+  for (const step of loop.procedures![0].steps) {
+    props.knot = { ...props.knot!, representations: props.knot!.representations!.map(rep => rep.id === 'view-3d-finish' ? { ...rep, data: step.data ? { ...(rep.data as object), ...step.data } : rep.data } : rep) }
     await flush()
     expect(calls.setModel.mock.lastCall?.[3]).toEqual(camera)
   }
@@ -91,7 +91,7 @@ it('does not reuse a stale camera after empty or invalid input', async () => {
   expect(calls.setModel.mock.lastCall?.[3]).toBeUndefined()
   props.representationId = 'missing'
   await flush()
-  props.representationId = 'view-3d-rest'
+  props.representationId = 'view-3d-finish'
   await flush()
   // Dispatch failures unmount the 3D viewer, so recovery must start fresh.
   expect(calls.setModel.mock.lastCall?.[3]).toBeUndefined()
