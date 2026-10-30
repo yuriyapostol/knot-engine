@@ -20,124 +20,6 @@
   },
   "representations": [
     {
-      "id": "view-3d-rest",
-      "type": "knot-engine:representation-types/3d",
-      "target": {
-        "kind": "state",
-        "construction": {
-          "id": "setup"
-        },
-        "id": "view-3d-rest"
-      },
-      "data": {
-        "coordinateSystem": {
-          "handedness": "right",
-          "upAxis": "y",
-          "scale": {
-            "kind": "physical",
-            "metersPerUnit": 1
-          }
-        },
-        "elements": [
-          {
-            "type": "curve",
-            "id": "rope-1",
-            "object": "rope-1",
-            "closed": false,
-            "interpolation": {
-              "type": "catmull-rom",
-              "parameterization": "uniform",
-              "tension": 0.5
-            },
-            "points": [
-              [0, 0, 0],
-              [0.4, 0.3, 0.1],
-              [0.8, 0, 0]
-            ]
-          }
-        ]
-      },
-      "names": [
-        {
-          "language": "en",
-          "value": "3D representation"
-        },
-        {
-          "language": "uk",
-          "value": "3D-представлення"
-        }
-      ],
-      "descriptions": [
-        {
-          "language": "en",
-          "value": "Spatial representation of the rope."
-        },
-        {
-          "language": "uk",
-          "value": "Просторове представлення мотузки."
-        }
-      ]
-    },
-    {
-      "id": "view-3d-bend",
-      "type": "knot-engine:representation-types/3d",
-      "target": {
-        "kind": "state",
-        "construction": {
-          "id": "setup"
-        },
-        "id": "view-3d-bend"
-      },
-      "data": {
-        "coordinateSystem": {
-          "handedness": "right",
-          "upAxis": "y",
-          "scale": {
-            "kind": "physical",
-            "metersPerUnit": 1
-          }
-        },
-        "elements": [
-          {
-            "type": "curve",
-            "id": "rope-1",
-            "object": "rope-1",
-            "closed": false,
-            "interpolation": {
-              "type": "catmull-rom",
-              "parameterization": "uniform",
-              "tension": 0.5
-            },
-            "points": [
-              [0, 0, 0],
-              [0.4, 0.5, 0.2],
-              [0.8, 0, 0]
-            ]
-          }
-        ]
-      },
-      "names": [
-        {
-          "language": "en",
-          "value": "3D — bend"
-        },
-        {
-          "language": "uk",
-          "value": "3D — вигин"
-        }
-      ],
-      "descriptions": [
-        {
-          "language": "en",
-          "value": "Spatial representation of the rope."
-        },
-        {
-          "language": "uk",
-          "value": "Просторове представлення мотузки."
-        }
-      ]
-    },
-    {
       "id": "view-3d-finish",
       "type": "knot-engine:representation-types/3d",
       "target": {
@@ -218,12 +100,6 @@
       ],
       "states": [
         {
-          "id": "view-3d-rest"
-        },
-        {
-          "id": "view-3d-bend"
-        },
-        {
           "id": "view-3d-finish"
         }
       ]
@@ -249,11 +125,6 @@
       "steps": [
         {
           "id": "rest",
-          "representations": [
-            {
-              "id": "view-3d-rest"
-            }
-          ],
           "names": [
             {
               "language": "en",
@@ -273,15 +144,30 @@
               "language": "uk",
               "value": "Розмістіть мотузку в початковому положенні."
             }
-          ]
+          ],
+          "data": {
+            "replace": [
+              {
+                "type": "curve",
+                "id": "rope-1",
+                "object": "rope-1",
+                "closed": false,
+                "interpolation": {
+                  "type": "catmull-rom",
+                  "parameterization": "uniform",
+                  "tension": 0.5
+                },
+                "points": [
+                  [0, 0, 0],
+                  [0.4, 0.3, 0.1],
+                  [0.8, 0, 0]
+                ]
+              }
+            ]
+          }
         },
         {
           "id": "bend",
-          "representations": [
-            {
-              "id": "view-3d-bend"
-            }
-          ],
           "names": [
             {
               "language": "en",
@@ -301,15 +187,30 @@
               "language": "uk",
               "value": "Сформуйте вигин мотузки."
             }
-          ]
+          ],
+          "data": {
+            "replace": [
+              {
+                "type": "curve",
+                "id": "rope-1",
+                "object": "rope-1",
+                "closed": false,
+                "interpolation": {
+                  "type": "catmull-rom",
+                  "parameterization": "uniform",
+                  "tension": 0.5
+                },
+                "points": [
+                  [0, 0, 0],
+                  [0.4, 0.5, 0.2],
+                  [0.8, 0, 0]
+                ]
+              }
+            ]
+          }
         },
         {
           "id": "finish",
-          "representations": [
-            {
-              "id": "view-3d-finish"
-            }
-          ],
           "names": [
             {
               "language": "en",
@@ -351,7 +252,10 @@
           "language": "uk",
           "value": "Триетапний спосіб із проміжним станом вигину."
         }
-      ]
+      ],
+      "base": {
+        "id": "view-3d-finish"
+      }
     },
     {
       "id": "sequence-b",
@@ -361,11 +265,6 @@
       "steps": [
         {
           "id": "rest",
-          "representations": [
-            {
-              "id": "view-3d-rest"
-            }
-          ],
           "names": [
             {
               "language": "en",
@@ -385,15 +284,30 @@
               "language": "uk",
               "value": "Розмістіть мотузку в початковому положенні."
             }
-          ]
+          ],
+          "data": {
+            "replace": [
+              {
+                "type": "curve",
+                "id": "rope-1",
+                "object": "rope-1",
+                "closed": false,
+                "interpolation": {
+                  "type": "catmull-rom",
+                  "parameterization": "uniform",
+                  "tension": 0.5
+                },
+                "points": [
+                  [0, 0, 0],
+                  [0.4, 0.3, 0.1],
+                  [0.8, 0, 0]
+                ]
+              }
+            ]
+          }
         },
         {
           "id": "finish",
-          "representations": [
-            {
-              "id": "view-3d-finish"
-            }
-          ],
           "names": [
             {
               "language": "en",
@@ -435,7 +349,10 @@
           "language": "uk",
           "value": "Скорочений двоетапний спосіб без проміжного стану."
         }
-      ]
+      ],
+      "base": {
+        "id": "view-3d-finish"
+      }
     }
   ],
   "representationTypes": [
