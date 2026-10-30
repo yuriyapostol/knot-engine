@@ -11,7 +11,7 @@ import geometry2dSchema from '../v1/schema/2d.schema.json'
 import geometry3dSchema from '../v1/schema/3d.schema.json'
 
 import { normalizeKnot } from '../src/core/validateKnot'
-const ajv=new Ajv2020({strict:false}),knot=ajv.compile(knotSchema),geometry2d=ajv.compile(geometry2dSchema),geometry3d=ajv.compile(geometry3dSchema),spatial=ajv.compile(spatialSchema),grid=ajv.compile(gridSchema),mosaic=ajv.compile(mosaicSchema),pd=ajv.compile(pdSchema),dt=ajv.compile(dtSchema)
+const ajv=new Ajv2020({strict:false}),knot=ajv.compile(knotSchema),geometry2d=ajv.compile(geometry2dSchema),geometry3d=ajv.compile(geometry3dSchema),grid=ajv.compile(gridSchema),mosaic=ajv.compile(mosaicSchema),pd=ajv.compile(pdSchema),dt=ajv.compile(dtSchema)
 for(const f of readdirSync('v1/examples/knots').filter(f=>f.endsWith('.json')))it(`schema/runtime align for ${f}`,()=>{
   const data=JSON.parse(readFileSync(`v1/examples/knots/${f}`,'utf8'))
   expect(knot(data),JSON.stringify(knot.errors)).toBe(true)
