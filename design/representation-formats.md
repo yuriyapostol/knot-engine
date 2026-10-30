@@ -10,7 +10,7 @@ The [3_1 diagrams page](https://knotinfo.org/diagram_display.php?3_1) provides:
 | --- | --- | --- |
 | KnotScape | PNG | `diagram-image`; structural diagram separately if original data can be obtained |
 | SnapPy | SVG with cubic Bezier paths | `diagram-image`; SnapPea/PLink projection for editable diagrams |
-| 3D | JavaScript XYZ array and curve construction settings | `spatial-curve` with explicit interpolation |
+| 3D | JavaScript XYZ array and curve construction settings | `3d` with explicit interpolation |
 | Grid | SVG and a coordinate list in the knot record | `grid-diagram` with encoding profiles |
 | Minimal mosaic and tile diagrams | PNG; structured mosaics in the author's repository | `mosaic-diagram` with a defined tile set |
 
@@ -70,7 +70,7 @@ The implemented knot/link [DT profile](../v1/specifications/dt-code.md) uses `co
 
 The [page HTML](https://knotinfo.org/diagram_display.php?3_1) contains 79 XYZ points. The first, `[0.9008,-0.1947,0.0825]`, is not repeated at the end. The page subtracts the mean, constructs `THREE.CatmullRomCurve3` and sets `closed` `true`. The [Three.js version loaded by the page](https://knotinfo.org/Diagrams_All_Folders/diagrams_3d/three.js) defaults to `centripetal` interpolation (r132).
 
-The `spatial-curve` adaptation must preserve `points`, closure and exact parameterization, for example `{type: "catmull-rom", parameterization: "centripetal"}`. Uniform and chordal require different explicit values. Uniform Catmull–Rom with `tension: 0.5` is not an interchangeable substitute.
+The `3d` adaptation must preserve `points`, closure and exact parameterization, for example `{type: "catmull-rom", parameterization: "centripetal"}`. Uniform and chordal require different explicit values. Uniform Catmull–Rom with `tension: 0.5` is not an interchangeable substitute.
 
 Source coordinates have no physical units and remain relative. Centering should remain a viewing operation or be recorded as an import transform. Tube radius `0.02` and tessellation are display settings, not verified physical diameter. Camera settings belong to `ViewDefinition`. The page credits Se-Goo Kim and Jaehyun Park for the geometry.
 
