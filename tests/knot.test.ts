@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync, readdirSync } from 'node:fs'
 import open from '../v1/examples/knots/open-rope.json'
 import multi from '../v1/examples/knots/procedures.json'
-import { validateGridDiagram, validateSpatialCurve, validateView, STANDARD_RESOURCES, expandURI, validateResourceRegistry, validateResourceDocument, validateRepresentationDocument, SPATIAL_CURVE, type RawKnot } from '../src/core'
+import { validateGridDiagram, validateGeometry3D, validateView, STANDARD_RESOURCES, expandURI, validateResourceRegistry, validateResourceDocument, validateRepresentationDocument, GEOMETRY_3D, type Geometry3DData, type RawKnot } from '../src/core'
 const copy = () => structuredClone(open)
 describe('RawKnot generation 1', () => {
   for(const file of readdirSync('v1/examples/knots').filter(f=>f.endsWith('.json'))) it(`validates ${file}`,()=>{
@@ -27,14 +27,14 @@ describe('RawKnot generation 1', () => {
   })
   it('keeps procedures independent of interpolation point counts',()=>{
     const a=structuredClone(multi)
-    a.representations[1].data.curves[0].points.push([2,3,4])
+    a.representations[1].data.elements[0].points.push([2,3,4])
     expect(validateKnot(a)).toMatchObject({valid:true,complete:true})
     a.procedures[0].steps[0].representations[0].id='missing'
     expect(validateKnot(a).valid).toBe(false)
   })
   it('reports missing dependencies separately from validity',()=>{
     const a=copy();a.representationTypes=[]
-    expect(validateKnot(a)).toMatchObject({valid:true,complete:false,missingDependencies:[{kind:'representation-type',ref:SPATIAL_CURVE}]})
+    expect(validateKnot(a)).toMatchObject({valid:true,complete:false,missingDependencies:[{kind:'representation-type',ref:GEOMETRY_3D}]})
     expect(validateKnot(a,{registries:[STANDARD_RESOURCES]})).toMatchObject({valid:true,complete:true})
     expect(()=>resolveKnot(a)).toThrow(/Incomplete/)
   })
@@ -56,7 +56,7 @@ describe('RawKnot generation 1', () => {
     expect(expandURI('k:thing',{k:'urn:example:'})).toBe('urn:example:thing')
     expect(()=>expandURI('typo:thing')).toThrow()
     expect(validateKnot({...open,namespaces:{https:'urn:example:'}}).valid).toBe(false)
-    const a=copy();a.representations[0].type='k:representation-types/spatial-curve'
+    const a=copy();a.representations[0].type='k:representation-types/3d'
     expect(validateKnot({...a,namespaces:{...a.namespaces,k:'https://yuriyapostol.github.io/knot-engine/v1/'}}).valid).toBe(true)
   })
   it('checks all representations, object and state scopes',()=>{
@@ -68,7 +68,7 @@ describe('RawKnot generation 1', () => {
     expect(validateKnot(c).valid).toBe(false)
   })
   it('rejects cycles, nonfinite numbers, deep/oversized arrays and accessors before validation',()=>{
-    for(const n of [NaN,Infinity,-Infinity]) {const a=copy();a.representations[0].data.curves[0].points[0][0]=n;expect(validateKnot(a).valid).toBe(false)}
+    for(const n of [NaN,Infinity,-Infinity]) {const a=copy();a.representations[0].data.elements[0].points[0][0]=n;expect(validateKnot(a).valid).toBe(false)}
     const cyclic:Record<string,unknown>={};cyclic.self=cyclic
     expect(validateKnot(cyclic).valid).toBe(false)
     let deep:unknown={};for(let i=0;i<70;i++)deep={deep}
@@ -77,7 +77,7 @@ describe('RawKnot generation 1', () => {
     expect(validateKnot({get schema(){throw new Error('must not run')}}).valid).toBe(false)
   })
   it('separates domain coordinates from renderer limits',()=>{
-    const a=copy();a.representations[0].data.curves[0].points[0][0]=2e6
+    const a=copy();a.representations[0].data.elements[0].points[0][0]=2e6
     expect(validateKnot(a).valid).toBe(true)
     expect(()=>resolveKnot(a)).toThrow(/1000000/)
   })
@@ -85,7 +85,7 @@ describe('RawKnot generation 1', () => {
     const a=copy();a.representations[0].data.coordinateSystem.scale.metersPerUnit=0.01
     expect(resolveKnot(a).curves[0].radius).toBe(a.constructions[0].objects[0].diameter/0.02)
     const b=copy() as unknown as RawKnot
-    const data=b.representations![0].data as import('../src/core').SpatialCurveData
+    const data=b.representations![0].data as Geometry3DData
     data.coordinateSystem.scale={kind:'relative'}
     expect(resolveKnot(b).warnings.length).toBeGreaterThan(0)
   })
@@ -98,11 +98,11 @@ describe('independent contracts',()=>{
   })
   it('checks curve closure and exact repeated points for each interpolation',()=>{
     const data=copy().representations[0].data
-    expect(validateSpatialCurve(data).valid).toBe(true)
-    data.curves[0].points[1]=data.curves[0].points[0]
-    expect(validateSpatialCurve(data).valid).toBe(false)
+    expect(validateGeometry3D(data).valid).toBe(true)
+    data.elements[0].points[1]=data.elements[0].points[0]
+    expect(validateGeometry3D(data).valid).toBe(false)
     const closed=copy().representations[0].data;closed.curves[0].closed=true;closed.curves[0].points=[ [0,0,0],[1,0,0] ]
-    expect(validateSpatialCurve(closed).valid).toBe(false)
+    expect(validateGeometry3D(closed).valid).toBe(false)
   })
   it('validates camera modes and vector/projection constraints',()=>{
     const view={id:'front',name:'Front',space:'space',camera:{mode:'fit',direction:[0,0,1],up:[0,1,0],projection:{kind:'orthographic'}}}
