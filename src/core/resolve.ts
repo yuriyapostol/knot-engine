@@ -1,10 +1,10 @@
-import { SPATIAL_CURVE, GEOMETRY_3D, ROPE_TYPE, type Geometry3DData, type Mesh3D, type Camera3D, type SpatialCurveData, type SpatialCurve, type Reference, type ViewDefinition, type RawKnot, type RawRepresentation } from './knot'
+import { GEOMETRY_3D, ROPE_TYPE, type Geometry3DData, type Mesh3D, type Camera3D, type Reference, type ViewDefinition, type RawKnot, type RawRepresentation } from './knot'
 import { validateKnot, normalizeKnot, indexKnot, constructionFor, type ValidationOptions } from './validateKnot'
 import { selectRepresentation } from './selectRepresentation'
 import { ViewerError } from './errors'
 import { validateView } from './validateSpatial'
 export type CameraView = Extract<Camera3D,{mode:'fixed'}>
-export interface RenderableCurve extends SpatialCurve { radius: number }
+export interface RenderableCurve extends Omit<Extract<Geometry3DData['elements'][number], { type: 'curve' }>, 'type'> { radius: number }
 export interface RenderableModel { id?: string; curves: RenderableCurve[]; meshes?: Mesh3D[]; camera?: Camera3D; warnings: string[] }
 export interface RepresentationSelection { representationId?: string; view?: Reference | ViewDefinition }
 export function resolveKnot(value: unknown, selection: RepresentationSelection = {}, options: ValidationOptions & { scope?: 'selected' | 'all' } = {}): RenderableModel {
@@ -20,13 +20,12 @@ export function resolveKnot(value: unknown, selection: RepresentationSelection =
     knot=normalizeKnot(checked.knot)
   }
   const index=indexKnot(knot,options.registries)
-  const rep=selection.representationId === undefined ? knot.representations?.find(r=>r.type === SPATIAL_CURVE || r.type === GEOMETRY_3D) : knot.representations?.find(r=>r.id === selection.representationId)
+  const rep=selection.representationId === undefined ? knot.representations?.find(r=>r.type === GEOMETRY_3D) : knot.representations?.find(r=>r.id === selection.representationId)
   if(!rep) throw new ViewerError('INVALID_MODEL','Requested representation was not found',undefined,false)
-  if(rep.type !== SPATIAL_CURVE && rep.type !== GEOMETRY_3D) throw new ViewerError('UNSUPPORTED_SCHEMA','3D viewer requires spatial-curve or 3d',undefined,false)
-  const data=rep.data as SpatialCurveData | Geometry3DData, warnings: string[]=[]
-  const isGeometry3D = rep.type === GEOMETRY_3D
-  const rawCurves = isGeometry3D ? (data as Geometry3DData).elements.filter(e => e.type === 'curve') : (data as SpatialCurveData).curves
-  const meshes = isGeometry3D ? (data as Geometry3DData).elements.filter(e => e.type === 'mesh') : []
+  if(rep.type !== GEOMETRY_3D) throw new ViewerError('UNSUPPORTED_SCHEMA','3D viewer requires 3d',undefined,false)
+  const data=rep.data as Geometry3DData, warnings: string[]=[]
+  const rawCurves = data.elements.filter(e => e.type === 'curve')
+  const meshes = data.elements.filter(e => e.type === 'mesh')
   const construction=rep.target && rep.target.kind !== 'subject' ? constructionFor(knot,index,rep.target.construction) : undefined
   const scale=data.coordinateSystem.scale
   const points=[...rawCurves.flatMap(c=>c.points),...meshes.flatMap(m=>m.vertices)]
