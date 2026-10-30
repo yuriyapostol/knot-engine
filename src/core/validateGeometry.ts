@@ -69,6 +69,11 @@ export function applyStepData(base: Geometry, data: StepData, type: typeof GEOME
   }
   if (errors.length) return { valid: false, issues: errors }
   const result = { ...structuredClone(base), elements: [...elements.values()] } as Geometry
+  const dimension = type === GEOMETRY_2D ? 2 : 3
+  for (const [i, element] of result.elements.entries()) {
+    if (type === GEOMETRY_2D && element.type !== 'curve') return { valid: false, issues: [issue(`elements.${i}`, '2D geometry supports curves only')] }
+    if (element.type === 'curve' && element.points.some(point => point.length !== dimension)) return { valid: false, issues: [issue(`elements.${i}.points`, 'Point dimension does not match base')] }
+  }
   if (type === GEOMETRY_2D) {
     if (data.crossings !== undefined) (result as Geometry2DData).crossings = structuredClone(data.crossings)
     return validateGeometry2D(result)
