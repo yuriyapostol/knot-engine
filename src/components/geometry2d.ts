@@ -22,8 +22,11 @@ function intersections(a: Curve2D, b: Curve2D, same: boolean): Hit[] {
 /** Match ordered crossing passages to geometric intersections of polyline curves. */
 export function locateCrossings(data: Geometry2DData): CrossingPosition[] {
   const curves = data.elements.filter(e => e.type === 'curve')
+  if (curves.some(c => c.interpolation.type !== 'polyline')) throw new Error('2D crossing location currently supports polyline interpolation only')
   const passages = data.crossings ?? []
   const hits: Array<{ idA: string; idB: string; hit: Hit }> = []
+  const segments = curves.reduce((n, c) => n + c.points.length - 1 + Number(c.closed), 0)
+  if (segments > 2048) throw new Error('Too many 2D segments for crossing detection')
   for (let i = 0; i < curves.length; i++) for (let j = i; j < curves.length; j++) {
     for (const hit of intersections(curves[i], curves[j], i === j)) hits.push({ idA: curves[i].id, idB: curves[j].id, hit })
   }
