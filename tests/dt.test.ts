@@ -75,7 +75,7 @@ it('supports metadata, standalone documents, scopes and preserves code order/sig
   expect(validateKnot({...a,representations:[{...rep,target:{kind:'construction',construction:{id:'missing'}}}]},options).valid).toBe(false)
   const selected=selectKnot(a,{representations:['dt']},options)
   expect(JSON.parse(JSON.stringify(composeKnot([selected,selected]))).representations[0]).toEqual(rep)
-  expect(()=>resolveKnot(a,{representationId:'dt'},options)).toThrow(/spatial-curve/)
+  expect(()=>resolveKnot(a,{representationId:'dt'},options)).toThrow(/requires 3d/)
   for(const change of [{preferredView:{direction:[0,0,1],up:[0,1,0]}},{views:[{id:'p',name:'Plane',space:'plane',camera:{mode:'plane',center:[0,0],height:1,rotation:0}}]}])expect(validateKnot({...a,representations:[{...rep,...change}]},options).valid).toBe(false)
   const frozen=dt([4,-6,2]);Object.freeze(frozen.code);Object.freeze(frozen)
   expect(validateDTCode(frozen)).toMatchObject({valid:true,data:frozen})
