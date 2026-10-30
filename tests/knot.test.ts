@@ -101,7 +101,7 @@ describe('independent contracts',()=>{
     expect(validateGeometry3D(data).valid).toBe(true)
     data.elements[0].points[1]=data.elements[0].points[0]
     expect(validateGeometry3D(data).valid).toBe(false)
-    const closed=copy().representations[0].data;closed.curves[0].closed=true;closed.curves[0].points=[ [0,0,0],[1,0,0] ]
+    const closed=copy().representations[0].data;closed.elements[0].closed=true;closed.elements[0].points=[ [0,0,0],[1,0,0] ]
     expect(validateGeometry3D(closed).valid).toBe(false)
   })
   it('validates camera modes and vector/projection constraints',()=>{
