@@ -2,7 +2,6 @@
 export const KNOT_NAMESPACE = 'https://yuriyapostol.github.io/knot-engine/v1/'
 export const GEOMETRY_2D = `${KNOT_NAMESPACE}representation-types/2d`
 export const GEOMETRY_3D = `${KNOT_NAMESPACE}representation-types/3d`
-export const SPATIAL_CURVE = `${KNOT_NAMESPACE}representation-types/spatial-curve`
 export const GRID_DIAGRAM = `${KNOT_NAMESPACE}representation-types/grid-diagram`
 export const MOSAIC_DIAGRAM = `${KNOT_NAMESPACE}representation-types/mosaic-diagram`
 export const LOMONACO_KAUFFMAN_11 = `${KNOT_NAMESPACE}tile-sets/lomonaco-kauffman-11`
@@ -38,11 +37,6 @@ export type CrossingPassage = { id: string; element: string } & (
 export interface Geometry2DData { coordinateSystem: { xAxis: 'right'; yAxis: 'up'; scale: CoordinateScale }; elements: GeometryElement2D[]; crossings?: CrossingPassage[] }
 export interface Geometry3DData { coordinateSystem: { handedness: 'right'; upAxis: 'y'; scale: CoordinateScale }; elements: GeometryElement3D[] }
 export interface StepData { remove?: string[]; replace?: (GeometryElement2D | GeometryElement3D)[]; add?: (GeometryElement2D | GeometryElement3D)[]; crossings?: CrossingPassage[] }
-export interface SpatialCurve { id: string; object?: string; closed: boolean; interpolation: Interpolation; points: Point3D[] }
-export interface SpatialCurveData {
-  coordinateSystem: { handedness: 'right'; upAxis: 'y'; scale: { kind: 'relative' } | { kind: 'physical'; metersPerUnit: number } }
-  curves: SpatialCurve[]
-}
 /** Row 0 is bottom; arrays indexed by column. Horizontal O→X; vertical X→O passes over. */
 export interface GridXODiagram { encoding: 'xo'; size: number; x: number[]; o: number[] }
 /** Unoriented vertices [column, row], both zero-based; array order is immaterial. */
