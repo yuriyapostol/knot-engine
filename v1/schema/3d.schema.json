@@ -1,0 +1,231 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuriyapostol.github.io/knot-engine/v1/schema/3d.schema.json",
+  "$ref": "#/$defs/geometry3d",
+  "$defs": {
+    "geometry3d": {
+      "type": "object",
+      "properties": {
+        "coordinateSystem": {
+          "type": "object",
+          "properties": {
+            "handedness": {
+              "const": "right"
+            },
+            "upAxis": {
+              "const": "y"
+            },
+            "scale": {
+              "$ref": "#/$defs/scale"
+            }
+          },
+          "required": [
+            "handedness",
+            "upAxis",
+            "scale"
+          ],
+          "additionalProperties": false
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/curve3"
+              },
+              {
+                "$ref": "#/$defs/mesh3"
+              }
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 256
+        }
+      },
+      "required": [
+        "coordinateSystem",
+        "elements"
+      ],
+      "additionalProperties": false
+    },
+    "scale": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "relative"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "physical"
+            },
+            "metersPerUnit": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "metersPerUnit"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "curve3": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "curve"
+        },
+        "object": {
+          "type": "string",
+          "minLength": 1
+        },
+        "closed": {
+          "type": "boolean"
+        },
+        "interpolation": {
+          "$ref": "#/$defs/interpolation"
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/point3"
+          },
+          "minItems": 2,
+          "maxItems": 4096
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "closed",
+        "interpolation",
+        "points"
+      ],
+      "additionalProperties": false
+    },
+    "interpolation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "polyline"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "catmull-rom"
+            },
+            "parameterization": {
+              "const": "uniform"
+            },
+            "tension": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "type",
+            "parameterization",
+            "tension"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "catmull-rom"
+            },
+            "parameterization": {
+              "enum": [
+                "centripetal",
+                "chordal"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "parameterization"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "point3": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "mesh3": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "mesh"
+        },
+        "object": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vertices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/point3"
+          },
+          "minItems": 3
+        },
+        "faces": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "vertices",
+        "faces"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
