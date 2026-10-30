@@ -77,7 +77,13 @@ async function loadModel() {
       const result = validateView({ id: 'application', name: 'Application', space: 'space', camera: props.initialCamera })
       if (!result.valid) throw new ViewerError('INVALID_MODEL', 'Invalid application camera', result.issues, false)
     }
-    const selection = selectRepresentation(props.knot, { representationId: props.representationId, ...(props.representationId ? {} : { type: GEOMETRY_3D }) }, { registries: props.registries })
+    const eligible = props.knot.representations?.filter(rep =>
+      rep.type === SPATIAL_CURVE || rep.type === GEOMETRY_3D ||
+      (rep.type.endsWith(':representation-types/spatial-curve') || rep.type.endsWith(':representation-types/3d'))
+    ) ?? []
+    const representationId = props.representationId ?? (eligible.length === 1 ? eligible[0].id : undefined)
+    if (!representationId) throw new ViewerError('INVALID_MODEL', 'Specify representationId when multiple 3D representations are available', undefined, false)
+    const selection = selectRepresentation(props.knot, { representationId }, { registries: props.registries })
     if (!selection.ok) throw new ViewerError('INVALID_MODEL', selection.issues[0]?.message ?? 'Unable to select representation', undefined, false)
     const selectedView = resolveRepresentationView(props.view, props.views, props.registries, props.knot.namespaces)
     if (!selectedView.ok) throw new ViewerError('INVALID_MODEL', selectedView.message, undefined, false)
