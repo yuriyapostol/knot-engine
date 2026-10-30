@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | KnotScape | PNG | `diagram-image`; окремо структурна плоска діаграма, якщо отримано її вихідні дані |
 | SnapPy | SVG із кубічними кривими Безьє | `diagram-image`; для редагованої діаграми — імпорт SnapPea/PLink projection |
-| 3D | Масив XYZ у JavaScript і параметри побудови кривої | `spatial-curve` з явно заданою інтерполяцією |
+| 3D | Масив XYZ у JavaScript і параметри побудови кривої | `3d` з явно заданою інтерполяцією |
 | Сіткові діаграми (Grid) | SVG; у записі вузла також список координат | `grid-diagram` з профілями кодування |
 | Minimal mosaic and tile diagrams | PNG; структурні мозаїки є в авторському репозиторії | `mosaic-diagram` з визначеним набором плиток |
 
@@ -76,7 +76,7 @@ PNG/SVG зберігають вигляд, але не гарантують на
 
 У HTML [сторінки 3_1](https://knotinfo.org/diagram_display.php?3_1) `point_array` містить 79 XYZ-точок. Початкова точка `[0.9008,-0.1947,0.0825]` не дублюється в кінці. Сторінка віднімає середнє координат, створює `THREE.CatmullRomCurve3` і встановлює `closed = true`. У [Three.js, який завантажує сама сторінка](https://knotinfo.org/Diagrams_All_Folders/diagrams_3d/three.js), типовий режим цієї кривої — `centripetal` (r132).
 
-Реалізований контракт `spatial-curve` зберігає `points`, `closed` і точний варіант інтерполяції, наприклад `interpolation: {type: "catmull-rom", parameterization: "centripetal"}`. Для uniform і chordal потрібні інші явні значення. Не можна підміняти centripetal uniform Catmull–Rom з `tension: 0.5` лише через спільну назву сімейства.
+Реалізований контракт `3d` зберігає `points`, `closed` і точний варіант інтерполяції, наприклад `interpolation: {type: "catmull-rom", parameterization: "centripetal"}`. Для uniform і chordal потрібні інші явні значення. Не можна підміняти centripetal uniform Catmull–Rom з `tension: 0.5` лише через спільну назву сімейства.
 
 Вихідні координати без фізичних одиниць зберігаються як умовні. Віднімання середнього слід або залишити в операції кадрування, або явно записати як перетворення імпорту; не змінювати дані непомітно. Радіус трубки `0.02` і густина сітки на сайті є параметрами візуалізації, а не доведеним фізичним діаметром. Камера належить окремому `ViewDefinition`. Авторство геометрії на сторінці зазначено за Se-Goo Kim і Jaehyun Park.
 
