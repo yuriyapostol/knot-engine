@@ -89,12 +89,11 @@ Field names and exact nesting for the base, operations, and crossing overrides a
 
 Intermediate animation phases, material coordinates along rope, local transforms, geometry reuse, and patches to individual point coordinates are deferred.
 
-## Implementation checklist
+## Implementation status
 
-1. Define exact TypeScript types, JSON Schemas, 2D coordinate conventions, and numeric bounds.
-2. Validate ordered crossing records against geometric intersections, including self-crossings.
-3. Define the concrete JSON layout of step overrides and `replace/add/remove`, including `crossings`.
-4. Migrate `spatial-curve` compatibly and update validators, viewers, examples, and both documentation languages together.
+Implemented: `2d` and `3d` representation types, JSON Schemas, structural validation, `Procedure.base` and independent `Step.data` overrides, 3D curves and triangle meshes, the 2D SVG viewer, and the `v1/examples/knots/geometry-crossing-demo.json` example.
+
+**Current limitation:** matching `crossings` records to actual intersections is implemented in the 2D viewer for `polyline` only. `validateGeometry2D` validates paired crossing records but does not compute geometric intersections. Catmull–Rom crossings in the 2D viewer, tangencies, overlapping spans, and ambiguous intersections are not yet supported.
 
 ## Step data contract
 
