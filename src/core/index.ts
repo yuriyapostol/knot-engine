@@ -17,3 +17,5 @@ export * from './resolveRepresentationView'
 
 export { Knot, Representation, Procedure, Step, Subject, LocalizedTexts, configureLocalization, subscribeLocalization } from './model'
 export type { PreparedResource, RawLocalizedTexts, KnotOptions, LocalizedConfig } from './model'
+
+export { validateGeometry2D, validateGeometry3D, applyStepData } from './validateGeometry'
