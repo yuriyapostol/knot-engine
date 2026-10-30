@@ -34,6 +34,11 @@ const result = computed(() => {
       const a = curve.points[p.segment], b = curve.points[(p.segment + 1) % curve.points.length]
       const length = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1
       return { ...p, dx: (b[0] - a[0]) / length, dy: (b[1] - a[1]) / length }
+    }).map(p => {
+      const curve = checked.data.elements.find(e => e.id === p.element)!
+      const a = curve.points[p.segment], b = curve.points[(p.segment + 1) % curve.points.length]
+      const length = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1
+      return { ...p, dx: (b[0] - a[0]) / length, dy: (b[1] - a[1]) / length }
     })
     return { data: { paths, over, bounds: [minX, -maxY, Math.max(maxX - minX, extent * 0.05), Math.max(maxY - minY, extent * 0.05)] as number[], gap }, error: null }
   } catch (e) { return { data: null, error: (e as Error).message } }
@@ -69,7 +74,7 @@ defineExpose({ resetView, fitToView, capture })
         <path v-for="path in result.data.paths" :key="path.id" :d="path.d" />
         <g v-for="(p, i) in result.data.over" :key="i">
           <circle :cx="p.x" :cy="-p.y" :r="result.data.gap * 1.15" :fill="theme === 'dark' ? '#141414' : '#ffffff'" stroke="none" />
-          <path :d="`M ${p.x - result.data.gap * 1.5} ${-p.y} L ${p.x + result.data.gap * 1.5} ${-p.y}`" />
+          <path :d="`M ${p.x - p.dx * result.data.gap * 1.5} ${-p.y + p.dy * result.data.gap * 1.5} L ${p.x + p.dx * result.data.gap * 1.5} ${-p.y - p.dy * result.data.gap * 1.5}`" />
         </g>
       </g>
     </svg>
