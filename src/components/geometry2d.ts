@@ -38,6 +38,7 @@ export function locateCrossings(data: Geometry2DData): CrossingPosition[] {
   for (const list of visits.values()) list.sort((a, b) => a.segment - b.segment || a.t - b.t)
   const cursors = new Map<string, number>(), positions: CrossingPosition[] = []
   const paired = new Map<string, number>()
+  const hitIds = new Map<number, string>()
   for (const passage of passages) {
     const list = visits.get(passage.element) ?? [], cursor = cursors.get(passage.element) ?? 0
     const visit = list[cursor]
@@ -48,6 +49,9 @@ export function locateCrossings(data: Geometry2DData): CrossingPosition[] {
     if (expected !== other) throw new Error(`Crossing ${passage.id} does not match geometric intersection`)
     const prior = paired.get(passage.id)
     if (prior !== undefined && prior !== visit.hitIndex) throw new Error(`Crossing ${passage.id} pairs different intersections`)
+    const previousId = hitIds.get(visit.hitIndex)
+    if (previousId !== undefined && previousId !== passage.id) throw new Error(`Geometric intersection has inconsistent crossing IDs: ${previousId}, ${passage.id}`)
+    hitIds.set(visit.hitIndex, passage.id)
     paired.set(passage.id, visit.hitIndex)
     positions.push({ id: passage.id, element: passage.element, segment: visit.segment, t: visit.t, x: hit.hit.x, y: hit.hit.y, over: 'underElement' in passage })
     cursors.set(passage.element, cursor + 1)
