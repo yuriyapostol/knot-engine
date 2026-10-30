@@ -206,22 +206,6 @@
           "if": {
             "properties": {
               "type": {
-                "const": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/spatial-curve"
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "data": {
-                "$ref": "#/$defs/spatial"
-              }
-            }
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "type": {
                 "const": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram"
               }
             }
@@ -609,191 +593,6 @@
       ],
       "additionalProperties": false
     },
-    "spatial": {
-      "type": "object",
-      "properties": {
-        "coordinateSystem": {
-          "type": "object",
-          "properties": {
-            "handedness": {
-              "const": "right"
-            },
-            "upAxis": {
-              "const": "y"
-            },
-            "scale": {
-              "$ref": "#/$defs/scale"
-            }
-          },
-          "required": [
-            "handedness",
-            "upAxis",
-            "scale"
-          ],
-          "additionalProperties": false
-        },
-        "curves": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/curve"
-          },
-          "minItems": 1,
-          "maxItems": 256
-        }
-      },
-      "required": [
-        "coordinateSystem",
-        "curves"
-      ],
-      "additionalProperties": false
-    },
-    "scale": {
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "relative"
-            }
-          },
-          "required": [
-            "kind"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "physical"
-            },
-            "metersPerUnit": {
-              "type": "number",
-              "exclusiveMinimum": 0
-            }
-          },
-          "required": [
-            "kind",
-            "metersPerUnit"
-          ],
-          "additionalProperties": false
-        }
-      ]
-    },
-    "curve": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1
-        },
-        "object": {
-          "type": "string",
-          "minLength": 1
-        },
-        "closed": {
-          "type": "boolean"
-        },
-        "interpolation": {
-          "$ref": "#/$defs/interpolation"
-        },
-        "points": {
-          "type": "array",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "number"
-            },
-            "minItems": 3,
-            "maxItems": 3
-          },
-          "minItems": 2,
-          "maxItems": 4096
-        }
-      },
-      "required": [
-        "id",
-        "closed",
-        "interpolation",
-        "points"
-      ],
-      "additionalProperties": false,
-      "allOf": [
-        {
-          "if": {
-            "properties": {
-              "closed": {
-                "const": true
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "points": {
-                "minItems": 3
-              }
-            }
-          }
-        }
-      ]
-    },
-    "interpolation": {
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "type": {
-              "const": "polyline"
-            }
-          },
-          "required": [
-            "type"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "type": {
-              "const": "catmull-rom"
-            },
-            "parameterization": {
-              "const": "uniform"
-            },
-            "tension": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1
-            }
-          },
-          "required": [
-            "type",
-            "parameterization",
-            "tension"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "type": {
-              "const": "catmull-rom"
-            },
-            "parameterization": {
-              "enum": [
-                "centripetal",
-                "chordal"
-              ]
-            }
-          },
-          "required": [
-            "type",
-            "parameterization"
-          ],
-          "additionalProperties": false
-        }
-      ]
-    },
     "grid": {
       "oneOf": [
         {
@@ -1033,6 +832,39 @@
       ],
       "additionalProperties": false
     },
+    "scale": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "relative"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "physical"
+            },
+            "metersPerUnit": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "metersPerUnit"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
     "curve2": {
       "type": "object",
       "properties": {
@@ -1070,6 +902,63 @@
         "points"
       ],
       "additionalProperties": false
+    },
+    "interpolation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "polyline"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "catmull-rom"
+            },
+            "parameterization": {
+              "const": "uniform"
+            },
+            "tension": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "type",
+            "parameterization",
+            "tension"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "catmull-rom"
+            },
+            "parameterization": {
+              "enum": [
+                "centripetal",
+                "chordal"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "parameterization"
+          ],
+          "additionalProperties": false
+        }
+      ]
     },
     "point2": {
       "type": "array",
