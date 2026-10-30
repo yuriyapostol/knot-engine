@@ -3,7 +3,7 @@ import type { RenderableModel } from '../core/resolve'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import type { CameraView, Camera3D, RawKnot, RawResourceRegistry, Reference, ViewDefinition, ViewerErrorCode, ValidationIssue } from '../core'
 import { resolveKnot } from '../core/resolve'
-import { resolveRepresentationView, selectRepresentation, SPATIAL_CURVE, GEOMETRY_3D, validateView, ViewerError } from '../core'
+import { resolveRepresentationView, selectRepresentation, GEOMETRY_3D, validateView, ViewerError } from '../core'
 import type { Quality } from '../geometry/build'
 import { ViewerEngine, type CaptureOptions } from '../renderer/ViewerEngine'
 import { messages as builtInMessages, type ViewerMessages } from '../locales'
@@ -78,8 +78,7 @@ async function loadModel() {
       if (!result.valid) throw new ViewerError('INVALID_MODEL', 'Invalid application camera', result.issues, false)
     }
     const eligible = props.knot.representations?.filter(rep =>
-      rep.type === SPATIAL_CURVE || rep.type === GEOMETRY_3D ||
-      (rep.type.endsWith(':representation-types/spatial-curve') || rep.type.endsWith(':representation-types/3d'))
+      rep.type === GEOMETRY_3D || rep.type.endsWith(':representation-types/3d')
     ) ?? []
     const representationId = props.representationId ?? (eligible.length === 1 ? eligible[0].id : undefined)
     if (!representationId) throw new ViewerError('INVALID_MODEL', 'Specify representationId when multiple 3D representations are available', undefined, false)
