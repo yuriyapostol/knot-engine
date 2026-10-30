@@ -78,7 +78,7 @@ Optional `2d.data.crossings` specifies the order of curve passages through cross
 
 `RawProcedure.base?: Reference` identifies a base geometric representation, which may be the final state. `RawStep.data?` independently overrides the base using `remove?: string[]` for existing element IDs, `replace?: Element[]` for complete existing elements, and `add?: Element[]` for new complete elements. Optional `crossings?: Crossing[]` entirely replaces the crossing list for 2D (an empty array clears it). Omitted operations have no effect. Steps do not patch each other; the base type and coordinate system are unchanged. `Step.data` requires `Procedure.base`; `Step.representations` remains supported. `Construction.states` is retained.
 
-Other existing representation types remain independent. Migrating `spatial-curve` requires compatibility with existing documents.
+Other non-geometric representation types remain independent. The legacy `spatial-curve` type is not part of the current contract.
 
 
 
