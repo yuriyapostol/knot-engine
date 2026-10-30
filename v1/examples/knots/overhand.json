@@ -31,7 +31,7 @@
   "representations": [
     {
       "id": "view-3d-rest",
-      "type": "knot-engine:representation-types/spatial-curve",
+      "type": "knot-engine:representation-types/3d",
       "target": {
         "kind": "state",
         "construction": {
@@ -48,8 +48,9 @@
             "metersPerUnit": 1
           }
         },
-        "curves": [
+        "elements": [
           {
+            "type": "curve",
             "id": "open",
             "object": "open",
             "closed": false,
@@ -109,10 +110,30 @@
       "data": {
         "tileSet": "knot-engine:tile-sets/lomonaco-kauffman-11",
         "tiles": [
-          [0, 2, 1, 0],
-          [2, 10, 9, 1],
-          [3, 9, 4, 6],
-          [0, 3, 5, 4]
+          [
+            0,
+            2,
+            1,
+            0
+          ],
+          [
+            2,
+            10,
+            9,
+            1
+          ],
+          [
+            3,
+            9,
+            4,
+            6
+          ],
+          [
+            0,
+            3,
+            5,
+            4
+          ]
         ]
       },
       "names": [
@@ -176,11 +197,11 @@
   ],
   "representationTypes": [
     {
-      "id": "knot-engine:representation-types/spatial-curve",
-      "name": "spatial-curve",
-      "description": "spatial-curve contract, generation 1",
+      "id": "knot-engine:representation-types/3d",
+      "name": "3d",
+      "description": "3d geometry contract, generation 1",
       "dataSchema": {
-        "ref": "knot-engine:schema/spatial-curve.schema.json"
+        "ref": "knot-engine:schema/3d.schema.json"
       },
       "specification": "knot-engine:specifications/knot.html",
       "viewSpace": "space"
