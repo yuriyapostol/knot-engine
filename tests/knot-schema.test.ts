@@ -8,13 +8,15 @@ import mosaicSchema from '../v1/schema/mosaic-diagram.schema.json'
 import dtSchema from '../v1/schema/dt-code.schema.json'
 import pdSchema from '../v1/schema/pd-code.schema.json'
 import gridSchema from '../v1/schema/grid-diagram.schema.json'
+import geometry2dSchema from '../v1/schema/2d.schema.json'
+import geometry3dSchema from '../v1/schema/3d.schema.json'
 
 import { normalizeKnot } from '../src/core/validateKnot'
-const ajv=new Ajv2020({strict:false}),knot=ajv.compile(knotSchema),spatial=ajv.compile(spatialSchema),grid=ajv.compile(gridSchema),mosaic=ajv.compile(mosaicSchema),pd=ajv.compile(pdSchema),dt=ajv.compile(dtSchema)
+const ajv=new Ajv2020({strict:false}),knot=ajv.compile(knotSchema),geometry2d=ajv.compile(geometry2dSchema),geometry3d=ajv.compile(geometry3dSchema),spatial=ajv.compile(spatialSchema),grid=ajv.compile(gridSchema),mosaic=ajv.compile(mosaicSchema),pd=ajv.compile(pdSchema),dt=ajv.compile(dtSchema)
 for(const f of readdirSync('v1/examples/knots').filter(f=>f.endsWith('.json')))it(`schema/runtime align for ${f}`,()=>{
   const data=JSON.parse(readFileSync(`v1/examples/knots/${f}`,'utf8'))
   expect(knot(data),JSON.stringify(knot.errors)).toBe(true)
-  for(const rep of normalizeKnot(data).representations!){const validate=rep.type.endsWith('spatial-curve')?spatial:rep.type.endsWith('mosaic-diagram')?mosaic:rep.type.endsWith('pd-code')?pd:rep.type.endsWith('dt-code')?dt:grid;expect(validate(rep.data),JSON.stringify(validate.errors)).toBe(true)}
+  for(const rep of normalizeKnot(data).representations!){const validate=rep.type.endsWith('/2d')?geometry2d:rep.type.endsWith('/3d')?geometry3d:rep.type.endsWith('spatial-curve')?spatial:rep.type.endsWith('mosaic-diagram')?mosaic:rep.type.endsWith('pd-code')?pd:rep.type.endsWith('dt-code')?dt:grid;expect(validate(rep.data),JSON.stringify(validate.errors)).toBe(true)}
   expect(validateKnot(data).valid).toBe(true)
 })
 it('schemas reject old envelope, unknown fields and invalid standalone data',()=>{
