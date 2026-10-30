@@ -183,7 +183,27 @@
         {
           "id": "before",
           "data": {
-            "crossings": []
+            "crossings": [],
+            "replace": [
+              {
+                "id": "rope-b",
+                "type": "curve",
+                "closed": false,
+                "interpolation": {
+                  "type": "polyline"
+                },
+                "points": [
+                  [
+                    0,
+                    2
+                  ],
+                  [
+                    2,
+                    2
+                  ]
+                ]
+              }
+            ]
           }
         },
         {
