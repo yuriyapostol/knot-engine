@@ -21,7 +21,7 @@ try {
   assert.ok(pack.files.some(f => f.path.startsWith('v1/schema/')))
   assert.ok(pack.files.every(f => !/^v(?!1\/)[0-9]+\//.test(f.path)))
   assert.ok(pack.files.every(f => !f.path.startsWith('site/')))
-  for (const schema of ['knot', 'spatial-curve', 'grid-diagram', 'pd-code', 'dt-code', 'source', 'contribution', 'license', 'resource-registry']) assert.ok(JSON.parse(readFileSync(join(installed, 'v1', 'schema', `${schema}.schema.json`), 'utf8')).$id)
+  for (const schema of ['knot', '2d', '3d', 'grid-diagram', 'pd-code', 'dt-code', 'source', 'contribution', 'license', 'resource-registry']) assert.ok(JSON.parse(readFileSync(join(installed, 'v1', 'schema', `${schema}.schema.json`), 'utf8')).$id)
   writeFileSync(join(temp, 'core-loader.mjs'), `export async function resolve(id, context, next) { if (['vue', 'three'].some(name => id === name || id.startsWith(name + '/'))) throw new Error('Core imported '+id); return next(id, context) }`)
   writeFileSync(join(temp, 'core.mjs'), `
     import assert from 'node:assert/strict'
