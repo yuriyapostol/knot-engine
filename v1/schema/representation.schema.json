@@ -945,17 +945,11 @@
     },
     "point2": {
       "type": "array",
-      "prefixItems": [
-        {
-          "type": "number"
-        },
-        {
-          "type": "number"
-        }
-      ],
-      "items": false,
       "minItems": 2,
-      "maxItems": 2
+      "maxItems": 2,
+      "items": {
+        "type": "number"
+      }
     },
     "crossingPassage": {
       "oneOf": [
@@ -1090,6 +1084,14 @@
       ],
       "additionalProperties": false
     },
+    "point3": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
     "mesh3": {
       "type": "object",
       "properties": {
@@ -1115,23 +1117,12 @@
           "type": "array",
           "items": {
             "type": "array",
-            "prefixItems": [
-              {
-                "type": "integer",
-                "minimum": 0
-              },
-              {
-                "type": "integer",
-                "minimum": 0
-              },
-              {
-                "type": "integer",
-                "minimum": 0
-              }
-            ],
-            "items": false,
             "minItems": 3,
-            "maxItems": 3
+            "maxItems": 3,
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            }
           },
           "minItems": 1
         }
