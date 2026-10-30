@@ -35,7 +35,7 @@ let engine: ViewerEngine | undefined
 let resize: ResizeObserver | undefined
 let intersection: IntersectionObserver | undefined
 let generation = 0
-function cameraContext() { return [props.knot, props.view, props.views, props.registries, props.initialCamera] as const }
+function cameraContext() { return [props.knot?.id, props.view, props.views, props.registries, props.initialCamera] as const }
 let loadedCameraContext: ReturnType<typeof cameraContext> | undefined
 
 function report(cause: ViewerError) {
