@@ -8,7 +8,7 @@ import { STANDARD_RESOURCES } from '../src/core'
 it('extracts a procedure with its representations, construction and type definitions',()=>{
   const source=structuredClone(multi)
   const part=selectKnot(source,{procedures:['sequence-b']})
-  expect(part.representations).toHaveLength(2)
+  expect(part.representations).toHaveLength(1)
   expect(part.procedures).toHaveLength(1)
   expect(part.constructions).toHaveLength(1)
   expect(part.objectTypes).toHaveLength(1)
@@ -17,11 +17,9 @@ it('extracts a procedure with its representations, construction and type definit
 })
 it('composes fragments of the same document and detects conflicts',()=>{
   const a=selectKnot(multi,{representations:[multi.representations[0].id]})
-  const b=selectKnot(multi,{representations:[multi.representations[1].id]})
-  expect(composeKnot([a,b]).representations).toHaveLength(2)
   expect(composeKnot([a,a]).representations).toHaveLength(1)
   expect(()=>composeKnot([a,grid])).toThrow()
-  const conflict=structuredClone(a);(conflict.representations![0].data as { curves: { points: number[][] }[] }).curves[0].points[1][0] += 0.01
+  const conflict=structuredClone(a);(conflict.representations![0].data as { elements: { points: number[][] }[] }).elements[0].points[1][0] += 0.01
   expect(()=>composeKnot([a,conflict])).toThrow(/Conflicting/)
   expect(()=>selectKnot(a,{representations:['missing']})).toThrow()
 })

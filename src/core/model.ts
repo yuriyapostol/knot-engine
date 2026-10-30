@@ -124,6 +124,7 @@ export class Representation implements RawRepresentation {
 }
 export class Step implements RawStep {
   id!: string
+  data?: RawStep['data']
   representations?: RawStep['representations']
   names?: LocalizedTexts
   instructions?: LocalizedTexts
@@ -132,6 +133,7 @@ export class Step implements RawStep {
 }
 export class Procedure implements RawProcedure {
   construction?: RawProcedure['construction']
+  base?: RawProcedure['base']
   id!: string
   steps!: Step[]
   names?: LocalizedTexts

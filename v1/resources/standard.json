@@ -6,35 +6,6 @@
   },
   "resources": [
     {
-      "kind": "representation-type",
-      "resource": {
-        "id": "knot-engine:representation-types/spatial-curve",
-        "name": "spatial-curve",
-        "description": "spatial-curve contract, generation 1",
-        "dataSchema": {
-          "ref": "knot-engine:schema/spatial-curve.schema.json"
-        },
-        "specification": "knot-engine:specifications/knot.html",
-        "viewSpace": "space",
-        "names": [
-          {
-            "language": "en",
-            "value": "Spatial curve"
-          },
-          {
-            "language": "uk",
-            "value": "Просторова крива"
-          }
-        ],
-        "descriptions": [
-          {
-            "language": "en",
-            "value": "spatial-curve contract, generation 1"
-          }
-        ]
-      }
-    },
-    {
       "kind": "object-type",
       "resource": {
         "id": "knot-engine:object-types/rope",
@@ -230,6 +201,52 @@
           {
             "language": "en",
             "value": "Signed even DT code for knot and link diagrams, generation 1"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "representation-type",
+      "resource": {
+        "id": "knot-engine:representation-types/2d",
+        "name": "2d",
+        "description": "2d geometry contract, generation 1",
+        "dataSchema": {
+          "ref": "knot-engine:schema/2d.schema.json"
+        },
+        "specification": "knot-engine:specifications/knot.html",
+        "viewSpace": "plane",
+        "names": [
+          {
+            "language": "en",
+            "value": "2D geometry"
+          },
+          {
+            "language": "uk",
+            "value": "Геометрія 2D"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "representation-type",
+      "resource": {
+        "id": "knot-engine:representation-types/3d",
+        "name": "3d",
+        "description": "3d geometry contract, generation 1",
+        "dataSchema": {
+          "ref": "knot-engine:schema/3d.schema.json"
+        },
+        "specification": "knot-engine:specifications/knot.html",
+        "viewSpace": "space",
+        "names": [
+          {
+            "language": "en",
+            "value": "3D geometry"
+          },
+          {
+            "language": "uk",
+            "value": "Геометрія 3D"
           }
         ]
       }

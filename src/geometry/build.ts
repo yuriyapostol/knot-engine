@@ -46,6 +46,19 @@ export function buildGeometry(model: RenderableModel, quality: Quality, theme: '
       resources.push(capGeo)
     }
   }
+  for (const mesh of model.meshes ?? []) {
+    const geometry = new THREE.BufferGeometry()
+    const positions = new Float32Array(mesh.faces.length * 9)
+    mesh.faces.forEach((face, i) => face.forEach((index, j) => {
+      const point = mesh.vertices[index]
+      positions.set(point, i * 9 + j * 3)
+    }))
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    geometry.computeVertexNormals()
+    const material = new THREE.MeshStandardMaterial({ color: theme === 'dark' ? 0xe8ad73 : 0xb9793d, side: THREE.DoubleSide, roughness: 0.83 })
+    group.add(new THREE.Mesh(geometry, material))
+    resources.push(geometry, material)
+  }
   const bounds = new THREE.Box3().setFromObject(group)
   return { group, bounds, warnings, dispose() { for (const resource of resources) resource.dispose() } }
 }

@@ -82,8 +82,8 @@ describe('prepared Knot model', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     const representation = knot.getRepresentation('view-3d-rest')!
     expect(representation).toBe(knot.representations?.[0])
-    expect(representation.getTypeDefinition()?.getName()).toBe('Просторова крива')
-    expect(representation.getName()).toBe('Просторова крива')
+    expect(representation.getTypeDefinition()?.getName()).toBe('Геометрія 3D')
+    expect(representation.getName()).toBe('Геометрія 3D')
     expect(knot.toRaw().schema).toBe('Knot')
     expect(JSON.stringify(knot.toRaw())).not.toContain('getName')
     expect(validateKnot(knot, { registries: [STANDARD_RESOURCES] }).valid).toBe(true)
@@ -92,7 +92,7 @@ describe('prepared Knot model', () => {
   })
   it('supports per-knot locale and overrides without changing global locale or raw JSON', () => {
     configureLocalization({ locale: 'en', fallbackLocale: 'en' })
-    const uri = 'https://yuriyapostol.github.io/knot-engine/v1/representation-types/spatial-curve'
+    const uri = 'https://yuriyapostol.github.io/knot-engine/v1/representation-types/3d'
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES], locale: 'uk', overrides: {
       'view-3d-rest': { names: [{ language: 'uk', value: 'Мій вигляд' }] },
       [uri]: { names: [{ language: 'uk', value: 'Мій тип' }] },
@@ -100,12 +100,12 @@ describe('prepared Knot model', () => {
     const rep = knot.getRepresentation('view-3d-rest')!
     expect(rep.getName()).toBe('Мій вигляд')
     expect(rep.getTypeDefinition()?.getName()).toBe('Мій тип')
-    expect(rep.getName('en')).toBe('Spatial curve')
+    expect(rep.getName('en')).toBe('3D geometry')
     expect(knot.clone().getRepresentation('view-3d-rest')?.getName()).toBe('Мій вигляд')
     expect(knot.select({ representations: ['view-3d-rest'] }).getRepresentation('view-3d-rest')?.getName()).toBe('Мій вигляд')
     expect(knot.toRaw()).toEqual(raw)
     const other = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
-    expect(other.getRepresentation('view-3d-rest')?.getName()).toBe('Spatial curve')
+    expect(other.getRepresentation('view-3d-rest')?.getName()).toBe('3D geometry')
   })
   it('edits procedures and steps without replacing unrelated entities', () => {
     const knot = Knot.from(raw as any)

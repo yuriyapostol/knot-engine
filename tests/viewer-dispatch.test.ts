@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import open from '../v1/examples/knots/open-rope.json'
 import { createViewerRegistry, selectViewerRepresentation } from '../src/components/viewerRegistry'
-import { SPATIAL_CURVE, MOSAIC_DIAGRAM, type RawKnot } from '../src/core'
+import { GEOMETRY_3D, MOSAIC_DIAGRAM, type RawKnot } from '../src/core'
 import type { Component } from 'vue'
 
 const component = {} as Component
 const registry = createViewerRegistry([
-  { typeUri: SPATIAL_CURVE, component, capabilities: { zoom: true } },
+  { typeUri: GEOMETRY_3D, component, capabilities: { zoom: true } },
   { typeUri: MOSAIC_DIAGRAM, component, capabilities: { zoom: true } },
 ])
 const copy = () => structuredClone(open) as unknown as RawKnot
@@ -16,7 +16,7 @@ describe('generic viewer dispatch', () => {
     knot.representations!.push({ id: 'unknown', type: 'urn:example:future', data: {} })
     const before = JSON.stringify(knot)
     const result = selectViewerRepresentation(knot, registry)
-    expect(result).toMatchObject({ ok: true, typeUri: SPATIAL_CURVE })
+    expect(result).toMatchObject({ ok: true, typeUri: GEOMETRY_3D })
     expect(JSON.stringify(knot)).toBe(before)
   })
   it('rejects multiple supported candidates without a priority rule', () => {

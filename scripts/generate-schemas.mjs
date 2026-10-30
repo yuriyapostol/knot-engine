@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 const contracts=JSON.parse(readFileSync('src/core/contracts.json','utf8'))
-const entries={'source':'sourceDefinition','contribution':'contribution','license':'license','knot': 'knot','mosaic-diagram':'mosaic','dt-code':'dt','pd-code':'pd','grid-diagram':'grid','spatial-curve':'spatial','representation':'representation','construction':'construction','view':'view','catalog':'catalog','representation-type':'representationType','object-type':'objectType','rope-object':'rope','equipment-object':'equipment','resource':'resourceDocument','resource-registry':'registry','representation-document':'representationDocument'}
+const entries={'source':'sourceDefinition','contribution':'contribution','license':'license','knot': 'knot','mosaic-diagram':'mosaic','dt-code':'dt','pd-code':'pd','grid-diagram':'grid','2d':'geometry2d','3d':'geometry3d','representation':'representation','construction':'construction','view':'view','catalog':'catalog','representation-type':'representationType','object-type':'objectType','rope-object':'rope','equipment-object':'equipment','resource':'resourceDocument','resource-registry':'registry','representation-document':'representationDocument'}
 for(const [name,key] of Object.entries(entries)) {
   const defs={}
   function include(k) {

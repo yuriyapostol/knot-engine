@@ -14,7 +14,7 @@ export function selectKnot(value: unknown, selection: { representations?: string
   const reps = new Set(selection.representations ?? []), procs = new Set(selection.procedures ?? [])
   for(const id of procs) if(!knot.procedures?.some(p=>p.id === id)) throw new ViewerError('INVALID_MODEL',`Unknown procedure: ${id}`,undefined,false)
   const procedures = knot.procedures?.filter(p=>procs.has(p.id)) ?? []
-  for(const p of procedures) for(const step of p.steps) for(const r of step.representations ?? []) if(r.id) reps.add(r.id)
+  for(const p of procedures) { if(p.base?.id) reps.add(p.base.id); for(const step of p.steps) for(const r of step.representations ?? []) if(r.id) reps.add(r.id) }
   for(const id of reps) if(!knot.representations?.some(r=>r.id === id)) throw new ViewerError('INVALID_MODEL',`Unknown representation: ${id}`,undefined,false)
   const representations = knot.representations?.filter(r=>reps.has(r.id)) ?? []
   const constructions = new Map<string,Construction>()

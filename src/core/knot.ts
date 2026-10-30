@@ -1,6 +1,7 @@
 /** RawKnot contracts, generation 1. See v1/specifications/knot.md. */
 export const KNOT_NAMESPACE = 'https://yuriyapostol.github.io/knot-engine/v1/'
-export const SPATIAL_CURVE = `${KNOT_NAMESPACE}representation-types/spatial-curve`
+export const GEOMETRY_2D = `${KNOT_NAMESPACE}representation-types/2d`
+export const GEOMETRY_3D = `${KNOT_NAMESPACE}representation-types/3d`
 export const GRID_DIAGRAM = `${KNOT_NAMESPACE}representation-types/grid-diagram`
 export const MOSAIC_DIAGRAM = `${KNOT_NAMESPACE}representation-types/mosaic-diagram`
 export const LOMONACO_KAUFFMAN_11 = `${KNOT_NAMESPACE}tile-sets/lomonaco-kauffman-11`
@@ -17,17 +18,25 @@ export const DT_SIGNED_EVEN = `${KNOT_NAMESPACE}conventions/dt-signed-even`
 /** One traversal or component traversals; negative means the odd visit passes under. */
 export interface DTCode { convention: typeof DT_SIGNED_EVEN; code: number[] | number[][] }
 export const ROPE_TYPE = `${KNOT_NAMESPACE}object-types/rope`
+export type Point2D = [number, number]
 export type Point3D = [number, number, number]
 export type Reference = { id: string; ref?: never } | { ref: string; id?: never }
 export type Namespaces = Record<string, string>
 export interface RawSubject { id: string; names?: { language: string; value: string }[]; descriptions?: { language: string; value: string }[]; identifiers?: { catalog: string; value: string }[] }
 export type Target = { kind: 'subject' } | { kind: 'construction'; construction: Reference } | { kind: 'state' | 'object'; construction: Reference; id: string }
 export type Interpolation = { type: 'polyline' } | { type: 'catmull-rom'; parameterization: 'uniform'; tension: number } | { type: 'catmull-rom'; parameterization: 'centripetal' | 'chordal' }
-export interface SpatialCurve { id: string; object?: string; closed: boolean; interpolation: Interpolation; points: Point3D[] }
-export interface SpatialCurveData {
-  coordinateSystem: { handedness: 'right'; upAxis: 'y'; scale: { kind: 'relative' } | { kind: 'physical'; metersPerUnit: number } }
-  curves: SpatialCurve[]
-}
+export type CoordinateScale = { kind: 'relative' } | { kind: 'physical'; metersPerUnit: number }
+export interface Curve2D { id: string; type: 'curve'; object?: string; closed: boolean; interpolation: Interpolation; points: Point2D[] }
+export interface Curve3D { id: string; type: 'curve'; object?: string; closed: boolean; interpolation: Interpolation; points: Point3D[] }
+export interface Mesh3D { id: string; type: 'mesh'; object?: string; vertices: Point3D[]; faces: [number, number, number][] }
+export type GeometryElement2D = Curve2D
+export type GeometryElement3D = Curve3D | Mesh3D
+export type CrossingPassage = { id: string; element: string } & (
+  { underElement: string; overElement?: never } | { overElement: string; underElement?: never }
+)
+export interface Geometry2DData { coordinateSystem: { xAxis: 'right'; yAxis: 'up'; scale: CoordinateScale }; elements: GeometryElement2D[]; crossings?: CrossingPassage[] }
+export interface Geometry3DData { coordinateSystem: { handedness: 'right'; upAxis: 'y'; scale: CoordinateScale }; elements: GeometryElement3D[] }
+export interface StepData { remove?: string[]; replace?: (GeometryElement2D | GeometryElement3D)[]; add?: (GeometryElement2D | GeometryElement3D)[]; crossings?: CrossingPassage[] }
 /** Row 0 is bottom; arrays indexed by column. Horizontal O→X; vertical X→O passes over. */
 export interface GridXODiagram { encoding: 'xo'; size: number; x: number[]; o: number[] }
 /** Unoriented vertices [column, row], both zero-based; array order is immaterial. */
@@ -57,8 +66,8 @@ export type SourceDefinition = Source & { id: string }
 export type SourceReference = Reference & { locator?: string; accessed?: string; note?: string }
 export type SourceUse = Source | SourceReference
 export interface RawRepresentation { names?: { language: string; value: string }[]; descriptions?: { language: string; value: string }[]; sources?: SourceUse[]; contributions?: Contribution[]; id: string; type: string; target?: Target; data: unknown }
-export interface RawStep { names?: { language: string; value: string }[]; id: string; instructions?: { language: string; value: string }[]; representations?: Reference[] }
-export interface RawProcedure { id: string; names?: { language: string; value: string }[]; descriptions?: { language: string; value: string }[]; construction?: Reference; steps: RawStep[] }
+export interface RawStep { names?: { language: string; value: string }[]; id: string; instructions?: { language: string; value: string }[]; representations?: Reference[]; data?: StepData }
+export interface RawProcedure { id: string; names?: { language: string; value: string }[]; descriptions?: { language: string; value: string }[]; construction?: Reference; base?: Reference; steps: RawStep[] }
 export type ResourceEntry = { kind: 'source'; resource: SourceDefinition } | { kind: 'catalog'; resource: RawCatalogDefinition } | { kind: 'representation-type'; resource: RawRepresentationTypeDefinition } | { kind: 'object-type'; resource: RawObjectTypeDefinition } | { kind: 'construction'; resource: Construction } | { kind: 'view'; resource: ViewDefinition }
 export type ResourceKind = ResourceEntry['kind']
 export interface Dependency { kind: ResourceKind; ref: string }

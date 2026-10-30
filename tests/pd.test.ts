@@ -50,7 +50,7 @@ it('integrates resources, standalone documents, targets, selection and compositi
   const selected=selectKnot(a,{representations:['pd']},options)
   expect(validateKnot(selected)).toMatchObject({valid:true,complete:true})
   expect(JSON.parse(JSON.stringify(composeKnot([selected,selected]))).representations[0].data).toEqual(data)
-  expect(()=>resolveKnot(a,{representationId:'pd'},options)).toThrow(/spatial-curve/)
+  expect(()=>resolveKnot(a,{representationId:'pd'},options)).toThrow(/requires 3d/)
   for(const change of [{preferredView:{direction:[0,0,1],up:[0,1,0]}},{views:[{id:'p',name:'Plane',space:'plane',camera:{mode:'plane',center:[0,0],height:1,rotation:0}}]}])expect(validateKnot({...a,representations:[{...a.representations[0],...change}]},options).valid).toBe(false)
 })
 it('enforces per-code and aggregate crossing budgets before analysis',()=>{

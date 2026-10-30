@@ -3,7 +3,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { createApp, defineComponent, h, nextTick, shallowReactive } from 'vue'
 import KnotViewer from '../src/components/KnotViewer.vue'
 import loop from '../v1/examples/knots/twisted-loop.json'
-import type { Camera3D, RawKnot, ViewDefinition } from '../src/core'
+import { applyStepData, GEOMETRY_3D, type Camera3D, type RawKnot, type ViewDefinition, type Geometry3DData } from '../src/core'
 
 const calls = vi.hoisted(() => ({ setModel: vi.fn(), view: vi.fn() }))
 vi.mock('../src/renderer/ViewerEngine', () => ({
@@ -26,7 +26,7 @@ const flush = async () => { await nextTick(); await nextTick(); await nextTick()
 async function mount(preserveCamera = false) {
   const props = shallowReactive({
     knot: structuredClone(loop) as RawKnot | null,
-    label: 'Loop', representationId: 'view-3d-rest', preserveCamera,
+    label: 'Loop', representationId: 'view-3d-finish', preserveCamera,
     initialCamera: undefined as Camera3D | undefined,
     view: undefined as ViewDefinition | undefined,
     quality: 'medium' as 'medium' | 'high',
@@ -50,7 +50,7 @@ afterEach(() => { mounts.splice(0).forEach(unmount => unmount()); vi.unstubAllGl
 
 it('keeps refitting representations by default', async () => {
   const props = await mount()
-  props.representationId = 'view-3d-finish'
+  props.knot = { ...props.knot!, representations: props.knot!.representations!.map(rep => rep.id === 'view-3d-finish' ? { ...rep, data: { ...(rep.data as object) } } : rep) }
   await flush()
   expect(calls.setModel).toHaveBeenCalledTimes(2)
   expect(calls.setModel.mock.lastCall?.[3]).toBeUndefined()
@@ -59,8 +59,12 @@ it('keeps refitting representations by default', async () => {
 it('preserves the current camera across steps and quality changes through KnotViewer', async () => {
   const props = await mount(true)
   expect(calls.setModel.mock.lastCall?.[3]).toBeUndefined()
-  for (const id of ['view-3d-twist', 'view-3d-finish', 'view-3d-rest']) {
-    props.representationId = id
+  const base = loop.representations.find(rep => rep.id === 'view-3d-finish')!
+  for (const step of loop.procedures![0].steps) {
+    const result = step.data ? applyStepData(base.data as Geometry3DData, step.data as Parameters<typeof applyStepData>[1], GEOMETRY_3D) : { valid: true as const, data: base.data }
+    expect(result.valid).toBe(true)
+    if (!result.valid) continue
+    props.knot = { ...props.knot!, representations: props.knot!.representations!.map(rep => rep.id === base.id ? { ...rep, data: result.data } : rep) }
     await flush()
     expect(calls.setModel.mock.lastCall?.[3]).toEqual(camera)
   }
@@ -68,9 +72,9 @@ it('preserves the current camera across steps and quality changes through KnotVi
   await flush()
   expect(calls.setModel.mock.lastCall?.[3]).toEqual(camera)
 })
-it('resets preservation for a new knot object or explicit camera/view', async () => {
+it('resets preservation for a different knot or explicit camera/view', async () => {
   const props = await mount(true)
-  props.knot = structuredClone(loop) as RawKnot
+  props.knot = { ...(structuredClone(loop) as RawKnot), id: 'another-knot' }
   await flush()
   expect(calls.setModel.mock.lastCall?.[3]).toBeUndefined()
   props.initialCamera = camera
@@ -91,7 +95,7 @@ it('does not reuse a stale camera after empty or invalid input', async () => {
   expect(calls.setModel.mock.lastCall?.[3]).toBeUndefined()
   props.representationId = 'missing'
   await flush()
-  props.representationId = 'view-3d-rest'
+  props.representationId = 'view-3d-finish'
   await flush()
   // Dispatch failures unmount the 3D viewer, so recovery must start fresh.
   expect(calls.setModel.mock.lastCall?.[3]).toBeUndefined()

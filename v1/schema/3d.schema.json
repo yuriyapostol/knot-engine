@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://yuriyapostol.github.io/knot-engine/v1/schema/spatial-curve.schema.json",
-  "$ref": "#/$defs/spatial",
+  "$id": "https://yuriyapostol.github.io/knot-engine/v1/schema/3d.schema.json",
+  "$ref": "#/$defs/geometry3d",
   "$defs": {
-    "spatial": {
+    "geometry3d": {
       "type": "object",
       "properties": {
         "coordinateSystem": {
@@ -26,10 +26,17 @@
           ],
           "additionalProperties": false
         },
-        "curves": {
+        "elements": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/curve"
+            "oneOf": [
+              {
+                "$ref": "#/$defs/curve3"
+              },
+              {
+                "$ref": "#/$defs/mesh3"
+              }
+            ]
           },
           "minItems": 1,
           "maxItems": 256
@@ -37,7 +44,7 @@
       },
       "required": [
         "coordinateSystem",
-        "curves"
+        "elements"
       ],
       "additionalProperties": false
     },
@@ -74,12 +81,15 @@
         }
       ]
     },
-    "curve": {
+    "curve3": {
       "type": "object",
       "properties": {
         "id": {
           "type": "string",
           "minLength": 1
+        },
+        "type": {
+          "const": "curve"
         },
         "object": {
           "type": "string",
@@ -94,12 +104,7 @@
         "points": {
           "type": "array",
           "items": {
-            "type": "array",
-            "items": {
-              "type": "number"
-            },
-            "minItems": 3,
-            "maxItems": 3
+            "$ref": "#/$defs/point3"
           },
           "minItems": 2,
           "maxItems": 4096
@@ -107,29 +112,12 @@
       },
       "required": [
         "id",
+        "type",
         "closed",
         "interpolation",
         "points"
       ],
-      "additionalProperties": false,
-      "allOf": [
-        {
-          "if": {
-            "properties": {
-              "closed": {
-                "const": true
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "points": {
-                "minItems": 3
-              }
-            }
-          }
-        }
-      ]
+      "additionalProperties": false
     },
     "interpolation": {
       "oneOf": [
@@ -187,6 +175,57 @@
           "additionalProperties": false
         }
       ]
+    },
+    "point3": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "mesh3": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "mesh"
+        },
+        "object": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vertices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/point3"
+          },
+          "minItems": 3
+        },
+        "faces": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "vertices",
+        "faces"
+      ],
+      "additionalProperties": false
     }
   }
 }

@@ -1,14 +1,14 @@
 import { Knot } from './model'
+import { validateGeometry2D, validateGeometry3D, applyStepData } from './validateGeometry'
 import { contributionIssues, licenseIssues, sourceIssues } from './metadata'
 import Ajv2020 from 'ajv/dist/2020.js'
-import { SPATIAL_CURVE, GRID_DIAGRAM, MOSAIC_DIAGRAM, PD_CODE, DT_CODE, ROPE_TYPE, type RawKnot, type RawResourceRegistry, type Reference, type Construction, type ResourceEntry, type RawRepresentation, type RawRepresentationTypeDefinition, type Dependency, type SpatialCurveData, type RawRepresentationDocument } from './knot'
+import { GEOMETRY_2D, GEOMETRY_3D, type Geometry2DData, type Geometry3DData, GRID_DIAGRAM, MOSAIC_DIAGRAM, PD_CODE, DT_CODE, ROPE_TYPE, type RawKnot, type RawResourceRegistry, type Reference, type Construction, type ResourceEntry, type RawRepresentation, type RawRepresentationTypeDefinition, type Dependency, type RawRepresentationDocument } from './knot'
 import { createResourceIndex, expandURI, normalizeResource, addResource, namespaceIssues, resourceIssues, type ResourceIndex } from './resources'
 import { duplicates, issue, preflight, structure, KNOT_LIMITS } from './validation'
 import { validateMosaicDiagram } from './validateMosaicDiagram'
 import { validateDTCode, dtAnalysisWork } from './validateDTCode'
 import { validatePDCode } from './validatePDCode'
 import { validateGridDiagram } from './validateGridDiagram'
-import { validateSpatialCurve } from './validateSpatial'
 import type { ValidationIssue } from './errors'
 export interface ValidationOptions { strict?: boolean; registries?: readonly RawResourceRegistry[]; schemas?: readonly Record<string, unknown>[] }
 export interface ValidationReport { missingDependencies: Dependency[]; uncheckedTypes: string[]; complete: boolean; warnings: string[] }
@@ -44,6 +44,7 @@ export function normalizeKnot(knot: RawKnot): RawKnot {
   }
   for (const proc of a.procedures ?? []) {
     if (proc.construction) reference(proc.construction)
+    if (proc.base) reference(proc.base)
     for (const step of proc.steps) for (const r of step.representations ?? []) reference(r)
   }
   delete a.namespaces
@@ -98,7 +99,7 @@ export function validateKnot(value: unknown, options: ValidationOptions = {}): K
   for (const rep of knot.representations ?? []) if (rep.target && rep.target.kind !== 'subject') { const c = checkConstruction(rep.target.construction,`representations.${rep.id}.target`); if(c) constructions.set(c.id,c) }
   for (const proc of knot.procedures ?? []) if (proc.construction) { const c = checkConstruction(proc.construction,`procedures.${proc.id}.construction`); if(c) constructions.set(c.id,c) }
   const checkData = (type: string, data: unknown, entry: ResourceEntry | undefined, path: string) => {
-    if (type === SPATIAL_CURVE) { const r = validateSpatialCurve(data); if(!r.valid) issues.push(...r.issues.map(e=>({...e,path:`${path}.${e.path}`}))); return }
+    if (type === GEOMETRY_2D || type === GEOMETRY_3D) { const r = type === GEOMETRY_2D ? validateGeometry2D(data) : validateGeometry3D(data); if (!r.valid) issues.push(...r.issues.map(e => ({...e,path: `${path}.${e.path}`}))); return }
     if (type === MOSAIC_DIAGRAM) { const r = validateMosaicDiagram(data); if(!r.valid) issues.push(...r.issues.map(e=>({...e,path:`${path}.${e.path}`}))); return }
     if (type === DT_CODE) { const r = validateDTCode(data); if(!r.valid) issues.push(...r.issues.map(e=>({...e,path:`${path}.${e.path}`}))); return }
     if (type === PD_CODE) { const r = validatePDCode(data); if(!r.valid) issues.push(...r.issues.map(e=>({...e,path:`${path}.${e.path}`}))); return }
@@ -163,16 +164,28 @@ export function validateKnot(value: unknown, options: ValidationOptions = {}): K
         if(!items?.some(v=>v.id === (rep.target as {id:string}).id)) issues.push(issue(`${path}.target.id`,'Unknown target in construction'))
       }
     }
-    if(rep.type === SPATIAL_CURVE && validateSpatialCurve(rep.data).valid) {
-      for(const curve of (rep.data as SpatialCurveData).curves) {
-        totalPoints += curve.points.length
-        if(curve.object && (!rep.target || rep.target.kind === 'subject')) issues.push(issue(`${path}.data.curves.${curve.id}.object`,'Object reference requires construction context'))
-        else if(curve.object && construction && !construction.objects.some(o=>o.id === curve.object)) issues.push(issue(`${path}.data.curves.${curve.id}.object`,'Unknown construction object'))
+    if ((rep.type === GEOMETRY_2D && validateGeometry2D(rep.data).valid) || (rep.type === GEOMETRY_3D && validateGeometry3D(rep.data).valid)) {
+      const data = rep.data as Geometry2DData | Geometry3DData
+      for (const element of data.elements) {
+        totalPoints += element.type === 'curve' ? element.points.length : element.vertices.length
+        if (element.object && (!rep.target || rep.target.kind === 'subject')) issues.push(issue(`${path}.data.elements.${element.id}.object`, 'Object reference requires construction context'))
+        else if (element.object && construction && !construction.objects.some(o => o.id === element.object)) issues.push(issue(`${path}.data.elements.${element.id}.object`, 'Unknown construction object'))
       }
     }
   }
   if(totalPoints > 65536) issues.push(issue('representations','Total point budget exceeded','LIMIT_EXCEEDED'))
   for(const proc of knot.procedures ?? []) {
+    const base = proc.base && !proc.base.ref ? knot.representations?.find(r => r.id === proc.base?.id) : undefined
+    if (proc.base && !base) issues.push(issue(`procedures.${proc.id}.base`, 'Unknown or external base representation'))
+    if (base && base.type !== GEOMETRY_2D && base.type !== GEOMETRY_3D) issues.push(issue(`procedures.${proc.id}.base`, 'Base must be 2D or 3D'))
+    for (const step of proc.steps) {
+      if (!step.data) continue
+      if (!base) { issues.push(issue(`procedures.${proc.id}.steps.${step.id}.data`, 'Step data requires a local base representation')); continue }
+      if (base.type === GEOMETRY_2D || base.type === GEOMETRY_3D) {
+        const result = applyStepData(base.data as Geometry2DData | Geometry3DData, step.data, base.type)
+        if (!result.valid) issues.push(...result.issues.map(e => ({ ...e, path: `procedures.${proc.id}.steps.${step.id}.data.${e.path}` })))
+      }
+    }
     issues.push(...duplicates(proc.steps,`procedures.${proc.id}.steps`))
     for(const step of proc.steps) for(const r of step.representations ?? []) {
       if(r.ref) issues.push(issue(`procedures.${proc.id}.steps.${step.id}`,'External representation references are outside the initial profile'))
