@@ -11,7 +11,7 @@
   "representations": [
     {
       "id": "view-3d-rest",
-      "type": "knot-engine:representation-types/spatial-curve",
+      "type": "knot-engine:representation-types/3d",
       "target": {
         "kind": "state",
         "construction": {
@@ -28,8 +28,9 @@
             "metersPerUnit": 1
           }
         },
-        "curves": [
+        "elements": [
           {
+            "type": "curve",
             "id": "rope-1",
             "object": "rope-1",
             "closed": false,
@@ -49,7 +50,7 @@
     },
     {
       "id": "view-3d-bend",
-      "type": "knot-engine:representation-types/spatial-curve",
+      "type": "knot-engine:representation-types/3d",
       "target": {
         "kind": "state",
         "construction": {
@@ -66,8 +67,9 @@
             "metersPerUnit": 1
           }
         },
-        "curves": [
+        "elements": [
           {
+            "type": "curve",
             "id": "rope-1",
             "object": "rope-1",
             "closed": false,
@@ -87,7 +89,7 @@
     },
     {
       "id": "view-3d-finish",
-      "type": "knot-engine:representation-types/spatial-curve",
+      "type": "knot-engine:representation-types/3d",
       "target": {
         "kind": "state",
         "construction": {
@@ -104,8 +106,9 @@
             "metersPerUnit": 1
           }
         },
-        "curves": [
+        "elements": [
           {
+            "type": "curve",
             "id": "rope-1",
             "object": "rope-1",
             "closed": false,
@@ -227,11 +230,11 @@
   ],
   "representationTypes": [
     {
-      "id": "knot-engine:representation-types/spatial-curve",
-      "name": "spatial-curve",
-      "description": "spatial-curve contract, generation 1",
+      "id": "knot-engine:representation-types/3d",
+      "name": "3d",
+      "description": "3d geometry contract, generation 1",
       "dataSchema": {
-        "ref": "knot-engine:schema/spatial-curve.schema.json"
+        "ref": "knot-engine:schema/3d.schema.json"
       },
       "specification": "knot-engine:specifications/knot.html",
       "viewSpace": "space"
