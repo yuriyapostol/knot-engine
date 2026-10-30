@@ -18,7 +18,7 @@ it('accepts both geometry contracts and checks crossing pair relationships', () 
   expect(validateGeometry3D(three).valid).toBe(true)
   expect(validateGeometry2D({ ...two, crossings: [two.crossings![0]] }).valid).toBe(false)
   expect(validateGeometry2D({ ...two, crossings: [two.crossings![0], { id: 'x', element: 'b', underElement: 'a' }] }).valid).toBe(false)
-  expect(validateGeometry3D({ ...three, elements: [{ ...three.elements[0], faces: [[0,1,9]] }] }).valid).toBe(false)
+  expect(validateGeometry3D({ ...three, elements: [{ id: 'mesh', type: 'mesh', vertices: [[0,0,0],[1,0,0],[0,1,0]], faces: [[0,1,9]] }] }).valid).toBe(false)
 })
 it('applies each step independently to the base and never mutates it', () => {
   const first = applyStepData(two, { replace: [curve('a', [[0, 0], [2, 0]])], crossings: [] }, GEOMETRY_2D)
