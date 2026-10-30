@@ -72,9 +72,9 @@ it('preserves the current camera across steps and quality changes through KnotVi
   await flush()
   expect(calls.setModel.mock.lastCall?.[3]).toEqual(camera)
 })
-it('resets preservation for a new knot object or explicit camera/view', async () => {
+it('resets preservation for a different knot or explicit camera/view', async () => {
   const props = await mount(true)
-  props.knot = structuredClone(loop) as RawKnot
+  props.knot = { ...(structuredClone(loop) as RawKnot), id: 'another-knot' }
   await flush()
   expect(calls.setModel.mock.lastCall?.[3]).toBeUndefined()
   props.initialCamera = camera
