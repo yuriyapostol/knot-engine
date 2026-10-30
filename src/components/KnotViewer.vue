@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import Knot3DViewer from './Knot3DViewer.vue'
 import KnotMosaicViewer from './KnotMosaicViewer.vue'
-import { MOSAIC_DIAGRAM, SPATIAL_CURVE, type RawKnot, type Camera3D, type RawResourceRegistry, type Reference, type ViewDefinition } from '../core'
+import { MOSAIC_DIAGRAM, SPATIAL_CURVE, GEOMETRY_3D, type RawKnot, type Camera3D, type RawResourceRegistry, type Reference, type ViewDefinition } from '../core'
 import type { ViewerMessages } from '../locales'
 import type { ViewerRegistry } from './viewerRegistry'
 import { createViewerRegistry, selectViewerRepresentation } from './viewerRegistry'
@@ -36,6 +36,7 @@ const emit = defineEmits<{
 }>()
 const builtIns = createViewerRegistry([
   { typeUri: SPATIAL_CURVE, component: Knot3DViewer, capabilities: { orbit: true, pan: true, zoom: true, capture: ['png'] } },
+  { typeUri: GEOMETRY_3D, component: Knot3DViewer, capabilities: { orbit: true, pan: true, zoom: true, capture: ['png'] } },
   { typeUri: MOSAIC_DIAGRAM, component: KnotMosaicViewer, capabilities: { pan: true, zoom: true, capture: ['svg'] } },
 ])
 const viewer = ref<{ resetView: () => void; fitToView: () => void; capture: (options?: CaptureOptions) => Promise<Blob> } | null>(null)
