@@ -3,7 +3,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { createApp, defineComponent, h, nextTick, shallowReactive } from 'vue'
 import KnotViewer from '../src/components/KnotViewer.vue'
 import loop from '../v1/examples/knots/twisted-loop.json'
-import type { Camera3D, RawKnot, ViewDefinition } from '../src/core'
+import { applyStepData, GEOMETRY_3D, type Camera3D, type RawKnot, type ViewDefinition, type Geometry3DData } from '../src/core'
 
 const calls = vi.hoisted(() => ({ setModel: vi.fn(), view: vi.fn() }))
 vi.mock('../src/renderer/ViewerEngine', () => ({
@@ -59,8 +59,12 @@ it('keeps refitting representations by default', async () => {
 it('preserves the current camera across steps and quality changes through KnotViewer', async () => {
   const props = await mount(true)
   expect(calls.setModel.mock.lastCall?.[3]).toBeUndefined()
+  const base = loop.representations.find(rep => rep.id === 'view-3d-finish')!
   for (const step of loop.procedures![0].steps) {
-    props.knot = { ...props.knot!, representations: props.knot!.representations!.map(rep => rep.id === 'view-3d-finish' ? { ...rep, data: step.data ? { ...(rep.data as object), ...step.data } : rep.data } : rep) }
+    const result = step.data ? applyStepData(base.data as Geometry3DData, step.data as Parameters<typeof applyStepData>[1], GEOMETRY_3D) : { valid: true as const, data: base.data }
+    expect(result.valid).toBe(true)
+    if (!result.valid) continue
+    props.knot = { ...props.knot!, representations: props.knot!.representations!.map(rep => rep.id === base.id ? { ...rep, data: result.data } : rep) }
     await flush()
     expect(calls.setModel.mock.lastCall?.[3]).toEqual(camera)
   }
