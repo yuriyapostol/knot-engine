@@ -1,19 +1,6 @@
 # Knot v1
 
-The `Knot` contract supports spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, named states, procedures and reusable resources. `RawKnot` is serialized data; the prepared `Knot` provides runtime methods. Other representation formats, animation, properties, relations and classifications need separate contracts; untyped fields for them are not accepted. See [open design questions](../../design/knot-draft.md).
-
-## 2D and 3D geometric representations and step data
-
-The `representation-types/2d` and `representation-types/3d` representation types contain `data.elements`, an array of elements with unique `id`, a `type` discriminator, and optional `object` referencing a construction object. All elements share the representation coordinate system; there are no per-element transforms.
-
-`2d` supports `curve` with `closed`, `interpolation`, and `points: [number,number][]`. `3d` supports `curve` with three-dimensional points and `mesh` with `vertices: [number,number,number][]` and triangular `faces: [number,number,number][]` (zero-based indices). `3d.coordinateSystem` retains the former `spatial-curve` semantics; `2d.coordinateSystem` uses X right, Y up, and the same `scale` rules.
-
-Optional `2d.data.crossings` specifies the order of curve passages through crossings. Each crossing has exactly two records with the same `id`; each record contains `element` and exactly one of `underElement` (the other element is below the current element) or `overElement` (the other element is above it). The subsequence for each `element` is ordered along the curve starting at its first point. A self-crossing uses two passages of the same element with opposite over/under relationships. Crossing positions are computed from geometry, not stored. Tangencies and coincident segments are unsupported.
-
-`RawProcedure.base?: Reference` identifies a base geometric representation, which may be the final state. `RawStep.data?` independently overrides the base using `remove?: string[]` for existing element IDs, `replace?: Element[]` for complete existing elements, and `add?: Element[]` for new complete elements. Optional `crossings?: Crossing[]` entirely replaces the crossing list for 2D (an empty array clears it). Omitted operations have no effect. Steps do not patch each other; the base type and coordinate system are unchanged. `Step.data` requires `Procedure.base`; `Step.representations` remains supported. `Construction.states` is retained.
-
-Other existing representation types remain independent. Migrating `spatial-curve` requires compatibility with existing documents.
-
+The `Knot` contract supports 2D and 3D geometry, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, named states, procedures and reusable resources. `RawKnot` is serialized data; the prepared `Knot` provides runtime methods. Other representation formats, animation, properties, relations and classifications need separate contracts; untyped fields for them are not accepted. See [open design questions](../../design/knot-draft.md).
 
 ## Terminology
 
@@ -24,7 +11,7 @@ Use descriptive concepts in prose. Name `Knot` explicitly when referring to that
 | Knot data object | `Knot`, `knot` |
 | Subject | `subject` |
 | Representation | `Representation`, `representations` |
-| Spatial curves | `spatial-curve` |
+| 2D / 3D geometry | `2d`, `3d` |
 | Grid diagrams | `grid-diagram` |
 | Mosaic diagrams | `mosaic-diagram` |
 | Planar diagram codes | `pd-code` |
@@ -72,17 +59,30 @@ A procedure requires `id` and nonempty `steps`; optional localized `names` and `
 
 Representations may carry optional `names` and `descriptions` arrays of `{language,value}` records, like `subject`. Procedures may carry optional localized `names` and `descriptions` in the same format. Procedure steps may carry `names` in the same format; actionable text uses `instructions` as an array of `{language,value}` records. These fields do not determine UI locale or fallback language.
 
+
+`RawProcedure.base?: Reference` identifies a base geometric representation, which may be the final state. `RawStep.data?` independently overrides the base using `remove?: string[]` for existing element IDs, `replace?: Element[]` for complete existing elements, and `add?: Element[]` for new complete elements. Optional `crossings?: Crossing[]` entirely replaces the crossing list for 2D (an empty array clears it). Omitted operations have no effect. Steps do not patch each other; the base type and coordinate system are unchanged. `Step.data` requires `Procedure.base`; `Step.representations` remains supported. `Construction.states` is retained.
+
 ## Representations
 
 A representation requires `id`, URI `type` and `data`; optional fields are `target`, `names`, `descriptions`, `sources`, `contributions`. IDs are unique in the knot. Type definitions require `id`, `name`, `description`, `dataSchema`, `specification`; optional `viewSpace` is `none` (default), `plane` or `space`. Object type definitions use the same fields except `viewSpace`.
 
 `dataSchema` is `{ref: absolute-or-compact-schema-URI}` or `{inline: JSON-Schema-object}` with an explicit `$schema` dialect. External schemas must be supplied through `options.schemas`; no network resolver is installed. The current custom schema engine supports draft 2020-12. A schema cannot prove domain semantics. Unknown types may pass structural validation while remaining in `uncheckedTypes`; they cannot be rendered or exported as verified self-contained fragments.
 
-### Spatial curves
+### 2D and 3D geometry
 
-Type: `https://yuriyapostol.github.io/knot-engine/v1/representation-types/spatial-curve`.
+The `representation-types/2d` and `representation-types/3d` representation types contain `data.elements`, an array of elements with unique `id`, a `type` discriminator, and optional `object` referencing a construction object. All elements share the representation coordinate system; there are no per-element transforms.
 
-`data` contains `coordinateSystem` and nonempty `curves`. The initial coordinate profile is right-handed with Y up: `{handedness:"right",upAxis:"y",scale}`. Scale is `{kind:"relative"}` or `{kind:"physical",metersPerUnit: positive-number}`. Import does not infer a physical scale or silently move points.
+`2d` supports `curve` with `closed`, `interpolation`, and `points: [number,number][]`. `3d` supports `curve` with three-dimensional points and `mesh` with `vertices: [number,number,number][]` and triangular `faces: [number,number,number][]` (zero-based indices). `3d.coordinateSystem` retains the former `spatial-curve` semantics; `2d.coordinateSystem` uses X right, Y up, and the same `scale` rules.
+
+Optional `2d.data.crossings` specifies the order of curve passages through crossings. Each crossing has exactly two records with the same `id`; each record contains `element` and exactly one of `underElement` (the other element is below the current element) or `overElement` (the other element is above it). The subsequence for each `element` is ordered along the curve starting at its first point. A self-crossing uses two passages of the same element with opposite over/under relationships. Crossing positions are computed from geometry, not stored. Tangencies and coincident segments are unsupported.
+
+`RawProcedure.base?: Reference` identifies a base geometric representation, which may be the final state. `RawStep.data?` independently overrides the base using `remove?: string[]` for existing element IDs, `replace?: Element[]` for complete existing elements, and `add?: Element[]` for new complete elements. Optional `crossings?: Crossing[]` entirely replaces the crossing list for 2D (an empty array clears it). Omitted operations have no effect. Steps do not patch each other; the base type and coordinate system are unchanged. `Step.data` requires `Procedure.base`; `Step.representations` remains supported. `Construction.states` is retained.
+
+Other existing representation types remain independent. Migrating `spatial-curve` requires compatibility with existing documents.
+
+
+
+`data` contains `coordinateSystem` and nonempty `elements`. The initial coordinate profile is right-handed with Y up: `{handedness:"right",upAxis:"y",scale}`. Scale is `{kind:"relative"}` or `{kind:"physical",metersPerUnit: positive-number}`. Import does not infer a physical scale or silently move points.
 
 Each curve requires `id`, `closed`, `interpolation`, `points`; optional `object` identifies an object in the target construction. Curves may describe the subject without a physical construction when no object reference is present. Points are finite XYZ triples, at least two for open curves and three for closed ones. Consecutive duplicates and a repeated closing endpoint are rejected by exact coordinate equality. Geometry closure is separate from rope topology.
 
@@ -94,6 +94,7 @@ Interpolation is one of:
 - `{type:"catmull-rom",parameterization:"chordal"}`.
 
 The renderer uses data coordinates. A physical rope diameter becomes radius `diameter / (2 * metersPerUnit)`. Otherwise display radius is 0.006 times the largest control-point span, with a warning; it is not a physical measurement. The renderer rejects coordinate/camera components above ±1,000,000 and nonpositive or greater-than-1,000,000 radii. These are rendering limits, separate from domain validation. Tube meshes approximate curves and do not prove knot topology or collision freedom.
+
 
 ### Grid diagrams (xo, vertex-pairs)
 
