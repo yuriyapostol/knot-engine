@@ -21,7 +21,7 @@ it('composes fragments of the same document and detects conflicts',()=>{
   expect(composeKnot([a,b]).representations).toHaveLength(2)
   expect(composeKnot([a,a]).representations).toHaveLength(1)
   expect(()=>composeKnot([a,grid])).toThrow()
-  const conflict=structuredClone(a);(conflict.representations![0].data as { curves: { points: number[][] }[] }).curves[0].points[1][0] += 0.01
+  const conflict=structuredClone(a);(conflict.representations![0].data as { elements: { points: number[][] }[] }).elements[0].points[1][0] += 0.01
   expect(()=>composeKnot([a,conflict])).toThrow(/Conflicting/)
   expect(()=>selectKnot(a,{representations:['missing']})).toThrow()
 })
