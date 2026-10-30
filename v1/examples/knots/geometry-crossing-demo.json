@@ -1,6 +1,9 @@
 {
   "schema": "Knot",
   "schemaVersion": 1,
+  "namespaces": {
+    "knot-engine": "https://yuriyapostol.github.io/knot-engine/v1/"
+  },
   "id": "geometry-crossing-demo",
   "subject": {
     "id": "geometry-crossing-demo",
@@ -18,7 +21,7 @@
   "representations": [
     {
       "id": "crossing-2d",
-      "type": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/2d",
+      "type": "knot-engine:representation-types/2d",
       "data": {
         "coordinateSystem": {
           "xAxis": "right",
@@ -36,14 +39,8 @@
               "type": "polyline"
             },
             "points": [
-              [
-                0,
-                0
-              ],
-              [
-                2,
-                2
-              ]
+              [0, 0],
+              [2, 2]
             ]
           },
           {
@@ -54,14 +51,8 @@
               "type": "polyline"
             },
             "points": [
-              [
-                0,
-                2
-              ],
-              [
-                2,
-                0
-              ]
+              [0, 2],
+              [2, 0]
             ]
           }
         ],
@@ -81,7 +72,7 @@
     },
     {
       "id": "crossing-3d",
-      "type": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/3d",
+      "type": "knot-engine:representation-types/3d",
       "data": {
         "coordinateSystem": {
           "handedness": "right",
@@ -99,21 +90,9 @@
               "type": "polyline"
             },
             "points": [
-              [
-                0,
-                0,
-                0.15
-              ],
-              [
-                1,
-                1,
-                0.15
-              ],
-              [
-                2,
-                2,
-                0.15
-              ]
+              [0, 0, 0.15],
+              [1, 1, 0.15],
+              [2, 2, 0.15]
             ]
           },
           {
@@ -124,49 +103,21 @@
               "type": "polyline"
             },
             "points": [
-              [
-                0,
-                2,
-                -0.15
-              ],
-              [
-                1,
-                1,
-                -0.15
-              ],
-              [
-                2,
-                0,
-                -0.15
-              ]
+              [0, 2, -0.15],
+              [1, 1, -0.15],
+              [2, 0, -0.15]
             ]
           },
           {
             "id": "marker",
             "type": "mesh",
             "vertices": [
-              [
-                0.9,
-                0.9,
-                -0.2
-              ],
-              [
-                1.1,
-                0.9,
-                -0.2
-              ],
-              [
-                1,
-                1.1,
-                -0.2
-              ]
+              [0.9, 0.9, -0.2],
+              [1.1, 0.9, -0.2],
+              [1, 1.1, -0.2]
             ],
             "faces": [
-              [
-                0,
-                1,
-                2
-              ]
+              [0, 1, 2]
             ]
           }
         ]
@@ -193,14 +144,8 @@
                   "type": "polyline"
                 },
                 "points": [
-                  [
-                    0,
-                    2
-                  ],
-                  [
-                    2,
-                    2
-                  ]
+                  [0, 2],
+                  [2, 2]
                 ]
               }
             ]
@@ -214,23 +159,23 @@
   ],
   "representationTypes": [
     {
-      "id": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/2d",
+      "id": "knot-engine:representation-types/2d",
       "name": "2d",
       "description": "2d geometry contract, generation 1",
       "dataSchema": {
-        "ref": "https://yuriyapostol.github.io/knot-engine/v1/schema/2d.schema.json"
+        "ref": "knot-engine:schema/2d.schema.json"
       },
-      "specification": "https://yuriyapostol.github.io/knot-engine/v1/specifications/knot.html",
+      "specification": "knot-engine:specifications/knot.html",
       "viewSpace": "plane"
     },
     {
-      "id": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/3d",
+      "id": "knot-engine:representation-types/3d",
       "name": "3d",
       "description": "3d geometry contract, generation 1",
       "dataSchema": {
-        "ref": "https://yuriyapostol.github.io/knot-engine/v1/schema/3d.schema.json"
+        "ref": "knot-engine:schema/3d.schema.json"
       },
-      "specification": "https://yuriyapostol.github.io/knot-engine/v1/specifications/knot.html",
+      "specification": "knot-engine:specifications/knot.html",
       "viewSpace": "space"
     }
   ]
