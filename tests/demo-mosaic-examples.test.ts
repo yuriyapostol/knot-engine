@@ -9,7 +9,7 @@ for (const fixture of [overhand, twistedLoop]) {
   const knot = fixture as unknown as RawKnot
   it(`${knot.id} provides selectable, valid 3D and mosaic representations`, () => {
     expect(validateKnot(knot)).toMatchObject({ valid: true, complete: true })
-    expect(knot.representations).toHaveLength(knot.id === 'twisted-loop' ? 4 : 2)
+    expect(knot.representations).toHaveLength(2)
     const types = knot.representations!.map(rep => expandURI(rep.type, knot.namespaces))
     expect(types).toContain(GEOMETRY_3D)
     expect(types).toContain(MOSAIC_DIAGRAM)
