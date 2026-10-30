@@ -191,5 +191,27 @@
         }
       ]
     }
+  ],
+  "representationTypes": [
+    {
+      "id": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/2d",
+      "name": "2d",
+      "description": "2d geometry contract, generation 1",
+      "dataSchema": {
+        "ref": "https://yuriyapostol.github.io/knot-engine/v1/schema/2d.schema.json"
+      },
+      "specification": "https://yuriyapostol.github.io/knot-engine/v1/specifications/knot.html",
+      "viewSpace": "plane"
+    },
+    {
+      "id": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/3d",
+      "name": "3d",
+      "description": "3d geometry contract, generation 1",
+      "dataSchema": {
+        "ref": "https://yuriyapostol.github.io/knot-engine/v1/schema/3d.schema.json"
+      },
+      "specification": "https://yuriyapostol.github.io/knot-engine/v1/specifications/knot.html",
+      "viewSpace": "space"
+    }
   ]
 }
