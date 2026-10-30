@@ -2,14 +2,13 @@ import { Knot } from './model'
 import { validateGeometry2D, validateGeometry3D, applyStepData } from './validateGeometry'
 import { contributionIssues, licenseIssues, sourceIssues } from './metadata'
 import Ajv2020 from 'ajv/dist/2020.js'
-import { GEOMETRY_2D, GEOMETRY_3D, type Geometry2DData, type Geometry3DData, SPATIAL_CURVE, GRID_DIAGRAM, MOSAIC_DIAGRAM, PD_CODE, DT_CODE, ROPE_TYPE, type RawKnot, type RawResourceRegistry, type Reference, type Construction, type ResourceEntry, type RawRepresentation, type RawRepresentationTypeDefinition, type Dependency, type SpatialCurveData, type RawRepresentationDocument } from './knot'
+import { GEOMETRY_2D, GEOMETRY_3D, type Geometry2DData, type Geometry3DData, GRID_DIAGRAM, MOSAIC_DIAGRAM, PD_CODE, DT_CODE, ROPE_TYPE, type RawKnot, type RawResourceRegistry, type Reference, type Construction, type ResourceEntry, type RawRepresentation, type RawRepresentationTypeDefinition, type Dependency, type RawRepresentationDocument } from './knot'
 import { createResourceIndex, expandURI, normalizeResource, addResource, namespaceIssues, resourceIssues, type ResourceIndex } from './resources'
 import { duplicates, issue, preflight, structure, KNOT_LIMITS } from './validation'
 import { validateMosaicDiagram } from './validateMosaicDiagram'
 import { validateDTCode, dtAnalysisWork } from './validateDTCode'
 import { validatePDCode } from './validatePDCode'
 import { validateGridDiagram } from './validateGridDiagram'
-import { validateSpatialCurve } from './validateSpatial'
 import type { ValidationIssue } from './errors'
 export interface ValidationOptions { strict?: boolean; registries?: readonly RawResourceRegistry[]; schemas?: readonly Record<string, unknown>[] }
 export interface ValidationReport { missingDependencies: Dependency[]; uncheckedTypes: string[]; complete: boolean; warnings: string[] }
@@ -101,7 +100,6 @@ export function validateKnot(value: unknown, options: ValidationOptions = {}): K
   for (const proc of knot.procedures ?? []) if (proc.construction) { const c = checkConstruction(proc.construction,`procedures.${proc.id}.construction`); if(c) constructions.set(c.id,c) }
   const checkData = (type: string, data: unknown, entry: ResourceEntry | undefined, path: string) => {
     if (type === GEOMETRY_2D || type === GEOMETRY_3D) { const r = type === GEOMETRY_2D ? validateGeometry2D(data) : validateGeometry3D(data); if (!r.valid) issues.push(...r.issues.map(e => ({...e,path: `${path}.${e.path}`}))); return }
-    if (type === SPATIAL_CURVE) { const r = validateSpatialCurve(data); if(!r.valid) issues.push(...r.issues.map(e=>({...e,path:`${path}.${e.path}`}))); return }
     if (type === MOSAIC_DIAGRAM) { const r = validateMosaicDiagram(data); if(!r.valid) issues.push(...r.issues.map(e=>({...e,path:`${path}.${e.path}`}))); return }
     if (type === DT_CODE) { const r = validateDTCode(data); if(!r.valid) issues.push(...r.issues.map(e=>({...e,path:`${path}.${e.path}`}))); return }
     if (type === PD_CODE) { const r = validatePDCode(data); if(!r.valid) issues.push(...r.issues.map(e=>({...e,path:`${path}.${e.path}`}))); return }
@@ -172,13 +170,6 @@ export function validateKnot(value: unknown, options: ValidationOptions = {}): K
         totalPoints += element.type === 'curve' ? element.points.length : element.vertices.length
         if (element.object && (!rep.target || rep.target.kind === 'subject')) issues.push(issue(`${path}.data.elements.${element.id}.object`, 'Object reference requires construction context'))
         else if (element.object && construction && !construction.objects.some(o => o.id === element.object)) issues.push(issue(`${path}.data.elements.${element.id}.object`, 'Unknown construction object'))
-      }
-    }
-    if(rep.type === SPATIAL_CURVE && validateSpatialCurve(rep.data).valid) {
-      for(const curve of (rep.data as SpatialCurveData).curves) {
-        totalPoints += curve.points.length
-        if(curve.object && (!rep.target || rep.target.kind === 'subject')) issues.push(issue(`${path}.data.curves.${curve.id}.object`,'Object reference requires construction context'))
-        else if(curve.object && construction && !construction.objects.some(o=>o.id === curve.object)) issues.push(issue(`${path}.data.curves.${curve.id}.object`,'Unknown construction object'))
       }
     }
   }
