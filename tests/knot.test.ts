@@ -27,9 +27,9 @@ describe('RawKnot generation 1', () => {
   })
   it('keeps procedures independent of interpolation point counts',()=>{
     const a=structuredClone(multi)
-    a.representations[1].data.elements[0].points.push([2,3,4])
+    a.procedures[0].steps[0].data.replace[0].points.push([2,3,4])
     expect(validateKnot(a)).toMatchObject({valid:true,complete:true})
-    a.procedures[0].steps[0].representations[0].id='missing'
+    a.procedures[0].base.id='missing'
     expect(validateKnot(a).valid).toBe(false)
   })
   it('reports missing dependencies separately from validity',()=>{
