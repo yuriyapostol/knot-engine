@@ -6,35 +6,6 @@
   },
   "resources": [
     {
-      "kind": "representation-type",
-      "resource": {
-        "id": "knot-engine:representation-types/spatial-curve",
-        "name": "spatial-curve",
-        "description": "spatial-curve contract, generation 1",
-        "dataSchema": {
-          "ref": "knot-engine:schema/spatial-curve.schema.json"
-        },
-        "specification": "knot-engine:specifications/knot.html",
-        "viewSpace": "space",
-        "names": [
-          {
-            "language": "en",
-            "value": "Spatial curve"
-          },
-          {
-            "language": "uk",
-            "value": "Просторова крива"
-          }
-        ],
-        "descriptions": [
-          {
-            "language": "en",
-            "value": "spatial-curve contract, generation 1"
-          }
-        ]
-      }
-    },
-    {
       "kind": "object-type",
       "resource": {
         "id": "knot-engine:object-types/rope",
