@@ -100,12 +100,12 @@ describe('prepared Knot model', () => {
     const rep = knot.getRepresentation('view-3d-rest')!
     expect(rep.getName()).toBe('Мій вигляд')
     expect(rep.getTypeDefinition()?.getName()).toBe('Мій тип')
-    expect(rep.getName('en')).toBe('3d')
+    expect(rep.getName('en')).toBe('3D geometry')
     expect(knot.clone().getRepresentation('view-3d-rest')?.getName()).toBe('Мій вигляд')
     expect(knot.select({ representations: ['view-3d-rest'] }).getRepresentation('view-3d-rest')?.getName()).toBe('Мій вигляд')
     expect(knot.toRaw()).toEqual(raw)
     const other = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
-    expect(other.getRepresentation('view-3d-rest')?.getName()).toBe('3d')
+    expect(other.getRepresentation('view-3d-rest')?.getName()).toBe('3D geometry')
   })
   it('edits procedures and steps without replacing unrelated entities', () => {
     const knot = Knot.from(raw as any)
