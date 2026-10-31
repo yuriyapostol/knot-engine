@@ -8,7 +8,7 @@ API ядра імпортується з `knot-engine/core`; ця точка в�
 | `validateGridDiagram(value)` | `{valid:true,data,diagram,warnings,componentCount,crossingCount}` або помилки; незалежна перевірка сіткових діаграм із кодуванням `xo` або `vertex-pairs` |
 | `validateDTCode(value)` | `{valid:true,data,code,warnings,componentCount,crossingCount}` або помилки; числовий DT вузлів і зачеплень із перевіркою планарної реалізовності |
 | `validatePDCode(value)` | `{valid:true,data,code,warnings,componentCount,crossingCount}` або помилки; незалежна перевірка коду планарної діаграми |
-| `validateSpatialCurve(value)` | `{valid:true,data,warnings}` або помилки |
+| `validateGeometry2D(value)` / `validateGeometry3D(value)` | `{valid:true,data,warnings}` або помилки |
 | `validateMosaicDiagram(value)` | `{valid:true,data,diagram,warnings,componentCount,occupiedTileCount,crossingCount}` або помилки; незалежна перевірка мозаїчної діаграми |
 | `validateView(value)` | `{valid:true,data,warnings}` або помилки |
 | `validateResourceDocument(value)` | Перевірена оболонка ресурсу або помилки; не встановлює замкненості залежностей |
@@ -21,7 +21,7 @@ API ядра імпортується з `knot-engine/core`; ця точка в�
 
 `Knot.validate()` і `knot.validate()` приймають `registries` (масив `RawResourceRegistry`). `ValidationOptions` для перевірки/вибору представлення додатково приймає `schemas` (явні об’єкти JSON Schema). Відомі об’єкти завжди закриті; `strict: false` не послаблює перевірку. `STANDARD_RESOURCES` надає визначення вбудованих типів представлень і предметів при явному передаванні. Експортуються типи, `ViewerError`, `KNOT_LIMITS`, константи простору імен і URI типів.
 
-Вбудовані переглядачі відображають просторові криві та SVG-мозаїки. Відображення вимагає повної перевірки вибраного представлення та його залежностей; виділення — повного документа. Дані невідомих типів можна зберігати з неповним звітом перевірки. Жодна операція не доводить математичної тотожності вузла.
+Вбудовані переглядачі відображають 2D-криві, 3D-криві й сітки та SVG-мозаїки. Відображення вимагає повної перевірки вибраного представлення та його залежностей; виділення — повного документа. Дані невідомих типів можна зберігати з неповним звітом перевірки. Жодна операція не доводить математичної тотожності вузла.
 
 Див. [семантику даних](knot.uk.md) і [API компонента](components.uk.md).
 

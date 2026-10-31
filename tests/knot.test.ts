@@ -13,6 +13,20 @@ describe('RawKnot generation 1', () => {
     expect(result,JSON.stringify(result)).toMatchObject({valid:true,complete:true})
   })
   for(const file of readdirSync('v1/examples/knots/invalid')) it(`rejects ${file}`,()=>expect(validateKnot(JSON.parse(readFileSync(`v1/examples/knots/invalid/${file}`,'utf8'))).valid).toBe(false))
+  it.each([
+    ['broken-object.json', 'Unknown construction object'],
+    ['closed-ends.json', 'ends'],
+    ['duplicate-representation.json', 'Duplicate ID']
+  ])('checks the intended error in the 3d fixture %s', (file, message) => {
+    const value = JSON.parse(readFileSync(`v1/examples/knots/invalid/${file}`, 'utf8'))
+    const result = validateKnot(value)
+    expect(result.valid).toBe(false)
+    if (!result.valid) expect(result.issues.some(issue => issue.message.includes(message) || issue.path.includes(message))).toBe(true)
+    if (file === 'broken-object.json') value.representations[0].data.elements[0].object = 'rope-1'
+    if (file === 'closed-ends.json') value.constructions[0].objects[0].topology = 'open'
+    if (file === 'duplicate-representation.json') value.representations.pop()
+    expect(validateKnot(value)).toMatchObject({ valid: true, complete: true })
+  })
   it('accepts metadata-only documents and rejects old roots',()=>{
     expect(validateKnot({schema:'Knot',schemaVersion:1,id:'document',subject:{id:'subject'}})).toMatchObject({valid:true,complete:true})
     expect(validateKnot({schemaVersion:1,curves:[]} ).valid).toBe(false)

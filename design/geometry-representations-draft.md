@@ -1,10 +1,10 @@
 # 2D/3D geometry and procedure states — design contract
 
-> Design contract for the upcoming implementation. Existing v1 runtime and JSON Schemas are not yet changed.
+> Design notes for the implemented 2D/3D contracts. See the [v1 specification](../v1/specifications/knot.md) for the current normative contract and the implementation status below for limitations.
 
 ## Scope and compatibility
 
-The new representation type URIs end in `representation-types/2d` and `representation-types/3d`. Short names in examples stand for the full type URIs. The existing `spatial-curve` remains valid until migration is implemented. The existing `grid-diagram`, `mosaic-diagram`, `pd-code`, and `dt-code` are independent types and remain available.
+The representation type URIs end in `representation-types/2d` and `representation-types/3d`. Short names in examples stand for the full type URIs. The existing `grid-diagram`, `mosaic-diagram`, `pd-code`, and `dt-code` are independent types and remain available.
 
 The existing `Representation`, `target`, `Construction.objects`, `Construction.states`, `target.kind: "state"`, and `Procedure.steps[].representations` are retained.
 
@@ -14,7 +14,7 @@ Both representation types contain `data.elements`, a nonempty array of heterogen
 
 Initial primitives: `curve` in 2D and 3D, `mesh` in 3D only. A curve retains the existing `closed`, `interpolation`, and `points` semantics. Points are numeric pairs in 2D and numeric triples in 3D. A mesh contains `vertices` (3D triples) and `faces` (triples of zero-based vertex indices). A mesh describes a surface, not necessarily a closed solid.
 
-The initial `3d.coordinateSystem` retains the current `spatial-curve` contract: `handedness: "right"`, `upAxis: "y"`, and `scale: {kind:"relative"}` or `{kind:"physical",metersPerUnit: ...}`. The 2D coordinate system needs a precise axis/orientation definition in the normative specification.
+`3d.coordinateSystem` uses `handedness: "right"`, `upAxis: "y"`, and `scale: {kind:"relative"}` or `{kind:"physical",metersPerUnit: ...}`. `2d.coordinateSystem` uses `xAxis: "right"`, `yAxis: "up"`, and the same scale rules.
 
 ### 3D example
 

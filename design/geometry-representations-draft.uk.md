@@ -1,10 +1,10 @@
 # Проєкт контрактів геометрії 2D/3D і станів процедури
 
-> Статус: проєкт для узгодження, **не чинна специфікація v1**. Код, JSON Schema та переглядачі поки не змінено.
+> Проєктні нотатки до реалізованих контрактів 2D/3D. Чинний нормативний контракт визначено у [специфікації v1](../v1/specifications/knot.uk.md); обмеження наведено нижче в розділі про стан реалізації.
 
 ## Мета та сумісність
 
-Запропоновані URI типів представлень закінчуються на `representation-types/2d` та `representation-types/3d`. У JSON прикладах нижче для читабельності показані короткі назви; фактичне поле `Representation.type` використовує URI, як і зараз. Наявний `spatial-curve` поки залишається чинним. Його міграцію слід визначити окремо перед реалізацією. `grid-diagram`, `mosaic-diagram`, `pd-code`, `dt-code` не замінюються цими типами.
+URI типів представлень закінчуються на `representation-types/2d` та `representation-types/3d`. У JSON прикладах нижче для читабельності показані короткі назви; фактичне поле `Representation.type` використовує URI, як і зараз. `grid-diagram`, `mosaic-diagram`, `pd-code`, `dt-code` не замінюються цими типами.
 
 `Representation` і `target` залишаються наявними. `Construction.objects`, `Construction.states` та `target.kind: "state"` **залишаються**. `Procedure.steps[].representations` також зберігається.
 
@@ -14,7 +14,7 @@
 
 Початкові примітиви: `curve` у 2D та 3D, `mesh` лише у 3D. `curve` зберігає `closed`, `interpolation`, `points` і чинну семантику кривих. 2D-точка — пара чисел, 3D-точка — трійка. `mesh` має `vertices` (3D-точки) та `faces` (трійки індексів вершин із нуля). Сітка описує поверхню, а не обов'язково замкнене фізичне тіло.
 
-Для `3d` початково зберігається нинішній `coordinateSystem` із `spatial-curve`: `handedness: "right"`, `upAxis: "y"`, `scale: {kind:"relative"}` або `{kind:"physical",metersPerUnit: ...}`. Точний 2D-контракт `coordinateSystem` (осі, орієнтація, масштаб) треба визначити перед реалізацією.
+`3d.coordinateSystem` використовує `handedness: "right"`, `upAxis: "y"`, `scale: {kind:"relative"}` або `{kind:"physical",metersPerUnit: ...}`. `2d.coordinateSystem` використовує `xAxis: "right"`, `yAxis: "up"` та ті самі правила масштабу.
 
 ### Приклад 3D
 

@@ -11,7 +11,7 @@
   "representations": [
     {
       "id": "view-3d-rest",
-      "type": "knot-engine:representation-types/spatial-curve",
+      "type": "knot-engine:representation-types/3d",
       "target": {
         "kind": "state",
         "construction": {
@@ -28,8 +28,9 @@
             "metersPerUnit": 1
           }
         },
-        "curves": [
+        "elements": [
           {
+            "type": "curve",
             "id": "rope-1",
             "object": "missing",
             "closed": false,
@@ -45,10 +46,6 @@
             ]
           }
         ]
-      },
-      "preferredView": {
-        "direction": [0, 0, 1],
-        "up": [0, 1, 0]
       }
     }
   ],
@@ -86,18 +83,18 @@
       "dataSchema": {
         "ref": "knot-engine:schema/rope-object.schema.json"
       },
-      "specification": "knot-engine:specifications/knot-knot.html"
+      "specification": "knot-engine:specifications/knot.html"
     }
   ],
   "representationTypes": [
     {
-      "id": "knot-engine:representation-types/spatial-curve",
-      "name": "spatial-curve",
-      "description": "spatial-curve contract, generation 1",
+      "id": "knot-engine:representation-types/3d",
+      "name": "3d",
+      "description": "3d geometry contract, generation 1",
       "dataSchema": {
-        "ref": "knot-engine:schema/spatial-curve.schema.json"
+        "ref": "knot-engine:schema/3d.schema.json"
       },
-      "specification": "knot-engine:specifications/knot-knot.html",
+      "specification": "knot-engine:specifications/knot.html",
       "viewSpace": "space"
     }
   ]

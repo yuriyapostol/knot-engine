@@ -2,7 +2,7 @@
 
 [English](README.md) | [Українська](README.uk.md)
 
-Knot modeling and rendering package with Vue 3 `KnotViewer`. The current `Knot` supports spatial curves, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, states, procedures and explicit resource registries. Built-in viewers render static 3D curves with perspective/orthographic cameras and PNG capture, or mosaics as SVG with pan, zoom and SVG capture.
+Knot modeling and rendering package with Vue 3 `KnotViewer`. The current `Knot` supports 2D and 3D geometry, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, states, procedures and explicit resource registries. Built-in viewers render static 3D curves and meshes with perspective/orthographic cameras and PNG capture, and 2D curves or mosaics as SVG with pan, zoom and SVG capture.
 
 ## Run locally
 

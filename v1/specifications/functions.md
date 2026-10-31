@@ -8,7 +8,7 @@ Import core APIs from `knot-engine/core`; this entry point uses no Vue, Three.js
 | `validateGridDiagram(value)` | `{valid:true,data,diagram,warnings,componentCount,crossingCount}` or issues; independent grid diagram validation with `xo` or `vertex-pairs` encoding |
 | `validateDTCode(value)` | `{valid:true,data,code,warnings,componentCount,crossingCount}` or issues; numeric knot/link DT with planar-realizability validation |
 | `validatePDCode(value)` | `{valid:true,data,code,warnings,componentCount,crossingCount}` or issues; independent planar diagram code validation |
-| `validateSpatialCurve(value)` | `{valid:true,data,warnings}` or issues |
+| `validateGeometry2D(value)` / `validateGeometry3D(value)` | `{valid:true,data,warnings}` or issues |
 | `validateMosaicDiagram(value)` | `{valid:true,data,diagram,warnings,componentCount,occupiedTileCount,crossingCount}` or issues; independent mosaic diagram validation |
 | `validateView(value)` | `{valid:true,data,warnings}` or issues |
 | `validateResourceDocument(value)` | Validated resource envelope or issues; does not establish dependency closure |
@@ -21,7 +21,7 @@ Import core APIs from `knot-engine/core`; this entry point uses no Vue, Three.js
 
 `Knot.validate()` and `knot.validate()` accept `registries` (array of `RawResourceRegistry`). The `ValidationOptions` used by representation validation/selection additionally accept `schemas` (explicit JSON Schema objects). Known objects are always closed; `strict: false` does not relax validation. `STANDARD_RESOURCES` provides the built-in representation and object type definitions when passed explicitly. Type definitions, `ViewerError`, `KNOT_LIMITS`, namespace and type URI constants are exported.
 
-Built-in viewers render spatial curves and SVG mosaics. Rendering requires complete validation of the selected representation and its dependencies; extraction requires a complete document. Unknown type data can be preserved with an incomplete report. No operation proves the mathematical identity of a knot.
+Built-in viewers render 2D curves, 3D curves and meshes, and SVG mosaics. Rendering requires complete validation of the selected representation and its dependencies; extraction requires a complete document. Unknown type data can be preserved with an incomplete report. No operation proves the mathematical identity of a knot.
 
 See [data semantics](knot.md) and [component API](components.md).
 

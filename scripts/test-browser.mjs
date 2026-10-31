@@ -173,7 +173,7 @@ try {
   }
   const edited = structuredClone(knot)
   edited.id = 'edited-knot'
-  edited.representations[2].data.curves[0].points[1][1] += 0.1
+  edited.representations[2].data.elements[0].points[1][1] += 0.1
   await editor.fill(JSON.stringify(edited))
   await waitForModel('edited-knot')
   assert.equal(await page.locator('.knot-engine-v1-demo__representation-select').inputValue(), 'view-3d-finish', 'Editing must preserve selected representation')

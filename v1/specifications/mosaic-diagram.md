@@ -71,7 +71,7 @@ Extraction shall retain the representation, its type resources and any target de
 
 `validateMosaicDiagram(data)` checks structure and semantics. Success returns `diagram`, `data`, `componentCount`, `occupiedTileCount` and `crossingCount`. JSON Schema checks structure; square shape, port matching, boundaries and components are runtime checks.
 
-The type is semantically checked without `uncheckedTypes`; completeness still requires its resources, for example via `STANDARD_RESOURCES`. The 3D resolver remains spatial-curve-only. `KnotMosaicViewer` renders this profile as SVG and `KnotViewer` dispatches to it.
+The type is semantically checked without `uncheckedTypes`; completeness still requires its resources, for example via `STANDARD_RESOURCES`. The 3D resolver handles only `3d` representations. `KnotMosaicViewer` renders this profile as SVG and `KnotViewer` dispatches to it.
 
 ## Examples and acceptance cases
 

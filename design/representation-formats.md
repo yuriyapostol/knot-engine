@@ -66,7 +66,7 @@ This extracts two original values; it does not propose putting both in one `repr
 
 The implemented knot/link [DT profile](../v1/specifications/dt-code.md) uses `convention` and `code`, with signs and traversal tied to the [KnotInfo DT description](https://knotinfo.org/descriptions/dt_notation.html). Do not mix package conventions because their arrays look alike. [Spherogram](https://snappy.computop.org/spherogram.html) documents its own PD rules and orientation caveats. The profile checks planar realizability but does not reconstruct a unique PD embedding; `[4,6,2]` is not a universal context-free format. Multicomponent DT uses nested component arrays with global numbering; explicit embedding choices remain separate work.
 
-## 3. Spatial curve
+## 3. 3D geometry
 
 The [page HTML](https://knotinfo.org/diagram_display.php?3_1) contains 79 XYZ points. The first, `[0.9008,-0.1947,0.0825]`, is not repeated at the end. The page subtracts the mean, constructs `THREE.CatmullRomCurve3` and sets `closed` `true`. The [Three.js version loaded by the page](https://knotinfo.org/Diagrams_All_Folders/diagrams_3d/three.js) defaults to `centripetal` interpolation (r132).
 
@@ -130,6 +130,6 @@ One `grid-diagram` type now supports `xo` and `vertex-pairs`, both zero-based wi
 
 ## 6. Implementation and remaining import work
 
-Spatial curves, both grid encodings, mosaics, PD and numeric DT for knots/links have implemented data and validation contracts. Spatial curves and mosaics also have built-in viewers. Image containers, editable planar diagrams, other notations and format converters need separate contracts and tests.
+3D geometry, both grid encodings, mosaics, PD and numeric DT for knots/links have implemented data and validation contracts. 3D geometry and mosaics also have built-in viewers. Image containers, editable planar diagrams, other notations and format converters need separate contracts and tests.
 
 Each import needs primary-source fixtures and preservation checks for geometry, closure, components, crossings, orientation, parameterization and provenance. A generated layout must not be presented as an original source image. Mathematical equivalence remains a separate task.

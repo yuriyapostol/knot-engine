@@ -71,7 +71,7 @@
 
 `validateMosaicDiagram(data)` перевіряє структуру та семантику. Успішний результат містить `diagram`, `data`, `componentCount`, `occupiedTileCount`, `crossingCount`. Схема перевіряє структуру; квадратність, стикування, межі й компоненти перевіряє runtime.
 
-Тип семантично перевіряється без `uncheckedTypes`; для `complete` мають бути доступні потрібні ресурси, наприклад через `STANDARD_RESOURCES`. `KnotMosaicViewer` відображає цей профіль як SVG, а `KnotViewer` делегує йому відображення.
+Тип семантично перевіряється без `uncheckedTypes`; для `complete` мають бути доступні потрібні ресурси, наприклад через `STANDARD_RESOURCES`. 3D-resolver обробляє лише представлення `3d`. `KnotMosaicViewer` відображає цей профіль як SVG, а `KnotViewer` делегує йому відображення.
 
 ## Приклади й критерії приймання
 

@@ -1,6 +1,6 @@
 # Viewer components
 
-`KnotViewer` selects and delegates one static representation of a [`RawKnot` or prepared `Knot`](prepared-model.md). Built-ins render spatial curves with `Knot3DViewer` and mosaics with `KnotMosaicViewer`. Grid, PD and DT have no built-in viewers. Replace input objects to update data; deep mutation is unsupported. Selection and validation precede renderer allocation.
+`KnotViewer` selects and delegates one static representation of a [`RawKnot` or prepared `Knot`](prepared-model.md). Built-ins render 2D curves with `Knot2DViewer`, 3D curves and meshes with `Knot3DViewer`, and mosaics with `KnotMosaicViewer`. Grid, PD and DT have no built-in viewers. Replace input objects to update data; deep mutation is unsupported. Selection and validation precede renderer allocation.
 
 | Prop | Meaning |
 | --- | --- |

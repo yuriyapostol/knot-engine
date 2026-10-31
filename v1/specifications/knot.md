@@ -72,13 +72,13 @@ A representation requires `id`, URI `type` and `data`; optional fields are `targ
 
 The `representation-types/2d` and `representation-types/3d` representation types contain `data.elements`, an array of elements with unique `id`, a `type` discriminator, and optional `object` referencing a construction object. All elements share the representation coordinate system; there are no per-element transforms.
 
-`2d` supports `curve` with `closed`, `interpolation`, and `points: [number,number][]`. `3d` supports `curve` with three-dimensional points and `mesh` with `vertices: [number,number,number][]` and triangular `faces: [number,number,number][]` (zero-based indices). `3d.coordinateSystem` retains the former `spatial-curve` semantics; `2d.coordinateSystem` uses X right, Y up, and the same `scale` rules.
+`2d` supports `curve` with `closed`, `interpolation`, and `points: [number,number][]`. `3d` supports `curve` with three-dimensional points and `mesh` with `vertices: [number,number,number][]` and triangular `faces: [number,number,number][]` (zero-based indices). `3d.coordinateSystem` is right-handed with Y up; `2d.coordinateSystem` uses X right, Y up, and the same `scale` rules.
 
 Optional `2d.data.crossings` specifies the order of curve passages through crossings. Each crossing has exactly two records with the same `id`; each record contains `element` and exactly one of `underElement` (the other element is below the current element) or `overElement` (the other element is above it). The subsequence for each `element` is ordered along the curve starting at its first point. A self-crossing uses two passages of the same element with opposite over/under relationships. Crossing positions are computed from geometry, not stored. Tangencies and coincident segments are unsupported.
 
 `RawProcedure.base?: Reference` identifies a base geometric representation, which may be the final state. `RawStep.data?` independently overrides the base using `remove?: string[]` for existing element IDs, `replace?: Element[]` for complete existing elements, and `add?: Element[]` for new complete elements. Optional `crossings?: Crossing[]` entirely replaces the crossing list for 2D (an empty array clears it). Omitted operations have no effect. Steps do not patch each other; the base type and coordinate system are unchanged. `Step.data` requires `Procedure.base`; `Step.representations` remains supported. `Construction.states` is retained.
 
-Other non-geometric representation types remain independent. The legacy `spatial-curve` type is not part of the current contract.
+Other non-geometric representation types remain independent.
 
 
 
@@ -124,7 +124,7 @@ The application passes a `view` (inline `ViewDefinition`, local `{id}`, or regis
 
 ## Standalone contracts and resources
 
-Independent schemas are available for grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, spatial curves, representation, construction, view, catalog, representation type, object type and rope/equipment objects. Each published schema includes only its needed definitions and can be compiled without the root knot schema. Generated schemas come from `src/core/contracts.json` via `npm run build:schemas`.
+Independent schemas are available for grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, 2D and 3D geometry, representation, construction, view, catalog, representation type, object type and rope/equipment objects. Each published schema includes only its needed definitions and can be compiled without the root knot schema. Generated schemas come from `src/core/contracts.json` via `npm run build:schemas`.
 
 `RawResourceDocument` requires `schema`, `schemaVersion`, `kind`, `resource`; optional `$schema`, `namespaces`, `dependencies`. Kinds: `catalog`, `representation-type`, `object-type`, `view`, `construction`, `source`. A standalone resource requires a global ID. `RawResourceRegistry` requires `schema`, `schemaVersion`, `resources:[{kind,resource}]`, with optional `$schema`, `namespaces`, `id`. A registry is an ordinary document, not a server or singleton. `RawRepresentationDocument` requires `schema`, `schemaVersion`, `representation`, with optional `$schema`, `namespaces`, `dependencies`, `subject`, `sources`.
 
