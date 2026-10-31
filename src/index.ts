@@ -1,3 +1,5 @@
+export { default as Knot2DViewer } from './components/Knot2DViewer.vue'
+export type { Geometry2DView } from './components/Knot2DViewer.vue'
 export { default as KnotMosaicViewer } from './components/KnotMosaicViewer.vue'
 export { default as Knot3DViewer } from './components/Knot3DViewer.vue'
 export { createViewerRegistry, findViewer, selectViewerRepresentation } from './components/viewerRegistry'

@@ -6,15 +6,15 @@ declare global {
   interface Window {
     __previewKnot?: RawKnot
     __previewSelection?: RepresentationSelection
-    __previewSetInput?: (input: { knot?: RawKnot; selection?: RepresentationSelection }) => void
+    __previewSetInput?: (input: { knot?: RawKnot; selection?: RepresentationSelection; interactive?: boolean }) => void
     __previewReady?: boolean
     __previewError?: string
     __previewCapture?: (width: number, height: number) => Promise<Blob>
   }
 }
 const viewer = ref<InstanceType<typeof KnotViewer> | null>(null)
-const input = shallowRef({ knot: window.__previewKnot, selection: window.__previewSelection })
-window.__previewSetInput = value => { window.__previewReady = false; window.__previewError = undefined; input.value = { knot: value.knot, selection: value.selection } }
+const input = shallowRef({ knot: window.__previewKnot, selection: window.__previewSelection, interactive: false })
+window.__previewSetInput = value => { window.__previewReady = false; window.__previewError = undefined; input.value = { knot: value.knot, selection: value.selection, interactive: value.interactive ?? false } }
 createApp({
   setup() {
     return () => h(KnotViewer, {
@@ -24,7 +24,7 @@ createApp({
       view: input.value.selection?.view,
       label: 'Model preview',
       showControls: false,
-      interactive: false,
+      interactive: input.value.interactive,
       onReady: () => { window.__previewReady = true },
       onError: (error: { code: string; message: string }) => { window.__previewError = `${error.code}: ${error.message}` }
     })

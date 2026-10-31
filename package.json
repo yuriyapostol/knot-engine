@@ -32,7 +32,11 @@
     },
     "./styles.css": "./dist/style.css",
     "./schema/asset.schema.json": "./v1/schema/asset.schema.json",
-    "./schema/*": "./v1/schema/*"
+    "./schema/*": "./v1/schema/*",
+    "./2d": {
+      "types": "./dist/2d/index.d.ts",
+      "import": "./dist/2d/index.js"
+    }
   },
   "scripts": {
     "build": "vue-tsc --noEmit && vite build && vue-tsc -p tsconfig.build.json",

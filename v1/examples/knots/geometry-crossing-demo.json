@@ -9,12 +9,12 @@
     "id": "geometry-crossing-demo",
     "names": [
       {
-        "language": "uk",
-        "value": "Приклад перетину кривих"
-      },
-      {
         "language": "en",
         "value": "Curve crossing example"
+      },
+      {
+        "language": "uk",
+        "value": "Приклад перетину кривих"
       }
     ]
   },
@@ -144,8 +144,8 @@
                   "type": "polyline"
                 },
                 "points": [
-                  [0, 2],
-                  [2, 2]
+                  [0, 2.5],
+                  [2, 2.5]
                 ]
               }
             ]

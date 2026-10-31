@@ -77,7 +77,7 @@ Self-crossing:
 }
 ```
 
-Implementation must verify correspondence with actual geometry for repeated intersections of the same curves, self-crossings, closed curves, and Catmull–Rom interpolation. Tangencies, coincident spans, and ambiguous intersections are outside the initial supported crossing profile. Numerical tolerances and validation/viewer behavior must be specified.
+The viewer verifies correspondence with actual geometry for repeated intersections of the same curves, self-crossings, closed curves, and Catmull–Rom interpolation, within the numerical limits of the [2D viewer profile](../v1/specifications/components.md#2d-geometry-viewer). Detected tangencies, coincident spans, and ambiguous intersections are rejected. Geometric correspondence is checked by the viewer; the core validator checks structure and crossing pairs.
 
 ## Intermediate procedure geometry
 
@@ -93,7 +93,7 @@ Intermediate animation phases, material coordinates along rope, local transforms
 
 Implemented: `2d` and `3d` representation types, JSON Schemas, structural validation, `Procedure.base` and independent `Step.data` overrides, 3D curves and triangle meshes, the 2D SVG viewer, and the `v1/examples/knots/geometry-crossing-demo.json` example.
 
-**Current limitation:** matching `crossings` records to actual intersections is implemented in the 2D viewer for `polyline` only. `validateGeometry2D` validates paired crossing records but does not compute geometric intersections. Catmull–Rom crossings in the 2D viewer, tangencies, overlapping spans, and ambiguous intersections are not yet supported.
+**Current implementation:** the 2D viewer renders polyline and Catmull–Rom geometry, matches ordered crossing records, resolves plane views and supports pan, zoom and SVG capture. Spline intersections use bounded adaptive subdivision; detected contacts, overlaps and ambiguous intersections are rejected. `validateGeometry2D` checks crossing pairs without computing intersections. Features below the subdivision tolerance are not certified. See the [2D viewer profile](../v1/specifications/components.md#2d-geometry-viewer) for budgets and numerical limits.
 
 ## Step data contract
 

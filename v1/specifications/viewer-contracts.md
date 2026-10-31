@@ -1,6 +1,6 @@
 # Representation selection and viewer contracts
 
-The package implements representation selection, registry dispatch, 3D and SVG mosaic viewers, and application-owned view settings. See the [component API](components.md) for props and [data contract](knot.md) for domain semantics.
+The package implements representation selection, registry dispatch, 3D, SVG 2D and mosaic viewers, and application-owned view settings. See the [component API](components.md) for props and [data contract](knot.md) for domain semantics.
 
 ## Core selection
 
@@ -21,11 +21,11 @@ The root must satisfy the `RawKnot` structure; optional sections may be omitted.
 
 `KnotViewer` uses a `ViewerRegistry`, a `ReadonlyMap<string, ViewerRegistration>` keyed by expanded absolute type URI. `createViewerRegistry(entries)` rejects duplicate keys; each entry has `typeUri`, Vue `component` and readonly `capabilities`. `findViewer(knot, type, registry)` expands a type in the knot's namespaces. `selectViewerRepresentation(knot, registry, representationId?)` applies compositor selection independently of rendering.
 
-Built-ins map `3d` to `Knot3DViewer` and `mosaic-diagram` to `KnotMosaicViewer`. A caller's `registry` replaces the built-ins. Without `representationId`, exactly one registered representation must exist; multiple supported representations require an ID, even of the same type. Unsupported siblings are ignored for dispatch. An explicit ID has no fallback. Zero registered candidates produce `UNSUPPORTED_REPRESENTATION`; missing or malformed representation collections receive core diagnostics.
+Built-ins map `2d` to `Knot2DViewer`, `3d` to `Knot3DViewer` and `mosaic-diagram` to `KnotMosaicViewer`. A caller's `registry` replaces the built-ins. Without `representationId`, exactly one registered representation must exist; multiple supported representations require an ID, even of the same type. Unsupported siblings are ignored for dispatch. An explicit ID has no fallback. Zero registered candidates produce `UNSUPPORTED_REPRESENTATION`; missing or malformed representation collections receive core diagnostics.
 
 Specialized viewers call core selection with their fixed type and also require an ID when multiple matches exist. All viewers accept `RawKnot` or prepared `Knot` with the selected representation's required context. A type resource alone does not register a renderer. Registries neither load code nor fetch data.
 
-Capabilities declare `orbit`, `pan`, `zoom`, `edit`, capture formats `png`/`svg`, and `sequences`. Built-in 3D supports orbit/pan/zoom and PNG; mosaic supports pan/zoom and SVG. Sequence schemas and navigation are not implemented.
+Capabilities declare `orbit`, `pan`, `zoom`, `edit`, capture formats `png`/`svg`, and `sequences`. Built-in 3D supports orbit/pan/zoom and PNG; 2D and mosaic support pan/zoom and SVG. Sequence schemas and navigation are not implemented.
 
 ## Application-owned views
 
@@ -39,12 +39,12 @@ Camera presets are not part of `RawKnot`. View changes, interaction and capture 
 
 ## Events, methods and capture
 
-Shared methods are `resetView()`, `fitToView()` and `capture(options?): Promise<Blob>`. Shared events are `ready`, `error` and `view-change`; 3D additionally emits `camera-change` with the same camera payload. Mosaic `view-change` carries `{center:[x,y],height}`. The compositor forwards events and emits structured dispatch errors itself.
+Shared methods are `resetView()`, `fitToView()` and `capture(options?): Promise<Blob>`. Shared events are `ready`, `error` and `view-change`; 3D additionally emits `camera-change` with the same camera payload. 2D and mosaic `view-change` carries `{center:[x,y],height}`. The compositor forwards events and emits structured dispatch errors itself.
 
-`CaptureOptions` contains `width`, `height`, `format`, `view` and `transparent`. Dimensions are integers in 1..2048. 3D produces PNG, default 512×512; mosaic produces SVG, default 1024×1024. Omitted format uses the viewer's format; explicitly unsupported formats reject. `current` captures local viewer state; `model-preview` uses the resolved spatial view/default camera or the full mosaic extent. The 3D `initialCamera` override is not used for preview capture. Capturing leaves the live view unchanged. PNG supports transparent backgrounds; mosaic SVG has no background fill.
+`CaptureOptions` contains `width`, `height`, `format`, `view` and `transparent`. Dimensions are integers in 1..2048. 3D produces PNG, default 512×512; 2D and mosaic produce SVG, default 1024×1024. Omitted format uses the viewer's format; explicitly unsupported formats reject. `current` captures local viewer state; `model-preview` uses the resolved spatial view/default camera or the full mosaic extent. For 2D, preview uses the resolved plane view or default geometry framing. The 3D `initialCamera` override is not used for preview capture. Capturing leaves the live view unchanged. PNG supports transparent backgrounds; mosaic SVG has no background fill. 2D SVG embeds its stroke color and uses transparent crossing gaps; its background is transparent by default, while `transparent:false` embeds the viewer background color.
 
 ## Package entries and checks
 
-`knot-engine/core` provides headless operations, `knot-engine/3d` exports `Knot3DViewer`, and `knot-engine/mosaic` exports `KnotMosaicViewer` without Three.js. The root exports all viewers and registry helpers. Import `knot-engine/styles.css` for visual components.
+`knot-engine/core` provides headless operations, `knot-engine/3d` exports `Knot3DViewer`, `knot-engine/2d` exports `Knot2DViewer`, and `knot-engine/mosaic` exports `KnotMosaicViewer` without Three.js. The root exports all viewers and registry helpers. Import `knot-engine/styles.css` for visual components.
 
-Checks cover selected/full validation, complete and partial contexts, URI expansion, ambiguous/unsupported selection, independent settings, immutable inputs, direct/delegated DOM rendering, event forwarding, 3D/mosaic switching in Chromium, SVG/PNG captures and packed JavaScript/TypeScript entry points.
+Checks cover selected/full validation, complete and partial contexts, URI expansion, ambiguous/unsupported selection, independent settings, immutable inputs, direct/delegated DOM rendering, event forwarding, 3D/2D/mosaic switching and transparent 2D crossing rasterization in Chromium, SVG/PNG captures and packed JavaScript/TypeScript entry points.

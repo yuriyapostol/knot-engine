@@ -120,7 +120,7 @@ The [DT specification](dt-code.md) defines `dt-code` for knots and links: an exp
 
 `Knot` contains representation data, constructions, states, and procedures, but **no camera presets or rendering settings**. Presentation fields in a representation are rejected by JSON Schema.
 
-The application passes a `view` (inline `ViewDefinition`, local `{id}`, or registry `{ref}`) and optional `views` preset collection directly to `KnotViewer`, `Knot3DViewer`, or `KnotMosaicViewer`. `initialCamera` is a separate 3D viewer prop. With no requested view, each viewer uses its own default framing. Plane views use `{mode:"plane",center:[x,y],height:positive}`; rotation is not supported. Capture settings belong to the viewer API, not the knot. See [viewer contracts](viewer-contracts.md).
+The application passes a `view` (inline `ViewDefinition`, local `{id}`, or registry `{ref}`) and optional `views` preset collection directly to `KnotViewer`, `Knot2DViewer`, `Knot3DViewer`, or `KnotMosaicViewer`. `initialCamera` is a separate 3D viewer prop. With no requested view, each viewer uses its own default framing. Plane views use `{mode:"plane",center:[x,y],height:positive}`; rotation is not supported. Capture settings belong to the viewer API, not the knot. See [viewer contracts](viewer-contracts.md).
 
 ## Standalone contracts and resources
 

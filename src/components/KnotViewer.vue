@@ -37,7 +37,7 @@ const emit = defineEmits<{
 }>()
 const builtIns = createViewerRegistry([
   { typeUri: GEOMETRY_3D, component: Knot3DViewer, capabilities: { orbit: true, pan: true, zoom: true, capture: ['png'] } },
-  { typeUri: GEOMETRY_2D, component: Knot2DViewer, capabilities: { zoom: true, capture: ['svg'] } },
+  { typeUri: GEOMETRY_2D, component: Knot2DViewer, capabilities: { pan: true, zoom: true, capture: ['svg'] } },
   { typeUri: MOSAIC_DIAGRAM, component: KnotMosaicViewer, capabilities: { pan: true, zoom: true, capture: ['svg'] } },
 ])
 const viewer = ref<{ resetView: () => void; fitToView: () => void; capture: (options?: CaptureOptions) => Promise<Blob> } | null>(null)

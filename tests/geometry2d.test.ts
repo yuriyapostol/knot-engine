@@ -29,9 +29,9 @@ it('locates a self-crossing twice on one curve', () => {
   expect(positions.map(p => p.segment)).toEqual([0,2])
   expect(positions.map(p => p.over)).toEqual([true,false])
 })
-it('does not silently draw crossings for interpolated splines', () => {
+it('locates crossings for interpolated splines', () => {
   const spline: Geometry2DData = { ...data, elements: [{ ...data.elements[0], interpolation: { type: 'catmull-rom', parameterization: 'centripetal' } }, data.elements[1]] }
-  expect(() => locateCrossings(spline)).toThrow(/polyline/)
+  expect(locateCrossings(spline)).toHaveLength(2)
 })
 
 it('renders geometric crossings consistently across independent example procedure steps', () => {
@@ -43,4 +43,50 @@ it('renders geometric crossings consistently across independent example procedur
   expect(before.valid).toBe(true)
   if (before.valid) expect(locateCrossings(before.data as Geometry2DData)).toEqual([])
   expect(locateCrossings(base)).toHaveLength(2)
+})
+
+for (const factor of [1e-8, 1, 1e8]) it(`handles transverse intersections at vertices at scale ${factor}`, () => {
+  const model: Geometry2DData = { ...data, elements: [curve('a', [[0, 0], [1, 1], [2, 2]]), curve('b', [[0, 2], [1, 1], [2, 0]])] }
+  model.elements = model.elements.map(c => ({ ...c, points: c.points.map(p => [p[0] * factor, p[1] * factor]) }))
+  const positions = locateCrossings(model)
+  expect(positions).toHaveLength(2)
+  expect(positions[0].x / factor).toBeCloseTo(1)
+})
+
+it('rejects endpoint contacts, tangencies, overlaps and triple intersections', () => {
+  for (const points of [
+    [[1, 1], [2, 0]], // endpoint on a
+    [[0, 2], [1, 1], [2, 2]], // touching without crossing
+    [[0.5, 0.5], [1.5, 1.5]], // overlap
+  ] as [number, number][][]) expect(() => locateCrossings({ ...data, elements: [data.elements[0], curve('b', points)] })).toThrow(/contact|tangen|overlap/)
+  expect(() => locateCrossings({ ...data, elements: [...data.elements, curve('c', [[1, -1], [1, 3]])] })).toThrow(/multiple/)
+})
+
+it('matches repeated crossings on a closed curve in traversal order', () => {
+  const square = { ...curve('a', [[0, 0], [2, 0], [2, 2], [0, 2]]), closed: true }
+  const model: Geometry2DData = { ...data, elements: [square, curve('b', [[-1, 1], [3, 1]])], crossings: [
+    { id: 'right', element: 'a', underElement: 'b' }, { id: 'left', element: 'a', overElement: 'b' },
+    { id: 'left', element: 'b', underElement: 'a' }, { id: 'right', element: 'b', overElement: 'a' },
+  ] }
+  expect(locateCrossings(model).map(p => [p.id, p.x, p.y])).toEqual([
+    ['right', 2, 1], ['left', 0, 1], ['left', 0, 1], ['right', 2, 1],
+  ])
+})
+
+it('rejects adjacent backtracking and caps dense intersection arrangements', () => {
+  expect(() => locateCrossings({ ...data, elements: [curve('a', [[0, 0], [2, 0], [1, 0]])], crossings: [] })).toThrow(/overlapping adjacent/)
+  const dense: Geometry2DData = { ...data, elements: Array.from({ length: 100 }, (_, i) => curve(`line-${i}`, [[-1, -i + i * i * 1e-4], [1, i + i * i * 1e-4]])), crossings: [] }
+  expect(() => locateCrossings(dense)).toThrow(/Too many 2D intersections/)
+})
+
+it('deduplicates spline vertex intersections despite floating-point parameter differences', () => {
+  const spline: Geometry2DData = { ...data, elements: [{ ...curve('a', [[0, 0], [1, 1], [2, 2.5]]), interpolation: { type: 'catmull-rom', parameterization: 'centripetal' } }, data.elements[1]] }
+  expect(locateCrossings(spline)).toHaveLength(2)
+})
+
+it('deduplicates a self-crossing at the closed-curve seam and orders it first', () => {
+  const self: Geometry2DData = { ...data, elements: [{ ...curve('a', [[1, 1], [2, 2], [0, 2], [2, 0], [0, 0]]), closed: true }], crossings: [
+    { id: 'x', element: 'a', underElement: 'a' }, { id: 'x', element: 'a', overElement: 'a' },
+  ] }
+  expect(locateCrossings(self).map(p => p.segment)).toEqual([0, 2])
 })
