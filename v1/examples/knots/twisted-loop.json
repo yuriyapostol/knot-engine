@@ -92,6 +92,80 @@
       ]
     },
     {
+      "id": "view-2d-finish",
+      "type": "knot-engine:representation-types/2d",
+      "target": {
+        "kind": "state",
+        "construction": {
+          "id": "setup"
+        },
+        "id": "view-3d-finish"
+      },
+      "data": {
+        "coordinateSystem": {
+          "xAxis": "right",
+          "yAxis": "up",
+          "scale": {
+            "kind": "physical",
+            "metersPerUnit": 1
+          }
+        },
+        "elements": [
+          {
+            "type": "curve",
+            "id": "rope-1",
+            "object": "rope-1",
+            "closed": true,
+            "interpolation": {
+              "type": "catmull-rom",
+              "parameterization": "uniform",
+              "tension": 0.7
+            },
+            "points": [
+              [-0.04, 0.03],
+              [-0.08, 0],
+              [-0.04, -0.03],
+              [0.04, 0.03],
+              [0.08, 0],
+              [0.04, -0.03]
+            ]
+          }
+        ],
+        "crossings": [
+          {
+            "id": "crossing-center",
+            "element": "rope-1",
+            "underElement": "rope-1"
+          },
+          {
+            "id": "crossing-center",
+            "element": "rope-1",
+            "overElement": "rope-1"
+          }
+        ]
+      },
+      "names": [
+        {
+          "language": "en",
+          "value": "2D representation"
+        },
+        {
+          "language": "uk",
+          "value": "2D-представлення"
+        }
+      ],
+      "descriptions": [
+        {
+          "language": "en",
+          "value": "Planar projection of the finished closed loop with one over/under crossing."
+        },
+        {
+          "language": "uk",
+          "value": "Плоска проєкція готової замкненої петлі з одним перетином і порядком проходження над та під."
+        }
+      ]
+    },
+    {
       "id": "mosaic-loop",
       "type": "knot-engine:representation-types/mosaic-diagram",
       "data": {
@@ -164,6 +238,16 @@
       },
       "specification": "knot-engine:specifications/knot.html",
       "viewSpace": "space"
+    },
+    {
+      "id": "knot-engine:representation-types/2d",
+      "name": "2d",
+      "description": "2d geometry contract, generation 1",
+      "dataSchema": {
+        "ref": "knot-engine:schema/2d.schema.json"
+      },
+      "specification": "knot-engine:specifications/knot.html",
+      "viewSpace": "plane"
     },
     {
       "id": "knot-engine:representation-types/mosaic-diagram",

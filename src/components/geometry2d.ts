@@ -124,24 +124,3 @@ export function locateCrossings(data: Geometry2DData): CrossingPosition[] {
   if (positions.length !== hits.length * 2) throw new Error('Crossing records do not match all geometric intersections')
   return positions
 }
-
-/** Follow the local branch through a crossing, including bends and spline samples. */
-export function crossingBridge(curve: Curve2D, crossing: CrossingPosition, distance: number): Point2D[] {
-  const origin: Point2D = [crossing.x, crossing.y]
-  function walk(direction: -1 | 1): Point2D[] {
-    const points: Point2D[] = []
-    let previous = origin, remaining = distance
-    let index = crossing.segment + (direction === 1 ? 1 : 0)
-    for (let count = 0; count < curve.points.length && remaining > 0; count++, index += direction) {
-      if (!curve.closed && (index < 0 || index >= curve.points.length)) break
-      const next = curve.points[(index + curve.points.length) % curve.points.length]
-      const length = Math.hypot(next[0] - previous[0], next[1] - previous[1])
-      if (length > remaining) {
-        points.push([previous[0] + (next[0] - previous[0]) * remaining / length, previous[1] + (next[1] - previous[1]) * remaining / length]); break
-      }
-      points.push(next); remaining -= length; previous = next
-    }
-    return points
-  }
-  return [...walk(-1).reverse(), origin, ...walk(1)]
-}

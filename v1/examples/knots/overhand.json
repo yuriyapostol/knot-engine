@@ -105,6 +105,113 @@
       ]
     },
     {
+      "id": "view-2d-rest",
+      "type": "knot-engine:representation-types/2d",
+      "target": {
+        "kind": "state",
+        "construction": {
+          "id": "setup"
+        },
+        "id": "view-3d-rest"
+      },
+      "data": {
+        "coordinateSystem": {
+          "xAxis": "right",
+          "yAxis": "up",
+          "scale": {
+            "kind": "physical",
+            "metersPerUnit": 1
+          }
+        },
+        "elements": [
+          {
+            "type": "curve",
+            "id": "open",
+            "object": "open",
+            "closed": false,
+            "interpolation": {
+              "type": "catmull-rom",
+              "parameterization": "uniform",
+              "tension": 0.5
+            },
+            "points": [
+              [-0.1, 0],
+              [-0.08, 0],
+              [-0.06, 0.001],
+              [-0.04, 0.0035],
+              [0.005, 0.014],
+              [0.037, 0.02],
+              [0.058, 0.007],
+              [0.058, -0.02],
+              [0.038, -0.044],
+              [0, -0.054],
+              [-0.038, -0.044],
+              [-0.058, -0.02],
+              [-0.058, 0.007],
+              [-0.037, 0.02],
+              [-0.005, 0.014],
+              [0.04, 0.0035],
+              [0.06, 0.001],
+              [0.08, 0],
+              [0.1, 0]
+            ]
+          }
+        ],
+        "crossings": [
+          {
+            "id": "crossing-left",
+            "element": "open",
+            "underElement": "open"
+          },
+          {
+            "id": "crossing-center",
+            "element": "open",
+            "overElement": "open"
+          },
+          {
+            "id": "crossing-right",
+            "element": "open",
+            "underElement": "open"
+          },
+          {
+            "id": "crossing-left",
+            "element": "open",
+            "overElement": "open"
+          },
+          {
+            "id": "crossing-center",
+            "element": "open",
+            "underElement": "open"
+          },
+          {
+            "id": "crossing-right",
+            "element": "open",
+            "overElement": "open"
+          }
+        ]
+      },
+      "names": [
+        {
+          "language": "en",
+          "value": "2D representation"
+        },
+        {
+          "language": "uk",
+          "value": "2D-представлення"
+        }
+      ],
+      "descriptions": [
+        {
+          "language": "en",
+          "value": "Planar projection of the rope with three over/under crossings."
+        },
+        {
+          "language": "uk",
+          "value": "Плоска проєкція мотузки з трьома перетинами та порядком проходження над і під."
+        }
+      ]
+    },
+    {
       "id": "mosaic-closure",
       "type": "knot-engine:representation-types/mosaic-diagram",
       "data": {
@@ -185,6 +292,16 @@
       },
       "specification": "knot-engine:specifications/knot.html",
       "viewSpace": "space"
+    },
+    {
+      "id": "knot-engine:representation-types/2d",
+      "name": "2d",
+      "description": "2d geometry contract, generation 1",
+      "dataSchema": {
+        "ref": "knot-engine:schema/2d.schema.json"
+      },
+      "specification": "knot-engine:specifications/knot.html",
+      "viewSpace": "plane"
     },
     {
       "id": "knot-engine:representation-types/mosaic-diagram",

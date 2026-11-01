@@ -38,7 +38,7 @@ it('renders real SVG standalone and through the compositor, with immutable input
     const mounted = await mount({ knot }, generic)
     expect(mounted.ready).toBeGreaterThan(0)
     expect(mounted.root.querySelector('[data-state="ready"]')).not.toBeNull()
-    expect(mounted.root.querySelectorAll('svg path').length).toBeGreaterThan(1)
+    expect(mounted.root.querySelectorAll('svg use').length).toBeGreaterThan(1)
     expect(mounted.root.querySelector('canvas')).toBeNull()
     mounted.root.querySelector<HTMLButtonElement>('[aria-label="Zoom in"]')!.click(); await nextTick()
     expect(mounted.events).toHaveLength(1)
@@ -108,7 +108,13 @@ it('exports self-contained color, transparent crossing gaps and optional opaque 
   const parsed = new DOMParser().parseFromString(content, 'image/svg+xml')
   expect(parsed.querySelector('parsererror')).toBeNull()
   expect(parsed.documentElement.style.color).toBe('rgb(12, 34, 56)')
-  expect(parsed.querySelector('mask circle[fill="black"]')).not.toBeNull()
+  expect(parsed.querySelector('mask use[stroke="black"]')).not.toBeNull()
+  const paths = parsed.querySelectorAll('defs > path')
+  expect(paths).toHaveLength(2)
+  const masking = parsed.querySelector('mask use')!, overlay = parsed.querySelector('svg > g > use')!
+  expect(masking.getAttribute('href')).toBe(overlay.getAttribute('href'))
+  expect(masking.getAttribute('stroke-dasharray')).toBe(overlay.getAttribute('stroke-dasharray'))
+  expect(masking.getAttribute('stroke-dashoffset')).toBe(overlay.getAttribute('stroke-dashoffset'))
   expect(parsed.documentElement.querySelector(':scope > rect')).toBeNull()
   const opaque = await read(await mounted.exposed.value!.capture({ transparent: false }))
   expect(opaque).toContain('fill="rgb(90, 80, 70)"')
@@ -124,6 +130,6 @@ it('uses distinct crossing masks for simultaneous viewers and renders Catmull–
   const data = knot.representations![0].data as { elements: { interpolation: unknown }[] }
   data.elements[0].interpolation = { type: 'catmull-rom', parameterization: 'centripetal' }
   const first = await mount({ knot }), second = await mount({ knot })
-  expect(first.root.querySelector('path')!.getAttribute('d')).toContain('C ')
+  expect(first.root.querySelector('defs > path')!.getAttribute('d')).toContain('C ')
   expect(first.root.querySelector('mask')!.id).not.toBe(second.root.querySelector('mask')!.id)
 })

@@ -5,8 +5,9 @@ let nextMaskId = 0
 <script setup lang="ts">
 import { computed, onMounted, ref, useId, watch } from 'vue'
 import { GEOMETRY_2D, selectRepresentation, validateGeometry2D, resolveRepresentationView, type RawKnot, type RawResourceRegistry, type Reference, type ViewDefinition } from '../core'
-import { locateCrossings, crossingBridge } from './geometry2d'
-import { curvePath2D, flattenGeometry2D } from './curves2d'
+import { locateCrossings } from './geometry2d'
+import { crossingStrokes2D, CROSSING_MASK_SCALE } from './crossingStrokes2d'
+import { flattenGeometry2D } from './curves2d'
 import { mosaicPanCenter } from './mosaicViewport'
 import { messages as defaults, type ViewerMessages } from '../locales'
 import type { CaptureOptions } from './captureOptions'
@@ -52,13 +53,9 @@ const result = computed(() => {
     const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys)
     const extent = Math.max(maxX - minX, maxY - minY)
     const gap = extent * 0.018
-    const paths = checked.data.elements.map(e => ({ id: e.id, d: curvePath2D(e) }))
-    const over = positions.filter(p => p.over).map(p => {
-      const curve = flattened.elements.find(e => e.id === p.element)!
-      return { ...p, d: curvePath2D({ ...curve, closed: false, points: crossingBridge(curve, p, gap * 1.5) }) }
-    })
+    const paths = crossingStrokes2D(checked.data, flattened, positions)
     const fit: Geometry2DView = { center: [minX + (maxX - minX) / 2, minY + (maxY - minY) / 2], height: extent * 1.12 }
-    return { data: { paths, over, fit, gap }, error: null }
+    return { data: { paths, fit, gap }, error: null }
   } catch (e) { return { data: null, error: (e as Error).message } }
 })
 const resolvedView = computed(() => resolveRepresentationView(props.view, props.views, props.registries, props.knot?.namespaces))
@@ -158,14 +155,19 @@ defineExpose({ resetView, fitToView, capture })
   <div class="knot-engine-v1-viewer" :data-theme="theme" :data-state="ready ? 'ready' : error ? 'error' : 'empty'" :aria-label="label" :aria-description="description" role="group">
     <svg v-if="ready && result.data" ref="svg" class="knot-engine-v1-geometry2d" :viewBox="viewBox" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" :aria-label="label" :tabindex="canInteract ? 0 : undefined" :style="{ touchAction: canInteract ? 'none' : 'auto' }" @wheel="onWheel" @pointerdown="onPointerDown" @pointermove="onPointerMove" @pointerup="onPointerUp" @pointercancel="onPointerUp" @lostpointercapture="onPointerUp" @keydown="onKeyDown">
       <defs>
+        <path v-for="(path, i) in result.data.paths" :id="`${maskId}-curve-${i}`" :key="path.id" :d="path.d" :pathLength="path.length" />
         <mask :id="maskId" maskUnits="userSpaceOnUse" :x="result.data.fit.center[0] - result.data.fit.height" :y="-result.data.fit.center[1] - result.data.fit.height" :width="result.data.fit.height * 2" :height="result.data.fit.height * 2" style="mask-type: luminance">
           <rect :x="result.data.fit.center[0] - result.data.fit.height" :y="-result.data.fit.center[1] - result.data.fit.height" :width="result.data.fit.height * 2" :height="result.data.fit.height * 2" fill="white" />
-          <circle v-for="(p, i) in result.data.over" :key="i" :cx="p.x" :cy="-p.y" :r="result.data.gap * 1.15" fill="black" />
+          <template v-for="(path, i) in result.data.paths" :key="path.id">
+            <use v-if="path.over" :href="`#${maskId}-curve-${i}`" :stroke-dasharray="path.over.array" :stroke-dashoffset="path.over.offset" fill="none" stroke="black" :stroke-width="result.data.gap * CROSSING_MASK_SCALE" stroke-linecap="butt" stroke-linejoin="round" />
+          </template>
         </mask>
       </defs>
       <g fill="none" stroke="currentColor" :stroke-width="result.data.gap" stroke-linecap="round" stroke-linejoin="round">
-        <g :mask="`url(#${maskId})`"><path v-for="path in result.data.paths" :key="path.id" :d="path.d" /></g>
-        <path v-for="(p, i) in result.data.over" :key="i" :d="p.d" />
+        <g :mask="`url(#${maskId})`"><use v-for="(path, i) in result.data.paths" :key="path.id" :href="`#${maskId}-curve-${i}`" /></g>
+        <template v-for="(path, i) in result.data.paths" :key="path.id">
+          <use v-if="path.over" :href="`#${maskId}-curve-${i}`" :stroke-dasharray="path.over.array" :stroke-dashoffset="path.over.offset" />
+        </template>
       </g>
     </svg>
     <div v-else class="knot-engine-v1-viewer__fallback" :role="error ? 'alert' : undefined">

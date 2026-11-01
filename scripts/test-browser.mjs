@@ -175,10 +175,27 @@ try {
   geometry.representations[0].data.elements[0].points = [[0, 0], [1, 1], [2, 2.5]]
   geometry.representations[0].data.elements[0].interpolation = { type: 'catmull-rom', parameterization: 'centripetal' }
   assert.equal(await setInput({ knot: geometry, selection: { representationId: 'crossing-2d' }, interactive: true }), undefined)
-  assert.match(await planar.locator('path').first().getAttribute('d'), /C /)
+  assert.match(await planar.locator('defs > path').first().getAttribute('d'), /C /)
   assert.equal(await page.evaluate(() => window.__webglContexts), webglBefore2D)
   assert.deepEqual(failures, [])
-  console.log('2D: real SVG, wheel zoom, transparent crossing rasterization, standalone export and Catmull–Rom passed')
+  geometry.representations[0].data.elements = [
+    { id: 'rope-a', type: 'curve', closed: false, interpolation: { type: 'polyline' }, points: [[-1, 0], [1, 0]] },
+    { id: 'rope-b', type: 'curve', closed: false, interpolation: { type: 'polyline' }, points: [[-1, -0.08], [1, 0.08]] },
+  ]
+  assert.equal(await setInput({ knot: geometry, selection: { representationId: 'crossing-2d' } }), undefined)
+  const shallowPixels = await page.evaluate(async () => {
+    const blob = await window.__previewCapture(512, 512)
+    const image = new Image(), url = URL.createObjectURL(blob)
+    try {
+      image.src = url; await image.decode()
+      const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512
+      const context = canvas.getContext('2d'); context.drawImage(image, 0, 0)
+      const alpha = (x, y) => context.getImageData(x, y, 1, 1).data[3]
+      return { gap: alpha(336, 250), underOutsideGap: alpha(450, 240), overInsideGap: alpha(336, 256), overOutsideGap: alpha(450, 256) }
+    } finally { URL.revokeObjectURL(url) }
+  })
+  assert.deepEqual(shallowPixels, { gap: 0, underOutsideGap: 255, overInsideGap: 255, overOutsideGap: 255 })
+  console.log('2D: real SVG, wheel zoom, transparent crossing rasterization, standalone export, Catmull–Rom and shallow-angle clearance passed')
   assert.equal(await setInput({ knot: fixture('v1/examples/knots/open-rope.json') }), undefined)
   assert.ok(await page.locator('canvas.knot-engine-v1-viewer__canvas').count() > 0)
   assert.equal(await page.evaluate(async () => (await window.__previewCapture(240, 180)).type), 'image/png')
