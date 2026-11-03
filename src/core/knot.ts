@@ -26,7 +26,15 @@ export interface RawSubject { id: string; names?: { language: string; value: str
 export type Target = { kind: 'subject' } | { kind: 'construction'; construction: Reference } | { kind: 'state' | 'object'; construction: Reference; id: string }
 export type Interpolation = { type: 'polyline' } | { type: 'catmull-rom'; parameterization: 'uniform'; tension: number } | { type: 'catmull-rom'; parameterization: 'centripetal' | 'chordal' }
 export type CoordinateScale = { kind: 'relative' } | { kind: 'physical'; metersPerUnit: number }
-export interface Curve2D { id: string; type: 'curve'; object?: string; closed: boolean; interpolation: Interpolation; points: Point2D[] }
+export interface InterpolatedCurve2D { id: string; type: 'curve'; object?: string; closed: boolean; interpolation: Interpolation; points: Point2D[] }
+export type CurveSegment2D =
+  | { type: 'line'; end: Point2D }
+  | { type: 'quadratic'; control: Point2D; end: Point2D }
+  | { type: 'cubic'; control1: Point2D; control2: Point2D; end: Point2D }
+/** Absolute coordinates; each segment starts at the previous endpoint (initially start). */
+export interface SegmentedCurve2D { id: string; type: 'curve'; object?: string; closed: boolean; start: Point2D; segments: CurveSegment2D[] }
+export type Curve2D = InterpolatedCurve2D | SegmentedCurve2D
+export type FlattenedGeometry2DData = Omit<Geometry2DData, 'elements'> & { elements: InterpolatedCurve2D[] }
 export interface Curve3D { id: string; type: 'curve'; object?: string; closed: boolean; interpolation: Interpolation; points: Point3D[] }
 export interface Mesh3D { id: string; type: 'mesh'; object?: string; vertices: Point3D[]; faces: [number, number, number][] }
 export type GeometryElement2D = Curve2D

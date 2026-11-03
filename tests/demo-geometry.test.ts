@@ -54,7 +54,7 @@ it('imports 2D/3D geometry, applies 2D steps and exports the selected format', a
   expect(representation.value).toBe('crossing-2d')
   const geometry = () => viewer.props!.knot.representations!.find(rep => rep.id === 'crossing-2d')!.data as Geometry2DData
   expect(geometry().crossings).toEqual([])
-  expect(geometry().elements.find(element => element.id === 'rope-b')!.points).toEqual([[0, 2.5], [2, 2.5]])
+  expect(geometry().elements.find(element => element.id === 'rope-b')).toMatchObject({ points: [[0, 2.5], [2, 2.5]] })
 
   const step = Array.from(root.querySelectorAll('select')).find(select => Array.from(select.options).some(option => option.value === 'before'))!
   step.value = 'after'

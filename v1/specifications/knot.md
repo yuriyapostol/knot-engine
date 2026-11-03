@@ -72,9 +72,9 @@ A representation requires `id`, URI `type` and `data`; optional fields are `targ
 
 The `representation-types/2d` and `representation-types/3d` representation types contain `data.elements`, an array of elements with unique `id`, a `type` discriminator, and optional `object` referencing a construction object. All elements share the representation coordinate system; there are no per-element transforms.
 
-`2d` supports `curve` with `closed`, `interpolation`, and `points: [number,number][]`. `3d` supports `curve` with three-dimensional points and `mesh` with `vertices: [number,number,number][]` and triangular `faces: [number,number,number][]` (zero-based indices). `3d.coordinateSystem` is right-handed with Y up; `2d.coordinateSystem` uses X right, Y up, and the same `scale` rules.
+`2d` supports `curve` with `closed` and either `interpolation` plus `points: [number,number][]`, or `start` plus explicit `segments` (see below). `3d` supports `curve` with three-dimensional points and `mesh` with `vertices: [number,number,number][]` and triangular `faces: [number,number,number][]` (zero-based indices). `3d.coordinateSystem` is right-handed with Y up; `2d.coordinateSystem` uses X right, Y up, and the same `scale` rules.
 
-Optional `2d.data.crossings` specifies the order of curve passages through crossings. Each crossing has exactly two records with the same `id`; each record contains `element` and exactly one of `underElement` (the other element is below the current element) or `overElement` (the other element is above it). The subsequence for each `element` is ordered along the curve starting at its first point. A self-crossing uses two passages of the same element with opposite over/under relationships. Crossing positions are computed from geometry, not stored. Tangencies and coincident segments are unsupported.
+Optional `2d.data.crossings` specifies the order of curve passages through crossings. Each crossing has exactly two records with the same `id`; each record contains `element` and exactly one of `underElement` (the other element is below the current element) or `overElement` (the other element is above it). The subsequence for each `element` is ordered along the curve starting at its first point (`start` for segmented curves). A self-crossing uses two passages of the same element with opposite over/under relationships. Crossing positions are computed from geometry, not stored. Tangencies and coincident segments are unsupported.
 
 `RawProcedure.base?: Reference` identifies a base geometric representation, which may be the final state. `RawStep.data?` independently overrides the base using `remove?: string[]` for existing element IDs, `replace?: Element[]` for complete existing elements, and `add?: Element[]` for new complete elements. Optional `crossings?: Crossing[]` entirely replaces the crossing list for 2D (an empty array clears it). Omitted operations have no effect. Steps do not patch each other; the base type and coordinate system are unchanged. `Step.data` requires `Procedure.base`; `Step.representations` remains supported. `Construction.states` is retained.
 
@@ -84,7 +84,7 @@ Other non-geometric representation types remain independent.
 
 `data` contains `coordinateSystem` and nonempty `elements`. The initial coordinate profile is right-handed with Y up: `{handedness:"right",upAxis:"y",scale}`. Scale is `{kind:"relative"}` or `{kind:"physical",metersPerUnit: positive-number}`. Import does not infer a physical scale or silently move points.
 
-Each curve requires `id`, `closed`, `interpolation`, `points`; optional `object` identifies an object in the target construction. Curves may describe the subject without a physical construction when no object reference is present. Points are finite XYZ triples, at least two for open curves and three for closed ones. Consecutive duplicates and a repeated closing endpoint are rejected by exact coordinate equality. Geometry closure is separate from rope topology.
+Each interpolated curve requires `id`, `closed`, `interpolation`, `points`; optional `object` identifies an object in the target construction. Curves may describe the subject without a physical construction when no object reference is present. Points are finite XY pairs in 2D or XYZ triples in 3D, at least two for open curves and three for closed ones. Consecutive duplicates and a repeated closing endpoint are rejected by exact coordinate equality. Geometry closure is separate from rope topology.
 
 Interpolation is one of:
 
@@ -92,6 +92,16 @@ Interpolation is one of:
 - `{type:"catmull-rom",parameterization:"uniform",tension: number-in-[0,1]}`;
 - `{type:"catmull-rom",parameterization:"centripetal"}`;
 - `{type:"catmull-rom",parameterization:"chordal"}`.
+
+A segmented 2D curve instead requires `id`, `type:"curve"`, `closed`, `start: [x,y]`, and a nonempty `segments` array. Optional `object` has the same meaning. The forms are mutually exclusive: `points`/`interpolation` cannot coexist with `start`/`segments`. Each segment starts at the previous endpoint, initially `start`, and has one of these forms:
+
+- `{type:"line",end:[x,y]}`;
+- `{type:"quadratic",control:[x,y],end:[x,y]}`;
+- `{type:"cubic",control1:[x,y],control2:[x,y],end:[x,y]}`.
+
+All coordinates are absolute finite XY pairs in the representation coordinate system. Segments can mix freely; handles determine continuity, without automatic smoothing. `closed:true` has SVG `Z` semantics, connecting the last endpoint to `start` by a straight segment if they differ. To close with a Bezier segment, explicitly end that segment at `start`. Coincident handles, repeated endpoints and zero-length segments are allowed; the interpolated-curve duplicate and minimum-point rules do not apply. A single cubic segment may form a closed loop. Entirely degenerate curves can validate structurally but the viewer rejects geometry without renderable spans.
+
+A segmented curve permits at most 4096 segments. The 65536-point geometry/document budgets include its start, every segment endpoint and all control points. Segmented curves are supported in 2D procedure `add`/`replace` operations and rejected for 3D bases. Existing interpolated data needs no migration. In TypeScript, `Curve2D` is now the union of `InterpolatedCurve2D` and `SegmentedCurve2D`; narrow with `'segments' in curve` before accessing form-specific fields. See [SVG path conversion](functions.md#svg-path-conversion) and [the Bezier example](../examples/knots/bezier-2d.json).
 
 The renderer uses data coordinates. A physical rope diameter becomes radius `diameter / (2 * metersPerUnit)`. Otherwise display radius is 0.006 times the largest control-point span, with a warning; it is not a physical measurement. The renderer rejects coordinate/camera components above ±1,000,000 and nonpositive or greater-than-1,000,000 radii. These are rendering limits, separate from domain validation. Tube meshes approximate curves and do not prove knot topology or collision freedom.
 

@@ -1,3 +1,4 @@
+import { mapCurve2D } from '../src/core/curves2d'
 import { expect, it } from 'vitest'
 import { locateCrossings } from '../src/components/geometry2d'
 import { applyStepData } from '../src/core/validateGeometry'
@@ -47,7 +48,7 @@ it('renders geometric crossings consistently across independent example procedur
 
 for (const factor of [1e-8, 1, 1e8]) it(`handles transverse intersections at vertices at scale ${factor}`, () => {
   const model: Geometry2DData = { ...data, elements: [curve('a', [[0, 0], [1, 1], [2, 2]]), curve('b', [[0, 2], [1, 1], [2, 0]])] }
-  model.elements = model.elements.map(c => ({ ...c, points: c.points.map(p => [p[0] * factor, p[1] * factor]) }))
+  model.elements = model.elements.map(c => mapCurve2D(c, p => [p[0] * factor, p[1] * factor]))
   const positions = locateCrossings(model)
   expect(positions).toHaveLength(2)
   expect(positions[0].x / factor).toBeCloseTo(1)

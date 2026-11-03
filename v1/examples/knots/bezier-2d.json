@@ -1,0 +1,71 @@
+{
+  "schema": "Knot",
+  "schemaVersion": 1,
+  "namespaces": {
+    "knot-engine": "https://yuriyapostol.github.io/knot-engine/v1/"
+  },
+  "id": "bezier-2d",
+  "subject": {
+    "id": "bezier-2d",
+    "names": [
+      { "language": "en", "value": "Mixed Bezier segments and a closed loop" },
+      { "language": "uk", "value": "Змішані сегменти Безьє та замкнена петля" }
+    ]
+  },
+  "representationTypes": [
+    {
+      "id": "knot-engine:representation-types/2d",
+      "name": "2d",
+      "description": "2d geometry contract, generation 1",
+      "dataSchema": { "ref": "knot-engine:schema/2d.schema.json" },
+      "specification": "knot-engine:specifications/knot.html",
+      "viewSpace": "plane"
+    }
+  ],
+  "representations": [
+    {
+      "id": "bezier-2d",
+      "type": "knot-engine:representation-types/2d",
+      "data": {
+        "coordinateSystem": {
+          "xAxis": "right",
+          "yAxis": "up",
+          "scale": { "kind": "relative" }
+        },
+        "elements": [
+          {
+            "id": "rope-a",
+            "type": "curve",
+            "closed": false,
+            "start": [-2, 0],
+            "segments": [
+              { "type": "quadratic", "control": [0, 2], "end": [2, 0] },
+              { "type": "cubic", "control1": [3, -1], "control2": [4, -1], "end": [5, 0] },
+              { "type": "line", "end": [6, 0] }
+            ]
+          },
+          {
+            "id": "rope-b",
+            "type": "curve",
+            "closed": false,
+            "interpolation": { "type": "polyline" },
+            "points": [[0, -1], [0, 2]]
+          },
+          {
+            "id": "loop",
+            "type": "curve",
+            "closed": true,
+            "start": [-6, 0],
+            "segments": [
+              { "type": "cubic", "control1": [-6, 2], "control2": [-4, 0], "end": [-6, 0] }
+            ]
+          }
+        ],
+        "crossings": [
+          { "id": "x1", "element": "rope-a", "underElement": "rope-b" },
+          { "id": "x1", "element": "rope-b", "overElement": "rope-a" }
+        ]
+      }
+    }
+  ]
+}

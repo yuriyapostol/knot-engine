@@ -4,10 +4,10 @@ let nextMaskId = 0
 </script>
 <script setup lang="ts">
 import { computed, onMounted, ref, useId, watch } from 'vue'
-import { GEOMETRY_2D, selectRepresentation, validateGeometry2D, resolveRepresentationView, type Geometry2DData, type RawKnot, type RawResourceRegistry, type Reference, type ViewDefinition } from '../core'
+import { GEOMETRY_2D, selectRepresentation, validateGeometry2D, resolveRepresentationView, type FlattenedGeometry2DData, type Geometry2DData, type RawKnot, type RawResourceRegistry, type Reference, type ViewDefinition } from '../core'
 import { locateCrossings } from './geometry2d'
 import { crossingStrokes2D, CROSSING_MASK_SCALE } from './crossingStrokes2d'
-import { flattenGeometry2D } from './curves2d'
+import { flattenGeometry2D, mapCurve2D } from './curves2d'
 import { mosaicPanCenter } from './mosaicViewport'
 import { messages as defaults, type ViewerMessages } from '../locales'
 import type { CaptureOptions } from './captureOptions'
@@ -65,11 +65,11 @@ const result = computed(() => {
     const svgExtent = 1000
     const renderUnit = extent / svgExtent
     if (!Number.isFinite(renderUnit) || renderUnit <= 0) throw new Error('2D extent exceeds SVG rendering precision')
-    const project = (data: Geometry2DData): Geometry2DData => ({
-      ...data, elements: data.elements.map(curve => ({
-        ...curve, points: curve.points.map(([x, y]): [number, number] => [(x - fit.center[0]) / renderUnit, (y - fit.center[1]) / renderUnit]),
-      })),
-    })
+    function project(data: FlattenedGeometry2DData): FlattenedGeometry2DData
+    function project(data: Geometry2DData): Geometry2DData
+    function project(data: Geometry2DData): Geometry2DData {
+      return { ...data, elements: data.elements.map(curve => mapCurve2D(curve, ([x, y]) => [(x - fit.center[0]) / renderUnit, (y - fit.center[1]) / renderUnit])) }
+    }
     const gap = svgExtent * 0.018
     const paths = crossingStrokes2D(project(checked.data), project(flattened), positions, gap, svgNumber)
     const transform = `translate(${fit.center[0]} ${-fit.center[1]}) scale(${renderUnit})`

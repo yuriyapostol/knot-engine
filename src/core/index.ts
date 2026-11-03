@@ -19,3 +19,6 @@ export { Knot, Representation, Procedure, Step, Subject, LocalizedTexts, configu
 export type { PreparedResource, RawLocalizedTexts, KnotOptions, LocalizedConfig } from './model'
 
 export { validateGeometry2D, validateGeometry3D, applyStepData } from './validateGeometry'
+
+export { importSVGPath2D, exportSVGPath2D } from './svgPath2d'
+export type { SVGPath2DOptions, SVGPath2DImportOptions } from './svgPath2d'

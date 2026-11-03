@@ -3,10 +3,10 @@ import { crossingStrokes2D } from '../src/components/crossingStrokes2d'
 import { flattenGeometry2D } from '../src/components/curves2d'
 import { locateCrossings } from '../src/components/geometry2d'
 import type { CrossingPosition } from '../src/components/geometry2d'
-import type { Curve2D, Geometry2DData } from '../src/core'
+import type { InterpolatedCurve2D as Curve2D, FlattenedGeometry2DData, Geometry2DData } from '../src/core'
 
 const curve = (id: string, points: [number, number][], closed = false): Curve2D => ({ id, type: 'curve', points, closed, interpolation: { type: 'polyline' } })
-const model = (elements: Curve2D[], crossings: Geometry2DData['crossings'] = []): Geometry2DData => ({ coordinateSystem: { xAxis: 'right', yAxis: 'up', scale: { kind: 'relative' } }, elements, crossings })
+const model = (elements: Curve2D[], crossings: Geometry2DData['crossings'] = []): FlattenedGeometry2DData => ({ coordinateSystem: { xAxis: 'right', yAxis: 'up', scale: { kind: 'relative' } }, elements, crossings })
 function strokes(data: Geometry2DData, width = 0.04) {
   const flattened = flattenGeometry2D(data)
   return crossingStrokes2D(data, flattened, locateCrossings(flattened), width)

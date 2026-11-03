@@ -35,9 +35,9 @@ Import `knot-engine/styles.css` for all visual components. Dedicated entries `kn
 
 ## 2D geometry viewer
 
-`Knot2DViewer` renders open and closed polylines and Catmull–Rom curves (uniform with explicit tension, centripetal or chordal) as SVG with over/under crossings.
+`Knot2DViewer` renders open and closed polylines and Catmull–Rom curves (uniform with explicit tension, centripetal or chordal) and mixed line/quadratic/cubic Bezier segments as SVG with over/under crossings.
 
-The ordered `crossings` records must match the geometry. Detected tangencies, endpoint contacts, overlaps and multiple intersections at one position are rejected. Spline intersection detection is approximate. Rendering is limited to 2048 segments after spline subdivision and 4096 intersections; exceeding either limit reports an error. `validateGeometry2D` checks structure and crossing pairs; the viewer checks geometric correspondence.
+The ordered `crossings` records must match the geometry. Detected tangencies, endpoint contacts, overlaps and multiple intersections at one position are rejected. Catmull–Rom and Bezier intersection detection is approximate: quadratic segments are converted exactly to cubics, then subdivided with a control-polygon distance bound of `1e-5` times the authored-point extent and maximum depth 20. Fully degenerate curves are rejected. Rendering is limited to 2048 segments after curve subdivision and 4096 intersections; exceeding either limit reports an error. `validateGeometry2D` checks structure and crossing pairs; the viewer checks geometric correspondence.
 
 `capture()` exports a self-contained SVG. Crossing gaps remain transparent on arbitrary backgrounds. The background is transparent by default; `transparent:false` includes the viewer background color.
 

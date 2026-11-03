@@ -171,6 +171,57 @@ try {
     } finally { URL.revokeObjectURL(url) }
   })
   assert.deepEqual(svgPixels, { type: 'image/svg+xml', background: 0, over: 255, gap: 0 })
+  // Compare our parser with the browser's SVG implementation, including shorthand resets.
+  const pathAgreement = await page.evaluate(async modulePath => {
+    const { importSVGPath2D, exportSVGPath2D } = await import(modulePath)
+    const cases = [
+      'm10 20 2 0 h2 v2 q1 2 2 0 t2 0 c1 1 2 1 3 0 s2 -1 3 0 z',
+      'M0 0 Q1 2 2 0 T4 0 6 0 L7 0 T8 0 S9 2 10 0',
+      'M0 0 C1 2 2 2 3 0 S5 -2 6 0 8 2 9 0z l0 1 m2 0 q1 1 2 0',
+      'M.5-.5L1e1,+2.5e-1 20.30.4',
+    ]
+    let maxError = 0
+    for (const d of cases) {
+      const normalized = importSVGPath2D(d, { idPrefix: 'test', yAxis: 'down' }).map(c => exportSVGPath2D(c, { yAxis: 'down' })).join(' ')
+      const paths = [d, normalized].map(value => {
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('d', value); return path
+      })
+      const lengths = paths.map(p => p.getTotalLength())
+      maxError = Math.max(maxError, Math.abs(lengths[0] - lengths[1]))
+      for (let i = 0; i <= 100; i++) {
+        const [a, b] = paths.map((p, j) => p.getPointAtLength(lengths[j] * i / 100))
+        maxError = Math.max(maxError, Math.hypot(a.x - b.x, a.y - b.y))
+      }
+    }
+    return maxError
+  }, `/@fs${resolve('src/core/svgPath2d.ts')}`)
+  assert.ok(pathAgreement < 0.001, `SVG parser geometry must agree with native SVG: ${pathAgreement}`)
+  assert.equal(await setInput({ knot: fixture('v1/examples/knots/bezier-2d.json'), selection: { representationId: 'bezier-2d' } }), undefined)
+  assert.match(await planar.locator('defs > path').first().getAttribute('d'), /Q .*C .*L /)
+  const bezierContinuity = await page.evaluate(async () => {
+    const svg = document.querySelector('svg.knot-engine-v1-geometry2d'), group = svg.querySelector(':scope > g')
+    const matrix = group.transform.baseVal.consolidate().matrix, box = svg.viewBox.baseVal
+    const samples = []
+    // The first curve is entirely over; the third is a single closed cubic loop.
+    for (const path of [svg.querySelectorAll('defs > path')[0], svg.querySelectorAll('defs > path')[2]]) {
+      const length = path.getTotalLength()
+      for (let i = 0; i <= 200; i++) {
+        const p = path.getPointAtLength(length * i / 200), world = new DOMPoint(p.x, p.y).matrixTransform(matrix)
+        samples.push([(world.x - box.x) / box.width * 512, (world.y - box.y) / box.height * 512])
+      }
+    }
+    const blob = await window.__previewCapture(512, 512), exported = await blob.text()
+    const image = new Image(), url = URL.createObjectURL(blob)
+    try {
+      image.src = url; await image.decode()
+      const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512
+      const context = canvas.getContext('2d'); context.drawImage(image, 0, 0)
+      return { commands: /Q .*C /.test(exported), alpha: Math.min(...samples.map(([x, y]) => context.getImageData(Math.floor(x), Math.floor(y), 1, 1).data[3])) }
+    } finally { URL.revokeObjectURL(url) }
+  })
+  assert.equal(bezierContinuity.commands, true)
+  assert.ok(bezierContinuity.alpha > 240, `Exported Bezier curves must remain continuous: ${JSON.stringify(bezierContinuity)}`)
+  assert.equal(await page.evaluate(() => window.__webglContexts), webglBefore2D)
   // A genuinely curved spline crosses the other strand at its middle control point.
   geometry.representations[0].data.elements[0].points = [[0, 0], [1, 1], [2, 2.5]]
   geometry.representations[0].data.elements[0].interpolation = { type: 'catmull-rom', parameterization: 'centripetal' }

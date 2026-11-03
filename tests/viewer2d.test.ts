@@ -4,6 +4,7 @@ import { createApp, defineComponent, h, nextTick, ref, shallowReactive, type Com
 import Knot2DViewer from '../src/components/Knot2DViewer.vue'
 import KnotViewer from '../src/components/KnotViewer.vue'
 import example from '../v1/examples/knots/geometry-crossing-demo.json'
+import bezier from '../v1/examples/knots/bezier-2d.json'
 import type { CaptureOptions, Geometry2DView, RawKnot, ViewDefinition } from '../src'
 
 const cleanups: (() => void)[] = []
@@ -136,4 +137,23 @@ it('uses distinct crossing masks for simultaneous viewers and renders Catmull–
   const first = await mount({ knot }), second = await mount({ knot })
   expect(first.root.querySelector('defs > path')!.getAttribute('d')).toContain('C ')
   expect(first.root.querySelector('mask')!.id).not.toBe(second.root.querySelector('mask')!.id)
+})
+
+it('renders and captures mixed Bezier paths and one-segment closed loops through either viewer', async () => {
+  for (const generic of [false, true]) {
+    const knot = structuredClone(bezier), before = JSON.stringify(knot)
+    const mounted = await mount({ knot, representationId: 'bezier-2d' }, generic)
+    expect(mounted.errors).toEqual([])
+    expect(mounted.ready).toBeGreaterThan(0)
+    const paths = mounted.root.querySelectorAll('defs > path')
+    expect(paths).toHaveLength(3)
+    expect(paths[0].getAttribute('d')).toMatch(/Q .*C .*L /)
+    expect(paths[2].getAttribute('d')).toMatch(/C .* Z$/)
+    expect(mounted.root.querySelector('mask use')).not.toBeNull()
+    const content = await read(await mounted.exposed.value!.capture())
+    const parsed = new DOMParser().parseFromString(content, 'image/svg+xml')
+    expect(parsed.querySelector('parsererror')).toBeNull()
+    expect(parsed.querySelector('defs > path')!.getAttribute('d')).toContain('Q ')
+    expect(JSON.stringify(knot)).toBe(before)
+  }
 })

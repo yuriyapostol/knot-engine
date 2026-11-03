@@ -1,4 +1,4 @@
-import type { Geometry2DData } from '../core/knot'
+import type { FlattenedGeometry2DData, Geometry2DData } from '../core/knot'
 import type { CrossingPosition } from './geometry2d'
 import { curvePath2D } from './curves2d'
 
@@ -58,7 +58,7 @@ export interface CrossingStroke2D {
 }
 
 /** Reuse complete SVG curves; dashes select overpasses by distance along each curve. */
-export function crossingStrokes2D(data: Geometry2DData, flattened: Geometry2DData, positions: CrossingPosition[], width: number, formatNumber: (value: number) => string = String): CrossingStroke2D[] {
+export function crossingStrokes2D(data: Geometry2DData, flattened: FlattenedGeometry2DData, positions: CrossingPosition[], width: number, formatNumber: (value: number) => string = String): CrossingStroke2D[] {
   const metrics = new Map(flattened.elements.map(curve => {
     const distances = [0]
     const segments = curve.points.length - Number(!curve.closed)

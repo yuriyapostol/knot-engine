@@ -1,4 +1,4 @@
-import type { Geometry2DData, Curve2D, Point2D } from '../core/knot'
+import type { Geometry2DData, InterpolatedCurve2D as Curve2D, Point2D } from '../core/knot'
 import { flattenGeometry2D } from './curves2d'
 export interface CrossingPosition { id: string; element: string; segment: number; t: number; x: number; y: number; over: boolean }
 type Hit = { a: number; b: number; ta: number; tb: number; x: number; y: number }

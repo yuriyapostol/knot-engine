@@ -33,6 +33,9 @@ try {
     assert.equal(core.validateDTCode({convention: core.DT_SIGNED_EVEN, code: [4,6,2]}).valid, true)
     assert.equal(core.validateDTCode({convention: core.DT_SIGNED_EVEN, code: [[4],[2]]}).componentCount, 2)
     assert.equal(core.validatePDCode({convention: core.PD_CCW_UNDER_FIRST, crossings: [], unlinkedComponents: 1}).componentCount, 1)
+    const curves = core.importSVGPath2D('M0 0q1 2 2 0t2 0', { idPrefix: 'rope', yAxis: 'down' })
+    assert.equal(core.exportSVGPath2D(curves[0], { yAxis: 'down' }), 'M 0 0 Q 1 2 2 0 Q 3 -2 4 0')
+    assert.equal(core.Knot.validate(${readFileSync('v1/examples/knots/bezier-2d.json', 'utf8')}).valid, true)
     assert.equal(core.Knot.from(${readFileSync('v1/examples/knots/open-rope.json', 'utf8')}).representations.length, 1)
   `)
   execFileSync(process.execPath, ['--no-warnings', '--experimental-loader', join(temp, 'core-loader.mjs'), join(temp, 'core.mjs')], { cwd: temp, stdio: 'pipe', encoding: 'utf8' })
@@ -42,10 +45,11 @@ try {
     import { renderToString } from 'vue/server-renderer'
     import { Knot3DViewer } from 'knot-engine/3d'
     import { KnotMosaicViewer } from 'knot-engine/mosaic'
-    import { Knot2DViewer } from 'knot-engine/2d'
+    import { Knot2DViewer, importSVGPath2D, exportSVGPath2D } from 'knot-engine/2d'
     assert.equal(typeof Knot3DViewer, 'object')
     assert.equal(typeof KnotMosaicViewer, 'object')
     assert.equal(typeof Knot2DViewer, 'object')
+    assert.equal(exportSVGPath2D(importSVGPath2D('M0 0L1 1', { idPrefix: 'a', yAxis: 'up' })[0], { yAxis: 'up' }), 'M 0 0 L 1 1')
     const html = await renderToString(createSSRApp(KnotMosaicViewer, { label: 'Mosaic standalone' }))
     assert.ok(html.includes('Mosaic standalone'))
   `)
@@ -73,7 +77,7 @@ try {
     import { KnotViewer, Knot2DViewer as Root2DViewer, type Geometry2DView, type RawKnot, type CameraView } from 'knot-engine'
     import { Knot3DViewer } from 'knot-engine/3d'
     import { KnotMosaicViewer } from 'knot-engine/mosaic'
-    import { Knot2DViewer } from 'knot-engine/2d'
+    import { Knot2DViewer, importSVGPath2D, exportSVGPath2D, type SegmentedCurve2D } from 'knot-engine/2d'
     import { Knot, type RawRepresentation, type DTCode, DT_SIGNED_EVEN, validateDTCode, type PDCode, type SourceDefinition, type Contribution, type License, validatePDCode, PD_CCW_UNDER_FIRST } from 'knot-engine/core'
     const representation: RawRepresentation = { id: 'r', type: 'urn:example:representation', data: {} }
     const knot: RawKnot = { schema: 'Knot', schemaVersion: 1, id: 'a', subject: { id: 's' }, representations: [representation] }
@@ -84,6 +88,10 @@ try {
     const mosaicProps: InstanceType<typeof KnotMosaicViewer>['$props'] = { label: 'mosaic', knot }
     const planarProps: InstanceType<typeof Knot2DViewer>['$props'] = { label: '2d', knot }
     const planarView: Geometry2DView = { center: [0, 0], height: 2 }
+    const bezier: SegmentedCurve2D = { id: 'bezier', type: 'curve', closed: false, start: [0, 0], segments: [{ type: 'quadratic', control: [1, 2], end: [2, 0] }] }
+    const svgPath = exportSVGPath2D(bezier, { yAxis: 'down' })
+    const imported: SegmentedCurve2D[] = importSVGPath2D(svgPath, { idPrefix: 'rope', yAxis: 'down' })
+    void imported
     void Root2DViewer; void planarProps; void planarView; void threeProps; void mosaicProps
     const pd: PDCode = { convention: PD_CCW_UNDER_FIRST, crossings: [[1,1,2,2]] }
     validatePDCode(pd)

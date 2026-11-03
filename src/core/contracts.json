@@ -2235,42 +2235,14 @@
       }
     },
     "curve2": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1
+      "oneOf": [
+        {
+          "$ref": "#/$defs/interpolatedCurve2"
         },
-        "type": {
-          "const": "curve"
-        },
-        "object": {
-          "type": "string",
-          "minLength": 1
-        },
-        "closed": {
-          "type": "boolean"
-        },
-        "interpolation": {
-          "$ref": "#/$defs/interpolation"
-        },
-        "points": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/point2"
-          },
-          "minItems": 2,
-          "maxItems": 4096
+        {
+          "$ref": "#/$defs/segmentedCurve2"
         }
-      },
-      "required": [
-        "id",
-        "type",
-        "closed",
-        "interpolation",
-        "points"
-      ],
-      "additionalProperties": false
+      ]
     },
     "curve3": {
       "type": "object",
@@ -2551,6 +2523,146 @@
       },
       "minItems": 3,
       "maxItems": 3
+    },
+    "interpolatedCurve2": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "curve"
+        },
+        "object": {
+          "type": "string",
+          "minLength": 1
+        },
+        "closed": {
+          "type": "boolean"
+        },
+        "interpolation": {
+          "$ref": "#/$defs/interpolation"
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/point2"
+          },
+          "minItems": 2,
+          "maxItems": 4096
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "closed",
+        "interpolation",
+        "points"
+      ],
+      "additionalProperties": false
+    },
+    "segmentedCurve2": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "curve"
+        },
+        "object": {
+          "type": "string",
+          "minLength": 1
+        },
+        "closed": {
+          "type": "boolean"
+        },
+        "start": {
+          "$ref": "#/$defs/point2"
+        },
+        "segments": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "items": {
+            "$ref": "#/$defs/curveSegment2"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "closed",
+        "start",
+        "segments"
+      ],
+      "additionalProperties": false
+    },
+    "curveSegment2": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "line"
+            },
+            "end": {
+              "$ref": "#/$defs/point2"
+            }
+          },
+          "required": [
+            "type",
+            "end"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "quadratic"
+            },
+            "control": {
+              "$ref": "#/$defs/point2"
+            },
+            "end": {
+              "$ref": "#/$defs/point2"
+            }
+          },
+          "required": [
+            "type",
+            "control",
+            "end"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "cubic"
+            },
+            "control1": {
+              "$ref": "#/$defs/point2"
+            },
+            "control2": {
+              "$ref": "#/$defs/point2"
+            },
+            "end": {
+              "$ref": "#/$defs/point2"
+            }
+          },
+          "required": [
+            "type",
+            "control1",
+            "control2",
+            "end"
+          ],
+          "additionalProperties": false
+        }
+      ]
     }
   }
 }
