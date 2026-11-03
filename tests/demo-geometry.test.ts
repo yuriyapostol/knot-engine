@@ -32,6 +32,24 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
+it('selects the closed trefoil as another representation of the existing overhand example', async () => {
+  const root = document.createElement('div')
+  document.body.append(root)
+  const app = createApp(InteractiveExample)
+  app.mount(root)
+  unmount = () => { app.unmount(); root.remove() }
+  const models = root.querySelector<HTMLSelectElement>('.knot-engine-v1-demo__model-select select')!
+  expect(Array.from(models.options, option => option.value)).toEqual(['overhand', 'loop'])
+  const representation = root.querySelector<HTMLSelectElement>('.knot-engine-v1-demo__representation-select')!
+  representation.value = 'view-2d-closed'
+  representation.dispatchEvent(new Event('change', { bubbles: true }))
+  await nextTick()
+  expect(viewer.props!.knot.id).toBe('overhand')
+  expect(viewer.props!.representationId).toBe('view-2d-closed')
+  expect(JSON.parse(root.querySelector('textarea')!.value).id).toBe('overhand')
+  expect(root.querySelector('[role="alert"]')).toBeNull()
+})
+
 it('imports 2D/3D geometry, applies 2D steps and exports the selected format', async () => {
   vi.useFakeTimers()
   viewer.capture.mockReset().mockResolvedValue(new Blob(['image']))

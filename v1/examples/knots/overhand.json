@@ -212,6 +212,99 @@
       ]
     },
     {
+      "id": "view-2d-closed",
+      "type": "knot-engine:representation-types/2d",
+      "data": {
+        "coordinateSystem": {
+          "xAxis": "right",
+          "yAxis": "up",
+          "scale": {
+            "kind": "relative"
+          }
+        },
+        "elements": [
+          {
+            "id": "closed",
+            "type": "curve",
+            "closed": true,
+            "start": [0, 1],
+            "segments": [
+              {
+                "type": "cubic",
+                "control1": [-1.35, 1.0],
+                "control2": [0.1910254, -1.6691343],
+                "end": [0.8660254, -0.5]
+              },
+              {
+                "type": "cubic",
+                "control1": [1.5410254, 0.6691343],
+                "control2": [-1.5410254, 0.6691343],
+                "end": [-0.8660254, -0.5]
+              },
+              {
+                "type": "cubic",
+                "control1": [-0.1910254, -1.6691343],
+                "control2": [1.35, 1.0],
+                "end": [0, 1.0]
+              }
+            ]
+          }
+        ],
+        "crossings": [
+          {
+            "id": "crossing-left",
+            "element": "closed",
+            "overElement": "closed"
+          },
+          {
+            "id": "crossing-bottom",
+            "element": "closed",
+            "underElement": "closed"
+          },
+          {
+            "id": "crossing-right",
+            "element": "closed",
+            "overElement": "closed"
+          },
+          {
+            "id": "crossing-left",
+            "element": "closed",
+            "underElement": "closed"
+          },
+          {
+            "id": "crossing-bottom",
+            "element": "closed",
+            "overElement": "closed"
+          },
+          {
+            "id": "crossing-right",
+            "element": "closed",
+            "underElement": "closed"
+          }
+        ]
+      },
+      "names": [
+        {
+          "language": "en",
+          "value": "2D representation (closed)"
+        },
+        {
+          "language": "uk",
+          "value": "2D-представлення (замкнене)"
+        }
+      ],
+      "descriptions": [
+        {
+          "language": "en",
+          "value": "Classic threefold-symmetric trefoil diagram with three cubic Bezier segments and three over/under crossings."
+        },
+        {
+          "language": "uk",
+          "value": "Класична діаграма трилисника з потрійною симетрією, трьома кубічними сегментами Безьє та трьома перетинами з проходженнями над і під."
+        }
+      ]
+    },
+    {
       "id": "mosaic-closure",
       "type": "knot-engine:representation-types/mosaic-diagram",
       "data": {
