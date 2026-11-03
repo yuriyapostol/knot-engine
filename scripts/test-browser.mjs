@@ -195,7 +195,73 @@ try {
     } finally { URL.revokeObjectURL(url) }
   })
   assert.deepEqual(shallowPixels, { gap: 0, underOutsideGap: 255, overInsideGap: 255, overOutsideGap: 255 })
-  console.log('2D: real SVG, wheel zoom, transparent crossing rasterization, standalone export, Catmull–Rom and shallow-angle clearance passed')
+  geometry.representations[0].data.elements = [
+    { id: 'rope-a', type: 'curve', closed: false, interpolation: { type: 'polyline' }, points: [[0, 0], [2, 2], [0, 2], [2, 0]] },
+  ]
+  for (const overFirst of [true, false]) {
+    geometry.representations[0].data.crossings = [
+      { id: 'self', element: 'rope-a', [overFirst ? 'underElement' : 'overElement']: 'rope-a' },
+      { id: 'self', element: 'rope-a', [overFirst ? 'overElement' : 'underElement']: 'rope-a' },
+    ]
+    assert.equal(await setInput({ knot: geometry, selection: { representationId: 'crossing-2d' } }), undefined)
+    const layerPixels = await page.evaluate(async () => {
+      const exported = await (await window.__previewCapture(512, 512)).text()
+      const raster = async foreground => {
+        const root = new DOMParser().parseFromString(exported, 'image/svg+xml').documentElement
+        if (foreground) root.querySelector('g[mask]').remove()
+        else for (const use of root.querySelectorAll(':scope > g > use')) use.remove()
+        const blob = new Blob([new XMLSerializer().serializeToString(root)], { type: 'image/svg+xml' })
+        const image = new Image(), url = URL.createObjectURL(blob)
+        try {
+          image.src = url; await image.decode()
+          const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512
+          const context = canvas.getContext('2d'); context.drawImage(image, 0, 0)
+          const alpha = (x, y) => context.getImageData(x, y, 1, 1).data[3]
+          return { start: alpha(27, 484), end: alpha(484, 484), capLeft: alpha(253, 27), capRight: alpha(258, 27) }
+        } finally { URL.revokeObjectURL(url) }
+      }
+      return { foreground: await raster(true), background: await raster(false) }
+    })
+    assert.equal(layerPixels.foreground.start, overFirst ? 255 : 0, 'No foreground dot at a hidden start')
+    assert.equal(layerPixels.foreground.end, overFirst ? 0 : 255, 'No foreground dot at a hidden end')
+    assert.equal(layerPixels.background.start, overFirst ? 0 : 255, 'No background dot at a hidden start')
+    assert.equal(layerPixels.background.end, overFirst ? 255 : 0, 'No background dot at a hidden end')
+    if (overFirst) {
+      assert.equal(layerPixels.foreground.capLeft, 255, 'Foreground round cap extends beyond the shared midpoint')
+      assert.equal(layerPixels.background.capRight, 255, 'Inset mask preserves the background round cap')
+    }
+  }
+  for (const scale of [1, 1e-5]) {
+    const loop = fixture('v1/examples/knots/twisted-loop.json')
+    const planarData = loop.representations.find(rep => rep.id === 'view-2d-finish').data
+    planarData.elements[0].points = planarData.elements[0].points.map(point => point.map(value => value * scale))
+    assert.equal(await setInput({ knot: loop, selection: { representationId: 'view-2d-finish' } }), undefined)
+    const continuity = await page.evaluate(async () => {
+      const svg = document.querySelector('svg.knot-engine-v1-geometry2d')
+      const path = svg.querySelector('defs > path'), group = svg.querySelector(':scope > g')
+      const matrix = group.transform.baseVal.consolidate().matrix
+      const length = path.getTotalLength(), box = svg.viewBox.baseVal
+      const radius = Number(group.getAttribute('stroke-width')) * Math.abs(matrix.a) * 3
+      const samples = []
+      for (let i = 0; i <= 240; i++) {
+        const point = path.getPointAtLength(length * i / 240)
+        const world = new DOMPoint(point.x, point.y).matrixTransform(matrix)
+        // The central underpass gap is intentional; every other centerline must remain visible.
+        if (Math.hypot(world.x, world.y) > radius) samples.push([(world.x - box.x) / box.width * 512, (world.y - box.y) / box.height * 512])
+      }
+      const blob = await window.__previewCapture(512, 512)
+      const image = new Image(), url = URL.createObjectURL(blob)
+      try {
+        image.src = url; await image.decode()
+        const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512
+        const context = canvas.getContext('2d'); context.drawImage(image, 0, 0)
+        return { count: samples.length, alpha: Math.min(...samples.map(([x, y]) => context.getImageData(Math.floor(x), Math.floor(y), 1, 1).data[3])) }
+      } finally { URL.revokeObjectURL(url) }
+    })
+    assert.ok(continuity.count > 200)
+    assert.ok(continuity.alpha > 240, `Closed loop must remain continuous at physical scale ${scale}: ${JSON.stringify(continuity)}`)
+  }
+  console.log('2D: complementary rounded layers, hidden-endpoint dots, closed seams and physical-scale continuity regressions passed')
   assert.equal(await setInput({ knot: fixture('v1/examples/knots/open-rope.json') }), undefined)
   assert.ok(await page.locator('canvas.knot-engine-v1-viewer__canvas').count() > 0)
   assert.equal(await page.evaluate(async () => (await window.__previewCapture(240, 180)).type), 'image/png')

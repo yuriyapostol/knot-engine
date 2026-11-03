@@ -5,15 +5,60 @@ import { curvePath2D } from './curves2d'
 export const CROSSING_MASK_SCALE = 2.3
 
 type Interval = [number, number]
+type DashPattern2D = { array: string; offset: number }
+
+function dashPattern(intervals: Interval[], length: number, formatNumber: (value: number) => string): DashPattern2D | null {
+  if (!intervals.length) return null
+  // Keep the repeat beyond both open ends. A period equal to the curve length
+  // can terminate/start a zero-length visible dash at an otherwise hidden end;
+  // round caps then turn that dash into a dot.
+  const array = intervals.flatMap(([start, end], i) => [
+    end - start,
+    i + 1 < intervals.length ? intervals[i + 1][0] - end : length + intervals[0][0],
+  ])
+  return { array: array.map(value => formatNumber(value)).join(' '), offset: -intervals[0][0] }
+}
+
+function complement(intervals: Interval[], length: number): Interval[] {
+  const result: Interval[] = []
+  let cursor = 0
+  for (const [start, end] of intervals) {
+    if (start > cursor) result.push([cursor, start])
+    cursor = end
+  }
+  if (cursor < length) result.push([cursor, length])
+  return result
+}
+
+function insetMask(intervals: Interval[], length: number, radius: number, closed: boolean): Interval[] {
+  const wraps = closed && intervals[0]?.[0] === 0 && intervals.at(-1)?.[1] === length
+  // A completely visible closed curve has no actual boundaries to inset.
+  if (wraps && intervals.length === 1) return intervals
+  const unwrapped: Interval[] = wraps
+    ? [...intervals.slice(1, -1), [intervals.at(-1)![0], length + intervals[0][1]]]
+    : intervals
+  const result: Interval[] = []
+  for (const [start, end] of unwrapped) {
+    const from = start + radius, to = end - radius
+    if (to <= from) continue
+    if (from >= length) result.push([from - length, to - length])
+    else if (to > length) result.push([from, length], [0, to - length])
+    else result.push([from, to])
+  }
+  return result.sort((a, b) => a[0] - b[0])
+}
+
 export interface CrossingStroke2D {
   id: string
   d: string
   length: number
-  over: { array: string; offset: number } | null
+  over: DashPattern2D | null
+  under: DashPattern2D | null
+  mask: DashPattern2D | null
 }
 
 /** Reuse complete SVG curves; dashes select overpasses by distance along each curve. */
-export function crossingStrokes2D(data: Geometry2DData, flattened: Geometry2DData, positions: CrossingPosition[]): CrossingStroke2D[] {
+export function crossingStrokes2D(data: Geometry2DData, flattened: Geometry2DData, positions: CrossingPosition[], width: number, formatNumber: (value: number) => string = String): CrossingStroke2D[] {
   const metrics = new Map(flattened.elements.map(curve => {
     const distances = [0]
     const segments = curve.points.length - Number(!curve.closed)
@@ -54,14 +99,11 @@ export function crossingStrokes2D(data: Geometry2DData, flattened: Geometry2DDat
       if (previous && interval[0] <= previous[1] + length * 1e-12) previous[1] = Math.max(previous[1], interval[1])
       else if (interval[1] > interval[0]) merged.push([...interval])
     }
-    let over: CrossingStroke2D['over'] = null
-    if (merged.length) {
-      // Rotate the dash pattern to the first window instead of inserting a
-      // zero-length dash, which would paint a dot with round line caps.
-      const array = merged.flatMap(([start, end], i) => [end - start, i + 1 < merged.length ? merged[i + 1][0] - end : length - end + merged[0][0]])
-      if (merged.length === 1 && merged[0][0] === 0 && merged[0][1] === length) array[1] = length
-      over = { array: array.join(' '), offset: -merged[0][0] }
+    return {
+      id: curve.id, d: curvePath2D(curve, formatNumber), length,
+      over: dashPattern(merged, length, formatNumber),
+      under: dashPattern(complement(merged, length), length, formatNumber),
+      mask: dashPattern(insetMask(merged, length, width / 2, curve.closed), length, formatNumber),
     }
-    return { id: curve.id, d: curvePath2D(curve), length, over }
   })
 }

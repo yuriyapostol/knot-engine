@@ -35,11 +35,11 @@ Import `knot-engine/styles.css` for all visual components. Dedicated entries `kn
 
 ## 2D geometry viewer
 
-`Knot2DViewer` renders open/closed polylines and Catmull–Rom curves (uniform with explicit tension, centripetal or chordal). SVG paths use cubic curves. Crossing detection adaptively subdivides splines with a control-polygon distance tolerance of 1e-5 of the control-point extent; arc-length estimates select crossing windows on the original SVG curves through `stroke-dasharray`. Each curve is defined once and reused for masking and overpasses. Windows extend to the arc-length midpoints between neighboring crossing passages, regardless of angle or stroke width. Open ends belong to the nearest passage; closed curves use cyclic neighbors across the seam. Adjacent overpass windows merge. The viewer limits the result to 2048 segments and 4096 intersections, reporting an error when either budget is exceeded. Intersection tests use extent-normalized coordinates with tolerance 1e-9.
+`Knot2DViewer` renders open and closed polylines and Catmull–Rom curves (uniform with explicit tension, centripetal or chordal) as SVG with over/under crossings.
 
-All detected transverse intersections must match the ordered paired `crossings` records, including self-crossings, vertex crossings and closing segments. Detected tangencies, endpoint contacts, overlaps and multiple intersections at one position are rejected. Spline detection is an approximation: features at or below the subdivision tolerance are not certified. `validateGeometry2D` checks structure and crossing pairs; it does not perform geometric intersection detection.
+The ordered `crossings` records must match the geometry. Detected tangencies, endpoint contacts, overlaps and multiple intersections at one position are rejected. Spline intersection detection is approximate. Rendering is limited to 2048 segments after spline subdivision and 4096 intersections; exceeding either limit reports an error. `validateGeometry2D` checks structure and crossing pairs; the viewer checks geometric correspondence.
 
-`capture()` exports a self-contained SVG with the computed stroke color. Crossing gaps use a mask and remain transparent on arbitrary backgrounds. The default background is transparent; `transparent:false` embeds the computed viewer background color. `model-preview` restores the requested plane camera or default fit without changing the live view. There is no PNG export or editing mode.
+`capture()` exports a self-contained SVG. Crossing gaps remain transparent on arbitrary backgrounds. The background is transparent by default; `transparent:false` includes the viewer background color.
 
 ## CSS namespace and styling
 

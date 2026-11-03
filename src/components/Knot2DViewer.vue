@@ -4,7 +4,7 @@ let nextMaskId = 0
 </script>
 <script setup lang="ts">
 import { computed, onMounted, ref, useId, watch } from 'vue'
-import { GEOMETRY_2D, selectRepresentation, validateGeometry2D, resolveRepresentationView, type RawKnot, type RawResourceRegistry, type Reference, type ViewDefinition } from '../core'
+import { GEOMETRY_2D, selectRepresentation, validateGeometry2D, resolveRepresentationView, type Geometry2DData, type RawKnot, type RawResourceRegistry, type Reference, type ViewDefinition } from '../core'
 import { locateCrossings } from './geometry2d'
 import { crossingStrokes2D, CROSSING_MASK_SCALE } from './crossingStrokes2d'
 import { flattenGeometry2D } from './curves2d'
@@ -13,6 +13,13 @@ import { messages as defaults, type ViewerMessages } from '../locales'
 import type { CaptureOptions } from './captureOptions'
 
 export interface Geometry2DView { center: [number, number]; height: number }
+
+// Display precision in normalized SVG units; geometry calculations stay unrounded.
+const SVG_DECIMAL_PLACES = 6
+function svgNumber(value: number): string {
+  return String(Number(value.toFixed(SVG_DECIMAL_PLACES)))
+}
+
 const props = withDefaults(defineProps<{
   knot?: RawKnot | null
   representationId?: string
@@ -52,10 +59,21 @@ const result = computed(() => {
     const xs = points.map(p => p[0]), ys = points.map(p => p[1])
     const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys)
     const extent = Math.max(maxX - minX, maxY - minY)
-    const gap = extent * 0.018
-    const paths = crossingStrokes2D(checked.data, flattened, positions)
     const fit: Geometry2DView = { center: [minX + (maxX - minX) / 2, minY + (maxY - minY) / 2], height: extent * 1.12 }
-    return { data: { paths, fit, gap }, error: null }
+    // Native SVG dash measurement loses accuracy on tiny physical coordinates.
+    // Measure and draw at a stable local scale, then transform to plane units.
+    const svgExtent = 1000
+    const renderUnit = extent / svgExtent
+    if (!Number.isFinite(renderUnit) || renderUnit <= 0) throw new Error('2D extent exceeds SVG rendering precision')
+    const project = (data: Geometry2DData): Geometry2DData => ({
+      ...data, elements: data.elements.map(curve => ({
+        ...curve, points: curve.points.map(([x, y]): [number, number] => [(x - fit.center[0]) / renderUnit, (y - fit.center[1]) / renderUnit]),
+      })),
+    })
+    const gap = svgExtent * 0.018
+    const paths = crossingStrokes2D(project(checked.data), project(flattened), positions, gap, svgNumber)
+    const transform = `translate(${fit.center[0]} ${-fit.center[1]}) scale(${renderUnit})`
+    return { data: { paths, fit, gap, transform, maskExtent: svgExtent * 1.12 }, error: null }
   } catch (e) { return { data: null, error: (e as Error).message } }
 })
 const resolvedView = computed(() => resolveRepresentationView(props.view, props.views, props.registries, props.knot?.namespaces))
@@ -71,7 +89,9 @@ const initial = computed((): Geometry2DView => {
   const view = resolvedView.value.ok ? resolvedView.value.view : null
   return view?.space === 'plane' ? { center: [...view.camera.center], height: view.camera.height } : result.value.data?.fit ?? { center: [0, 0], height: 1 }
 })
-function box(view: Geometry2DView) { return `${view.center[0] - view.height / 2} ${-view.center[1] - view.height / 2} ${view.height} ${view.height}` }
+function box(view: Geometry2DView) {
+  return [view.center[0] - view.height / 2, -view.center[1] - view.height / 2, view.height, view.height].join(' ')
+}
 const viewBox = computed(() => box(camera.value))
 function announceView() { emit('view-change', { center: [...camera.value.center], height: camera.value.height }) }
 function applyView() { camera.value = { center: [...initial.value.center], height: initial.value.height }; onPointerUp() }
@@ -155,18 +175,22 @@ defineExpose({ resetView, fitToView, capture })
   <div class="knot-engine-v1-viewer" :data-theme="theme" :data-state="ready ? 'ready' : error ? 'error' : 'empty'" :aria-label="label" :aria-description="description" role="group">
     <svg v-if="ready && result.data" ref="svg" class="knot-engine-v1-geometry2d" :viewBox="viewBox" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" :aria-label="label" :tabindex="canInteract ? 0 : undefined" :style="{ touchAction: canInteract ? 'none' : 'auto' }" @wheel="onWheel" @pointerdown="onPointerDown" @pointermove="onPointerMove" @pointerup="onPointerUp" @pointercancel="onPointerUp" @lostpointercapture="onPointerUp" @keydown="onKeyDown">
       <defs>
-        <path v-for="(path, i) in result.data.paths" :id="`${maskId}-curve-${i}`" :key="path.id" :d="path.d" :pathLength="path.length" />
-        <mask :id="maskId" maskUnits="userSpaceOnUse" :x="result.data.fit.center[0] - result.data.fit.height" :y="-result.data.fit.center[1] - result.data.fit.height" :width="result.data.fit.height * 2" :height="result.data.fit.height * 2" style="mask-type: luminance">
-          <rect :x="result.data.fit.center[0] - result.data.fit.height" :y="-result.data.fit.center[1] - result.data.fit.height" :width="result.data.fit.height * 2" :height="result.data.fit.height * 2" fill="white" />
+        <path v-for="(path, i) in result.data.paths" :id="`${maskId}-curve-${i}`" :key="path.id" :d="path.d" :pathLength="svgNumber(path.length)" />
+        <mask :id="maskId" maskUnits="userSpaceOnUse" :x="svgNumber(-result.data.maskExtent)" :y="svgNumber(-result.data.maskExtent)" :width="svgNumber(result.data.maskExtent * 2)" :height="svgNumber(result.data.maskExtent * 2)" style="mask-type: luminance">
+          <rect :x="svgNumber(-result.data.maskExtent)" :y="svgNumber(-result.data.maskExtent)" :width="svgNumber(result.data.maskExtent * 2)" :height="svgNumber(result.data.maskExtent * 2)" fill="white" />
           <template v-for="(path, i) in result.data.paths" :key="path.id">
-            <use v-if="path.over" :href="`#${maskId}-curve-${i}`" :stroke-dasharray="path.over.array" :stroke-dashoffset="path.over.offset" fill="none" stroke="black" :stroke-width="result.data.gap * CROSSING_MASK_SCALE" stroke-linecap="butt" stroke-linejoin="round" />
+            <use v-if="path.mask" :href="`#${maskId}-curve-${i}`" :stroke-dasharray="path.mask.array" :stroke-dashoffset="svgNumber(path.mask.offset)" fill="none" stroke="black" :stroke-width="svgNumber(result.data.gap * CROSSING_MASK_SCALE)" stroke-linecap="butt" stroke-linejoin="round" />
           </template>
         </mask>
       </defs>
-      <g fill="none" stroke="currentColor" :stroke-width="result.data.gap" stroke-linecap="round" stroke-linejoin="round">
-        <g :mask="`url(#${maskId})`"><use v-for="(path, i) in result.data.paths" :key="path.id" :href="`#${maskId}-curve-${i}`" /></g>
+      <g :transform="result.data.transform" fill="none" stroke="currentColor" :stroke-width="svgNumber(result.data.gap)" stroke-linecap="round" stroke-linejoin="round">
+        <g :mask="`url(#${maskId})`">
+          <template v-for="(path, i) in result.data.paths" :key="path.id">
+            <use v-if="path.under" :href="`#${maskId}-curve-${i}`" :stroke-dasharray="path.under.array" :stroke-dashoffset="svgNumber(path.under.offset)" />
+          </template>
+        </g>
         <template v-for="(path, i) in result.data.paths" :key="path.id">
-          <use v-if="path.over" :href="`#${maskId}-curve-${i}`" :stroke-dasharray="path.over.array" :stroke-dashoffset="path.over.offset" />
+          <use v-if="path.over" :href="`#${maskId}-curve-${i}`" :stroke-dasharray="path.over.array" :stroke-dashoffset="svgNumber(path.over.offset)" />
         </template>
       </g>
     </svg>

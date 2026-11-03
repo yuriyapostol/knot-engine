@@ -70,8 +70,8 @@ export function flattenGeometry2D(data: Geometry2DData): Geometry2DData {
   return { ...data, elements }
 }
 
-export function curvePath2D(curve: Curve2D): string {
-  const point = (p: Point2D) => `${p[0]} ${-p[1]}`
+export function curvePath2D(curve: Curve2D, formatNumber: (value: number) => string = String): string {
+  const point = (p: Point2D) => `${formatNumber(p[0])} ${formatNumber(-p[1])}`
   const spans = cubicSpans(curve)
   const path = spans.length
     ? `M ${point(curve.points[0])} ` + spans.map(([, b, c, d]) => `C ${point(b)} ${point(c)} ${point(d)}`).join(' ')
