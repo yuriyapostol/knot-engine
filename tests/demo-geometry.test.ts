@@ -78,3 +78,58 @@ it('imports 2D/3D geometry, applies 2D steps and exports the selected format', a
   expect(viewer.capture).toHaveBeenLastCalledWith({ view: 'current', format: 'image/png' })
   expect(downloads.at(-1)).toBe('knot-current.png')
 })
+
+it('filters procedures and steps by representation type and keeps step selection within that type', async () => {
+  vi.useFakeTimers()
+  const root = document.createElement('div')
+  document.body.append(root)
+  const app = createApp(InteractiveExample)
+  app.mount(root)
+  unmount = () => { app.unmount(); root.remove() }
+  const model: RawKnot = JSON.parse(JSON.stringify(crossing))
+  model.representations!.push({ ...model.representations![1], id: 'other-3d' })
+  model.procedures!.push({ id: 'mixed', steps: [
+    { id: 'only-3d', representations: [{ id: 'crossing-3d' }] },
+    { id: 'both', representations: [{ id: 'crossing-3d' }, { id: 'crossing-2d' }] },
+    { id: 'only-2d', representations: [{ id: 'crossing-2d' }] },
+  ] })
+  const editor = root.querySelector('textarea')!
+  editor.value = JSON.stringify(model)
+  editor.dispatchEvent(new Event('input', { bubbles: true }))
+  await vi.advanceTimersByTimeAsync(300)
+  await nextTick()
+
+  const settings = () => Array.from(root.querySelectorAll<HTMLSelectElement>('.knot-engine-v1-demo__view-settings select'))
+  const values = (select: HTMLSelectElement) => Array.from(select.options, option => option.value)
+  const change = async (select: HTMLSelectElement, value: string) => {
+    select.value = value
+    select.dispatchEvent(new Event('change', { bubbles: true }))
+    await nextTick()
+  }
+  expect(values(settings()[1])).toEqual(['crossing-steps', 'mixed'])
+  expect(values(settings()[2])).toEqual(['before', 'after'])
+  await change(settings()[1], 'mixed')
+  expect(values(settings()[2])).toEqual(['both', 'only-2d'])
+  expect(viewer.props!.representationId).toBe('crossing-2d')
+
+  await change(settings()[0], 'other-3d')
+  expect(settings()).toHaveLength(2)
+  expect(values(settings()[1])).toEqual(['only-3d', 'both'])
+  expect(viewer.props!.representationId).toBe('other-3d')
+  await change(settings()[1], 'both')
+  expect(viewer.props!.representationId).toBe('crossing-3d')
+  expect(viewer.props!.knot.representations![0].data).toEqual(crossing.representations[0].data)
+
+  await change(settings()[0], 'crossing-2d')
+  expect(values(settings()[1])).toEqual(['crossing-steps', 'mixed'])
+  expect(values(settings()[2])).toEqual(['before', 'after'])
+  expect(settings()[2].value).toBe('before')
+  expect(root.querySelector('[role="alert"]')).toBeNull()
+
+  const modelSelect = root.querySelector<HTMLSelectElement>('.knot-engine-v1-demo__model-select select')!
+  await change(modelSelect, 'loop')
+  await change(settings()[0], 'mosaic-loop')
+  expect(settings()).toHaveLength(1)
+  await change(settings()[0], 'view-3d-finish')
+  expect(settings()).toHaveLength(3)
+})

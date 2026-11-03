@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
-import {  KnotViewer, Knot, selectRepresentation, applyStepData, ViewerError, type RawKnot, GEOMETRY_2D, GEOMETRY_3D, MOSAIC_DIAGRAM, expandURI, type Camera3D, type CaptureOptions  } from 'knot-engine'
+import {  KnotViewer, Knot, selectRepresentation, applyStepData, ViewerError, type RawKnot, type RawProcedure, type RawStep, GEOMETRY_2D, GEOMETRY_3D, MOSAIC_DIAGRAM, expandURI, type Camera3D, type CaptureOptions  } from 'knot-engine'
 import loop from '../../v1/examples/knots/twisted-loop.json'
 import overhand from '../../v1/examples/knots/overhand.json'
 type DemoInput = { kind: 'knot'; data: RawKnot }
@@ -39,27 +39,49 @@ function supportedRepresentations(data: RawKnot) {
   return data.representations?.filter(rep => [GEOMETRY_2D, GEOMETRY_3D, MOSAIC_DIAGRAM].some(type => type === expandURI(rep.type, data.namespaces))) ?? []
 }
 const representations = computed(() => knot.value ? supportedRepresentations(knot.value) : [])
-const procedures = computed(() => knot.value?.procedures ?? [])
-const selectedProcedure = ref('')
-const steps = computed(() => procedures.value.find(procedure => procedure.id === selectedProcedure.value)?.steps ?? [])
-function chooseProcedure() {
-  selectedStep.value = ''
+const representationType = computed(() => {
+  const rep = representations.value.find(rep => rep.id === representationId.value)
+  return rep ? expandURI(rep.type, knot.value?.namespaces) : undefined
+})
+function matchesRepresentationType(id: string | undefined) {
+  return representations.value.some(rep => rep.id === id && expandURI(rep.type, knot.value?.namespaces) === representationType.value)
 }
+function procedureSteps(procedure: RawProcedure): RawStep[] {
+  return procedure.steps.filter(step =>
+    ((step.data || !step.representations?.length) && matchesRepresentationType(procedure.base?.id)) ||
+    step.representations?.some(reference => matchesRepresentationType(reference.id))
+  )
+}
+const procedures = computed(() => knot.value?.procedures?.filter(procedure => procedureSteps(procedure).length) ?? [])
+const selectedProcedure = ref('')
+const steps = computed(() => {
+  const procedure = procedures.value.find(procedure => procedure.id === selectedProcedure.value)
+  return procedure ? procedureSteps(procedure) : []
+})
 const selectedStep = ref('')
+function chooseProcedure() {
+  selectedStep.value = steps.value[0]?.id ?? ''
+  chooseStep()
+}
+function chooseRepresentation() {
+  selectedProcedure.value = procedures.value[0]?.id ?? ''
+  selectedStep.value = steps.value[0]?.id ?? ''
+}
 function chooseStep() {
   const procedure = procedures.value.find(item => item.id === selectedProcedure.value)
-  const baseId = procedure?.base && 'id' in procedure.base ? procedure.base.id : undefined
-  if (baseId && representations.value.some(rep => rep.id === baseId)) representationId.value = baseId
+  const baseId = procedure?.base?.id
   const step = steps.value.find(item => item.id === selectedStep.value)
-  const id = step?.representations?.find((ref): ref is { id: string } => 'id' in ref && representations.value.some(rep => rep.id === ref.id))
-  if (id) representationId.value = id.id
+  if (baseId && matchesRepresentationType(baseId)) representationId.value = baseId
+  const reference = step?.representations?.find(reference => matchesRepresentationType(reference.id))
+  if (reference?.id) representationId.value = reference.id
 }
+chooseRepresentation()
 const displayedKnot = computed<RawKnot | null>(() => {
   const source = knot.value
   if (!source) return null
   const procedure = procedures.value.find(item => item.id === selectedProcedure.value)
-  const step = procedure?.steps.find(item => item.id === selectedStep.value)
-  if (!procedure?.base || !step?.data || !('id' in procedure.base)) return source
+  const step = steps.value.find(item => item.id === selectedStep.value)
+  if (!procedure?.base || !step?.data || !matchesRepresentationType(procedure.base.id)) return source
   const base = source.representations?.find(rep => rep.id === procedure.base?.id)
   if (!base) return source
   const type = expandURI(base.type, source.namespaces)
@@ -101,8 +123,7 @@ function setCurrent(input: DemoInput) {
   if (!selection.ok) throw new ViewerError('INVALID_MODEL', selection.issues[0]?.message ?? 'Invalid representation')
   representationId.value = rep.id
   current.value = input
-  selectedProcedure.value = input.data.procedures?.[0]?.id ?? ''
-  selectedStep.value = input.data.procedures?.[0]?.steps[0]?.id ?? ''
+  chooseRepresentation()
   chooseStep()
 }
 function choose() {
@@ -173,7 +194,7 @@ async function download(options: CaptureOptions, name: string) {
       </aside>
       <section class="knot-engine-v1-demo__stage">
         <section class="knot-engine-v1-demo__panel knot-engine-v1-demo__view-settings">
-          <label v-if="knot">{{ content.representation }}<span class="knot-engine-v1-demo__select-field"><select v-model="representationId" class="knot-engine-v1-demo__representation-select"><option v-for="representation in representations" :key="representation.id" :value="representation.id">{{ localizedEntryName(representation, locale) }}</option></select></span></label>
+          <label v-if="knot">{{ content.representation }}<span class="knot-engine-v1-demo__select-field"><select v-model="representationId" @change="chooseRepresentation" class="knot-engine-v1-demo__representation-select"><option v-for="representation in representations" :key="representation.id" :value="representation.id">{{ localizedEntryName(representation, locale) }}</option></select></span></label>
           <label v-if="procedures.length > 1">{{ content.procedure }}<span class="knot-engine-v1-demo__select-field"><select v-model="selectedProcedure" @change="chooseProcedure"><option v-for="procedure in procedures" :key="procedure.id" :value="procedure.id">{{ localizedEntryName(procedure, locale) }}</option></select></span></label>
           <label v-if="steps.length">{{ content.step }}<span class="knot-engine-v1-demo__select-field"><select v-model="selectedStep" @change="chooseStep"><option v-for="step in steps" :key="step.id" :value="step.id">{{ localizedEntryName(step, locale) }}</option></select></span></label>
         </section>
