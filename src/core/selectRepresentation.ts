@@ -1,6 +1,6 @@
 import { Knot } from './model'
 import { type RawKnot, type RawRepresentation } from './knot'
-import { expandURI } from './resources'
+import { resolveResourceURI } from './resources'
 import { preflight } from './validation'
 import { validateKnot, normalizeKnot, type ValidationOptions } from './validateKnot'
 
@@ -22,7 +22,7 @@ const failure = (code: SelectionIssueCode, message: string, path?: string): Sele
 
 /**
  * Independently select and validate a representation. The root must satisfy
- * the v1 RawKnot structure; unrelated representations and procedures do not
+ * the v1 RawKnot structure; unrelated representations and algorithms do not
  * prevent targeted selection. The returned knot retains the full context.
  */
 export function selectRepresentation(
@@ -44,7 +44,7 @@ export function selectRepresentation(
   let normalized: RawKnot, requestedType: string | undefined
   try {
     normalized = normalizeKnot(knot)
-    requestedType = query.type === undefined ? undefined : expandURI(query.type, knot.namespaces)
+    requestedType = query.type === undefined ? undefined : resolveResourceURI(query.type, 'representation-type', knot.namespaces)
   } catch (error) {
     return failure('INVALID_KNOT', (error as Error).message)
   }
@@ -59,14 +59,14 @@ export function selectRepresentation(
 
   const selected = matches[0]
   // Scope only the representation graph needed by this request. Preserve the
-  // original full knot in the result for metadata and procedure navigation.
+  // original full knot in the result for metadata and algorithm navigation.
   const target = selected.target
   const localConstructionId = target && target.kind !== 'subject' && target.construction.id
   const sourceIds = new Set((selected.sources ?? []).flatMap(s => 'id' in s && s.id ? [s.id] : []))
   const validationKnot: RawKnot = options.scope === 'all' ? knot : {
     ...knot,
     representations: [knot.representations!.find(r => r.id === selected.id)!],
-    procedures: [],
+    algorithms: [],
     constructions: (knot.constructions ?? []).filter(c =>
       'ref' in c
         ? target !== undefined && target.kind !== 'subject' && c.ref === target.construction.ref

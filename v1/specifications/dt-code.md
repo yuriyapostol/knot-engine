@@ -10,20 +10,20 @@ Type: `https://yuriyapostol.github.io/knot-engine/v1/representation-types/dt-cod
 
 ```json
 {
-  "convention": "https://yuriyapostol.github.io/knot-engine/v1/conventions/dt-signed-even",
+  "convention": "dt-signed-even",
   "code": [4, 6, 2]
 }
 ```
 
 For n crossings, traversing the oriented circle visits crossings 1 through 2n. `code[i]` pairs odd visit 2i+1 with even visit `abs(code[i])`. Absolute values must permute 2,4,…,2n, without duplicates. Entries are nonzero signed even integers. A positive entry means the odd visit passes over (the even visit under); a negative entry means the odd visit passes under (the even visit over). This sign is not the crossing's oriented writhe sign.
 
-Traversal numbering is one-based and is intrinsic to DT; these numbers are visit labels, not zero-based storage indices. No reordering, sign normalization, cyclic shift or reversal is performed. The fixed `convention` URI identifies this local wrapper/convention. Standalone validation requires its absolute form; document validators expand declared compact prefixes first. It is not a resource reference and never triggers a network request.
+Traversal numbering is one-based and is intrinsic to DT; these numbers are visit labels, not zero-based storage indices. No reordering, sign normalization, cyclic shift or reversal is performed. The fixed `convention` URI identifies this local wrapper/convention. Standalone validation accepts the standard short name or canonical URI; document validators expand declared compact prefixes first. It references an automatically available `convention` resource, included in self-contained exports; it never triggers a network request.
 
 `code` accepts either a flat numeric array for one component or a nonempty array of component arrays. Mixed shapes are rejected. For example, the Knot Atlas link `L7n2` uses:
 
 ```json
 {
-  "convention": "https://yuriyapostol.github.io/knot-engine/v1/conventions/dt-signed-even",
+  "convention": "dt-signed-even",
   "code": [[6, -8], [-10, 12, -14, 2, -4]]
 }
 ```
@@ -62,7 +62,7 @@ Before matrix analysis, sum rⱼ²·ceil(rⱼ/32) over reduced words, then over 
 
 Use the ordinary `Representation` envelope, including targets, `sources` and flat `contributions`. Shared source definitions and a global license belong to Knot; see [metadata](sources.md). Dates, notes and source identifiers are independent of DT traversal numbers.
 
-The standard type has `viewSpace:"none"`: this code does not contain coordinates or a preferred camera. Camera settings belong to the application and are not representation fields. Completeness requires available type/source resources, for example through `STANDARD_RESOURCES` plus any user sources. Supported DT does not enter `uncheckedTypes`. Standalone representation documents, scoped targets, selection and same-document composition use ordinary rules and preserve signed code order and attribution. Equivalent codes are not deduplicated automatically. There is no built-in DT viewer.
+The standard type has `viewSpace:"none"`: this code does not contain coordinates or a preferred camera. Camera settings belong to the application and are not representation fields. Standard type resources are available automatically; external source dependencies must still be supplied. Supported DT does not enter `uncheckedTypes`. Standalone representation documents, scoped targets, selection and same-document composition use ordinary rules and preserve signed code order and attribution. Equivalent codes are not deduplicated automatically. There is no built-in DT viewer.
 
 ## Sources, decisions and checked examples
 

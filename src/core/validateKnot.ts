@@ -4,7 +4,7 @@ import { validateGeometry2D, validateGeometry3D, applyStepData } from './validat
 import { contributionIssues, licenseIssues, sourceIssues } from './metadata'
 import Ajv2020 from 'ajv/dist/2020.js'
 import { GEOMETRY_2D, GEOMETRY_3D, type Geometry2DData, type Geometry3DData, GRID_DIAGRAM, MOSAIC_DIAGRAM, PD_CODE, DT_CODE, ROPE_TYPE, type RawKnot, type RawResourceRegistry, type Reference, type Construction, type ResourceEntry, type RawRepresentation, type RawRepresentationTypeDefinition, type Dependency, type RawRepresentationDocument } from './knot'
-import { createResourceIndex, expandURI, normalizeResource, addResource, namespaceIssues, resourceIssues, type ResourceIndex } from './resources'
+import { createResourceIndex, expandURI, resolveResourceURI, normalizeResource, addResource, namespaceIssues, resourceIssues, type ResourceIndex } from './resources'
 import { duplicates, issue, preflight, structure, KNOT_LIMITS } from './validation'
 import { validateMosaicDiagram } from './validateMosaicDiagram'
 import { validateDTCode, dtAnalysisWork } from './validateDTCode'
@@ -23,8 +23,8 @@ export function normalizeKnot(knot: RawKnot): RawKnot {
   for (const ident of a.subject.identifiers ?? []) ident.catalog = uri(ident.catalog)
   for (const d of a.dependencies ?? []) d.ref = uri(d.ref)
   const reference = (r: Reference) => { if (r.ref) r.ref = uri(r.ref); else if (r.id?.includes(':')) r.id = uri(r.id) }
-  for (const key of ['catalogs','representationTypes','objectTypes'] as const) {
-    const kind = { catalogs: 'catalog', representationTypes: 'representation-type', objectTypes: 'object-type' }[key]
+  for (const key of ['catalogs','representationTypes','objectTypes','algorithmPurposes','tileSets','conventions'] as const) {
+    const kind = { catalogs: 'catalog', representationTypes: 'representation-type', objectTypes: 'object-type', algorithmPurposes: 'algorithm-purpose', tileSets: 'tile-set', conventions: 'convention' }[key]
     Object.assign(a, a[key] ? { [key]: a[key]!.map(resource => normalizeResource({ kind, resource } as ResourceEntry,ns).resource) } : {})
   }
   if (a.constructions) a.constructions = a.constructions.map(c => 'ref' in c ? { ref: uri(c.ref) } : normalizeResource({ kind: 'construction', resource: c },ns).resource as Construction)
@@ -34,16 +34,17 @@ export function normalizeKnot(knot: RawKnot): RawKnot {
       if ('ref' in source && source.ref) source.ref = uri(source.ref)
       else if ('id' in source && source.id?.includes(':')) source.id = uri(source.id)
     }
-    rep.type = uri(rep.type)
+    rep.type = resolveResourceURI(rep.type, 'representation-type', ns)
     // Expand only URI fields belonging to supported data contracts, never arbitrary data.
     if (rep.data && typeof rep.data === 'object' && !Array.isArray(rep.data)) {
       const data = rep.data as Record<string, unknown>
       const key = rep.type === DT_CODE || rep.type === PD_CODE ? 'convention' : rep.type === MOSAIC_DIAGRAM ? 'tileSet' : undefined
-      if (key && typeof data[key] === 'string') data[key] = uri(data[key])
+      if (key && typeof data[key] === 'string') data[key] = resolveResourceURI(data[key], key === 'tileSet' ? 'tile-set' : 'convention', ns)
     }
     if (rep.target && rep.target.kind !== 'subject') reference(rep.target.construction)
   }
-  for (const proc of a.procedures ?? []) {
+  for (const proc of a.algorithms ?? []) {
+    if (proc.purpose) proc.purpose = resolveResourceURI(proc.purpose, 'algorithm-purpose', ns)
     if (proc.construction) reference(proc.construction)
     if (proc.base) reference(proc.base)
     for (const step of proc.steps) for (const r of step.representations ?? []) reference(r)
@@ -57,6 +58,9 @@ export function indexKnot(knot: RawKnot, registries: readonly RawResourceRegistr
   for (const c of knot.catalogs ?? []) addResource(index,{ kind:'catalog',resource:c })
   for (const r of knot.representationTypes ?? []) addResource(index,{ kind:'representation-type',resource:r })
   for (const o of knot.objectTypes ?? []) addResource(index,{ kind:'object-type',resource:o })
+  for (const p of knot.algorithmPurposes ?? []) addResource(index,{ kind:'algorithm-purpose',resource:p })
+  for (const t of knot.tileSets ?? []) addResource(index,{ kind:'tile-set',resource:t })
+  for (const c of knot.conventions ?? []) addResource(index,{ kind:'convention',resource:c })
   for (const c of knot.constructions ?? []) if (!('ref' in c) && c.id.includes(':')) addResource(index,{ kind:'construction',resource:c })
   return index
 }
@@ -92,13 +96,13 @@ export function validateKnot(value: unknown, options: ValidationOptions = {}): K
     if (!c && !ref.ref) issues.push(issue(path,'Unknown local construction'))
     return c
   }
-  for (const key of ['catalogs','representationTypes','objectTypes','representations','procedures'] as const) issues.push(...duplicates(knot[key] ?? [],key))
+  for (const key of ['catalogs','representationTypes','objectTypes','algorithmPurposes','tileSets','conventions','representations','algorithms'] as const) issues.push(...duplicates(knot[key] ?? [],key))
   const locals = (knot.constructions ?? []).filter((c):c is Construction => !('ref' in c))
   issues.push(...duplicates(locals,'constructions'))
   const constructions = new Map<string,Construction>(locals.map(c => [c.id,c]))
   for (const c of knot.constructions ?? []) if ('ref' in c) { const found = checkConstruction(c,'constructions'); if (found) constructions.set(found.id,found) }
   for (const rep of knot.representations ?? []) if (rep.target && rep.target.kind !== 'subject') { const c = checkConstruction(rep.target.construction,`representations.${rep.id}.target`); if(c) constructions.set(c.id,c) }
-  for (const proc of knot.procedures ?? []) if (proc.construction) { const c = checkConstruction(proc.construction,`procedures.${proc.id}.construction`); if(c) constructions.set(c.id,c) }
+  for (const proc of knot.algorithms ?? []) if (proc.construction) { const c = checkConstruction(proc.construction,`algorithms.${proc.id}.construction`); if(c) constructions.set(c.id,c) }
   const checkData = (type: string, data: unknown, entry: ResourceEntry | undefined, path: string) => {
     if (type === GEOMETRY_2D || type === GEOMETRY_3D) { const r = type === GEOMETRY_2D ? validateGeometry2D(data) : validateGeometry3D(data); if (!r.valid) issues.push(...r.issues.map(e => ({...e,path: `${path}.${e.path}`}))); return }
     if (type === MOSAIC_DIAGRAM) { const r = validateMosaicDiagram(data); if(!r.valid) issues.push(...r.issues.map(e=>({...e,path:`${path}.${e.path}`}))); return }
@@ -156,6 +160,11 @@ export function validateKnot(value: unknown, options: ValidationOptions = {}): K
       else if ('id' in source && source.id && !knot.sources?.some(s=>s.id === source.id)) issues.push(issue(sourcePath,'Unknown local source'))
     }
     const definition = entry?.resource as RawRepresentationTypeDefinition | undefined
+    if (rep.data && typeof rep.data === 'object' && !Array.isArray(rep.data)) {
+      const data = rep.data as Record<string, unknown>
+      if (rep.type === MOSAIC_DIAGRAM && typeof data.tileSet === 'string') need('tile-set', data.tileSet, `${path}.data.tileSet`)
+      if ((rep.type === PD_CODE || rep.type === DT_CODE) && typeof data.convention === 'string') need('convention', data.convention, `${path}.data.convention`)
+    }
     checkData(rep.type,rep.data,entry,`${path}.data`)
     let construction: Construction | undefined
     if(rep.target && rep.target.kind !== 'subject') {
@@ -175,22 +184,26 @@ export function validateKnot(value: unknown, options: ValidationOptions = {}): K
     }
   }
   if(totalPoints > 65536) issues.push(issue('representations','Total point budget exceeded','LIMIT_EXCEEDED'))
-  for(const proc of knot.procedures ?? []) {
+  for(const proc of knot.algorithms ?? []) {
+    if (proc.purpose) need('algorithm-purpose', proc.purpose, `algorithms.${proc.id}.purpose`)
     const base = proc.base && !proc.base.ref ? knot.representations?.find(r => r.id === proc.base?.id) : undefined
-    if (proc.base && !base) issues.push(issue(`procedures.${proc.id}.base`, 'Unknown or external base representation'))
-    if (base && base.type !== GEOMETRY_2D && base.type !== GEOMETRY_3D) issues.push(issue(`procedures.${proc.id}.base`, 'Base must be 2D or 3D'))
+    if (proc.base && !base) issues.push(issue(`algorithms.${proc.id}.base`, 'Unknown or external base representation'))
+    if (base && base.type !== GEOMETRY_2D && base.type !== GEOMETRY_3D) issues.push(issue(`algorithms.${proc.id}.base`, 'Base must be 2D or 3D'))
     for (const step of proc.steps) {
+      if (step.repeat?.min !== undefined && step.repeat.max !== undefined && step.repeat.min > step.repeat.max) {
+        issues.push(issue(`algorithms.${proc.id}.steps.${step.id}.repeat`, 'Repeat min must not exceed max'))
+      }
       if (!step.data) continue
-      if (!base) { issues.push(issue(`procedures.${proc.id}.steps.${step.id}.data`, 'Step data requires a local base representation')); continue }
+      if (!base) { issues.push(issue(`algorithms.${proc.id}.steps.${step.id}.data`, 'Step data requires a local base representation')); continue }
       if (base.type === GEOMETRY_2D || base.type === GEOMETRY_3D) {
         const result = applyStepData(base.data as Geometry2DData | Geometry3DData, step.data, base.type)
-        if (!result.valid) issues.push(...result.issues.map(e => ({ ...e, path: `procedures.${proc.id}.steps.${step.id}.data.${e.path}` })))
+        if (!result.valid) issues.push(...result.issues.map(e => ({ ...e, path: `algorithms.${proc.id}.steps.${step.id}.data.${e.path}` })))
       }
     }
-    issues.push(...duplicates(proc.steps,`procedures.${proc.id}.steps`))
+    issues.push(...duplicates(proc.steps,`algorithms.${proc.id}.steps`))
     for(const step of proc.steps) for(const r of step.representations ?? []) {
-      if(r.ref) issues.push(issue(`procedures.${proc.id}.steps.${step.id}`,'External representation references are outside the initial profile'))
-      else if(!knot.representations?.some(v=>v.id === r.id)) issues.push(issue(`procedures.${proc.id}.steps.${step.id}`,'Unknown representation'))
+      if(r.ref) issues.push(issue(`algorithms.${proc.id}.steps.${step.id}`,'External representation references are outside the initial profile'))
+      else if(!knot.representations?.some(v=>v.id === r.id)) issues.push(issue(`algorithms.${proc.id}.steps.${step.id}`,'Unknown representation'))
     }
   }
   if(issues.length) return {valid:false,issues}

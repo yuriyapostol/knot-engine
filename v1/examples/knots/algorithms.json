@@ -21,7 +21,7 @@
   "representations": [
     {
       "id": "view-3d-finish",
-      "type": "knot-engine:representation-types/3d",
+      "type": "3d",
       "target": {
         "kind": "state",
         "construction": {
@@ -85,7 +85,7 @@
       "objects": [
         {
           "id": "rope-1",
-          "type": "knot-engine:object-types/rope",
+          "type": "rope",
           "topology": "open",
           "ends": [
             {
@@ -105,18 +105,7 @@
       ]
     }
   ],
-  "objectTypes": [
-    {
-      "id": "knot-engine:object-types/rope",
-      "name": "rope",
-      "description": "rope contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/rope-object.schema.json"
-      },
-      "specification": "knot-engine:specifications/knot.html"
-    }
-  ],
-  "procedures": [
+  "algorithms": [
     {
       "id": "sequence-a",
       "construction": {
@@ -135,7 +124,7 @@
               "value": "Початковий стан"
             }
           ],
-          "instructions": [
+          "descriptions": [
             {
               "language": "en",
               "value": "Place the rope in its initial position."
@@ -178,7 +167,7 @@
               "value": "Формування вигину"
             }
           ],
-          "instructions": [
+          "descriptions": [
             {
               "language": "en",
               "value": "Form a bend in the rope."
@@ -221,7 +210,7 @@
               "value": "Завершений стан"
             }
           ],
-          "instructions": [
+          "descriptions": [
             {
               "language": "en",
               "value": "Arrange the rope into its final shape."
@@ -246,7 +235,7 @@
       "descriptions": [
         {
           "language": "en",
-          "value": "Three-step procedure with an intermediate bend state."
+          "value": "Three-step algorithm with an intermediate bend state."
         },
         {
           "language": "uk",
@@ -275,7 +264,7 @@
               "value": "Початковий стан"
             }
           ],
-          "instructions": [
+          "descriptions": [
             {
               "language": "en",
               "value": "Place the rope in its initial position."
@@ -318,7 +307,7 @@
               "value": "Завершений стан"
             }
           ],
-          "instructions": [
+          "descriptions": [
             {
               "language": "en",
               "value": "Arrange the rope into its final shape."
@@ -343,7 +332,7 @@
       "descriptions": [
         {
           "language": "en",
-          "value": "Short two-step procedure without the intermediate state."
+          "value": "Short two-step algorithm without the intermediate state."
         },
         {
           "language": "uk",
@@ -353,18 +342,6 @@
       "base": {
         "id": "view-3d-finish"
       }
-    }
-  ],
-  "representationTypes": [
-    {
-      "id": "knot-engine:representation-types/3d",
-      "name": "3d",
-      "description": "3d geometry contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/3d.schema.json"
-      },
-      "specification": "knot-engine:specifications/knot.html",
-      "viewSpace": "space"
     }
   ]
 }

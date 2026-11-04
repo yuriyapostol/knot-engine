@@ -10,13 +10,13 @@ Representation type: `https://yuriyapostol.github.io/knot-engine/v1/representati
 
 | Field | Contract |
 | --- | --- |
-| `convention` | Required exact URI `https://yuriyapostol.github.io/knot-engine/v1/conventions/pd-ccw-under-first` |
+| `convention` | Required `pd-ccw-under-first` or canonical URI `https://yuriyapostol.github.io/knot-engine/v1/conventions/pd-ccw-under-first` |
 | `crossings` | Required array of integer quadruples `[a,b,c,d]`; may be empty |
 | `unlinkedComponents` | Optional nonnegative integer, default 0: additional split trivial circles without crossings |
 
 For each crossing, slots 0–3 list half-edges counterclockwise, starting at the incoming underpassing half-edge. Opposite slots 0/2 form the underpassing strand, slots 1/3 the overpassing strand. A crossing is not a four-way strand junction. Equal labels connect exactly two half-edges; a label may occur twice at the same crossing, as in a Reidemeister-I loop. Requiring four distinct labels would incorrectly reject such diagrams.
 
-Edge labels are positive safe integers (1 through 9,007,199,254,740,991), not array indices. Arbitrary gaps and bijective relabeling are allowed. Labels from source PD codes are preserved, including one-based numbering. The validator does not require consecutive numbering along components or sort crossings. `convention` is a fixed type-specific URI. Standalone validation requires its absolute form; document validators expand declared compact prefixes first. It creates no resource dependency or network request.
+Edge labels are positive safe integers (1 through 9,007,199,254,740,991), not array indices. Arbitrary gaps and bijective relabeling are allowed. Labels from source PD codes are preserved, including one-based numbering. The validator does not require consecutive numbering along components or sort crossings. `convention` is a fixed type-specific URI. Standalone validation accepts the standard short name or canonical URI; document validators expand declared compact prefixes first. It references an automatically available `convention` resource, included in self-contained exports; it never triggers a network request.
 
 `unlinkedComponents` explicitly preserves circles that an empty crossing list cannot encode. With no crossings, it must be at least 1. Empty links are outside this profile. It can also accompany a nonempty code. These circles are additional split unknots, not unlabeled edges or virtual crossings; no nesting, position, component names or orientations are stored for them.
 
@@ -39,7 +39,7 @@ The algorithm is iterative, using O(n) time and storage for n crossings. `KNOT_L
 
 Use the ordinary representation envelope, including scoped targets and dependencies. The standard resource has `viewSpace:"none"`: PD has no layout or coordinate system. Camera settings belong to the application and are not representation fields. No mapping from counted link components to construction objects is implied.
 
-Both standalone representation documents and Knot use the supported semantic validator. Completeness additionally requires resource closure, for example via `STANDARD_RESOURCES`; supported PD does not enter `uncheckedTypes`. The [standalone JSON Schema](../schema/pd-code.schema.json) checks structure only; repeated-label multiplicity, planarity, direction consistency and component existence require runtime validation.
+Both standalone representation documents and Knot use the supported semantic validator. Standard type resources are available automatically; external dependencies must still be resolved; supported PD does not enter `uncheckedTypes`. The [standalone JSON Schema](../schema/pd-code.schema.json) checks structure only; repeated-label multiplicity, planarity, direction consistency and component existence require runtime validation.
 
 Validation, extraction, JSON round trips and same-document composition preserve labels, crossing order and explicit `unlinkedComponents` without normalization. Equivalent relabelings are not automatically deduplicated. There is no built-in PD viewer; validation completeness does not imply renderer support.
 
@@ -53,7 +53,7 @@ The [trefoil example](../examples/knots/pd-trefoil.json) uses the PD value recor
 
 ```json
 {
-  "convention": "https://yuriyapostol.github.io/knot-engine/v1/conventions/pd-ccw-under-first",
+  "convention": "pd-ccw-under-first",
   "crossings": [[1, 5, 2, 4], [3, 1, 4, 6], [5, 3, 6, 2]]
 }
 ```

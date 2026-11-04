@@ -15,7 +15,7 @@ type RepresentationQuery = { representationId?: string; type?: string }
 
 The result contains normalized raw data without UI, input mutation or fetching. Type matching uses expanded URIs. An explicit ID must match any requested type. Missing, ambiguous and unsupported matches return distinct issue codes: `INVALID_KNOT`, `REPRESENTATION_NOT_FOUND`, `AMBIGUOUS_REPRESENTATION`, `UNSUPPORTED_REPRESENTATION`, `MISSING_DEPENDENCY`, `INVALID_REPRESENTATION`.
 
-The root must satisfy the `RawKnot` structure; optional sections may be omitted. By default, validation checks the selected representation and required context, including subject catalog identifiers. Unrelated representations and procedures do not prevent targeted rendering. `scope: 'all'` validates the entire document. `registries` and `schemas` supply explicit dependencies. Success requires complete validation of that scope and retains the full normalized knot context.
+The root must satisfy the `RawKnot` structure; optional sections may be omitted. By default, validation checks the selected representation and required context, including subject catalog identifiers. Unrelated representations and algorithms do not prevent targeted rendering. `scope: 'all'` validates the entire document. `registries` and `schemas` supply explicit dependencies. Success requires complete validation of that scope and retains the full normalized knot context.
 
 ## Viewer dispatch
 
@@ -35,7 +35,7 @@ A `ViewDefinition` requires `id`, `name`, `space`, `camera`; `description` is op
 
 Spatial `fit` requires finite, nonzero, noncollinear `direction` and `up` vectors and `projection`. Direction points from focus to camera. Optional `padding` is at least 1, default 1.1. `fixed` requires distinct `position`/`target`, nonparallel `up` and projection. Perspective uses `0 < fovY < π` radians; fixed orthographic projection additionally requires positive `height`. Viewport aspect and geometry bounds determine fitting. `initialCamera` overrides the 3D display camera after view resolution; invalid requested views are still errors.
 
-Camera presets are not part of `RawKnot`. View changes, interaction and capture leave domain data unchanged. Construction states and procedure steps have independent meaning.
+Camera presets are not part of `RawKnot`. View changes, interaction and capture leave domain data unchanged. Construction states and algorithm steps have independent meaning.
 
 ## Events, methods and capture
 

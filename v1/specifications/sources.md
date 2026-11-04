@@ -38,7 +38,7 @@ An inline definition and a reference are mutually exclusive. The source-level no
 
 External definitions use the ordinary `kind:"source"` resource contract, registry, explicit dependencies and namespace expansion. A missing local `id` is invalid. A missing global `ref` is reported as a `source` missing dependency and makes validation incomplete; a wrong resource kind is invalid. Source, author and license URLs are ordinary URLs, never compact identifiers or hidden dependencies. A source resource document must use a global ID.
 
-A standalone representation document may embed root-like `sources` definitions to resolve local references. No registry is consulted implicitly and no URL is fetched. See [the complete example](../examples/knots/sources-contributions.json).
+A standalone representation document may embed root-like `sources` definitions to resolve local references. Source registries must be supplied explicitly; no URL is fetched. See [the complete example](../examples/knots/sources-contributions.json).
 
 ## Contributions
 

@@ -16,12 +16,12 @@ The standard type uses `viewSpace: "plane"` and references the standalone [JSON 
 
 | Field | Contract |
 | --- | --- |
-| `tileSet` | Exact absolute URI `https://yuriyapostol.github.io/knot-engine/v1/tile-sets/lomonaco-kauffman-11` |
+| `tileSet` | `lomonaco-kauffman-11` or canonical URI `https://yuriyapostol.github.io/knot-engine/v1/tile-sets/lomonaco-kauffman-11` |
 | `tiles` | Nonempty square matrix of integer tile codes 0–10 |
 
-Size is `tiles.length`; every row has that length. No duplicated `size`, per-tile rotation, scale or coordinate-system fields are stored. Only the tile set above is supported. Its URI identifies the fixed convention defined here; it is not a new registry resource kind and never triggers network access.
+Size is `tiles.length`; every row has that length. No duplicated `size`, per-tile rotation, scale or coordinate-system fields are stored. Only the tile set above is supported. Its identity references the standard `tile-set` resource and never triggers network access.
 
-The `tileSet` value identifies a fixed type-specific convention, not a generic resource dependency. Standalone schema/`validateMosaicDiagram` require its absolute URI. Knot and representation-document validation also accept declared compact forms and expand them before type validation; representation `type` follows the same document namespace rules.
+The `tileSet` value references a `tile-set` resource. Standalone schema/`validateMosaicDiagram` accept its standard short name or canonical URI. Knot and representation-document validation also accept declared compact URIs and expand them before type validation. The standard definition is available automatically; defining another tile set does not make it supported by this fixed profile.
 
 A 1×1 blank matrix is structurally a square matrix but is semantically invalid: at least one closed component is required. Blank border tiles are allowed and preserved; no trimming, padding, rotation or reflection occurs during validation, extraction or composition.
 
@@ -67,11 +67,11 @@ Use the ordinary `Representation` envelope: `id`, `type`, `data`, optional `targ
 
 Application-owned views must have `space: "plane"` and camera `{mode:"plane",center:[x,y],height:positive}`; rotation is not accepted. For camera coordinates, tile (row r, column c) occupies x in [c,c+1] and y in [n-r-1,n-r], with Y upward. The mosaic fills [0,n] × [0,n]; center [n/2,n/2] and height n show its full vertical extent. Aspect ratio and padding remain viewer concerns. Row indexing stays downward; this mapping does not reflect the data.
 
-Extraction shall retain the representation, its type resources and any target dependencies under the ordinary rules, preserving the matrix exactly. The fixed tile-set convention needs no new dependency kind or hidden registry. Composition follows the existing same-document identity and conflict rules; visually equivalent rotated matrices are not automatically deduplicated.
+Extraction shall retain the representation, its type resources and any target dependencies under the ordinary rules, preserving the matrix exactly. Self-contained extraction also includes the referenced `tile-set` definition with its canonical identity. Composition follows the existing same-document identity and conflict rules; visually equivalent rotated matrices are not automatically deduplicated.
 
 `validateMosaicDiagram(data)` checks structure and semantics. Success returns `diagram`, `data`, `componentCount`, `occupiedTileCount` and `crossingCount`. JSON Schema checks structure; square shape, port matching, boundaries and components are runtime checks.
 
-The type is semantically checked without `uncheckedTypes`; completeness still requires its resources, for example via `STANDARD_RESOURCES`. The 3D resolver handles only `3d` representations. `KnotMosaicViewer` renders this profile as SVG and `KnotViewer` dispatches to it.
+The type is semantically checked without `uncheckedTypes`; its standard type definition is available automatically; external dependencies must still be resolved. The 3D resolver handles only `3d` representations. `KnotMosaicViewer` renders this profile as SVG and `KnotViewer` dispatches to it.
 
 ## Examples and acceptance cases
 
@@ -80,9 +80,9 @@ The following is a representation fragment; see also the self-contained [mosaic-
 ```json
 {
   "id": "mosaic",
-  "type": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/mosaic-diagram",
+  "type": "mosaic-diagram",
   "data": {
-    "tileSet": "https://yuriyapostol.github.io/knot-engine/v1/tile-sets/lomonaco-kauffman-11",
+    "tileSet": "lomonaco-kauffman-11",
     "tiles": [
       [2, 1],
       [3, 4]
@@ -95,7 +95,7 @@ Its four occupied tiles form one component without crossings. A two-component ex
 
 ```json
 {
-  "tileSet": "https://yuriyapostol.github.io/knot-engine/v1/tile-sets/lomonaco-kauffman-11",
+  "tileSet": "lomonaco-kauffman-11",
   "tiles": [
     [2, 1, 2, 1],
     [3, 4, 3, 4],
@@ -109,7 +109,7 @@ The researched 4×4 source example is:
 
 ```json
 {
-  "tileSet": "https://yuriyapostol.github.io/knot-engine/v1/tile-sets/lomonaco-kauffman-11",
+  "tileSet": "lomonaco-kauffman-11",
   "tiles": [
     [0, 2, 1, 0],
     [2, 9, 10, 1],

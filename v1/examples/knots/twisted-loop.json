@@ -31,7 +31,7 @@
   "representations": [
     {
       "id": "view-3d-finish",
-      "type": "knot-engine:representation-types/3d",
+      "type": "3d",
       "target": {
         "kind": "state",
         "construction": {
@@ -93,7 +93,7 @@
     },
     {
       "id": "view-2d-finish",
-      "type": "knot-engine:representation-types/2d",
+      "type": "2d",
       "target": {
         "kind": "state",
         "construction": {
@@ -167,9 +167,9 @@
     },
     {
       "id": "mosaic-loop",
-      "type": "knot-engine:representation-types/mosaic-diagram",
+      "type": "mosaic-diagram",
       "data": {
-        "tileSet": "knot-engine:tile-sets/lomonaco-kauffman-11",
+        "tileSet": "lomonaco-kauffman-11",
         "tiles": [
           [0, 2, 1],
           [2, 9, 4],
@@ -199,7 +199,7 @@
     },
     {
       "id": "grid-xo",
-      "type": "knot-engine:representation-types/grid-diagram",
+      "type": "grid-diagram",
       "data": {
         "encoding": "xo",
         "size": 3,
@@ -229,7 +229,7 @@
     },
     {
       "id": "grid-vertex-pairs",
-      "type": "knot-engine:representation-types/grid-diagram",
+      "type": "grid-diagram",
       "data": {
         "encoding": "vertex-pairs",
         "size": 3,
@@ -270,7 +270,7 @@
       "objects": [
         {
           "id": "rope-1",
-          "type": "knot-engine:object-types/rope",
+          "type": "rope",
           "topology": "closed",
           "ends": [],
           "diameter": 0.01
@@ -283,60 +283,7 @@
       ]
     }
   ],
-  "objectTypes": [
-    {
-      "id": "knot-engine:object-types/rope",
-      "name": "rope",
-      "description": "rope contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/rope-object.schema.json"
-      },
-      "specification": "knot-engine:specifications/knot.html"
-    }
-  ],
-  "representationTypes": [
-    {
-      "id": "knot-engine:representation-types/3d",
-      "name": "3d",
-      "description": "3d geometry contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/3d.schema.json"
-      },
-      "specification": "knot-engine:specifications/knot.html",
-      "viewSpace": "space"
-    },
-    {
-      "id": "knot-engine:representation-types/2d",
-      "name": "2d",
-      "description": "2d geometry contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/2d.schema.json"
-      },
-      "specification": "knot-engine:specifications/knot.html",
-      "viewSpace": "plane"
-    },
-    {
-      "id": "knot-engine:representation-types/mosaic-diagram",
-      "name": "mosaic-diagram",
-      "description": "mosaic-diagram contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/mosaic-diagram.schema.json"
-      },
-      "specification": "knot-engine:specifications/mosaic-diagram.html",
-      "viewSpace": "plane"
-    },
-    {
-      "id": "knot-engine:representation-types/grid-diagram",
-      "name": "grid-diagram",
-      "description": "grid-diagram contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/grid-diagram.schema.json"
-      },
-      "specification": "knot-engine:specifications/grid-diagram.html",
-      "viewSpace": "plane"
-    }
-  ],
-  "procedures": [
+  "algorithms": [
     {
       "id": "sequence-a",
       "construction": {
@@ -355,7 +302,7 @@
               "value": "Просте кільце"
             }
           ],
-          "instructions": [
+          "descriptions": [
             {
               "language": "en",
               "value": "Lay out the closed rope as a flat ring."
@@ -401,7 +348,7 @@
               "value": "Часткове скручування"
             }
           ],
-          "instructions": [
+          "descriptions": [
             {
               "language": "en",
               "value": "Hold the left side and turn the right side of the ring by a quarter turn out of its plane."
@@ -447,7 +394,7 @@
               "value": "Скручена петля"
             }
           ],
-          "instructions": [
+          "descriptions": [
             {
               "language": "en",
               "value": "Continue turning the right side by another quarter turn to form a crossing, keeping one strand above the other."
@@ -481,7 +428,8 @@
       ],
       "base": {
         "id": "view-3d-finish"
-      }
+      },
+      "purpose": "tying"
     },
     {
       "id": "sequence-b",
@@ -489,6 +437,75 @@
         "id": "setup"
       },
       "steps": [
+        {
+          "id": "finish",
+          "names": [
+            {
+              "language": "en",
+              "value": "Twisted loop"
+            },
+            {
+              "language": "uk",
+              "value": "Скручена петля"
+            }
+          ],
+          "descriptions": [
+            {
+              "language": "en",
+              "value": "Start with the twisted loop, keeping one strand above the other at the crossing."
+            },
+            {
+              "language": "uk",
+              "value": "Почніть зі скрученої петлі, залишаючи одну гілку над іншою в місці перехрещення."
+            }
+          ]
+        },
+        {
+          "id": "twist",
+          "names": [
+            {
+              "language": "en",
+              "value": "Partial untwist"
+            },
+            {
+              "language": "uk",
+              "value": "Часткове розкручування"
+            }
+          ],
+          "descriptions": [
+            {
+              "language": "en",
+              "value": "Hold the left side and turn the right side back by a quarter turn, opening the crossing."
+            },
+            {
+              "language": "uk",
+              "value": "Утримуючи лівий бік, поверніть правий бік у зворотному напрямку на чверть оберту, розкриваючи перехрещення."
+            }
+          ],
+          "data": {
+            "replace": [
+              {
+                "type": "curve",
+                "id": "rope-1",
+                "object": "rope-1",
+                "closed": true,
+                "interpolation": {
+                  "type": "catmull-rom",
+                  "parameterization": "uniform",
+                  "tension": 0.65
+                },
+                "points": [
+                  [-0.04, 0.05, -0.02],
+                  [-0.08, 0, 0],
+                  [-0.04, -0.05, 0.02],
+                  [0.04, -0.02, 0.05],
+                  [0.08, 0, 0],
+                  [0.04, 0.02, -0.05]
+                ]
+              }
+            ]
+          }
+        },
         {
           "id": "rest",
           "names": [
@@ -501,14 +518,14 @@
               "value": "Просте кільце"
             }
           ],
-          "instructions": [
+          "descriptions": [
             {
               "language": "en",
-              "value": "Lay out the closed rope as a flat ring."
+              "value": "Turn the right side back by another quarter turn and lay out the closed rope as a flat ring."
             },
             {
               "language": "uk",
-              "value": "Розкладіть замкнену мотузку у плоске кільце."
+              "value": "Поверніть правий бік у зворотному напрямку ще на чверть оберту й розкладіть замкнену мотузку у плоске кільце."
             }
           ],
           "data": {
@@ -534,54 +551,32 @@
               }
             ]
           }
-        },
-        {
-          "id": "finish",
-          "names": [
-            {
-              "language": "en",
-              "value": "Twisted loop"
-            },
-            {
-              "language": "uk",
-              "value": "Скручена петля"
-            }
-          ],
-          "instructions": [
-            {
-              "language": "en",
-              "value": "Hold the left side and turn the right side of the ring by half a turn to form a crossing, keeping one strand above the other."
-            },
-            {
-              "language": "uk",
-              "value": "Утримуючи лівий бік, поверніть правий бік кільця на пів оберту, утворюючи перехрещення та залишаючи одну гілку над іншою."
-            }
-          ]
         }
       ],
       "names": [
         {
           "language": "en",
-          "value": "Direct transition to the twisted loop"
+          "value": "Untwisting the loop step by step"
         },
         {
           "language": "uk",
-          "value": "Безпосереднє формування скрученої петлі"
+          "value": "Послідовне розкручування петлі"
         }
       ],
       "descriptions": [
         {
           "language": "en",
-          "value": "A shortened two-step procedure showing the same initial ring and finished loop."
+          "value": "Three steps reversing the twisting sequence: from the twisted loop through a partial untwist to a flat ring."
         },
         {
           "language": "uk",
-          "value": "Скорочений двоетапний спосіб із тим самим початковим кільцем і готовою петлею."
+          "value": "Три кроки у зворотному порядку до скручування: від скрученої петлі через часткове розкручування до плоского кільця."
         }
       ],
       "base": {
         "id": "view-3d-finish"
-      }
+      },
+      "purpose": "untying"
     }
   ]
 }

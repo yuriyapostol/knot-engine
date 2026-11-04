@@ -1,4 +1,4 @@
-import { type RawKnot, type Construction, type Reference } from './knot'
+import { MOSAIC_DIAGRAM, PD_CODE, DT_CODE, type RawKnot, type Construction, type Reference } from './knot'
 import { validateKnot, normalizeKnot, indexKnot, constructionFor, type ValidationOptions } from './validateKnot'
 import { canonical } from './validation'
 import { ViewerError } from './errors'
@@ -8,20 +8,20 @@ function checked(value: unknown, options: ValidationOptions): RawKnot {
   if(!result.complete) throw new ViewerError('UNSUPPORTED_SCHEMA','Operation requires resolved dependencies and supported semantics',undefined,false)
   return normalizeKnot(result.knot)
 }
-/** Extracts a self-contained fragment; only explicitly selected procedures and representations. */
-export function selectKnot(value: unknown, selection: { representations?: string[]; procedures?: string[] }, options: ValidationOptions = {}): RawKnot {
+/** Extracts a self-contained fragment; only explicitly selected algorithms and representations. */
+export function selectKnot(value: unknown, selection: { representations?: string[]; algorithms?: string[] }, options: ValidationOptions = {}): RawKnot {
   const knot = checked(value,options), index = indexKnot(knot,options.registries)
-  const reps = new Set(selection.representations ?? []), procs = new Set(selection.procedures ?? [])
-  for(const id of procs) if(!knot.procedures?.some(p=>p.id === id)) throw new ViewerError('INVALID_MODEL',`Unknown procedure: ${id}`,undefined,false)
-  const procedures = knot.procedures?.filter(p=>procs.has(p.id)) ?? []
-  for(const p of procedures) { if(p.base?.id) reps.add(p.base.id); for(const step of p.steps) for(const r of step.representations ?? []) if(r.id) reps.add(r.id) }
+  const reps = new Set(selection.representations ?? []), procs = new Set(selection.algorithms ?? [])
+  for(const id of procs) if(!knot.algorithms?.some(p=>p.id === id)) throw new ViewerError('INVALID_MODEL',`Unknown algorithm: ${id}`,undefined,false)
+  const algorithms = knot.algorithms?.filter(p=>procs.has(p.id)) ?? []
+  for(const p of algorithms) { if(p.base?.id) reps.add(p.base.id); for(const step of p.steps) for(const r of step.representations ?? []) if(r.id) reps.add(r.id) }
   for(const id of reps) if(!knot.representations?.some(r=>r.id === id)) throw new ViewerError('INVALID_MODEL',`Unknown representation: ${id}`,undefined,false)
   const representations = knot.representations?.filter(r=>reps.has(r.id)) ?? []
   const constructions = new Map<string,Construction>()
   const includeConstruction = (r: Reference) => { const c=constructionFor(knot,index,r); if(c) constructions.set(c.id,c) }
   for(const r of representations) if(r.target && r.target.kind !== 'subject') includeConstruction(r.target.construction)
-  for(const p of procedures) if(p.construction) includeConstruction(p.construction)
-  const output: RawKnot = { schema:'Knot',schemaVersion:1,id:knot.id,subject:knot.subject,representations,procedures,constructions:[...constructions.values()] }
+  for(const p of algorithms) if(p.construction) includeConstruction(p.construction)
+  const output: RawKnot = { schema:'Knot',schemaVersion:1,id:knot.id,subject:knot.subject,representations,algorithms,constructions:[...constructions.values()] }
   if (knot.contributions) output.contributions = knot.contributions
   if (knot.license) output.license = knot.license
   const included = new Set<string>()
@@ -34,11 +34,18 @@ export function selectKnot(value: unknown, selection: { representations?: string
     if(entry.kind === 'catalog') (output.catalogs ??= []).push(entry.resource)
     if(entry.kind === 'representation-type') (output.representationTypes ??= []).push(entry.resource)
     if(entry.kind === 'object-type') (output.objectTypes ??= []).push(entry.resource)
+    if(entry.kind === 'algorithm-purpose') (output.algorithmPurposes ??= []).push(entry.resource)
+    if(entry.kind === 'tile-set') (output.tileSets ??= []).push(entry.resource)
+    if(entry.kind === 'convention') (output.conventions ??= []).push(entry.resource)
   }
+  for (const algorithm of algorithms) if (algorithm.purpose) include(algorithm.purpose)
   for(const ident of output.subject.identifiers ?? []) include(ident.catalog)
   for(const c of constructions.values()) for(const o of c.objects) include(o.type)
   for(const rep of representations) {
     include(rep.type)
+    const data = rep.data as Record<string, unknown>
+    if (rep.type === MOSAIC_DIAGRAM && typeof data?.tileSet === 'string') include(data.tileSet)
+    if ((rep.type === PD_CODE || rep.type === DT_CODE) && typeof data?.convention === 'string') include(data.convention)
     for (const source of rep.sources ?? []) {
       if ('ref' in source && source.ref) include(source.ref)
       else if ('id' in source && source.id) {
@@ -58,7 +65,7 @@ export function composeKnot(values: readonly unknown[], options: ValidationOptio
     if (p.license && out.license && canonical(p.license) !== canonical(out.license)) throw new ViewerError('INVALID_MODEL','Conflicting license',undefined,false)
     if (p.license) out.license = structuredClone(p.license)
     if (p.contributions) out.contributions = [...new Map([...(out.contributions ?? []),...p.contributions].map(c=>[canonical(c),c])).values()]
-    for(const key of ['catalogs','representationTypes','objectTypes','constructions','representations','procedures','dependencies','sources'] as const) {
+    for(const key of ['catalogs','representationTypes','objectTypes','algorithmPurposes','tileSets','conventions','constructions','representations','algorithms','dependencies','sources'] as const) {
       const merged=new Map<string,unknown>()
       for(const item of [...(out[key] ?? []),...(p[key] ?? [])]) {
         const id='id' in item ? item.id : item.ref

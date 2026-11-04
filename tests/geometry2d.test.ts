@@ -35,12 +35,12 @@ it('locates crossings for interpolated splines', () => {
   expect(locateCrossings(spline)).toHaveLength(2)
 })
 
-it('renders geometric crossings consistently across independent example procedure steps', () => {
+it('renders geometric crossings consistently across independent example algorithm steps', () => {
   const example = JSON.parse(readFileSync('v1/examples/knots/geometry-crossing-demo.json', 'utf8'))
   const base = example.representations.find((r: { id: string }) => r.id === 'crossing-2d').data as Geometry2DData
   expect(locateCrossings(base)).toHaveLength(2)
-  const procedure = example.procedures[0]
-  const before = applyStepData(base, procedure.steps[0].data, GEOMETRY_2D)
+  const algorithm = example.algorithms[0]
+  const before = applyStepData(base, algorithm.steps[0].data, GEOMETRY_2D)
   expect(before.valid).toBe(true)
   if (before.valid) expect(locateCrossings(before.data as Geometry2DData)).toEqual([])
   expect(locateCrossings(base)).toHaveLength(2)

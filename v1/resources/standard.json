@@ -250,6 +250,139 @@
           }
         ]
       }
+    },
+    {
+      "kind": "algorithm-purpose",
+      "resource": {
+        "id": "knot-engine:algorithm-purposes/tying",
+        "name": "tying",
+        "description": "Forming a knot.",
+        "specification": "knot-engine:specifications/knot.html",
+        "names": [
+          {
+            "language": "en",
+            "value": "Tying"
+          },
+          {
+            "language": "uk",
+            "value": "Зав’язування"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "algorithm-purpose",
+      "resource": {
+        "id": "knot-engine:algorithm-purposes/untying",
+        "name": "untying",
+        "description": "Undoing a knot.",
+        "specification": "knot-engine:specifications/knot.html",
+        "names": [
+          {
+            "language": "en",
+            "value": "Untying"
+          },
+          {
+            "language": "uk",
+            "value": "Розв’язування"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "algorithm-purpose",
+      "resource": {
+        "id": "knot-engine:algorithm-purposes/transformation",
+        "name": "transformation",
+        "description": "Changing one knot into another.",
+        "specification": "knot-engine:specifications/knot.html",
+        "names": [
+          {
+            "language": "en",
+            "value": "Transformation"
+          },
+          {
+            "language": "uk",
+            "value": "Перетворення"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "algorithm-purpose",
+      "resource": {
+        "id": "knot-engine:algorithm-purposes/adjustment",
+        "name": "adjustment",
+        "description": "Dressing, tightening or regulating an existing knot.",
+        "specification": "knot-engine:specifications/knot.html",
+        "names": [
+          {
+            "language": "en",
+            "value": "Adjustment"
+          },
+          {
+            "language": "uk",
+            "value": "Регулювання"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "tile-set",
+      "resource": {
+        "id": "knot-engine:tile-sets/lomonaco-kauffman-11",
+        "name": "lomonaco-kauffman-11",
+        "description": "The fixed eleven-tile mosaic convention, including crossing tiles 9 and 10.",
+        "specification": "knot-engine:specifications/mosaic-diagram.html",
+        "names": [
+          {
+            "language": "en",
+            "value": "Lomonaco–Kauffman 11 tiles"
+          },
+          {
+            "language": "uk",
+            "value": "11 плиток Ломонако—Кауфмана"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "convention",
+      "resource": {
+        "id": "knot-engine:conventions/pd-ccw-under-first",
+        "name": "pd-ccw-under-first",
+        "description": "Counterclockwise crossing slots starting with the incoming underpass.",
+        "specification": "knot-engine:specifications/pd-code.html",
+        "names": [
+          {
+            "language": "en",
+            "value": "PD: counterclockwise, underpass first"
+          },
+          {
+            "language": "uk",
+            "value": "PD: проти годинникової стрілки, нижній прохід першим"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "convention",
+      "resource": {
+        "id": "knot-engine:conventions/dt-signed-even",
+        "name": "dt-signed-even",
+        "description": "Signed even labels; a negative entry means the odd visit passes under.",
+        "specification": "knot-engine:specifications/dt-code.html",
+        "names": [
+          {
+            "language": "en",
+            "value": "DT: signed even code"
+          },
+          {
+            "language": "uk",
+            "value": "DT: парний код зі знаками"
+          }
+        ]
+      }
     }
   ]
 }

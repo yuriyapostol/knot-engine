@@ -1,6 +1,6 @@
 import type { Component } from 'vue'
 import type { RawKnot, SelectionResult } from '../core'
-import { expandURI, selectRepresentation } from '../core'
+import { resolveResourceURI, selectRepresentation } from '../core'
 
 export interface ViewerCapabilities {
   orbit?: boolean
@@ -27,7 +27,7 @@ export function createViewerRegistry(entries: readonly ViewerRegistration[]): Vi
 }
 
 export function findViewer(knot: RawKnot, type: string, registry: ViewerRegistry): ViewerRegistration | undefined {
-  return registry.get(expandURI(type, knot.namespaces))
+  return registry.get(resolveResourceURI(type, 'representation-type', knot.namespaces))
 }
 
 /**
@@ -55,7 +55,7 @@ export function selectViewerRepresentation(
   let candidates: string[]
   try {
     candidates = knot.representations.filter(rep =>
-      typeof rep.type === 'string' && registry.has(expandURI(rep.type, knot.namespaces)),
+      typeof rep.type === 'string' && registry.has(resolveResourceURI(rep.type, 'representation-type', knot.namespaces)),
     ).map(rep => rep.id)
   } catch {
     // Let core return its own structured diagnostic for invalid namespaces.

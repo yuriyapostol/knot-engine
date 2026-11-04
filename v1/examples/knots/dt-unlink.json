@@ -8,24 +8,12 @@
   "subject": {
     "id": "dt-unlink-subject"
   },
-  "representationTypes": [
-    {
-      "id": "knot-engine:representation-types/dt-code",
-      "name": "dt-code",
-      "description": "Signed even DT code for knot and link diagrams, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/dt-code.schema.json"
-      },
-      "specification": "knot-engine:specifications/dt-code.html",
-      "viewSpace": "none"
-    }
-  ],
   "representations": [
     {
       "id": "dt",
-      "type": "knot-engine:representation-types/dt-code",
+      "type": "dt-code",
       "data": {
-        "convention": "knot-engine:conventions/dt-signed-even",
+        "convention": "dt-signed-even",
         "code": [
           [],
           []

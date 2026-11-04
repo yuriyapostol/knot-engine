@@ -909,7 +909,18 @@
         },
         "type": {
           "type": "string",
-          "minLength": 1
+          "anyOf": [
+            {
+              "enum": [
+                "rope",
+                "support",
+                "carabiner"
+              ]
+            },
+            {
+              "pattern": "^(https?://\\S+|urn:\\S+|[A-Za-z][A-Za-z0-9_-]*:.+)$"
+            }
+          ]
         }
       },
       "required": [
@@ -921,7 +932,10 @@
           "if": {
             "properties": {
               "type": {
-                "const": "https://yuriyapostol.github.io/knot-engine/v1/object-types/rope"
+                "enum": [
+                  "https://yuriyapostol.github.io/knot-engine/v1/object-types/rope",
+                  "rope"
+                ]
               }
             }
           },
@@ -935,7 +949,9 @@
               "type": {
                 "enum": [
                   "https://yuriyapostol.github.io/knot-engine/v1/object-types/support",
-                  "https://yuriyapostol.github.io/knot-engine/v1/object-types/carabiner"
+                  "https://yuriyapostol.github.io/knot-engine/v1/object-types/carabiner",
+                  "support",
+                  "carabiner"
                 ]
               }
             }
@@ -1028,7 +1044,21 @@
         },
         "type": {
           "type": "string",
-          "minLength": 1
+          "anyOf": [
+            {
+              "enum": [
+                "2d",
+                "3d",
+                "grid-diagram",
+                "mosaic-diagram",
+                "pd-code",
+                "dt-code"
+              ]
+            },
+            {
+              "pattern": "^(https?://\\S+|urn:\\S+|[A-Za-z][A-Za-z0-9_-]*:.+)$"
+            }
+          ]
         },
         "target": {
           "$ref": "#/$defs/target"
@@ -1076,7 +1106,10 @@
           "if": {
             "properties": {
               "type": {
-                "const": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram"
+                "enum": [
+                  "https://yuriyapostol.github.io/knot-engine/v1/representation-types/grid-diagram",
+                  "grid-diagram"
+                ]
               }
             }
           },
@@ -1140,7 +1173,10 @@
           "if": {
             "properties": {
               "type": {
-                "const": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/2d"
+                "enum": [
+                  "https://yuriyapostol.github.io/knot-engine/v1/representation-types/2d",
+                  "2d"
+                ]
               }
             }
           },
@@ -1156,7 +1192,10 @@
           "if": {
             "properties": {
               "type": {
-                "const": "https://yuriyapostol.github.io/knot-engine/v1/representation-types/3d"
+                "enum": [
+                  "https://yuriyapostol.github.io/knot-engine/v1/representation-types/3d",
+                  "3d"
+                ]
               }
             }
           },
@@ -1164,6 +1203,54 @@
             "properties": {
               "data": {
                 "$ref": "#/$defs/geometry3d"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "mosaic-diagram"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/mosaicDocumentData"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "pd-code"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/pdDocumentData"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "dt-code"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/dtDocumentData"
               }
             }
           }
@@ -1177,7 +1264,7 @@
           "type": "string",
           "minLength": 1
         },
-        "instructions": {
+        "descriptions": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/name"
@@ -1203,6 +1290,17 @@
         },
         "data": {
           "$ref": "#/$defs/stepData"
+        },
+        "condition": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "minItems": 1,
+          "maxItems": 128
+        },
+        "repeat": {
+          "$ref": "#/$defs/stepRepeat"
         }
       },
       "required": [
@@ -1210,7 +1308,7 @@
       ],
       "additionalProperties": false
     },
-    "procedure": {
+    "algorithm": {
       "type": "object",
       "properties": {
         "id": {
@@ -1246,6 +1344,22 @@
         },
         "base": {
           "$ref": "#/$defs/reference"
+        },
+        "purpose": {
+          "type": "string",
+          "anyOf": [
+            {
+              "enum": [
+                "tying",
+                "untying",
+                "transformation",
+                "adjustment"
+              ]
+            },
+            {
+              "pattern": "^(https?://\\S+|urn:\\S+|[A-Za-z][A-Za-z0-9_-]*:.+)$"
+            }
+          ]
         }
       },
       "required": [
@@ -1351,6 +1465,54 @@
             "resource"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "algorithm-purpose"
+            },
+            "resource": {
+              "$ref": "#/$defs/algorithmPurpose"
+            }
+          },
+          "required": [
+            "kind",
+            "resource"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "tile-set"
+            },
+            "resource": {
+              "$ref": "#/$defs/tileSet"
+            }
+          },
+          "required": [
+            "kind",
+            "resource"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "convention"
+            },
+            "resource": {
+              "$ref": "#/$defs/convention"
+            }
+          },
+          "required": [
+            "kind",
+            "resource"
+          ],
+          "additionalProperties": false
         }
       ]
     },
@@ -1364,7 +1526,10 @@
             "object-type",
             "view",
             "construction",
-            "source"
+            "source",
+            "algorithm-purpose",
+            "tile-set",
+            "convention"
           ]
         },
         "ref": {
@@ -1644,7 +1809,10 @@
       "type": "object",
       "properties": {
         "tileSet": {
-          "const": "https://yuriyapostol.github.io/knot-engine/v1/tile-sets/lomonaco-kauffman-11"
+          "enum": [
+            "https://yuriyapostol.github.io/knot-engine/v1/tile-sets/lomonaco-kauffman-11",
+            "lomonaco-kauffman-11"
+          ]
         },
         "tiles": {
           "type": "array",
@@ -1749,7 +1917,10 @@
       "type": "object",
       "properties": {
         "convention": {
-          "const": "https://yuriyapostol.github.io/knot-engine/v1/conventions/pd-ccw-under-first"
+          "enum": [
+            "https://yuriyapostol.github.io/knot-engine/v1/conventions/pd-ccw-under-first",
+            "pd-ccw-under-first"
+          ]
         },
         "crossings": {
           "type": "array",
@@ -2053,7 +2224,10 @@
       "type": "object",
       "properties": {
         "convention": {
-          "const": "https://yuriyapostol.github.io/knot-engine/v1/conventions/dt-signed-even"
+          "enum": [
+            "https://yuriyapostol.github.io/knot-engine/v1/conventions/dt-signed-even",
+            "dt-signed-even"
+          ]
         },
         "code": {
           "oneOf": [
@@ -2192,10 +2366,10 @@
           "minItems": 0,
           "maxItems": 1024
         },
-        "procedures": {
+        "algorithms": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/procedure"
+            "$ref": "#/$defs/algorithm"
           },
           "minItems": 0,
           "maxItems": 256
@@ -2216,6 +2390,30 @@
         },
         "license": {
           "$ref": "#/$defs/license"
+        },
+        "algorithmPurposes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/algorithmPurpose"
+          },
+          "minItems": 0,
+          "maxItems": 256
+        },
+        "tileSets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/tileSet"
+          },
+          "minItems": 0,
+          "maxItems": 256
+        },
+        "conventions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/convention"
+          },
+          "minItems": 0,
+          "maxItems": 256
         }
       },
       "required": [
@@ -2663,6 +2861,300 @@
           "additionalProperties": false
         }
       ]
+    },
+    "stepRepeat": {
+      "description": "Total step executions. The core validator additionally checks min <= max.",
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "min": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "count"
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "min"
+                ]
+              },
+              {
+                "required": [
+                  "max"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "anyOf": [
+            {
+              "required": [
+                "min"
+              ]
+            },
+            {
+              "required": [
+                "max"
+              ]
+            }
+          ],
+          "not": {
+            "required": [
+              "count"
+            ]
+          }
+        }
+      ]
+    },
+    "algorithmPurpose": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "specification": {
+          "type": "string",
+          "minLength": 1
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "specification"
+      ],
+      "additionalProperties": false
+    },
+    "mosaicDocumentData": {
+      "type": "object",
+      "properties": {
+        "tileSet": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10
+            }
+          }
+        }
+      },
+      "required": [
+        "tileSet",
+        "tiles"
+      ],
+      "additionalProperties": false
+    },
+    "pdDocumentData": {
+      "type": "object",
+      "properties": {
+        "convention": {
+          "type": "string",
+          "minLength": 1
+        },
+        "crossings": {
+          "type": "array",
+          "maxItems": 16384,
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "minItems": 4,
+            "maxItems": 4
+          }
+        },
+        "unlinkedComponents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16384
+        }
+      },
+      "required": [
+        "convention",
+        "crossings"
+      ],
+      "additionalProperties": false
+    },
+    "dtDocumentData": {
+      "type": "object",
+      "properties": {
+        "convention": {
+          "type": "string",
+          "minLength": 1
+        },
+        "code": {
+          "oneOf": [
+            {
+              "type": "array",
+              "maxItems": 512,
+              "items": {
+                "type": "integer",
+                "multipleOf": 2,
+                "minimum": -1024,
+                "maximum": 1024,
+                "not": {
+                  "const": 0
+                }
+              }
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 512,
+              "items": {
+                "type": "array",
+                "maxItems": 512,
+                "items": {
+                  "type": "integer",
+                  "multipleOf": 2,
+                  "minimum": -1024,
+                  "maximum": 1024,
+                  "not": {
+                    "const": 0
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "convention",
+        "code"
+      ],
+      "additionalProperties": false
+    },
+    "tileSet": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "specification": {
+          "type": "string",
+          "minLength": 1
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "specification"
+      ],
+      "additionalProperties": false
+    },
+    "convention": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "specification": {
+          "type": "string",
+          "minLength": 1
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "specification"
+      ],
+      "additionalProperties": false
     }
   }
 }

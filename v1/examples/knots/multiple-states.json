@@ -11,7 +11,7 @@
   "representations": [
     {
       "id": "view-3d-rest",
-      "type": "knot-engine:representation-types/3d",
+      "type": "3d",
       "target": {
         "kind": "state",
         "construction": {
@@ -50,7 +50,7 @@
     },
     {
       "id": "view-3d-bend",
-      "type": "knot-engine:representation-types/3d",
+      "type": "3d",
       "target": {
         "kind": "state",
         "construction": {
@@ -89,7 +89,7 @@
     },
     {
       "id": "view-3d-finish",
-      "type": "knot-engine:representation-types/3d",
+      "type": "3d",
       "target": {
         "kind": "state",
         "construction": {
@@ -133,7 +133,7 @@
       "objects": [
         {
           "id": "rope-1",
-          "type": "knot-engine:object-types/rope",
+          "type": "rope",
           "topology": "open",
           "ends": [
             {
@@ -157,29 +157,6 @@
           "id": "view-3d-finish"
         }
       ]
-    }
-  ],
-  "objectTypes": [
-    {
-      "id": "knot-engine:object-types/rope",
-      "name": "rope",
-      "description": "rope contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/rope-object.schema.json"
-      },
-      "specification": "knot-engine:specifications/knot.html"
-    }
-  ],
-  "representationTypes": [
-    {
-      "id": "knot-engine:representation-types/3d",
-      "name": "3d",
-      "description": "3d geometry contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/3d.schema.json"
-      },
-      "specification": "knot-engine:specifications/knot.html",
-      "viewSpace": "space"
     }
   ]
 }

@@ -1,6 +1,6 @@
 import { validateKnot } from '../src/core/validateKnot'
 import { describe, expect, it } from 'vitest'
-import { Knot, configureLocalization, subscribeLocalization, STANDARD_RESOURCES, expandURI } from '../src/core'
+import { Knot, configureLocalization, subscribeLocalization, STANDARD_RESOURCES, resolveResourceURI, expandURI } from '../src/core'
 import raw from '../v1/examples/knots/open-rope.json'
 
 describe('prepared Knot model', () => {
@@ -107,22 +107,22 @@ describe('prepared Knot model', () => {
     const other = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
     expect(other.getRepresentation('view-3d-rest')?.getName()).toBe('3D geometry')
   })
-  it('edits procedures and steps without replacing unrelated entities', () => {
+  it('edits algorithms and steps without replacing unrelated entities', () => {
     const knot = Knot.from(raw as any)
     const rep = knot.getRepresentation('view-3d-rest')
-    const procedure = knot.addProcedure({ id: 'tie', steps: [{ id: 'first' }] })
-    expect(knot.getProcedure('tie')).toBe(procedure)
-    expect(procedure.getStep('first')).toBe(procedure.steps[0])
-    procedure.steps.push({ id: 'direct-step' } as any)
-    expect(procedure.steps.some(step => step.id === 'direct-step')).toBe(true)
-    const step = procedure.addStep({ id: 'second' })
-    expect(procedure.getStep('second')).toBe(step)
-    expect(() => procedure.addStep({ id: 'second' })).toThrow()
-    expect(procedure.removeStep('first')).toBe(true)
+    const algorithm = knot.addAlgorithm({ id: 'tie', steps: [{ id: 'first' }] })
+    expect(knot.getAlgorithm('tie')).toBe(algorithm)
+    expect(algorithm.getStep('first')).toBe(algorithm.steps[0])
+    algorithm.steps.push({ id: 'direct-step' } as any)
+    expect(algorithm.steps.some(step => step.id === 'direct-step')).toBe(true)
+    const step = algorithm.addStep({ id: 'second' })
+    expect(algorithm.getStep('second')).toBe(step)
+    expect(() => algorithm.addStep({ id: 'second' })).toThrow()
+    expect(algorithm.removeStep('first')).toBe(true)
     expect(knot.getRepresentation('view-3d-rest')).toBe(rep)
-    expect(knot.toRaw().procedures?.[0].steps.map(x => x.id)).toEqual(['direct-step', 'second'])
-    expect(knot.removeProcedure('tie')).toBe(true)
-    expect(knot.getProcedure('tie')).toBeUndefined()
+    expect(knot.toRaw().algorithms?.[0].steps.map(x => x.id)).toEqual(['direct-step', 'second'])
+    expect(knot.removeAlgorithm('tie')).toBe(true)
+    expect(knot.getAlgorithm('tie')).toBeUndefined()
   })
   it('edits inline resource definitions without losing unrelated prepared references', () => {
     const knot = Knot.from(raw as any, { registries: [STANDARD_RESOURCES] })
@@ -146,13 +146,13 @@ describe('prepared Knot model', () => {
     expect(knot.toRaw().representationTypes?.some(x => x.id === id)).toBe(false)
   })
   it('restores registry definitions after removing an inline override', () => {
-    const source = STANDARD_RESOURCES.resources.find(entry => entry.kind === 'representation-type' && expandURI(entry.resource.id, STANDARD_RESOURCES.namespaces) === expandURI(raw.representations[0].type, raw.namespaces))!.resource as any
+    const source = STANDARD_RESOURCES.resources.find(entry => entry.kind === 'representation-type' && expandURI(entry.resource.id, STANDARD_RESOURCES.namespaces) === resolveResourceURI(raw.representations[0].type, 'representation-type', raw.namespaces))!.resource as any
     const knot = Knot.from({ ...raw, catalogs: [], representationTypes: [], objectTypes: [] } as any, {
       registries: [STANDARD_RESOURCES],
     })
     const original = knot.getResource(source.id)!
     const rep = knot.getRepresentation('view-3d-rest')!
-    const local = knot.addResourceDefinition('representationTypes', { ...source, name: 'Temporary type' })
+    const local = knot.addResourceDefinition('representationTypes', { ...source, names: [{ language: 'en', value: 'Temporary type' }] })
     expect(knot.getResource(source.id)).toBe(local)
     expect(rep.getTypeDefinition()).toBe(local)
     expect(knot.removeResourceDefinition('representationTypes', source.id)).toBe(true)
@@ -165,38 +165,63 @@ describe('prepared Knot model', () => {
     expect(original.getName('en')).toBe(restored.getName('en'))
     expect(source.name).not.toBe('Temporary type')
   })
-  it('uses per-Knot locale for subject, procedures and steps, including newly added steps', () => {
+  it('uses per-Knot locale for subject, algorithms and steps, including newly added steps', () => {
     const bilingual = [{ language: 'en', value: 'English' }, { language: 'uk', value: 'Українська' }]
     const input = {
       ...raw, subject: { ...raw.subject, names: bilingual },
-      procedures: [{ id: 'guide', names: bilingual, descriptions: bilingual,
-        steps: [{ id: 'first', names: bilingual, instructions: bilingual }] }],
+      algorithms: [{ id: 'guide', names: bilingual, descriptions: bilingual,
+        steps: [{ id: 'first', names: bilingual, descriptions: bilingual }] }],
     }
     configureLocalization({ locale: 'en', fallbackLocale: 'en' })
     const uk = Knot.from(input as any, { locale: 'uk' })
     const en = Knot.from(input as any, { locale: 'en' })
     expect(uk.subject.getName()).toBe('Українська')
     expect(en.subject.getName()).toBe('English')
-    expect(uk.getProcedure('guide')!.getDescription()).toBe('Українська')
-    expect(uk.getProcedure('guide')!.getStep('first')!.getInstructions()).toBe('Українська')
-    const added = uk.getProcedure('guide')!.addStep({ id: 'second', names: bilingual, instructions: bilingual })
-    expect(added.getInstructions()).toBe('Українська')
-    expect(uk.clone().getProcedure('guide')!.getStep('second')!.getName()).toBe('Українська')
-    expect(uk.toRaw()).toEqual({ ...input, procedures: [{ ...input.procedures[0], steps: [...input.procedures[0].steps, { id: 'second', names: bilingual, instructions: bilingual }] }] })
-    expect(en.getProcedure('guide')!.getStep('first')!.getName()).toBe('English')
+    expect(uk.getAlgorithm('guide')!.getDescription()).toBe('Українська')
+    expect(uk.getAlgorithm('guide')!.getStep('first')!.getDescription()).toBe('Українська')
+    const added = uk.getAlgorithm('guide')!.addStep({ id: 'second', names: bilingual, descriptions: bilingual })
+    expect(added.getDescription()).toBe('Українська')
+    expect(uk.clone().getAlgorithm('guide')!.getStep('second')!.getName()).toBe('Українська')
+    expect(uk.toRaw()).toEqual({ ...input, algorithms: [{ ...input.algorithms[0], steps: [...input.algorithms[0].steps, { id: 'second', names: bilingual, descriptions: bilingual }] }] })
+    expect(en.getAlgorithm('guide')!.getStep('first')!.getName()).toBe('English')
   })
-  it('applies per-Knot name overrides to subject, procedure and step without changing raw text', () => {
+  it('localizes conditions and preserves algorithm controls across editing and extraction', () => {
+    const condition = [{ language: 'en', value: 'If needed.' }, { language: 'uk', value: 'За потреби.' }]
+    const input = { schema: 'Knot' as const, schemaVersion: 1 as const, id: 'controls', subject: { id: 'rope' }, algorithms: [{ id: 'guide', purpose: 'untying' as const, steps: [{ id: 'first', condition, repeat: { min: 1, max: 3 } }] }] }
+    const knot = Knot.from(input, { locale: 'uk-UA', fallbackLocale: 'en', overrides: { first: { descriptions: [{ language: 'uk', value: 'An unrelated description.' }] } } })
+    const step = knot.getAlgorithm('guide')!.getStep('first')!
+    expect(step.getCondition()).toBe('За потреби.')
+    expect(step.getCondition('de')).toBe('If needed.')
+    expect(step.condition!.getExact('uk')).toBe('За потреби.')
+    expect(knot.toRaw()).toEqual(input)
+    const selected = knot.select({ algorithms: ['guide'] })
+    for (const copy of [knot.clone(), selected, Knot.compose([selected], { locale: 'uk-UA' })]) {
+      expect(resolveResourceURI(copy.getAlgorithm('guide')!.purpose!, 'algorithm-purpose')).toBe(resolveResourceURI('untying', 'algorithm-purpose'))
+      expect(copy.getAlgorithm('guide')!.getPurposeDefinition()?.getName('uk')).toBe('Розв’язування')
+      expect(copy.getAlgorithm('guide')!.getStep('first')!.getCondition()).toBe('За потреби.')
+      expect(copy.toRaw().algorithms![0].steps).toEqual(input.algorithms[0].steps)
+    }
+    const added = knot.getAlgorithm('guide')!.addStep({ id: 'second', condition, repeat: { count: 2 } })
+    expect(added.getCondition()).toBe('За потреби.')
+    const algorithm = knot.addAlgorithm({ id: 'adjust', purpose: 'adjustment', steps: [{ id: 'first', condition, repeat: { max: 4 } }] })
+    expect(algorithm.getStep('first')!.getCondition()).toBe('За потреби.')
+    expect(algorithm.getStep('first')!.repeat).toEqual({ max: 4 })
+    expect(input.algorithms[0].steps).toHaveLength(1)
+  })
+  it('applies per-Knot name and description overrides without changing raw text', () => {
     const bilingual = [{ language: 'en', value: 'Original' }]
     const input = { ...raw, subject: { ...raw.subject, names: bilingual },
-      procedures: [{ id: 'guide', names: bilingual, descriptions: bilingual, steps: [{ id: 'first', names: bilingual }] }] }
+      algorithms: [{ id: 'guide', names: bilingual, descriptions: bilingual, steps: [{ id: 'first', names: bilingual, descriptions: bilingual }] }] }
     const knot = Knot.from(input as any, { locale: 'uk', overrides: {
       [raw.subject.id]: { names: [{ language: 'uk', value: 'Предмет' }] },
       guide: { descriptions: [{ language: 'uk', value: 'Опис' }] },
-      first: { names: [{ language: 'uk', value: 'Крок' }] },
+      first: { names: [{ language: 'uk', value: 'Крок' }], descriptions: [{ language: 'uk', value: 'Опис кроку' }] },
     } })
     expect(knot.subject.getName()).toBe('Предмет')
-    expect(knot.getProcedure('guide')!.getDescription()).toBe('Опис')
-    expect(knot.getProcedure('guide')!.getStep('first')!.getName()).toBe('Крок')
+    expect(knot.getAlgorithm('guide')!.getDescription()).toBe('Опис')
+    expect(knot.getAlgorithm('guide')!.getStep('first')!.getName()).toBe('Крок')
+    expect(knot.getAlgorithm('guide')!.getStep('first')!.getDescription()).toBe('Опис кроку')
+    expect(knot.getAlgorithm('guide')!.getStep('first')!.getDescription('en')).toBe('Original')
     expect(knot.toRaw()).toEqual(input)
   })
   it('preserves per-Knot localization and raw serialization across clone, select and compose', () => {

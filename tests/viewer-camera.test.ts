@@ -60,7 +60,7 @@ it('preserves the current camera across steps and quality changes through KnotVi
   const props = await mount(true)
   expect(calls.setModel.mock.lastCall?.[3]).toBeUndefined()
   const base = loop.representations.find(rep => rep.id === 'view-3d-finish')!
-  for (const step of loop.procedures![0].steps) {
+  for (const step of loop.algorithms![0].steps) {
     const result = step.data ? applyStepData(base.data as Geometry3DData, step.data as Parameters<typeof applyStepData>[1], GEOMETRY_3D) : { valid: true as const, data: base.data }
     expect(result.valid).toBe(true)
     if (!result.valid) continue

@@ -64,7 +64,18 @@
         },
         "type": {
           "type": "string",
-          "minLength": 1
+          "anyOf": [
+            {
+              "enum": [
+                "rope",
+                "support",
+                "carabiner"
+              ]
+            },
+            {
+              "pattern": "^(https?://\\S+|urn:\\S+|[A-Za-z][A-Za-z0-9_-]*:.+)$"
+            }
+          ]
         }
       },
       "required": [
@@ -76,7 +87,10 @@
           "if": {
             "properties": {
               "type": {
-                "const": "https://yuriyapostol.github.io/knot-engine/v1/object-types/rope"
+                "enum": [
+                  "https://yuriyapostol.github.io/knot-engine/v1/object-types/rope",
+                  "rope"
+                ]
               }
             }
           },
@@ -90,7 +104,9 @@
               "type": {
                 "enum": [
                   "https://yuriyapostol.github.io/knot-engine/v1/object-types/support",
-                  "https://yuriyapostol.github.io/knot-engine/v1/object-types/carabiner"
+                  "https://yuriyapostol.github.io/knot-engine/v1/object-types/carabiner",
+                  "support",
+                  "carabiner"
                 ]
               }
             }

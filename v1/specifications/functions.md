@@ -19,9 +19,10 @@ Import core APIs from `knot-engine/core`; this entry point uses no Vue, Three.js
 | `Knot.from(raw, options?)` / `knot.select(selection)` / `Knot.compose(parts)` | Prepare, select and compose documents |
 | `selectRepresentation(knot, query?, options?)` | Select and validate one representation; structured diagnostics |
 | `resolveRepresentationView(requested, views?, registries?, namespaces?)` | Resolve an application-owned view without fetching |
+| `resolveResourceURI(value, kind, namespaces?)` | Canonical URI for a reserved standard name or an absolute/declared compact URI; kind scopes the name |
 | `expandURI(value, namespaces?)` | Exact expanded URI; undeclared prefixes throw |
 
-`Knot.validate()` and `knot.validate()` accept `registries` (array of `RawResourceRegistry`). The `ValidationOptions` used by representation validation/selection additionally accept `schemas` (explicit JSON Schema objects). Known objects are always closed; `strict: false` does not relax validation. `STANDARD_RESOURCES` provides the built-in representation and object type definitions when passed explicitly. Type definitions, `ViewerError`, `KNOT_LIMITS`, namespace and type URI constants are exported.
+`Knot.validate()` and `knot.validate()` accept `registries` (array of `RawResourceRegistry`). The `ValidationOptions` used by representation validation/selection additionally accept `schemas` (explicit JSON Schema objects). Known objects are always closed; `strict: false` does not relax validation. `STANDARD_RESOURCES` publishes the immutable standard representation types, object types, algorithm purposes, tile sets and conventions; these definitions are always available without passing a registry. Type definitions, `ViewerError`, `KNOT_LIMITS`, namespace and type URI constants are exported.
 
 Built-in viewers render 2D curves, 3D curves and meshes, and SVG grids and mosaics. Rendering requires complete validation of the selected representation and its dependencies; extraction requires a complete document. Unknown type data can be preserved with an incomplete report. No operation proves the mathematical identity of a knot.
 

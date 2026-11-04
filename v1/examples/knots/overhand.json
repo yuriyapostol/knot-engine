@@ -31,7 +31,7 @@
   "representations": [
     {
       "id": "view-3d-rest",
-      "type": "knot-engine:representation-types/3d",
+      "type": "3d",
       "target": {
         "kind": "state",
         "construction": {
@@ -106,7 +106,7 @@
     },
     {
       "id": "view-2d-rest",
-      "type": "knot-engine:representation-types/2d",
+      "type": "2d",
       "target": {
         "kind": "state",
         "construction": {
@@ -213,7 +213,7 @@
     },
     {
       "id": "view-2d-closed",
-      "type": "knot-engine:representation-types/2d",
+      "type": "2d",
       "data": {
         "coordinateSystem": {
           "xAxis": "right",
@@ -306,9 +306,9 @@
     },
     {
       "id": "mosaic-closure",
-      "type": "knot-engine:representation-types/mosaic-diagram",
+      "type": "mosaic-diagram",
       "data": {
-        "tileSet": "knot-engine:tile-sets/lomonaco-kauffman-11",
+        "tileSet": "lomonaco-kauffman-11",
         "tiles": [
           [0, 2, 1, 0],
           [2, 10, 9, 1],
@@ -339,7 +339,7 @@
     },
     {
       "id": "grid-xo",
-      "type": "knot-engine:representation-types/grid-diagram",
+      "type": "grid-diagram",
       "data": {
         "encoding": "xo",
         "size": 5,
@@ -369,7 +369,7 @@
     },
     {
       "id": "grid-vertex-pairs",
-      "type": "knot-engine:representation-types/grid-diagram",
+      "type": "grid-diagram",
       "data": {
         "encoding": "vertex-pairs",
         "size": 5,
@@ -414,7 +414,7 @@
       "objects": [
         {
           "id": "open",
-          "type": "knot-engine:object-types/rope",
+          "type": "rope",
           "topology": "open",
           "ends": [
             {
@@ -432,59 +432,6 @@
           "id": "view-3d-rest"
         }
       ]
-    }
-  ],
-  "objectTypes": [
-    {
-      "id": "knot-engine:object-types/rope",
-      "name": "rope",
-      "description": "rope contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/rope-object.schema.json"
-      },
-      "specification": "knot-engine:specifications/knot.html"
-    }
-  ],
-  "representationTypes": [
-    {
-      "id": "knot-engine:representation-types/3d",
-      "name": "3d",
-      "description": "3d geometry contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/3d.schema.json"
-      },
-      "specification": "knot-engine:specifications/knot.html",
-      "viewSpace": "space"
-    },
-    {
-      "id": "knot-engine:representation-types/2d",
-      "name": "2d",
-      "description": "2d geometry contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/2d.schema.json"
-      },
-      "specification": "knot-engine:specifications/knot.html",
-      "viewSpace": "plane"
-    },
-    {
-      "id": "knot-engine:representation-types/mosaic-diagram",
-      "name": "mosaic-diagram",
-      "description": "mosaic-diagram contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/mosaic-diagram.schema.json"
-      },
-      "specification": "knot-engine:specifications/mosaic-diagram.html",
-      "viewSpace": "plane"
-    },
-    {
-      "id": "knot-engine:representation-types/grid-diagram",
-      "name": "grid-diagram",
-      "description": "grid-diagram contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/grid-diagram.schema.json"
-      },
-      "specification": "knot-engine:specifications/grid-diagram.html",
-      "viewSpace": "plane"
     }
   ]
 }

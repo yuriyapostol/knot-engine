@@ -3,7 +3,7 @@ import { resolveKnot } from '../src/core/resolve'
 import { describe, expect, it } from 'vitest'
 import { readFileSync, readdirSync } from 'node:fs'
 import open from '../v1/examples/knots/open-rope.json'
-import multi from '../v1/examples/knots/procedures.json'
+import multi from '../v1/examples/knots/algorithms.json'
 import { validateGridDiagram, validateGeometry3D, validateView, STANDARD_RESOURCES, expandURI, validateResourceRegistry, validateResourceDocument, validateRepresentationDocument, GEOMETRY_3D, type Geometry3DData, type RawKnot } from '../src/core'
 const copy = () => structuredClone(open)
 describe('RawKnot generation 1', () => {
@@ -32,6 +32,11 @@ describe('RawKnot generation 1', () => {
     expect(validateKnot({schemaVersion:1,curves:[]} ).valid).toBe(false)
     expect(validateKnot({...open,units:'m'}).valid).toBe(false)
   })
+  it('accepts step descriptions and rejects the former instructions field', () => {
+    const knot = { ...open, algorithms: [{ id: 'guide', steps: [{ id: 'first', descriptions: [{ language: 'en', value: 'Loosen the rope if needed.' }] }] }] }
+    expect(validateKnot(knot)).toMatchObject({ valid: true, complete: true })
+    expect(validateKnot({ ...knot, algorithms: [{ id: 'guide', steps: [{ id: 'first', instructions: [] }] }] }).valid).toBe(false)
+  })
   it('does not mutate frozen input and copies resolved geometry',()=>{
     const a=copy(), before=JSON.stringify(a)
     const freeze=(v:unknown)=>{if(v && typeof v==='object'){Object.values(v).forEach(freeze);Object.freeze(v)}}
@@ -39,17 +44,18 @@ describe('RawKnot generation 1', () => {
     const r=resolveKnot(a);r.curves[0].points[0][0]=123
     expect(JSON.stringify(a)).toBe(before)
   })
-  it('keeps procedures independent of interpolation point counts',()=>{
+  it('keeps algorithms independent of interpolation point counts',()=>{
     const a=structuredClone(multi)
-    a.procedures[0].steps[0].data!.replace![0].points.push([2,3,4])
+    a.algorithms[0].steps[0].data!.replace![0].points.push([2,3,4])
     expect(validateKnot(a)).toMatchObject({valid:true,complete:true})
-    a.procedures[0].base.id='missing'
+    a.algorithms[0].base.id='missing'
     expect(validateKnot(a).valid).toBe(false)
   })
   it('reports missing dependencies separately from validity',()=>{
-    const a=copy();a.representationTypes=[]
-    expect(validateKnot(a)).toMatchObject({valid:true,complete:false,missingDependencies:[{kind:'representation-type',ref:GEOMETRY_3D}]})
-    expect(validateKnot(a,{registries:[STANDARD_RESOURCES]})).toMatchObject({valid:true,complete:true})
+    const purpose = { id: 'urn:example:inspection', name: 'Inspection', description: 'Inspect a knot', specification: 'urn:example:inspection-spec' }
+    const a={ ...copy(), algorithms: [{ id: 'inspect', purpose: purpose.id, steps: [{ id: 'check' }] }] }
+    expect(validateKnot(a)).toMatchObject({valid:true,complete:false,missingDependencies:[{kind:'algorithm-purpose',ref:purpose.id}]})
+    expect(validateKnot(a,{registries:[{schema:'ResourceRegistry',schemaVersion:1,resources:[{kind:'algorithm-purpose',resource:purpose}]}]})).toMatchObject({valid:true,complete:true})
     expect(()=>resolveKnot(a)).toThrow(/Incomplete/)
   })
   it('retains unknown extensions as unchecked, never claims renderer support',()=>{
@@ -63,7 +69,8 @@ describe('RawKnot generation 1', () => {
     expect(validateKnot({...a,representations:[{...a.representations[0],data:3}]})).toMatchObject({valid:true,complete:false})
   })
   it('rejects conflicts between embedded and explicitly provided resources',()=>{
-    const a=copy();a.representationTypes[0].description='conflict'
+    const type = structuredClone(STANDARD_RESOURCES.resources.find(entry => entry.kind === 'representation-type' && entry.resource.name === '3d')!.resource)
+    const a={ ...copy(), representationTypes: [{ ...type, description: 'conflict' }] }
     expect(validateKnot(a,{registries:[STANDARD_RESOURCES]}).valid).toBe(false)
   })
   it('expands only declared prefixes and rejects reserved names',()=>{

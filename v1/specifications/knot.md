@@ -1,6 +1,6 @@
 # Knot v1
 
-The `Knot` contract supports 2D and 3D geometry, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, named states, procedures and reusable resources. `RawKnot` is serialized data; the prepared `Knot` provides runtime methods. Other representation formats, animation, properties, relations and classifications need separate contracts; untyped fields for them are not accepted. See [open design questions](../../design/knot-draft.md).
+The `Knot` contract supports 2D and 3D geometry, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, named states, algorithms and reusable resources. `RawKnot` is serialized data; the prepared `Knot` provides runtime methods. Other representation formats, animation, properties, relations and classifications need separate contracts; untyped fields for them are not accepted. See [open design questions](../../design/knot-draft.md).
 
 ## Terminology
 
@@ -19,7 +19,7 @@ Use descriptive concepts in prose. Name `Knot` explicitly when referring to that
 | Construction | `Construction`, `constructions` |
 | Construction object | `ConstructionObject`, `objects` |
 | Named state | `states` |
-| Procedure and step | `Procedure`, `procedures`, `Step`, `steps` |
+| Algorithm and step | `Algorithm`, `algorithms`, `Step`, `steps` |
 | View and camera | Viewer-owned `ViewDefinition`, `view`, `views`, `initialCamera` |
 | Catalog definition | `RawCatalogDefinition`, `catalogs` |
 | Source and contribution | `SourceDefinition`, `SourceUse`, `Contribution` |
@@ -29,7 +29,7 @@ Use descriptive concepts in prose. Name `Knot` explicitly when referring to that
 
 ## Documents and identity
 
-`Knot` requires `schema: "Knot"`, `schemaVersion: 1`, `id` and `subject: {id}`. Optional collections are `sources`, `contributions`, `catalogs`, `representationTypes`, `objectTypes`, `constructions`, `representations`, `procedures`, `dependencies`. `$schema` is optional and, when present, must identify the corresponding published JSON Schema. `namespaces` declares compact URI prefixes. Known objects are closed: unknown fields are errors even if a caller passes `strict: false`.
+`Knot` requires `schema: "Knot"`, `schemaVersion: 1`, `id` and `subject: {id}`. Optional collections are `sources`, `contributions`, `catalogs`, `representationTypes`, `objectTypes`, `algorithmPurposes`, `tileSets`, `conventions`, `constructions`, `representations`, `algorithms`, `dependencies`. `$schema` is optional and, when present, must identify the corresponding published JSON Schema. `namespaces` declares compact URI prefixes. Known objects are closed: unknown fields are errors even if a caller passes `strict: false`.
 
 `knot.id` identifies the document; `subject.id` identifies its subject. Initial-profile IDs may be local strings or absolute/compact URIs. Independent documents are not merged by subject identity. `subject.names` and `subject.descriptions` contain `{language,value}` records for localized display names and descriptions; both fields are optional arrays, each limited to 128 records. `language` and `value` are nonempty strings; language tags should follow BCP 47 (`uk`, `en`, etc.). Neither array sets a viewer locale or implies a fallback policy. `subject.identifiers` contains `{catalog,value}` records. A catalog is an identification system, not a collection of all its entries. Its rules validate a designation, not the truth of the author's identification.
 
@@ -41,30 +41,73 @@ Global identifiers use absolute `http`, `https` or `urn` URIs, or a declared `pr
 
 Prefixes also apply to our `dataSchema.ref` field, `data.convention` in standard DT/PD representations, and `data.tileSet` in standard mosaic representations. The representation type is expanded first and determines which data fields may be expanded. Arbitrary data of unknown types, source URLs and `dataSchema.inline` contents are not rewritten. Each document or registry has its own `namespaces`; moving a compact fragment into another document requires carrying its declarations or expanding its URIs first.
 
-JSON Schema does not expand data values using our `namespaces`. Before checking extracted `data` with a standalone DT/PD/mosaic schema, expand the corresponding fields. Direct validators `validateDTCode`, `validatePDCode` and `validateMosaicDiagram` accept full URIs; the `Knot` and `RawRepresentationDocument` validators expand them in the document context. Canonical schema `$id` and `const` values remain full URIs.
+JSON Schema does not expand data values using our `namespaces`. Standalone DT/PD/mosaic schemas and direct validators accept the supported standard short name or its canonical URI. Declared compact URIs require a document context and are expanded by the `Knot` and `RawRepresentationDocument` validators. Canonical schema `$id` values remain full URIs.
 
 Local references use `{id: string}`; external resource references use `{ref: URI}`. These forms are exclusive. Local references resolve only in their declared scope; a global resource may be included in a knot and addressed with `{ref}`. JSON Schema `$id`/`$ref` and editor `$schema` retain ordinary URI semantics and do not use compact prefixes.
 
-Resource registries are explicitly passed as `options.registries`. `STANDARD_RESOURCES` is a convenience registry exported by core; it is not implicitly inserted. Bundled examples embed the definitions they need. Different definitions with the same global ID are an error; identical JSON objects, ignoring key order, may be deduplicated. Array order remains significant. Unknown representation data is preserved without rewriting arbitrary fields.
+The immutable standard definitions in `STANDARD_RESOURCES` are always available. Standard-only knots need no `representationTypes`, `objectTypes`, `algorithmPurposes`, `tileSets`, `conventions` or explicit registry. External definitions can be embedded or explicitly passed as `options.registries`; external references are never fetched. Reserved standard identities cannot be redefined with a different kind or contract. Different definitions with the same global ID are an error; identical JSON objects, ignoring key order, may be deduplicated. Array order remains significant. Unknown representation data is preserved without rewriting arbitrary fields.
 
-## Constructions and procedures
+## Standard names and resource identities
 
-A construction requires `id` and nonempty `objects`; optional fields are `name`, `description`, `states`. Objects require local `id` and URI `type`. IDs are unique within a construction; the same local ID in a different construction denotes a different object. Named states require `id`, optionally `name` and `description`. State IDs are local to the construction.
+The following reserved, case-sensitive short names are part of the v1 contract, both inside and outside this package:
+
+| Field | Standard names | Canonical URI suffix |
+| --- | --- | --- |
+| `Representation.type` and representation queries | `2d`, `3d`, `grid-diagram`, `mosaic-diagram`, `pd-code`, `dt-code` | `representation-types/<name>` |
+| `ConstructionObject.type` | `rope`, `support`, `carabiner` | `object-types/<name>` |
+| `Algorithm.purpose` | `tying`, `untying`, `transformation`, `adjustment` | `algorithm-purposes/<name>` |
+| Mosaic `Representation.data.tileSet` | `lomonaco-kauffman-11` | `tile-sets/<name>` |
+| PD/DT `Representation.data.convention` | `pd-ccw-under-first`, `dt-signed-even` | `conventions/<name>` |
+
+Suffixes are relative to `https://yuriyapostol.github.io/knot-engine/v1/`. A short name, its canonical URI and its declared compact URI denote the same resource. Short names are scoped to the field's resource kind; arbitrary bare names, document IDs and local references do not become resource aliases. Namespaces cannot replace reserved spellings. Custom types and purposes use absolute or declared compact URIs.
+
+Normalization and selection compare canonical URIs. Prepared objects and `toRaw()` preserve authored short names; selection/composition return normalized data. `knot.select()` produces a self-contained fragment with canonical identities and the needed standard/custom type and purpose definitions. A URI alone does not make an export self-contained. Repeating identical definitions is accepted; changing a standard contract or resource kind is rejected. Localized labels may be overridden without changing the contract.
+
+`resolveResourceURI(value, kind, namespaces?)` resolves these names or a URI; generic `expandURI()` remains URI-only. Standalone DT/PD/mosaic schemas and validators accept standard short names or canonical convention/tile-set URIs. Document validation additionally expands declared prefixes before semantic checks. JSON Schema cannot resolve arbitrary namespace declarations; short-type document branches accept nonempty convention/tile-set strings and the runtime checks their canonical identity.
+
+Tile sets and conventions are `tile-set` and `convention` resources. Their definitions require `id`, `name`, `description`, `specification` and may contain localized `names` and `descriptions`; there is no `dataSchema`. Custom definitions may be embedded in `tileSets`/`conventions` or supplied by registry. Standard definitions are automatic and included in self-contained exports. An external definition does not extend supported semantics: the current mosaic profile accepts only the Lomonaco–Kauffman set, and PD/DT each accept only their corresponding standard convention. Unknown type data is not rewritten merely because it contains these field names.
+
+## Constructions and algorithms
+
+A construction requires `id` and nonempty `objects`; optional fields are `name`, `description`, `states`. Objects require local `id` and a `type` expressed as a standard short name or URI. IDs are unique within a construction; the same local ID in a different construction denotes a different object. Named states require `id`, optionally `name` and `description`. State IDs are local to the construction.
 
 Built-in rope objects have `topology: open | closed` and `ends`. Open ropes have two ends with distinct IDs; closed ropes have none. Optional `length` and `diameter` are positive finite meters. Support and carabiner profiles currently contain only `id` and `type`; their curves do not define a standardized equipment shape. Additional types need a definition and schema, and remain semantically unchecked without a supported validator.
 
 A representation's omitted `target` means the document subject. Explicit forms are `{kind:"subject"}`, `{kind:"construction",construction:Reference}`, or `{kind:"state"|"object",construction:Reference,id:string}`. State and object references resolve within that construction.
 
-A procedure requires `id` and nonempty `steps`; optional localized `names` and `descriptions` arrays of `{language,value}` records and `construction` provide context. Each step has a unique local `id`, optional `instructions` (array of `{language,value}` records) and `representations` (local `{id}` references in this profile). A step may have no image or several images. Procedures impose no equality of point counts, interpolation or animation timing. A state can be shared by multiple procedures and representations.
+An algorithm requires `id` and nonempty `steps`; optional localized `names` and `descriptions` arrays of `{language,value}` records and `construction` provide context. Each step has a unique local `id`, optional `descriptions` (array of `{language,value}` records) and `representations` (local `{id}` references in this profile). A step may have no image or several images. Algorithms impose no equality of point counts, interpolation or animation timing. A state can be shared by multiple algorithms and representations.
 
-Representations may carry optional `names` and `descriptions` arrays of `{language,value}` records, like `subject`. Procedures may carry optional localized `names` and `descriptions` in the same format. Procedure steps may carry `names` in the same format; actionable text uses `instructions` as an array of `{language,value}` records. These fields do not determine UI locale or fallback language.
+Representations may carry optional `names` and `descriptions` arrays of `{language,value}` records, like `subject`. Algorithms may carry optional localized `names` and `descriptions` in the same format. Algorithm steps may carry `names` and `descriptions` in the same format; descriptions may explain the step or describe actions to perform. These fields do not determine UI locale or fallback language.
 
 
-`RawProcedure.base?: Reference` identifies a base geometric representation, which may be the final state. `RawStep.data?` independently overrides the base using `remove?: string[]` for existing element IDs, `replace?: Element[]` for complete existing elements, and `add?: Element[]` for new complete elements. Optional `crossings?: Crossing[]` entirely replaces the crossing list for 2D (an empty array clears it). Omitted operations have no effect. Steps do not patch each other; the base type and coordinate system are unchanged. `Step.data` requires `Procedure.base`; `Step.representations` remains supported. `Construction.states` is retained.
+`RawAlgorithm.base?: Reference` identifies a base geometric representation, which may be the final state. `RawStep.data?` independently overrides the base using `remove?: string[]` for existing element IDs, `replace?: Element[]` for complete existing elements, and `add?: Element[]` for new complete elements. Optional `crossings?: Crossing[]` entirely replaces the crossing list for 2D (an empty array clears it). Omitted operations have no effect. Steps do not patch each other; the base type and coordinate system are unchanged. `Step.data` requires `Algorithm.base`; `Step.representations` remains supported. `Construction.states` is retained.
+
+Step text previously stored in `instructions` must be moved to `descriptions`; `instructions` is no longer accepted. Prepared steps expose `getDescription()` instead of `getInstructions()`.
+
+The former `procedures` collection is now `algorithms`; the old field is no longer accepted. Rename `RawProcedure`/`Procedure` to `RawAlgorithm`/`Algorithm`, `getProcedure`/`addProcedure`/`removeProcedure` to `getAlgorithm`/`addAlgorithm`/`removeAlgorithm`, and the `select()` option to `algorithms`. The base representation and independent step overrides retain their semantics. Algorithms may describe tying, untying, transformation or adjustment.
+
+### Conditions, repetition and purpose
+
+`RawAlgorithm.purpose?` references an `algorithm-purpose` resource. Standard short names classify the algorithm: `tying` (forming a knot), `untying` (undoing a knot), `transformation` (changing one knot into another), or `adjustment` (dressing, tightening or regulating an existing knot). Custom purposes use absolute or declared compact URIs and require a definition in `algorithmPurposes` or an explicit registry. Missing purpose definitions make validation incomplete; a wrong resource kind is invalid. Purpose definitions require `id`, `name`, `description`, `specification` and may have localized `names` and `descriptions`; they have no `dataSchema`. Omission leaves the purpose unspecified. Purpose does not determine the initial or final state, change `base`, or establish the identity of another knot.
+
+`RawStep.condition?` is a nonempty localized array of `{language,value}` records (1–128 records, with nonempty strings), describing when the step should be performed. Its entries are translations of one condition. A person evaluates it once before the whole step; a false condition skips the step entirely, including all repetitions. Without a condition the step is unconditional. Conditions are descriptive text, not executable expressions; the engine does not evaluate them or automatically choose transitions. Prepared steps expose `condition` as `LocalizedTexts` and `getCondition(language?)` using the owning knot's locale and fallback, without name/description overrides.
+
+`RawStep.repeat?` specifies the **total number of executions**, not additional repeats after the first:
+
+| Form | Meaning |
+| --- | --- |
+| `{count: 3}` | Exactly three executions |
+| `{min: 2, max: 4}` | Two to four executions |
+| `{min: 2}` | At least two executions, without an upper bound |
+| `{max: 4}` | One to four executions |
+
+All supplied counts must be positive integers. At least one of `count`, `min`, `max` is required; `count` excludes both `min` and `max`. The core validator additionally enforces `min <= max` when both are present; standard JSON Schema validates the field shapes but cannot compare these sibling values. Omitted `min` means 1; omitted `max` means no upper bound. Without `repeat` the step is performed once. If the condition is false, zero executions are permitted regardless of the repetition minimum. Within a range, a person chooses the number of executions. Rechecking conditions between repetitions and automatic branching are outside this contract.
+
+These fields describe human actions. They do not accumulate geometry patches, generate intermediate representations, or change the independent application of `Step.data` to the algorithm's base. See the [shared tying and untying example](../examples/knots/algorithm.json).
 
 ## Representations
 
-A representation requires `id`, URI `type` and `data`; optional fields are `target`, `names`, `descriptions`, `sources`, `contributions`. IDs are unique in the knot. Type definitions require `id`, `name`, `description`, `dataSchema`, `specification`; optional `viewSpace` is `none` (default), `plane` or `space`. Object type definitions use the same fields except `viewSpace`.
+A representation requires `id`, `type` (standard short name or URI) and `data`; optional fields are `target`, `names`, `descriptions`, `sources`, `contributions`. IDs are unique in the knot. Type definitions require `id`, `name`, `description`, `dataSchema`, `specification`; optional `viewSpace` is `none` (default), `plane` or `space`. Object type definitions use the same fields except `viewSpace`.
 
 `dataSchema` is `{ref: absolute-or-compact-schema-URI}` or `{inline: JSON-Schema-object}` with an explicit `$schema` dialect. External schemas must be supplied through `options.schemas`; no network resolver is installed. The current custom schema engine supports draft 2020-12. A schema cannot prove domain semantics. Unknown types may pass structural validation while remaining in `uncheckedTypes`; they cannot be rendered or exported as verified self-contained fragments.
 
@@ -76,7 +119,7 @@ The `representation-types/2d` and `representation-types/3d` representation types
 
 Optional `2d.data.crossings` specifies the order of curve passages through crossings. Each crossing has exactly two records with the same `id`; each record contains `element` and exactly one of `underElement` (the other element is below the current element) or `overElement` (the other element is above it). The subsequence for each `element` is ordered along the curve starting at its first point (`start` for segmented curves). A self-crossing uses two passages of the same element with opposite over/under relationships. Crossing positions are computed from geometry, not stored. Tangencies and coincident segments are unsupported.
 
-`RawProcedure.base?: Reference` identifies a base geometric representation, which may be the final state. `RawStep.data?` independently overrides the base using `remove?: string[]` for existing element IDs, `replace?: Element[]` for complete existing elements, and `add?: Element[]` for new complete elements. Optional `crossings?: Crossing[]` entirely replaces the crossing list for 2D (an empty array clears it). Omitted operations have no effect. Steps do not patch each other; the base type and coordinate system are unchanged. `Step.data` requires `Procedure.base`; `Step.representations` remains supported. `Construction.states` is retained.
+`RawAlgorithm.base?: Reference` identifies a base geometric representation, which may be the final state. `RawStep.data?` independently overrides the base using `remove?: string[]` for existing element IDs, `replace?: Element[]` for complete existing elements, and `add?: Element[]` for new complete elements. Optional `crossings?: Crossing[]` entirely replaces the crossing list for 2D (an empty array clears it). Omitted operations have no effect. Steps do not patch each other; the base type and coordinate system are unchanged. `Step.data` requires `Algorithm.base`; `Step.representations` remains supported. `Construction.states` is retained.
 
 Other non-geometric representation types remain independent.
 
@@ -101,7 +144,7 @@ A segmented 2D curve instead requires `id`, `type:"curve"`, `closed`, `start: [x
 
 All coordinates are absolute finite XY pairs in the representation coordinate system. Segments can mix freely; handles determine continuity, without automatic smoothing. `closed:true` has SVG `Z` semantics, connecting the last endpoint to `start` by a straight segment if they differ. To close with a Bezier segment, explicitly end that segment at `start`. Coincident handles, repeated endpoints and zero-length segments are allowed; the interpolated-curve duplicate and minimum-point rules do not apply. A single cubic segment may form a closed loop. Entirely degenerate curves can validate structurally but the viewer rejects geometry without renderable spans.
 
-A segmented curve permits at most 4096 segments. The 65536-point geometry/document budgets include its start, every segment endpoint and all control points. Segmented curves are supported in 2D procedure `add`/`replace` operations and rejected for 3D bases. Existing interpolated data needs no migration. In TypeScript, `Curve2D` is now the union of `InterpolatedCurve2D` and `SegmentedCurve2D`; narrow with `'segments' in curve` before accessing form-specific fields. See [SVG path conversion](functions.md#svg-path-conversion) and [the Bezier example](../examples/knots/bezier-2d.json).
+A segmented curve permits at most 4096 segments. The 65536-point geometry/document budgets include its start, every segment endpoint and all control points. Segmented curves are supported in 2D algorithm `add`/`replace` operations and rejected for 3D bases. Existing interpolated data needs no migration. In TypeScript, `Curve2D` is now the union of `InterpolatedCurve2D` and `SegmentedCurve2D`; narrow with `'segments' in curve` before accessing form-specific fields. See [SVG path conversion](functions.md#svg-path-conversion) and [the Bezier example](../examples/knots/bezier-2d.json).
 
 The renderer uses data coordinates. A physical rope diameter becomes radius `diameter / (2 * metersPerUnit)`. Otherwise display radius is 0.006 times the largest control-point span, with a warning; it is not a physical measurement. The renderer rejects coordinate/camera components above ±1,000,000 and nonpositive or greater-than-1,000,000 radii. These are rendering limits, separate from domain validation. Tube meshes approximate curves and do not prove knot topology or collision freedom.
 
@@ -128,15 +171,15 @@ The [DT specification](dt-code.md) defines `dt-code` for knots and links: an exp
 
 ## Viewer-owned views and settings
 
-`Knot` contains representation data, constructions, states, and procedures, but **no camera presets or rendering settings**. Presentation fields in a representation are rejected by JSON Schema.
+`Knot` contains representation data, constructions, states, and algorithms, but **no camera presets or rendering settings**. Presentation fields in a representation are rejected by JSON Schema.
 
 The application passes a `view` (inline `ViewDefinition`, local `{id}`, or registry `{ref}`) and optional `views` preset collection directly to `KnotViewer`, `Knot2DViewer`, `Knot3DViewer`, or `KnotMosaicViewer`. `initialCamera` is a separate 3D viewer prop. With no requested view, each viewer uses its own default framing. Plane views use `{mode:"plane",center:[x,y],height:positive}`; rotation is not supported. Capture settings belong to the viewer API, not the knot. See [viewer contracts](viewer-contracts.md).
 
 ## Standalone contracts and resources
 
-Independent schemas are available for grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, 2D and 3D geometry, representation, construction, view, catalog, representation type, object type and rope/equipment objects. Each published schema includes only its needed definitions and can be compiled without the root knot schema. Generated schemas come from `src/core/contracts.json` via `npm run build:schemas`.
+Independent schemas are available for grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, 2D and 3D geometry, representation, construction, view, catalog, representation type, object type, algorithm purpose, tile set, convention and rope/equipment objects. Each published schema includes only its needed definitions and can be compiled without the root knot schema. Generated schemas come from `src/core/contracts.json` via `npm run build:schemas`.
 
-`RawResourceDocument` requires `schema`, `schemaVersion`, `kind`, `resource`; optional `$schema`, `namespaces`, `dependencies`. Kinds: `catalog`, `representation-type`, `object-type`, `view`, `construction`, `source`. A standalone resource requires a global ID. `RawResourceRegistry` requires `schema`, `schemaVersion`, `resources:[{kind,resource}]`, with optional `$schema`, `namespaces`, `id`. A registry is an ordinary document, not a server or singleton. `RawRepresentationDocument` requires `schema`, `schemaVersion`, `representation`, with optional `$schema`, `namespaces`, `dependencies`, `subject`, `sources`.
+`RawResourceDocument` requires `schema`, `schemaVersion`, `kind`, `resource`; optional `$schema`, `namespaces`, `dependencies`. Kinds: `catalog`, `representation-type`, `object-type`, `algorithm-purpose`, `tile-set`, `convention`, `view`, `construction`, `source`. A standalone resource requires a global ID. `RawResourceRegistry` requires `schema`, `schemaVersion`, `resources:[{kind,resource}]`, with optional `$schema`, `namespaces`, `id`. A registry is an ordinary document, not a server or singleton. `RawRepresentationDocument` requires `schema`, `schemaVersion`, `representation`, with optional `$schema`, `namespaces`, `dependencies`, `subject`, `sources`.
 
 Catalog definitions require global `id`, `name`, `description`; optional `homepage`, `edition`, `identifierRules`. Rules support `pattern` (ECMA-262 without flags) and `caseSensitive` (default true). Case-insensitive identity comparison, when needed by a consumer, folds only ASCII A–Z; stored values remain unchanged. The runtime checks patterns as written and does not perform catalog lookup or infer identity. Anchor a pattern with `^`/`$` to match the whole designation.
 
@@ -152,10 +195,10 @@ The [shared metadata contract](sources.md) defines fields, roles, validation, ex
 
 `Knot.validate(raw)` returns either `{valid:false,issues}` or `{valid:true,knot,warnings,complete,missingDependencies,uncheckedTypes}`. `valid` means known structures and resolvable references are consistent; `complete` additionally requires all required definitions and supported domain semantics. Extraction requires complete document validation; rendering requires complete validation of the selected representation and its dependencies. Validation never mutates input or fetches data. JSON Schema is structural; runtime additionally checks scopes, uniqueness, curve continuity, grid diagram permutations and aggregate budgets. It does not prove mathematical identity or practical safety.
 
-Before traversal, a resource profile bounds nesting at 64, total visited values at 262144 and individual strings at 1048576 characters. Non-JSON values, sparse arrays, accessors and cycles are rejected. Additional structural limits include 1024 representations, 256 constructions/objects/states, 256 procedures, 1024 steps per procedure, 4096 points per curve, and 65536 points across the knot. Limits protect this implementation and do not define every possible domain object.
+Before traversal, a resource profile bounds nesting at 64, total visited values at 262144 and individual strings at 1048576 characters. Non-JSON values, sparse arrays, accessors and cycles are rejected. Additional structural limits include 1024 representations, 256 constructions/objects/states, 256 algorithms, 1024 steps per algorithm, 4096 points per curve, and 65536 points across the knot. Limits protect this implementation and do not define every possible domain object.
 
-`knot.select({representations?,procedures?})` returns an independent self-contained prepared knot with requested procedures, their referenced representations, required complete constructions and type/catalog definitions. Unrelated procedures and representations are omitted. Global references remain valid after external resources are embedded. Only supported types may be extracted; unknown URI fields cannot be safely rewritten. Assertions are outside this initial profile, so there are no hidden relation traversals or assertion omissions.
+`knot.select({representations?,algorithms?})` returns an independent self-contained prepared knot with requested algorithms, their referenced representations, required complete constructions and type/purpose/tile-set/convention/catalog definitions. Unrelated algorithms and representations are omitted. Global references remain valid after external resources are embedded. Only supported types may be extracted; unknown URI fields cannot be safely rewritten. Assertions are outside this initial profile, so there are no hidden relation traversals or assertion omissions.
 
 `Knot.compose(parts,options?)` merges fragments with equal document IDs and equal subjects, after namespace expansion. Conflicting collection IDs are errors; omitted fields do not delete data. It is not a patch format or a merger of independent documents. Both operations return independent copies and revalidate the result.
 
-[Open rope](../examples/knots/open-rope.json) · [Two procedures sharing states](../examples/knots/procedures.json) · [Grid](../examples/knots/grid-diagram.json) · [API](functions.md)
+[Open rope](../examples/knots/open-rope.json) · [Two algorithms sharing states](../examples/knots/algorithms.json) · [Grid](../examples/knots/grid-diagram.json) · [API](functions.md)

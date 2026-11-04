@@ -3,7 +3,7 @@ import { expect, it } from 'vitest'
 import overhand from '../v1/examples/knots/overhand.json'
 import twistedLoop from '../v1/examples/knots/twisted-loop.json'
 import { normalizeKnot } from '../src/core/validateKnot'
-import { GRID_DIAGRAM, MOSAIC_DIAGRAM, GEOMETRY_3D, GEOMETRY_2D, expandURI, validateGridDiagram, validateMosaicDiagram, selectRepresentation, type RawKnot, type Geometry2DData, type GridXODiagram, type GridVertexPairsDiagram } from '../src/core'
+import { GRID_DIAGRAM, MOSAIC_DIAGRAM, GEOMETRY_3D, GEOMETRY_2D, resolveResourceURI, validateGridDiagram, validateMosaicDiagram, selectRepresentation, type RawKnot, type Geometry2DData, type GridXODiagram, type GridVertexPairsDiagram } from '../src/core'
 import { locateCrossings } from '../src/components/geometry2d'
 import { flattenGeometry2D } from '../src/components/curves2d'
 
@@ -12,7 +12,7 @@ for (const fixture of [overhand, twistedLoop]) {
   it(`${knot.id} provides selectable, valid demo representations`, () => {
     expect(validateKnot(knot)).toMatchObject({ valid: true, complete: true })
     expect(knot.representations).toHaveLength(knot.id === 'overhand' ? 6 : 5)
-    const types = knot.representations!.map(rep => expandURI(rep.type, knot.namespaces))
+    const types = knot.representations!.map(rep => resolveResourceURI(rep.type, 'representation-type', knot.namespaces))
     expect(types).toContain(GEOMETRY_3D)
     expect(types).toContain(MOSAIC_DIAGRAM)
     expect(types).toContain(GEOMETRY_2D)
@@ -20,7 +20,7 @@ for (const fixture of [overhand, twistedLoop]) {
     for (const rep of knot.representations ?? []) {
       expect(selectRepresentation(knot, { representationId: rep.id })).toMatchObject({ ok: true })
     }
-    const mosaic = knot.representations!.find(rep => expandURI(rep.type, knot.namespaces) === MOSAIC_DIAGRAM)!
+    const mosaic = knot.representations!.find(rep => resolveResourceURI(rep.type, 'representation-type', knot.namespaces) === MOSAIC_DIAGRAM)!
     expect(validateMosaicDiagram(normalizeKnot(knot).representations!.find(rep => rep.id === mosaic.id)!.data)).toMatchObject({ valid: true, componentCount: 1 })
   })
   it(`${knot.id} has matching grid encodings and crossing handedness consistent with its closed 2D diagram`, () => {

@@ -69,7 +69,7 @@ it('supports metadata, standalone documents, scopes and preserves code order/sig
   const rep={...a.representations[0],sources:[{id:'atlas',locator:'DT example',note:'Signs retained'}],contributions:[{name:'Editor',roles:['validation']}]}
   a.representations=[rep]
   expect(validateKnot(a,options)).toMatchObject({valid:true,complete:true,uncheckedTypes:[]})
-  expect(validateKnot(a)).toMatchObject({valid:true,complete:false})
+  expect(validateKnot(a)).toMatchObject({valid:true,complete:true})
   expect(validateRepresentationDocument({schema:'RepresentationDocument',schemaVersion:1,sources:a.sources,representation:rep},options)).toMatchObject({valid:true,complete:true})
   expect(validateKnot({...a,namespaces:{r:'https://yuriyapostol.github.io/knot-engine/v1/representation-types/'},representations:[{...rep,type:'r:dt-code'}]},options)).toMatchObject({valid:true,complete:true})
   expect(validateKnot({...a,representations:[{...rep,target:{kind:'construction',construction:{id:'missing'}}}]},options).valid).toBe(false)

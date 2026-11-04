@@ -7,7 +7,10 @@
       "type": "object",
       "properties": {
         "convention": {
-          "const": "https://yuriyapostol.github.io/knot-engine/v1/conventions/dt-signed-even"
+          "enum": [
+            "https://yuriyapostol.github.io/knot-engine/v1/conventions/dt-signed-even",
+            "dt-signed-even"
+          ]
         },
         "code": {
           "oneOf": [

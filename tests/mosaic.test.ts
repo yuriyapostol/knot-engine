@@ -32,7 +32,7 @@ it('bounds cells before tracing', () => {
 it('integrates completeness, compact type names and standalone documents', () => {
   const options={registries:[STANDARD_RESOURCES]}
   expect(validateKnot(knot,options)).toMatchObject({valid:true,complete:true,uncheckedTypes:[]})
-  expect(validateKnot(knot)).toMatchObject({valid:true,complete:false,uncheckedTypes:[]})
+  expect(validateKnot(knot)).toMatchObject({valid:true,complete:true,uncheckedTypes:[]})
   expect(validateKnot({...knot,namespaces:{k:'https://yuriyapostol.github.io/knot-engine/v1/representation-types/'},representations:[{...knot.representations[0],type:'k:mosaic-diagram'}]},options)).toMatchObject({valid:true,complete:true})
   const rep={...knot.representations[0]}
   expect(validateRepresentationDocument({schema:'RepresentationDocument',schemaVersion:1,representation:rep},options)).toMatchObject({valid:true,complete:true})

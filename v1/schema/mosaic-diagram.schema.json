@@ -7,7 +7,10 @@
       "type": "object",
       "properties": {
         "tileSet": {
-          "const": "https://yuriyapostol.github.io/knot-engine/v1/tile-sets/lomonaco-kauffman-11"
+          "enum": [
+            "https://yuriyapostol.github.io/knot-engine/v1/tile-sets/lomonaco-kauffman-11",
+            "lomonaco-kauffman-11"
+          ]
         },
         "tiles": {
           "type": "array",

@@ -11,7 +11,7 @@
   "representations": [
     {
       "id": "view-3d-rest",
-      "type": "knot-engine:representation-types/3d",
+      "type": "3d",
       "target": {
         "kind": "state",
         "construction": {
@@ -50,7 +50,7 @@
     },
     {
       "id": "view-3d-bend",
-      "type": "knot-engine:representation-types/3d",
+      "type": "3d",
       "target": {
         "kind": "state",
         "construction": {
@@ -89,7 +89,7 @@
     },
     {
       "id": "view-3d-finish",
-      "type": "knot-engine:representation-types/3d",
+      "type": "3d",
       "target": {
         "kind": "state",
         "construction": {
@@ -133,7 +133,7 @@
       "objects": [
         {
           "id": "rope-1",
-          "type": "knot-engine:object-types/rope",
+          "type": "rope",
           "topology": "open",
           "ends": [
             {
@@ -159,18 +159,7 @@
       ]
     }
   ],
-  "objectTypes": [
-    {
-      "id": "knot-engine:object-types/rope",
-      "name": "rope",
-      "description": "rope contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/rope-object.schema.json"
-      },
-      "specification": "knot-engine:specifications/knot.html"
-    }
-  ],
-  "procedures": [
+  "algorithms": [
     {
       "id": "sequence-a",
       "construction": {
@@ -201,19 +190,71 @@
             }
           ]
         }
-      ]
-    }
-  ],
-  "representationTypes": [
+      ],
+      "purpose": "tying",
+      "base": {
+        "id": "view-3d-finish"
+      }
+    },
     {
-      "id": "knot-engine:representation-types/3d",
-      "name": "3d",
-      "description": "3d geometry contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/3d.schema.json"
+      "id": "untying",
+      "purpose": "untying",
+      "construction": {
+        "id": "setup"
       },
-      "specification": "knot-engine:specifications/knot.html",
-      "viewSpace": "space"
+      "base": {
+        "id": "view-3d-finish"
+      },
+      "steps": [
+        {
+          "id": "start",
+          "representations": [
+            {
+              "id": "view-3d-finish"
+            }
+          ]
+        },
+        {
+          "id": "loosen",
+          "descriptions": [
+            {
+              "language": "en",
+              "value": "Work the knot loose."
+            },
+            {
+              "language": "uk",
+              "value": "Розхитайте вузол."
+            }
+          ],
+          "condition": [
+            {
+              "language": "en",
+              "value": "If the rope is tightly jammed."
+            },
+            {
+              "language": "uk",
+              "value": "Якщо мотузку сильно затягнуто."
+            }
+          ],
+          "repeat": {
+            "min": 1,
+            "max": 3
+          },
+          "representations": [
+            {
+              "id": "view-3d-bend"
+            }
+          ]
+        },
+        {
+          "id": "finish",
+          "representations": [
+            {
+              "id": "view-3d-rest"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

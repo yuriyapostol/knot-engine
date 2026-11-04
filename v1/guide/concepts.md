@@ -6,6 +6,8 @@ A specification defines the meaning of data and implementation behavior. A JSON 
 
 The [`Knot` specification](../specifications/knot.md), its [schema](../schema/knot.schema.json), and the [component contract](../specifications/components.md) describe the current package.
 
+Standard representation types, object types and algorithm purposes have resource definitions, but their short names (`3d`, `rope`, `untying`) are sufficient in ordinary knot data. The standard registry is always available; only external definitions need inline data or explicit registries. See [standard identities](../specifications/knot.md#standard-names-and-resource-identities).
+
 ## Further design
 
 The [open design questions](../../design/knot-draft.md) cover additional formats, assertions and sequence behavior. They introduce no accepted fields beyond the specifications.

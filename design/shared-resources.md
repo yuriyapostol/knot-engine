@@ -23,15 +23,18 @@ A declared `knot-engine:representation-types/pd-code` expands by concatenating t
 | Kind | Definition | Placement |
 | --- | --- | --- |
 | `catalog` | Identification system and designation rules | `RawKnot.catalogs`, explicit registry |
-| `representation-type` | Data schema and semantic specification | `RawKnot.representationTypes`, explicit registry |
-| `object-type` | Construction-object data contract | `RawKnot.objectTypes`, explicit registry |
+| `representation-type` | Data schema and semantic specification | Standard registry, `RawKnot.representationTypes`, explicit external registry |
+| `object-type` | Construction-object data contract | Standard registry, `RawKnot.objectTypes`, explicit external registry |
+| `algorithm-purpose` | Purpose and localized labels | Standard registry, `RawKnot.algorithmPurposes`, explicit external registry |
+| `tile-set` | Mosaic tile-set identity and specification | Standard registry, `RawKnot.tileSets`, explicit external registry |
+| `convention` | PD/DT notation identity and specification | Standard registry, `RawKnot.conventions`, explicit external registry |
 | `construction` | Concrete objects and optional named states | `RawKnot.constructions`, explicit registry |
 | `source` | Data origin, authors and source license | `RawKnot.sources`, explicit registry |
 | `view` | Named plane or spatial camera | Application `views`, explicit registry |
 
 Constructions can be inline or included through `{ref: URI}`. Local `{id}` and global `{ref}` references are exclusive. Views are application-owned inputs to components. All viewers receive the knot context rather than a bare resource payload.
 
-Different definitions with the same kind and expanded URI conflict; identical JSON definitions may be deduplicated ignoring object-key order. Registries are explicitly supplied, including `STANDARD_RESOURCES`; no singleton or resolver fetches missing definitions. Missing dependencies and unchecked types prevent complete validation. Envelope-only resource/registry validation does not establish transitive closure.
+Different definitions with the same kind and expanded URI conflict; identical JSON definitions may be deduplicated ignoring object-key order. Standard types and purposes are always available from the immutable `STANDARD_RESOURCES`; external registries are explicitly supplied. No resolver fetches missing definitions. Missing dependencies and unchecked types prevent complete validation. Envelope-only resource/registry validation does not establish transitive closure.
 
 ## Catalogs, types and constructions
 

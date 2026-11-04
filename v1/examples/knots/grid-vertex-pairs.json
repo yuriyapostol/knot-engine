@@ -11,7 +11,7 @@
   "representations": [
     {
       "id": "grid",
-      "type": "knot-engine:representation-types/grid-diagram",
+      "type": "grid-diagram",
       "data": {
         "encoding": "vertex-pairs",
         "size": 2,
@@ -22,18 +22,6 @@
           [1, 1]
         ]
       }
-    }
-  ],
-  "representationTypes": [
-    {
-      "id": "knot-engine:representation-types/grid-diagram",
-      "name": "grid-diagram",
-      "description": "grid-diagram contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/grid-diagram.schema.json"
-      },
-      "specification": "knot-engine:specifications/knot.html",
-      "viewSpace": "plane"
     }
   ]
 }

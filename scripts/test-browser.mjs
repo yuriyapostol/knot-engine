@@ -88,7 +88,7 @@ try {
 
   for (const model of ['overhand', 'twisted-loop']) {
     const modelKnot = fixture(`v1/examples/knots/${model}.json`)
-    const representationId = modelKnot.representations.find(rep => rep.type.endsWith('/3d')).id
+    const representationId = modelKnot.representations.find(rep => rep.type === '3d').id
     assert.equal(await setInput({ knot: modelKnot, selection: { representationId } }), undefined)
     const capture = await page.evaluate(async () => {
       const blob = await window.__previewCapture(240, 180)
@@ -108,10 +108,10 @@ try {
   const orthographicView = { id: 'ortho', name: 'Orthographic', space: 'space', camera: { mode: 'fit', direction: [0, 0, 1], up: [0, 1, 0], projection: { kind: 'orthographic' } } }
   assert.equal(await setInput({ knot: orthographic, selection: { view: orthographicView } }), undefined)
   assert.ok(await page.evaluate(async () => (await window.__previewCapture(320,180)).size) > 1000)
-  const knot = fixture('v1/examples/knots/procedures.json')
+  const knot = fixture('v1/examples/knots/algorithms.json')
   // Keep two full representations for the compositor selection/replacement checks.
   const rest = structuredClone(knot.representations[0]); rest.id = 'view-3d-rest'
-  rest.data.elements = structuredClone(knot.procedures[0].steps[0].data.replace)
+  rest.data.elements = structuredClone(knot.algorithms[0].steps[0].data.replace)
   knot.representations.push(rest)
   assert.equal(await setInput({ knot, selection: { representationId: 'view-3d-rest' } }), undefined)
   const capturePixels = () => page.evaluate(async () => {

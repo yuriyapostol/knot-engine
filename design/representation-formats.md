@@ -88,7 +88,7 @@ The `3_1` row contains a complete 16-value vector, yielding:
 
 ```json
 {
-  "tileSet": "https://yuriyapostol.github.io/knot-engine/v1/tile-sets/lomonaco-kauffman-11",
+  "tileSet": "lomonaco-kauffman-11",
   "tiles": [
     [0, 2, 1, 0],
     [2, 9, 10, 1],

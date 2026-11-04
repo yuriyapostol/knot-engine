@@ -1,5 +1,5 @@
-import type { RawKnot, RawRepresentation, RawProcedure, RawStep, RawSubject, RawResourceRegistry, ResourceEntry, Construction } from './knot'
-import { STANDARD_RESOURCES, expandURI } from './resources'
+import type { RawKnot, RawRepresentation, RawAlgorithm, RawStep, RawSubject, RawResourceRegistry, ResourceEntry, Construction } from './knot'
+import { STANDARD_RESOURCES, STANDARD_NAMES, resolveResourceURI, assertStandardResource, expandURI } from './resources'
 import { validateKnot } from './validateKnot'
 import { selectKnot, composeKnot } from './knotParts'
 
@@ -43,11 +43,10 @@ const contexts = new WeakMap<Knot, Map<string, PreparedResource>>()
 const typedContexts = new WeakMap<Knot, Map<string, PreparedResource>>()
 const resourceIdentity = (kind: ResourceEntry['kind'], id: string) => `${kind}:${id}`
 const registries = new WeakMap<Knot, readonly RawResourceRegistry[]>()
-function localized(values: RawLocalizedTexts | undefined, entity: object & { id?: string }, key: 'names' | 'descriptions' | 'instructions', language?: string): string | undefined {
+function localized(values: RawLocalizedTexts | undefined, entity: object & { id?: string }, key: 'names' | 'descriptions' | 'condition', language?: string): string | undefined {
   const knot = textOwner.get(entity)
   const target = language ?? languageFor(knot)
-  const overrideKey = key === 'instructions' ? undefined : key
-  const override = (locale: string) => overrideKey && entity.id ? overrideFor(knot, entity.id, overrideKey, locale) : undefined
+  const override = (locale: string) => entity.id && key !== 'condition' ? overrideFor(knot, entity.id, key, locale) : undefined
   return override(target) ?? exact(values, target) ?? override(fallbackFor(knot))
     ?? exact(values, fallbackFor(knot)) ?? exact(values, 'en')
 }
@@ -57,7 +56,7 @@ function texts(values?: RawLocalizedTexts): LocalizedTexts | undefined {
   return values as LocalizedTexts
 }
 function decorate(value: any): void {
-  for (const key of ['names', 'descriptions', 'instructions']) if (Array.isArray(value[key])) texts(value[key])
+  for (const key of ['names', 'descriptions', 'condition']) if (Array.isArray(value[key])) texts(value[key])
 }
 const resourceMethods = {
   getName(this: any, language?: string): string | undefined {
@@ -127,19 +126,24 @@ export class Step implements RawStep {
   data?: RawStep['data']
   representations?: RawStep['representations']
   names?: LocalizedTexts
-  instructions?: LocalizedTexts
+  descriptions?: LocalizedTexts
+  condition?: LocalizedTexts
+  repeat?: RawStep['repeat']
   getName(language?: string): string | undefined { return localized(this.names, this, 'names', language) }
-  getInstructions(language?: string): string | undefined { return localized(this.instructions, this, 'instructions', language) }
+  getDescription(language?: string): string | undefined { return localized(this.descriptions, this, 'descriptions', language) }
+  getCondition(language?: string): string | undefined { return localized(this.condition, this, 'condition', language) }
 }
-export class Procedure implements RawProcedure {
-  construction?: RawProcedure['construction']
-  base?: RawProcedure['base']
+export class Algorithm implements RawAlgorithm {
+  construction?: RawAlgorithm['construction']
+  base?: RawAlgorithm['base']
+  purpose?: RawAlgorithm['purpose']
   id!: string
   steps!: Step[]
   names?: LocalizedTexts
   descriptions?: LocalizedTexts
   getName(language?: string): string | undefined { return localized(this.names, this, 'names', language) }
   getDescription(language?: string): string | undefined { return localized(this.descriptions, this, 'descriptions', language) }
+  getPurposeDefinition(): PreparedResource | undefined { return owner.get(this)?.getResource(this.purpose ?? '', 'algorithm-purpose') }
   getStep(id: string): Step | undefined { return this.steps.find(x => x.id === id) }
   addStep(input: RawStep): Step {
     if (this.getStep(input.id)) throw new Error('Duplicate step ID: ' + input.id)
@@ -163,11 +167,14 @@ export class Knot implements RawKnot {
   id!: string
   subject!: Subject
   representations?: Representation[]
-  procedures?: Procedure[]
+  algorithms?: Algorithm[]
   namespaces?: RawKnot['namespaces']
   catalogs?: RawKnot['catalogs']
   representationTypes?: RawKnot['representationTypes']
   objectTypes?: RawKnot['objectTypes']
+  algorithmPurposes?: RawKnot['algorithmPurposes']
+  tileSets?: RawKnot['tileSets']
+  conventions?: RawKnot['conventions']
   constructions?: RawKnot['constructions']
   static from(input: RawKnot | Knot, options: KnotOptions = {}): Knot {
     if (input instanceof Knot) return input
@@ -179,20 +186,21 @@ export class Knot implements RawKnot {
     return Knot.from(composeKnot(parts.map(x => x instanceof Knot ? x.toRaw() : x), options), options)
   }
   getRepresentation(id: string): Representation | undefined { return this.representations?.find(x => x.id === id) }
-  getProcedure(id: string): Procedure | undefined { return this.procedures?.find(x => x.id === id) }
-  addProcedure(input: RawProcedure): Procedure {
-    if (this.getProcedure(input.id)) throw new Error('Duplicate procedure ID: ' + input.id)
-    const procedure = structuredClone(input) as Procedure
-    textOwner.set(procedure, this)
-    decorate(procedure)
-    Object.setPrototypeOf(procedure, Procedure.prototype)
-    for (const step of procedure.steps) { textOwner.set(step, this); decorate(step); Object.setPrototypeOf(step, Step.prototype) }
-    this.procedures = [...(this.procedures ?? []), procedure] as Procedure[]
-    return procedure
+  getAlgorithm(id: string): Algorithm | undefined { return this.algorithms?.find(x => x.id === id) }
+  addAlgorithm(input: RawAlgorithm): Algorithm {
+    if (this.getAlgorithm(input.id)) throw new Error('Duplicate algorithm ID: ' + input.id)
+    const algorithm = structuredClone(input) as Algorithm
+    textOwner.set(algorithm, this)
+    owner.set(algorithm, this)
+    decorate(algorithm)
+    Object.setPrototypeOf(algorithm, Algorithm.prototype)
+    for (const step of algorithm.steps) { textOwner.set(step, this); decorate(step); Object.setPrototypeOf(step, Step.prototype) }
+    this.algorithms = [...(this.algorithms ?? []), algorithm] as Algorithm[]
+    return algorithm
   }
-  removeProcedure(id: string): boolean {
-    if (!this.getProcedure(id)) return false
-    this.procedures = (this.procedures ?? []).filter(x => x.id !== id) as Procedure[]
+  removeAlgorithm(id: string): boolean {
+    if (!this.getAlgorithm(id)) return false
+    this.algorithms = (this.algorithms ?? []).filter(x => x.id !== id) as Algorithm[]
     return true
   }
   getConstruction(id: string): Construction | undefined {
@@ -246,17 +254,21 @@ export class Knot implements RawKnot {
   getResource(id: string, kind?: ResourceEntry['kind']): PreparedResource | undefined {
     let uri = id
     if (!id.startsWith('https://') && !id.startsWith('http://') && !id.startsWith('urn:')) {
-      try { uri = expandURI(id, this.namespaces) } catch { /* unresolved external reference */ }
+      try {
+        const standardKind = kind ?? (Object.keys(STANDARD_NAMES) as (keyof typeof STANDARD_NAMES)[]).find(key => (STANDARD_NAMES[key] as readonly string[]).includes(id))
+        uri = standardKind ? resolveResourceURI(id, standardKind, this.namespaces) : expandURI(id, this.namespaces)
+      } catch { /* unresolved external reference */ }
     }
     return kind ? typedContexts.get(this)?.get(resourceIdentity(kind, uri)) : contexts.get(this)?.get(uri)
   }
   /** Add an inline definition without modifying an attached registry. */
-  addResourceDefinition(kind: 'catalogs' | 'representationTypes' | 'objectTypes', definition: NonNullable<RawKnot['catalogs']>[number] | NonNullable<RawKnot['representationTypes']>[number] | NonNullable<RawKnot['objectTypes']>[number]): PreparedResource {
+  addResourceDefinition(kind: 'catalogs' | 'representationTypes' | 'objectTypes' | 'algorithmPurposes' | 'tileSets' | 'conventions', definition: NonNullable<RawKnot['catalogs']>[number] | NonNullable<RawKnot['representationTypes']>[number] | NonNullable<RawKnot['objectTypes']>[number] | NonNullable<RawKnot['algorithmPurposes']>[number] | NonNullable<RawKnot['tileSets']>[number] | NonNullable<RawKnot['conventions']>[number]): PreparedResource {
     const collection = (this[kind] ?? []) as { id: string }[]
     const value = structuredClone(definition)
     const uri = expandURI(value.id, this.namespaces)
     if (collection.some(item => expandURI(item.id, this.namespaces) === uri)) throw new Error('Duplicate resource URI: ' + uri)
-    const resourceKind = { catalogs: 'catalog', representationTypes: 'representation-type', objectTypes: 'object-type' }[kind] as ResourceEntry['kind']
+    const resourceKind = { catalogs: 'catalog', representationTypes: 'representation-type', objectTypes: 'object-type', algorithmPurposes: 'algorithm-purpose', tileSets: 'tile-set', conventions: 'convention' }[kind] as ResourceEntry['kind']
+    assertStandardResource({ kind: resourceKind, resource: { ...value, id: uri } } as ResourceEntry, this.namespaces)
     const previous = this.getResource(uri, resourceKind)
     const view = resource(value, this, uri)
     if (previous && !('names' in value)) Object.defineProperty(view, 'names', { get: () => (previous as any).names, enumerable: false })
@@ -267,7 +279,7 @@ export class Knot implements RawKnot {
     return view
   }
   /** Remove an inline definition, restoring the next applicable resource layer. */
-  removeResourceDefinition(kind: 'catalogs' | 'representationTypes' | 'objectTypes', id: string): boolean {
+  removeResourceDefinition(kind: 'catalogs' | 'representationTypes' | 'objectTypes' | 'algorithmPurposes' | 'tileSets' | 'conventions', id: string): boolean {
     const collection = (this[kind] ?? []) as { id: string }[]
     const uri = expandURI(id, this.namespaces)
     const target = collection.find(item => expandURI(item.id, this.namespaces) === uri)
@@ -275,7 +287,7 @@ export class Knot implements RawKnot {
     const remaining = collection.filter(item => item !== target)
     // A resource URI cannot fall back to a definition of another resource kind.
     const fallbackInline = remaining.find(item => expandURI(item.id, this.namespaces) === uri)
-    const resourceKind = { catalogs: 'catalog', representationTypes: 'representation-type', objectTypes: 'object-type' }[kind] as ResourceEntry['kind']
+    const resourceKind = { catalogs: 'catalog', representationTypes: 'representation-type', objectTypes: 'object-type', algorithmPurposes: 'algorithm-purpose', tileSets: 'tile-set', conventions: 'convention' }[kind] as ResourceEntry['kind']
     const fallbackRegistry = [STANDARD_RESOURCES, ...(registries.get(this) ?? [])]
       .flatMap(registry => registry.resources.map(entry => ({ entry, registry })))
       .reverse().find(({ entry, registry }) => entry.kind === resourceKind &&
@@ -319,7 +331,7 @@ export class Knot implements RawKnot {
   }
   toRaw(): RawKnot { return JSON.parse(JSON.stringify(this)) as RawKnot }
   clone(): Knot { return prepareKnot(this.toRaw(), registries.get(this), localizations.get(this)) }
-  select(selection: { representations?: string[]; procedures?: string[] }): Knot {
+  select(selection: { representations?: string[]; algorithms?: string[] }): Knot {
     const attached = registries.get(this) ?? []
     return Knot.from(selectKnot(this.toRaw(), selection, { registries: attached }), { registries: attached, ...localizations.get(this) })
   }
@@ -338,17 +350,18 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
     Object.setPrototypeOf(representation, Representation.prototype)
     owner.set(representation, knot)
   }
-  for (const procedure of knot.procedures ?? []) {
-    textOwner.set(procedure, knot)
-    decorate(procedure)
-    Object.setPrototypeOf(procedure, Procedure.prototype)
-    for (const step of procedure.steps) {
+  for (const algorithm of knot.algorithms ?? []) {
+    textOwner.set(algorithm, knot)
+    owner.set(algorithm, knot)
+    decorate(algorithm)
+    Object.setPrototypeOf(algorithm, Algorithm.prototype)
+    for (const step of algorithm.steps) {
       textOwner.set(step, knot)
       decorate(step)
       Object.setPrototypeOf(step, Step.prototype)
     }
   }
-  for (const key of ['catalogs', 'representationTypes', 'objectTypes'] as const) {
+  for (const key of ['catalogs', 'representationTypes', 'objectTypes', 'algorithmPurposes', 'tileSets', 'conventions'] as const) {
     if (knot[key]) (knot as any)[key] = knot[key]
   }
   const index = new Map<string, PreparedResource>()
@@ -357,6 +370,7 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
     for (const entry of registry.resources) {
       const item = entry.resource
       const id = item.id.startsWith('https://') || item.id.startsWith('http://') || item.id.startsWith('urn:') ? item.id : expandURI(item.id, registry.namespaces)
+      assertStandardResource({ ...entry, resource: { ...item, id } } as ResourceEntry, registry.namespaces)
       const defaults = typedIndex.get(resourceIdentity(entry.kind, id)) as any
       const view = resource(item, knot, id)
       if (defaults && !('names' in item)) Object.defineProperty(view, 'names', { get: () => defaults.names, enumerable: false })
@@ -365,10 +379,11 @@ export function prepareKnot(raw: RawKnot, attached: readonly RawResourceRegistry
       typedIndex.set(resourceIdentity(entry.kind, id), view)
     }
   }
-  for (const key of ['catalogs', 'representationTypes', 'objectTypes'] as const) {
+  for (const key of ['catalogs', 'representationTypes', 'objectTypes', 'algorithmPurposes', 'tileSets', 'conventions'] as const) {
     for (const item of (knot[key] ?? []) as { id: string }[]) {
       const id = item.id.startsWith('https://') || item.id.startsWith('http://') || item.id.startsWith('urn:') ? item.id : expandURI(item.id, knot.namespaces)
-      const resourceKind = { catalogs: 'catalog', representationTypes: 'representation-type', objectTypes: 'object-type' }[key] as ResourceEntry['kind']
+      const resourceKind = { catalogs: 'catalog', representationTypes: 'representation-type', objectTypes: 'object-type', algorithmPurposes: 'algorithm-purpose', tileSets: 'tile-set', conventions: 'convention' }[key] as ResourceEntry['kind']
+      assertStandardResource({ kind: resourceKind, resource: { ...item, id } } as ResourceEntry, knot.namespaces)
       const defaults = typedIndex.get(resourceIdentity(resourceKind, id)) as any
       const view = resource(item, knot, id)
       if (defaults && !('names' in item)) Object.defineProperty(view, 'names', { get: () => defaults.names, enumerable: false })

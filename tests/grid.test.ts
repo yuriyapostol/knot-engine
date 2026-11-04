@@ -31,7 +31,7 @@ it('preserves viewer-independent representations and complete standalone and com
   const knot={schema:'Knot',schemaVersion:1,id:'g',subject:{id:'s'},representations:[rep]}
   const options={registries:[STANDARD_RESOURCES]}
   expect(validateKnot(knot,options)).toMatchObject({valid:true,complete:true,uncheckedTypes:[]})
-  expect(validateKnot(knot)).toMatchObject({valid:true,complete:false})
+  expect(validateKnot(knot)).toMatchObject({valid:true,complete:true})
   expect(validateRepresentationDocument({schema:'RepresentationDocument',schemaVersion:1,representation:rep},options)).toMatchObject({valid:true,complete:true})
   expect(validateKnot({...knot,representations:[{...rep,preferredView:{direction:[0,0,1],up:[0,1,0]}}]},options).valid).toBe(false)
   const part=selectKnot(knot,{representations:['g']},options)

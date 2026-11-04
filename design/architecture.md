@@ -3,7 +3,7 @@
 The package separates domain data, validation and presentation. Current contracts: [data](../v1/specifications/knot.md), [prepared objects](../v1/specifications/prepared-model.md), [functions](../v1/specifications/functions.md) and [components](../v1/specifications/components.md). [Open design questions](knot-draft.md) describe extensions beyond those contracts.
 
 ```text
-RawKnot / Knot + explicitly supplied resource registries
+RawKnot / Knot + standard resources + explicitly supplied external registries
   → bounded structural validation
   → namespace expansion and dependency validation
   → representation selection
@@ -30,7 +30,7 @@ The 3D viewer builds polyline or uniform/centripetal/chordal Catmull–Rom geome
 
 ## Site and verification
 
-The site editor uses public package APIs, edits the full knot, preserves a supported representation selection and retains the last valid result after an invalid edit. Procedures select illustrations without imposing animation correspondence. PNG and SVG exports follow the selected viewer's capabilities.
+The site editor uses public package APIs, edits the full knot, preserves a supported representation selection and retains the last valid result after an invalid edit. Algorithms select illustrations without imposing animation correspondence. PNG and SVG exports follow the selected viewer's capabilities.
 
 Checks cover types, schemas, semantic validation, geometry, SSR/hydration, DOM integration, Chromium rendering/capture, tarball consumers and site links. Hardware touch/WebView behavior and physical knot correctness require separate verification.
 

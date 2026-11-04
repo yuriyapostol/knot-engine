@@ -33,15 +33,15 @@ it('applies each step independently to the base and never mutates it', () => {
   expect(applyStepData(two, { remove: ['a'], replace: [curve('a', [[0,0],[1,1]])] }, GEOMETRY_2D).valid).toBe(false)
   expect(applyStepData(three, { crossings: [] }, GEOMETRY_3D).valid).toBe(false)
 })
-it('accepts built-in geometry types in a Knot and resolves procedure base references', () => {
+it('accepts built-in geometry types in a Knot and resolves algorithm base references', () => {
   const knot = {
     schema: 'Knot', schemaVersion: 1, id: 'test', subject: { id: 'subject' },
     representations: [{ id: 'final', type: GEOMETRY_2D, data: two }],
-    procedures: [{ id: 'tying', base: { id: 'final' }, steps: [
+    algorithms: [{ id: 'tying', base: { id: 'final' }, steps: [
       { id: 'start', data: { crossings: [] } }, { id: 'final' }
     ] }]
   }
   expect(validateKnot(knot).valid).toBe(true)
-  expect(validateKnot({ ...knot, procedures: [{ ...knot.procedures[0], base: { id: 'missing' } }] }).valid).toBe(false)
-  expect(validateKnot({ ...knot, procedures: [{ ...knot.procedures[0], steps: [{ id: 'bad', data: { remove: ['missing'] } }] }] }).valid).toBe(false)
+  expect(validateKnot({ ...knot, algorithms: [{ ...knot.algorithms[0], base: { id: 'missing' } }] }).valid).toBe(false)
+  expect(validateKnot({ ...knot, algorithms: [{ ...knot.algorithms[0], steps: [{ id: 'bad', data: { remove: ['missing'] } }] }] }).valid).toBe(false)
 })

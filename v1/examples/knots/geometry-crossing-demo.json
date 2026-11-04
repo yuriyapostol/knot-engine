@@ -21,7 +21,7 @@
   "representations": [
     {
       "id": "crossing-2d",
-      "type": "knot-engine:representation-types/2d",
+      "type": "2d",
       "data": {
         "coordinateSystem": {
           "xAxis": "right",
@@ -72,7 +72,7 @@
     },
     {
       "id": "crossing-3d",
-      "type": "knot-engine:representation-types/3d",
+      "type": "3d",
       "data": {
         "coordinateSystem": {
           "handedness": "right",
@@ -124,7 +124,7 @@
       }
     }
   ],
-  "procedures": [
+  "algorithms": [
     {
       "id": "crossing-steps",
       "base": {
@@ -155,28 +155,6 @@
           "id": "after"
         }
       ]
-    }
-  ],
-  "representationTypes": [
-    {
-      "id": "knot-engine:representation-types/2d",
-      "name": "2d",
-      "description": "2d geometry contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/2d.schema.json"
-      },
-      "specification": "knot-engine:specifications/knot.html",
-      "viewSpace": "plane"
-    },
-    {
-      "id": "knot-engine:representation-types/3d",
-      "name": "3d",
-      "description": "3d geometry contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/3d.schema.json"
-      },
-      "specification": "knot-engine:specifications/knot.html",
-      "viewSpace": "space"
     }
   ]
 }

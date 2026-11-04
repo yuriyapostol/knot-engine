@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
-import {  KnotViewer, Knot, selectRepresentation, applyStepData, ViewerError, type RawKnot, type RawProcedure, type RawStep, GEOMETRY_2D, GEOMETRY_3D, MOSAIC_DIAGRAM, GRID_DIAGRAM, expandURI, type Camera3D, type CaptureOptions  } from 'knot-engine'
+import {  KnotViewer, Knot, selectRepresentation, applyStepData, ViewerError, type RawKnot, type RawAlgorithm, type RawStep, GEOMETRY_2D, GEOMETRY_3D, MOSAIC_DIAGRAM, GRID_DIAGRAM, resolveResourceURI, type Camera3D, type CaptureOptions  } from 'knot-engine'
 import loop from '../../v1/examples/knots/twisted-loop.json'
 import overhand from '../../v1/examples/knots/overhand.json'
 type DemoInput = { kind: 'knot'; data: RawKnot }
@@ -36,40 +36,55 @@ const selected = ref('overhand')
 const current = shallowRef<DemoInput>(examples.overhand)
 const knot = computed(() => current.value.kind === 'knot' ? current.value.data : null)
 function supportedRepresentations(data: RawKnot) {
-  return data.representations?.filter(rep => [GEOMETRY_2D, GEOMETRY_3D, MOSAIC_DIAGRAM, GRID_DIAGRAM].some(type => type === expandURI(rep.type, data.namespaces))) ?? []
+  return data.representations?.filter(rep => [GEOMETRY_2D, GEOMETRY_3D, MOSAIC_DIAGRAM, GRID_DIAGRAM].some(type => type === resolveResourceURI(rep.type, 'representation-type', data.namespaces))) ?? []
 }
 const representations = computed(() => knot.value ? supportedRepresentations(knot.value) : [])
 const representationType = computed(() => {
   const rep = representations.value.find(rep => rep.id === representationId.value)
-  return rep ? expandURI(rep.type, knot.value?.namespaces) : undefined
+  return rep ? resolveResourceURI(rep.type, 'representation-type', knot.value?.namespaces) : undefined
 })
 function matchesRepresentationType(id: string | undefined) {
-  return representations.value.some(rep => rep.id === id && expandURI(rep.type, knot.value?.namespaces) === representationType.value)
+  return representations.value.some(rep => rep.id === id && resolveResourceURI(rep.type, 'representation-type', knot.value?.namespaces) === representationType.value)
 }
-function procedureSteps(procedure: RawProcedure): RawStep[] {
-  return procedure.steps.filter(step =>
-    ((step.data || !step.representations?.length) && matchesRepresentationType(procedure.base?.id)) ||
+function algorithmSteps(algorithm: RawAlgorithm): RawStep[] {
+  return algorithm.steps.filter(step =>
+    ((step.data || !step.representations?.length) && matchesRepresentationType(algorithm.base?.id)) ||
     step.representations?.some(reference => matchesRepresentationType(reference.id))
   )
 }
-const procedures = computed(() => knot.value?.procedures?.filter(procedure => procedureSteps(procedure).length) ?? [])
-const selectedProcedure = ref('')
+const algorithms = computed(() => knot.value?.algorithms?.filter(algorithm => algorithmSteps(algorithm).length) ?? [])
+const selectedAlgorithm = ref('')
 const steps = computed(() => {
-  const procedure = procedures.value.find(procedure => procedure.id === selectedProcedure.value)
-  return procedure ? procedureSteps(procedure) : []
+  const algorithm = algorithms.value.find(algorithm => algorithm.id === selectedAlgorithm.value)
+  return algorithm ? algorithmSteps(algorithm) : []
 })
 const selectedStep = ref('')
-function chooseProcedure() {
-  selectedStep.value = steps.value[0]?.id ?? ''
+function stepForRepresentation(algorithm: RawAlgorithm, id: string) {
+  return algorithmSteps(algorithm).find(step => {
+    const data = step.data
+    const hasOverrides = data && (data.remove?.length || data.replace?.length || data.add?.length || data.crossings !== undefined)
+    if (id === algorithm.base?.id && hasOverrides) return false
+    return step.representations?.length
+      ? step.representations.some(reference => reference.id === id)
+      : id === algorithm.base?.id
+  })
+}
+function chooseAlgorithm() {
+  const algorithm = algorithms.value.find(item => item.id === selectedAlgorithm.value)
+  const baseId = algorithm?.base?.id
+  const baseStep = algorithm && baseId && matchesRepresentationType(baseId) ? stepForRepresentation(algorithm, baseId) : undefined
+  selectedStep.value = baseStep?.id ?? steps.value[0]?.id ?? ''
   chooseStep()
+  if (baseStep && baseId) representationId.value = baseId
 }
 function chooseRepresentation() {
-  selectedProcedure.value = procedures.value[0]?.id ?? ''
-  selectedStep.value = steps.value[0]?.id ?? ''
+  const algorithm = algorithms.value.find(item => stepForRepresentation(item, representationId.value)) ?? algorithms.value[0]
+  selectedAlgorithm.value = algorithm?.id ?? ''
+  selectedStep.value = (algorithm && stepForRepresentation(algorithm, representationId.value))?.id ?? steps.value[0]?.id ?? ''
 }
 function chooseStep() {
-  const procedure = procedures.value.find(item => item.id === selectedProcedure.value)
-  const baseId = procedure?.base?.id
+  const algorithm = algorithms.value.find(item => item.id === selectedAlgorithm.value)
+  const baseId = algorithm?.base?.id
   const step = steps.value.find(item => item.id === selectedStep.value)
   if (baseId && matchesRepresentationType(baseId)) representationId.value = baseId
   const reference = step?.representations?.find(reference => matchesRepresentationType(reference.id))
@@ -79,12 +94,12 @@ chooseRepresentation()
 const displayedKnot = computed<RawKnot | null>(() => {
   const source = knot.value
   if (!source) return null
-  const procedure = procedures.value.find(item => item.id === selectedProcedure.value)
+  const algorithm = algorithms.value.find(item => item.id === selectedAlgorithm.value)
   const step = steps.value.find(item => item.id === selectedStep.value)
-  if (!procedure?.base || !step?.data || !matchesRepresentationType(procedure.base.id)) return source
-  const base = source.representations?.find(rep => rep.id === procedure.base?.id)
+  if (!algorithm?.base || !step?.data || !matchesRepresentationType(algorithm.base.id)) return source
+  const base = source.representations?.find(rep => rep.id === algorithm.base?.id)
   if (!base) return source
-  const type = expandURI(base.type, source.namespaces)
+  const type = resolveResourceURI(base.type, 'representation-type', source.namespaces)
   if (type !== GEOMETRY_2D && type !== GEOMETRY_3D) return source
   const result = applyStepData(base.data as Parameters<typeof applyStepData>[0], step.data, type)
   if (!result.valid) return source
@@ -111,9 +126,9 @@ const issue = ref('')
 const viewer = ref<InstanceType<typeof KnotViewer> | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 const content = computed(() => locale.value === 'uk' ? {
-  model: 'Модель', representation: 'Представлення', procedure: 'Спосіб формування', step: 'Крок формування', custom: 'Власна модель', invalidJSON: 'Некоректний JSON', invalidFormat: 'Очікується RawKnot', fileLimit: 'Файл перевищує 1 MiB', export: 'Експорт зображення', editor: 'Код', openFile: 'Відкрити з файлу', saveFile: 'Зберегти в файл'
+  model: 'Модель', representation: 'Представлення', algorithm: 'Алгоритм', step: 'Крок алгоритму', custom: 'Власна модель', invalidJSON: 'Некоректний JSON', invalidFormat: 'Очікується RawKnot', fileLimit: 'Файл перевищує 1 MiB', export: 'Експорт зображення', editor: 'Код', openFile: 'Відкрити з файлу', saveFile: 'Зберегти в файл'
 } : {
-  model: 'Model', representation: 'Representation', procedure: 'Formation procedure', step: 'Formation step', custom: 'Custom model', invalidJSON: 'Invalid JSON', invalidFormat: 'Expected RawKnot', fileLimit: 'File exceeds 1 MiB', export: 'Export image', editor: 'Code', openFile: 'Open from file', saveFile: 'Save to file'
+  model: 'Model', representation: 'Representation', algorithm: 'Algorithm', step: 'Algorithm step', custom: 'Custom model', invalidJSON: 'Invalid JSON', invalidFormat: 'Expected RawKnot', fileLimit: 'File exceeds 1 MiB', export: 'Export image', editor: 'Code', openFile: 'Open from file', saveFile: 'Save to file'
 })
 function setCurrent(input: DemoInput) {
   const candidates = supportedRepresentations(input.data)
@@ -124,7 +139,6 @@ function setCurrent(input: DemoInput) {
   representationId.value = rep.id
   current.value = input
   chooseRepresentation()
-  chooseStep()
 }
 function choose() {
   clearTimeout(draftTimer)
@@ -170,7 +184,7 @@ function saveCode() {
 }
 const usesSVG = computed(() => {
   const rep = representations.value.find(rep => rep.id === representationId.value)
-  const type = rep ? expandURI(rep.type, knot.value?.namespaces) : undefined
+  const type = rep ? resolveResourceURI(rep.type, 'representation-type', knot.value?.namespaces) : undefined
   return type === GEOMETRY_2D || type === MOSAIC_DIAGRAM || type === GRID_DIAGRAM
 })
 async function download(options: CaptureOptions, name: string) {
@@ -195,7 +209,7 @@ async function download(options: CaptureOptions, name: string) {
       <section class="knot-engine-v1-demo__stage">
         <section class="knot-engine-v1-demo__panel knot-engine-v1-demo__view-settings">
           <label v-if="knot">{{ content.representation }}<span class="knot-engine-v1-demo__select-field"><select v-model="representationId" @change="chooseRepresentation" class="knot-engine-v1-demo__representation-select"><option v-for="representation in representations" :key="representation.id" :value="representation.id">{{ localizedEntryName(representation, locale) }}</option></select></span></label>
-          <label v-if="procedures.length > 1">{{ content.procedure }}<span class="knot-engine-v1-demo__select-field"><select v-model="selectedProcedure" @change="chooseProcedure"><option v-for="procedure in procedures" :key="procedure.id" :value="procedure.id">{{ localizedEntryName(procedure, locale) }}</option></select></span></label>
+          <label v-if="algorithms.length > 1">{{ content.algorithm }}<span class="knot-engine-v1-demo__select-field"><select v-model="selectedAlgorithm" @change="chooseAlgorithm"><option v-for="algorithm in algorithms" :key="algorithm.id" :value="algorithm.id">{{ localizedEntryName(algorithm, locale) }}</option></select></span></label>
           <label v-if="steps.length">{{ content.step }}<span class="knot-engine-v1-demo__select-field"><select v-model="selectedStep" @change="chooseStep"><option v-for="step in steps" :key="step.id" :value="step.id">{{ localizedEntryName(step, locale) }}</option></select></span></label>
         </section>
         <KnotViewer ref="viewer" :show-controls="false" :knot="displayedKnot" :representation-id="representationId" :initial-camera="demoCamera" preserve-camera :label="localizedName(current.data, locale)" :locale="locale" :theme="theme" @error="issue = $event.message" />

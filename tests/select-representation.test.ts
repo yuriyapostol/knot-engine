@@ -36,7 +36,7 @@ describe('independent representation selection', () => {
   })
   it('reports incomplete dependencies', () => {
     const knot = copy()
-    knot.representationTypes = []
+    knot.subject.identifiers = [{ catalog: 'urn:missing:catalog', value: 'example' }]
     expect(selectRepresentation(knot)).toMatchObject({
       ok: false, issues: [{ code: 'MISSING_DEPENDENCY' }],
     })
@@ -67,9 +67,9 @@ describe('targeted validation', () => {
     expect(broken.ok).toBe(false)
     if (!broken.ok) expect(broken.issues.some(issue => issue.code === 'INVALID_REPRESENTATION')).toBe(true)
   })
-  it('does not require unrelated procedures to validate the selected representation', () => {
+  it('does not require unrelated algorithms to validate the selected representation', () => {
     const knot = copy()
-    knot.procedures = [{ id: 'future-steps', steps: [{ id: 'step', representations: [{ id: 'missing' }] }] }]
+    knot.algorithms = [{ id: 'future-steps', steps: [{ id: 'step', representations: [{ id: 'missing' }] }] }]
     expect(selectRepresentation(knot, { type: GEOMETRY_3D })).toMatchObject({ ok: true })
     expect(selectRepresentation(knot, { type: GEOMETRY_3D }, { scope: 'all' })).toMatchObject({ ok: false })
   })

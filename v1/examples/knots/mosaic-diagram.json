@@ -8,24 +8,12 @@
   "subject": {
     "id": "mosaic-subject"
   },
-  "representationTypes": [
-    {
-      "id": "knot-engine:representation-types/mosaic-diagram",
-      "name": "mosaic-diagram",
-      "description": "mosaic-diagram contract, generation 1",
-      "dataSchema": {
-        "ref": "knot-engine:schema/mosaic-diagram.schema.json"
-      },
-      "specification": "knot-engine:specifications/mosaic-diagram.html",
-      "viewSpace": "plane"
-    }
-  ],
   "representations": [
     {
       "id": "mosaic",
-      "type": "knot-engine:representation-types/mosaic-diagram",
+      "type": "mosaic-diagram",
       "data": {
-        "tileSet": "knot-engine:tile-sets/lomonaco-kauffman-11",
+        "tileSet": "lomonaco-kauffman-11",
         "tiles": [
           [0, 2, 1, 0],
           [2, 9, 10, 1],

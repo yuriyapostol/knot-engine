@@ -2,14 +2,14 @@ import { selectKnot } from '../src/core/knotParts'
 import { composeKnot } from '../src/core/knotParts'
 import { validateKnot } from '../src/core/validateKnot'
 import { expect, it } from 'vitest'
-import multi from '../v1/examples/knots/procedures.json'
+import multi from '../v1/examples/knots/algorithms.json'
 import grid from '../v1/examples/knots/grid-diagram.json'
 import { STANDARD_RESOURCES } from '../src/core'
-it('extracts a procedure with its representations, construction and type definitions',()=>{
+it('extracts an algorithm with its representations, construction and type definitions',()=>{
   const source=structuredClone(multi)
-  const part=selectKnot(source,{procedures:['sequence-b']})
+  const part=selectKnot(source,{algorithms:['sequence-b']})
   expect(part.representations).toHaveLength(1)
-  expect(part.procedures).toHaveLength(1)
+  expect(part.algorithms).toHaveLength(1)
   expect(part.constructions).toHaveLength(1)
   expect(part.objectTypes).toHaveLength(1)
   expect(validateKnot(part)).toMatchObject({valid:true,complete:true})
@@ -24,7 +24,7 @@ it('composes fragments of the same document and detects conflicts',()=>{
   expect(()=>selectKnot(a,{representations:['missing']})).toThrow()
 })
 it('includes externally supplied type definitions and no unrelated registry entries',()=>{
-  const a=structuredClone(grid);a.representationTypes=[]
+  const a=structuredClone(grid)
   const part=selectKnot(a,{representations:['grid']},{registries:[STANDARD_RESOURCES]})
   expect(part.representationTypes).toHaveLength(1)
   expect(part.objectTypes).toBeUndefined()

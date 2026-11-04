@@ -143,6 +143,54 @@
             "resource"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "algorithm-purpose"
+            },
+            "resource": {
+              "$ref": "#/$defs/algorithmPurpose"
+            }
+          },
+          "required": [
+            "kind",
+            "resource"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "tile-set"
+            },
+            "resource": {
+              "$ref": "#/$defs/tileSet"
+            }
+          },
+          "required": [
+            "kind",
+            "resource"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "convention"
+            },
+            "resource": {
+              "$ref": "#/$defs/convention"
+            }
+          },
+          "required": [
+            "kind",
+            "resource"
+          ],
+          "additionalProperties": false
         }
       ]
     },
@@ -708,7 +756,18 @@
         },
         "type": {
           "type": "string",
-          "minLength": 1
+          "anyOf": [
+            {
+              "enum": [
+                "rope",
+                "support",
+                "carabiner"
+              ]
+            },
+            {
+              "pattern": "^(https?://\\S+|urn:\\S+|[A-Za-z][A-Za-z0-9_-]*:.+)$"
+            }
+          ]
         }
       },
       "required": [
@@ -720,7 +779,10 @@
           "if": {
             "properties": {
               "type": {
-                "const": "https://yuriyapostol.github.io/knot-engine/v1/object-types/rope"
+                "enum": [
+                  "https://yuriyapostol.github.io/knot-engine/v1/object-types/rope",
+                  "rope"
+                ]
               }
             }
           },
@@ -734,7 +796,9 @@
               "type": {
                 "enum": [
                   "https://yuriyapostol.github.io/knot-engine/v1/object-types/support",
-                  "https://yuriyapostol.github.io/knot-engine/v1/object-types/carabiner"
+                  "https://yuriyapostol.github.io/knot-engine/v1/object-types/carabiner",
+                  "support",
+                  "carabiner"
                 ]
               }
             }
@@ -963,6 +1027,132 @@
       },
       "required": [
         "name"
+      ],
+      "additionalProperties": false
+    },
+    "algorithmPurpose": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "specification": {
+          "type": "string",
+          "minLength": 1
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "specification"
+      ],
+      "additionalProperties": false
+    },
+    "tileSet": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "specification": {
+          "type": "string",
+          "minLength": 1
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "specification"
+      ],
+      "additionalProperties": false
+    },
+    "convention": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "specification": {
+          "type": "string",
+          "minLength": 1
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/name"
+          },
+          "maxItems": 128
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "specification"
       ],
       "additionalProperties": false
     }

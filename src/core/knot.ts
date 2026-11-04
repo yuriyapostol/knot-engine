@@ -7,16 +7,16 @@ export const MOSAIC_DIAGRAM = `${KNOT_NAMESPACE}representation-types/mosaic-diag
 export const LOMONACO_KAUFFMAN_11 = `${KNOT_NAMESPACE}tile-sets/lomonaco-kauffman-11`
 export type MosaicTile = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
 /** Row-major square matrix; row 0 is top. */
-export interface MosaicDiagram { tileSet: typeof LOMONACO_KAUFFMAN_11; tiles: MosaicTile[][] }
+export interface MosaicDiagram { tileSet: typeof LOMONACO_KAUFFMAN_11 | 'lomonaco-kauffman-11'; tiles: MosaicTile[][] }
 export const PD_CODE = `${KNOT_NAMESPACE}representation-types/pd-code`
 export const PD_CCW_UNDER_FIRST = `${KNOT_NAMESPACE}conventions/pd-ccw-under-first`
 export type PDCrossing = [number, number, number, number]
 /** Positive edge labels; CCW slots start at an incoming underpass. */
-export interface PDCode { convention: typeof PD_CCW_UNDER_FIRST; crossings: PDCrossing[]; unlinkedComponents?: number }
+export interface PDCode { convention: typeof PD_CCW_UNDER_FIRST | 'pd-ccw-under-first'; crossings: PDCrossing[]; unlinkedComponents?: number }
 export const DT_CODE = `${KNOT_NAMESPACE}representation-types/dt-code`
 export const DT_SIGNED_EVEN = `${KNOT_NAMESPACE}conventions/dt-signed-even`
 /** One traversal or component traversals; negative means the odd visit passes under. */
-export interface DTCode { convention: typeof DT_SIGNED_EVEN; code: number[] | number[][] }
+export interface DTCode { convention: typeof DT_SIGNED_EVEN | 'dt-signed-even'; code: number[] | number[][] }
 export const ROPE_TYPE = `${KNOT_NAMESPACE}object-types/rope`
 export type Point2D = [number, number]
 export type Point3D = [number, number, number]
@@ -74,9 +74,17 @@ export type SourceDefinition = Source & { id: string }
 export type SourceReference = Reference & { locator?: string; accessed?: string; note?: string }
 export type SourceUse = Source | SourceReference
 export interface RawRepresentation { names?: { language: string; value: string }[]; descriptions?: { language: string; value: string }[]; sources?: SourceUse[]; contributions?: Contribution[]; id: string; type: string; target?: Target; data: unknown }
-export interface RawStep { names?: { language: string; value: string }[]; id: string; instructions?: { language: string; value: string }[]; representations?: Reference[]; data?: StepData }
-export interface RawProcedure { id: string; names?: { language: string; value: string }[]; descriptions?: { language: string; value: string }[]; construction?: Reference; base?: Reference; steps: RawStep[] }
-export type ResourceEntry = { kind: 'source'; resource: SourceDefinition } | { kind: 'catalog'; resource: RawCatalogDefinition } | { kind: 'representation-type'; resource: RawRepresentationTypeDefinition } | { kind: 'object-type'; resource: RawObjectTypeDefinition } | { kind: 'construction'; resource: Construction } | { kind: 'view'; resource: ViewDefinition }
+/** Total executions of a step, rather than additional executions after the first. */
+export type StepRepeat = { count: number; min?: never; max?: never }
+  | ({ count?: never } & ({ min: number; max?: number } | { min?: number; max: number }))
+/** Standard short name, absolute URI, or declared compact URI. */
+export type AlgorithmPurpose = string
+export interface RawAlgorithmPurposeDefinition { id: string; name: string; description: string; specification: string; names?: { language: string; value: string }[]; descriptions?: { language: string; value: string }[] }
+export interface RawTileSetDefinition extends RawAlgorithmPurposeDefinition {}
+export interface RawConventionDefinition extends RawAlgorithmPurposeDefinition {}
+export interface RawStep { names?: { language: string; value: string }[]; id: string; descriptions?: { language: string; value: string }[]; condition?: { language: string; value: string }[]; repeat?: StepRepeat; representations?: Reference[]; data?: StepData }
+export interface RawAlgorithm { id: string; names?: { language: string; value: string }[]; descriptions?: { language: string; value: string }[]; purpose?: AlgorithmPurpose; construction?: Reference; base?: Reference; steps: RawStep[] }
+export type ResourceEntry = { kind: 'source'; resource: SourceDefinition } | { kind: 'catalog'; resource: RawCatalogDefinition } | { kind: 'representation-type'; resource: RawRepresentationTypeDefinition } | { kind: 'object-type'; resource: RawObjectTypeDefinition } | { kind: 'algorithm-purpose'; resource: RawAlgorithmPurposeDefinition } | { kind: 'tile-set'; resource: RawTileSetDefinition } | { kind: 'convention'; resource: RawConventionDefinition } | { kind: 'construction'; resource: Construction } | { kind: 'view'; resource: ViewDefinition }
 export type ResourceKind = ResourceEntry['kind']
 export interface Dependency { kind: ResourceKind; ref: string }
 export interface DocumentContext { schemaVersion: 1; $schema?: string; namespaces?: Namespaces; dependencies?: Dependency[] }
@@ -84,7 +92,8 @@ export interface RawKnot extends DocumentContext {
   schema: 'Knot'; id: string; subject: RawSubject
   sources?: SourceDefinition[]; contributions?: Contribution[]; license?: License
   catalogs?: RawCatalogDefinition[]; representationTypes?: RawRepresentationTypeDefinition[]; objectTypes?: RawObjectTypeDefinition[]
-  constructions?: (Construction | { ref: string })[]; representations?: RawRepresentation[]; procedures?: RawProcedure[]
+  algorithmPurposes?: RawAlgorithmPurposeDefinition[]; tileSets?: RawTileSetDefinition[]; conventions?: RawConventionDefinition[]
+  constructions?: (Construction | { ref: string })[]; representations?: RawRepresentation[]; algorithms?: RawAlgorithm[]
 }
 export type RawResourceDocument = DocumentContext & ResourceEntry & { schema: 'ResourceDocument' }
 export interface RawResourceRegistry extends Omit<DocumentContext, 'dependencies'> { schema: 'ResourceRegistry'; id?: string; resources: ResourceEntry[] }

@@ -155,7 +155,7 @@ it('rejects detected Bezier tangencies and overlaps', () => {
   expect(() => locateCrossings(model(parse('M0 0 C1 0 2 0 3 0 M1 0 L2 0')))).toThrow(/overlap|collinear/)
 })
 
-it('supports procedure replacements and rejects 2D segments in 3D procedure bases', () => {
+it('supports algorithm replacements and rejects 2D segments in 3D algorithm bases', () => {
   const base = model([{ id: 'rope-1', type: 'curve', closed: false, interpolation: { type: 'polyline' }, points: [[0, 0], [2, 0]] }])
   const curve = mixed()
   const result = applyStepData(base, { replace: [curve] }, GEOMETRY_2D)
