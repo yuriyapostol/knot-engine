@@ -1,6 +1,6 @@
 # Viewer components
 
-`KnotViewer` selects and delegates one static representation of a [`RawKnot` or prepared `Knot`](prepared-model.md). Built-ins render 2D curves with `Knot2DViewer`, 3D curves and meshes with `Knot3DViewer`, and mosaics with `KnotMosaicViewer`. Grid, PD and DT have no built-in viewers. Replace input objects to update data; deep mutation is unsupported. Selection and validation precede renderer allocation.
+`KnotViewer` selects and delegates one static representation of a [`RawKnot` or prepared `Knot`](prepared-model.md). Built-ins render 2D curves with `Knot2DViewer`, 3D curves and meshes with `Knot3DViewer`, and mosaics with `KnotMosaicViewer`. Grids render with `KnotGridViewer`; PD and DT have no built-in viewers. Replace input objects to update data; deep mutation is unsupported. Selection and validation precede renderer allocation.
 
 | Prop | Meaning |
 | --- | --- |
@@ -14,7 +14,7 @@
 | `initialCamera?: Camera3D` | 3D display-camera override |
 | `preserveCamera?: boolean` | Keep the current 3D camera, zoom and target when switching representations or quality within the same input object; default false |
 | `description?`, `poster?` | Accessible description; poster is a 3D fallback image |
-| `locale?: 'uk' \| 'en'`, `messages?` | UI language (default uk); message overrides apply to 2D and 3D |
+| `locale?: 'uk' \| 'en'`, `messages?` | UI language (default uk); message overrides apply to 2D, grid and 3D |
 | `theme?: 'light' \| 'dark'` | Default light |
 | `quality?: 'low' \| 'medium' \| 'high'` | 3D quality, default medium; triangle budget may lower it |
 | `active?`, `interactive?`, `showControls?` | Boolean controls, all default true |
@@ -23,15 +23,15 @@ Specialized viewers accept the relevant props directly and select only their sup
 
 With `preserveCamera`, the first representation sets the framing; later steps keep it instead of fitting each shape again. Replacing `knot`, `view`, `views`, `registries` or `initialCamera`, clearing the input, or a load error resets preservation. `resetView()` and `fitToView()` still explicitly reframe the current shape. Perspective depth can still affect apparent rope thickness; a fixed orthographic camera gives a uniform screen scale at every depth.
 
-Events: `ready({knotId?,schemaVersion:1,warnings})`, `error({code,message,issues?,recoverable})`, `view-change`. 3D also emits `camera-change(CameraView)`; the spatial view is a complete fixed camera with `position`, `target`, `up`, `projection`, and perspective FOV in radians. 2D and mosaic view changes carry `{center:[x,y],height}`. Dispatch errors use core selection codes; specialized viewers use `INVALID_MODEL` for invalid input/view selection. 3D also reports `UNSUPPORTED_SCHEMA`, `LIMIT_EXCEEDED`, `WEBGL_UNAVAILABLE`, `CONTEXT_LOST`, `RENDER_FAILED`, `CAPTURE_FAILED` as applicable.
+Events: `ready({knotId?,schemaVersion:1,warnings})`, `error({code,message,issues?,recoverable})`, `view-change`. 3D also emits `camera-change(CameraView)`; the spatial view is a complete fixed camera with `position`, `target`, `up`, `projection`, and perspective FOV in radians. 2D, grid and mosaic view changes carry `{center:[x,y],height}`. Dispatch errors use core selection codes; specialized viewers use `INVALID_MODEL` for invalid input/view selection. 3D also reports `UNSUPPORTED_SCHEMA`, `LIMIT_EXCEEDED`, `WEBGL_UNAVAILABLE`, `CONTEXT_LOST`, `RENDER_FAILED`, `CAPTURE_FAILED` as applicable.
 
-Methods: `resetView()`, `fitToView()`, `capture(options?): Promise<Blob>`. Capture accepts `width`, `height`, `format`, `view:'current'|'model-preview'`, `transparent`; dimensions are integers in 1..2048. 3D supports `image/png` (default 512×512); 2D and mosaic support `image/svg+xml` (default 1024×1024). `current` preserves local framing; `model-preview` uses the resolved spatial camera/default or the full mosaic extent. For 2D, preview uses the resolved plane view or default geometry framing. Capture leaves the live view unchanged.
+Methods: `resetView()`, `fitToView()`, `capture(options?): Promise<Blob>`. Capture accepts `width`, `height`, `format`, `view:'current'|'model-preview'`, `transparent`; dimensions are integers in 1..2048. 3D supports `image/png` (default 512×512); 2D, grid and mosaic support `image/svg+xml` (default 1024×1024). `current` preserves local framing; `model-preview` uses the resolved spatial camera/default or the full grid/mosaic extent. For 2D, preview uses the resolved plane view or default geometry framing. Capture leaves the live view unchanged.
 
-3D slots: `toolbar({reset,fit,zoomIn,zoomOut,ready,touchActive})`, `fallback({state,error,poster})`, `loading({state})`. Its states are `empty`, `initializing`, `ready`, `error`; SSR renders a stable fallback without WebGL. 2D and mosaic provide toolbar and fallback slots and renders valid input directly as SVG, including during SSR. They have no asynchronous loading state or poster behavior.
+3D slots: `toolbar({reset,fit,zoomIn,zoomOut,ready,touchActive})`, `fallback({state,error,poster})`, `loading({state})`. Its states are `empty`, `initializing`, `ready`, `error`; SSR renders a stable fallback without WebGL. 2D, grid and mosaic provide toolbar and fallback slots and render valid input directly as SVG, including during SSR. They have no asynchronous loading state or poster behavior.
 
-3D cleans listeners, observers and GPU resources on unmount and pauses rendering when inactive, hidden or outside the viewport. Toolbar buttons, arrow keys and touch orbit/pinch control its camera. 2D and mosaic support wheel zoom and pointer pan without WebGL. 2D also supports arrow-key pan, +/− zoom and Home to reset; inactive or noninteractive viewers ignore gestures. 2D reset restores the requested plane view; fit frames all geometry. Hardware touch/WebView verification is separate from headless coverage. There is no automatic fetching or animation. The 3D geometry budget is 100,000 triangles; quality is reduced before allocation or fails if low quality remains too large.
+3D cleans listeners, observers and GPU resources on unmount and pauses rendering when inactive, hidden or outside the viewport. Toolbar buttons, arrow keys and touch orbit/pinch control its camera. 2D, grid and mosaic support wheel zoom and pointer pan without WebGL. 2D and grid also support arrow-key pan, +/− zoom and Home to reset; inactive or noninteractive viewers ignore gestures. 2D and grid reset restore the requested plane view; fit frames all geometry or the full grid. Hardware touch/WebView verification is separate from headless coverage. There is no automatic fetching or animation. The 3D geometry budget is 100,000 triangles; quality is reduced before allocation or fails if low quality remains too large.
 
-Import `knot-engine/styles.css` for all visual components. Dedicated entries `knot-engine/2d`, `knot-engine/3d` and `knot-engine/mosaic` export the specialized viewers; the root entry exports all viewers and registry helpers.
+Import `knot-engine/styles.css` for all visual components. Dedicated entries `knot-engine/2d`, `knot-engine/3d`, `knot-engine/grid` and `knot-engine/mosaic` export the specialized viewers; the root entry exports all viewers and registry helpers.
 
 ## 2D geometry viewer
 
@@ -45,7 +45,7 @@ The ordered `crossings` records must match the geometry. Detected tangencies, en
 
 The built-in viewers share root class `.knot-engine-v1-viewer`; part classes are `.knot-engine-v1-viewer__surface`, `.knot-engine-v1-viewer__canvas`, `.knot-engine-v1-viewer__fallback`, `.knot-engine-v1-viewer__poster`, `.knot-engine-v1-viewer__toolbar`. The root exposes `data-theme="light|dark"` and `data-state="empty|initializing|ready|error"`.
 
-The package CSS namespace is `knot-engine-v1`; `viewer` is shared by the built-in viewer components. 2D SVG uses `.knot-engine-v1-geometry2d`; mosaic SVG additionally uses `.knot-engine-v1-mosaic`. New component families can use their own names under the package/generation prefix. `v1` covers `0.x` and later `1.x` packages; subsequent generations use `.knot-engine-v2-viewer…` classes and `--knot-engine-v2-viewer-*` variables. This permits different major versions on the same page. Unversioned aliases are not added.
+The package CSS namespace is `knot-engine-v1`; `viewer` is shared by the built-in viewer components. 2D SVG uses `.knot-engine-v1-geometry2d`; grid SVG uses `.knot-engine-v1-grid`; mosaic SVG additionally uses `.knot-engine-v1-mosaic`. New component families can use their own names under the package/generation prefix. `v1` covers `0.x` and later `1.x` packages; subsequent generations use `.knot-engine-v2-viewer…` classes and `--knot-engine-v2-viewer-*` variables. This permits different major versions on the same page. Unversioned aliases are not added.
 
 Backward compatibility is not required during initial development, including for CSS. The namespace does not freeze classes, variables, markup or appearance between releases in one generation or guarantee interchangeable stylesheets. Each viewer should use the stylesheet from its corresponding release.
 

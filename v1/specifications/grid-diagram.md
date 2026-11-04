@@ -1,6 +1,6 @@
 # Grid diagram
 
-Supported data and validation profile. Rendering is deferred.
+Supported data, validation and SVG rendering profile.
 
 ## xo encoding: contract and conventions
 
@@ -12,7 +12,7 @@ For `encoding:"xo"`, `data` is exactly `{encoding:"xo",size,x,o}`. Size is an in
 
 Horizontal segments run O→X; vertical segments run X→O and pass over horizontal segments. Connections are ordinary straight planar segments, without wrapping across boundaries. Several oriented closed components are allowed in X/O. Swapping X and O reverses every component's orientation without changing the underlying crossing diagram. Reflecting coordinates without changing crossing conventions can change chirality; it is not an identity-preserving normalization.
 
-A future plane viewer can map marker (column c, row r) to [c+0.5,r+0.5], with grid extent [0,n] × [0,n]. Camera settings belong to the application. There is no built-in grid viewer.
+`KnotGridViewer` maps marker (column c, row r) to [c+0.5,r+0.5], with grid extent [0,n] × [0,n]. Camera settings belong to the application. The SVG viewport preserves upward-positive row coordinates.
 
 ## Vertex-pairs encoding
 
@@ -63,6 +63,14 @@ Tests check exact point-set recovery and one component. The catalog label is sou
 ## Acceptance cases
 
 Tests include a 2×2 loop, separate loops, a two-crossing/two-component diagram, a three-crossing/one-component diagram, the KnotInfo geometry, reversal of all orientations, sizes 2 and 512, invalid indices/permutations/overlaps, sparse arrays, non-JSON numbers, unsupported encodings, unknown fields, plane views, standalone documents and extraction/composition round trips.
+
+## Rendering
+
+`KnotGridViewer`, exported from `knot-engine/grid` and the root entry, renders both encodings as SVG. `KnotViewer` dispatches this type automatically under its ordinary selection rules. X/O markers are shown only for `xo`; `vertex-pairs` has no orientation markers. Horizontal strands have transparent gaps at strict interior crossings; vertical strands remain continuous.
+
+The viewer supports plane views, pointer pan, wheel zoom, arrow-key pan, +/− zoom, Home/reset, fit, localized controls and toolbar/fallback slots. `resetView()` restores the requested plane view; `fitToView()` frames the full grid. `view-change` emits `{center:[x,y],height}` in grid plane coordinates.
+
+`capture()` produces self-contained SVG, default 1024×1024, with dimensions in 1..2048. `current` preserves the live camera; `model-preview` frames the full grid without changing it. The background is transparent by default; `transparent:false` embeds the viewer background color. Import `knot-engine/styles.css`. See the [component API](components.md).
 
 ## Attribution of concrete data
 

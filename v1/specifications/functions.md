@@ -23,7 +23,7 @@ Import core APIs from `knot-engine/core`; this entry point uses no Vue, Three.js
 
 `Knot.validate()` and `knot.validate()` accept `registries` (array of `RawResourceRegistry`). The `ValidationOptions` used by representation validation/selection additionally accept `schemas` (explicit JSON Schema objects). Known objects are always closed; `strict: false` does not relax validation. `STANDARD_RESOURCES` provides the built-in representation and object type definitions when passed explicitly. Type definitions, `ViewerError`, `KNOT_LIMITS`, namespace and type URI constants are exported.
 
-Built-in viewers render 2D curves, 3D curves and meshes, and SVG mosaics. Rendering requires complete validation of the selected representation and its dependencies; extraction requires a complete document. Unknown type data can be preserved with an incomplete report. No operation proves the mathematical identity of a knot.
+Built-in viewers render 2D curves, 3D curves and meshes, and SVG grids and mosaics. Rendering requires complete validation of the selected representation and its dependencies; extraction requires a complete document. Unknown type data can be preserved with an incomplete report. No operation proves the mathematical identity of a knot.
 
 See [data semantics](knot.md) and [component API](components.md).
 

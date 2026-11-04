@@ -26,6 +26,10 @@
       "types": "./dist/3d/index.d.ts",
       "import": "./dist/3d/index.js"
     },
+    "./grid": {
+      "types": "./dist/grid/index.d.ts",
+      "import": "./dist/grid/index.js"
+    },
     "./mosaic": {
       "types": "./dist/mosaic/index.d.ts",
       "import": "./dist/mosaic/index.js"

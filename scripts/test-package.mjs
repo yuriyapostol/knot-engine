@@ -45,9 +45,11 @@ try {
     import { renderToString } from 'vue/server-renderer'
     import { Knot3DViewer } from 'knot-engine/3d'
     import { KnotMosaicViewer } from 'knot-engine/mosaic'
+    import { KnotGridViewer } from 'knot-engine/grid'
     import { Knot2DViewer, importSVGPath2D, exportSVGPath2D } from 'knot-engine/2d'
     assert.equal(typeof Knot3DViewer, 'object')
     assert.equal(typeof KnotMosaicViewer, 'object')
+    assert.equal(typeof KnotGridViewer, 'object')
     assert.equal(typeof Knot2DViewer, 'object')
     assert.equal(exportSVGPath2D(importSVGPath2D('M0 0L1 1', { idPrefix: 'a', yAxis: 'up' })[0], { yAxis: 'up' }), 'M 0 0 L 1 1')
     const html = await renderToString(createSSRApp(KnotMosaicViewer, { label: 'Mosaic standalone' }))
@@ -60,6 +62,9 @@ try {
     import { createSSRApp } from 'vue'
     import { renderToString } from 'vue/server-renderer'
     import { Knot2DViewer } from 'knot-engine/2d'
+    import { KnotGridViewer } from 'knot-engine/grid'
+    const grid = await renderToString(createSSRApp(KnotGridViewer, { knot: ${readFileSync('v1/examples/knots/grid-diagram.json', 'utf8')}, label: 'Grid standalone' }))
+    assert.ok(grid.includes('<svg') && grid.includes('data-grid-marker') && grid.includes('data-state="ready"'))
     const html = await renderToString(createSSRApp(Knot2DViewer, { knot: ${readFileSync('v1/examples/knots/geometry-crossing-demo.json', 'utf8')}, label: '2D standalone' }))
     assert.ok(html.includes('<svg') && html.includes('<mask') && html.includes('data-state="ready"'))
   `)
@@ -77,6 +82,7 @@ try {
     import { KnotViewer, Knot2DViewer as Root2DViewer, type Geometry2DView, type RawKnot, type CameraView } from 'knot-engine'
     import { Knot3DViewer } from 'knot-engine/3d'
     import { KnotMosaicViewer } from 'knot-engine/mosaic'
+    import { KnotGridViewer } from 'knot-engine/grid'
     import { Knot2DViewer, importSVGPath2D, exportSVGPath2D, type SegmentedCurve2D } from 'knot-engine/2d'
     import { Knot, type RawRepresentation, type DTCode, DT_SIGNED_EVEN, validateDTCode, type PDCode, type SourceDefinition, type Contribution, type License, validatePDCode, PD_CCW_UNDER_FIRST } from 'knot-engine/core'
     const representation: RawRepresentation = { id: 'r', type: 'urn:example:representation', data: {} }
@@ -85,6 +91,8 @@ try {
     type Props = InstanceType<typeof KnotViewer>['$props']
     const props: Props = { knot, representationId: 'r', label: 'a', initialCamera: camera }
     const threeProps: InstanceType<typeof Knot3DViewer>['$props'] = { label: '3d', knot }
+    const gridProps: InstanceType<typeof KnotGridViewer>['$props'] = { label: 'grid', knot }
+    void gridProps
     const mosaicProps: InstanceType<typeof KnotMosaicViewer>['$props'] = { label: 'mosaic', knot }
     const planarProps: InstanceType<typeof Knot2DViewer>['$props'] = { label: '2d', knot }
     const planarView: Geometry2DView = { center: [0, 0], height: 2 }

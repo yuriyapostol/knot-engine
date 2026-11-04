@@ -196,6 +196,72 @@
           "value": "Мозаїчне представлення вузла."
         }
       ]
+    },
+    {
+      "id": "grid-xo",
+      "type": "knot-engine:representation-types/grid-diagram",
+      "data": {
+        "encoding": "xo",
+        "size": 3,
+        "x": [0, 2, 1],
+        "o": [1, 0, 2]
+      },
+      "names": [
+        {
+          "language": "en",
+          "value": "Grid diagram (X/O)"
+        },
+        {
+          "language": "uk",
+          "value": "Сіткова діаграма (X/O)"
+        }
+      ],
+      "descriptions": [
+        {
+          "language": "en",
+          "value": "Grid diagram of the closed loop with one crossing."
+        },
+        {
+          "language": "uk",
+          "value": "Сіткова діаграма замкненої петлі з одним перетином."
+        }
+      ]
+    },
+    {
+      "id": "grid-vertex-pairs",
+      "type": "knot-engine:representation-types/grid-diagram",
+      "data": {
+        "encoding": "vertex-pairs",
+        "size": 3,
+        "vertices": [
+          [0, 0],
+          [0, 1],
+          [1, 2],
+          [1, 0],
+          [2, 1],
+          [2, 2]
+        ]
+      },
+      "names": [
+        {
+          "language": "en",
+          "value": "Grid diagram (vertex pairs)"
+        },
+        {
+          "language": "uk",
+          "value": "Сіткова діаграма (пари вершин)"
+        }
+      ],
+      "descriptions": [
+        {
+          "language": "en",
+          "value": "Grid diagram of the closed loop with one crossing."
+        },
+        {
+          "language": "uk",
+          "value": "Сіткова діаграма замкненої петлі з одним перетином."
+        }
+      ]
     }
   ],
   "constructions": [
@@ -257,6 +323,16 @@
         "ref": "knot-engine:schema/mosaic-diagram.schema.json"
       },
       "specification": "knot-engine:specifications/mosaic-diagram.html",
+      "viewSpace": "plane"
+    },
+    {
+      "id": "knot-engine:representation-types/grid-diagram",
+      "name": "grid-diagram",
+      "description": "grid-diagram contract, generation 1",
+      "dataSchema": {
+        "ref": "knot-engine:schema/grid-diagram.schema.json"
+      },
+      "specification": "knot-engine:specifications/grid-diagram.html",
       "viewSpace": "plane"
     }
   ],

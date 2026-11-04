@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import Knot3DViewer from './Knot3DViewer.vue'
+import KnotGridViewer from './KnotGridViewer.vue'
 import Knot2DViewer from './Knot2DViewer.vue'
 import KnotMosaicViewer from './KnotMosaicViewer.vue'
-import { MOSAIC_DIAGRAM, GEOMETRY_3D, GEOMETRY_2D, type RawKnot, type Camera3D, type RawResourceRegistry, type Reference, type ViewDefinition } from '../core'
+import { GRID_DIAGRAM, MOSAIC_DIAGRAM, GEOMETRY_3D, GEOMETRY_2D, type RawKnot, type Camera3D, type RawResourceRegistry, type Reference, type ViewDefinition } from '../core'
 import type { ViewerMessages } from '../locales'
 import type { ViewerRegistry } from './viewerRegistry'
 import { createViewerRegistry, selectViewerRepresentation } from './viewerRegistry'
@@ -36,6 +37,7 @@ const emit = defineEmits<{
   'view-change': [view: unknown]
 }>()
 const builtIns = createViewerRegistry([
+  { typeUri: GRID_DIAGRAM, component: KnotGridViewer, capabilities: { pan: true, zoom: true, capture: ['svg'] } },
   { typeUri: GEOMETRY_3D, component: Knot3DViewer, capabilities: { orbit: true, pan: true, zoom: true, capture: ['png'] } },
   { typeUri: GEOMETRY_2D, component: Knot2DViewer, capabilities: { pan: true, zoom: true, capture: ['svg'] } },
   { typeUri: MOSAIC_DIAGRAM, component: KnotMosaicViewer, capabilities: { pan: true, zoom: true, capture: ['svg'] } },

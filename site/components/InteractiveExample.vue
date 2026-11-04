@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
-import {  KnotViewer, Knot, selectRepresentation, applyStepData, ViewerError, type RawKnot, type RawProcedure, type RawStep, GEOMETRY_2D, GEOMETRY_3D, MOSAIC_DIAGRAM, expandURI, type Camera3D, type CaptureOptions  } from 'knot-engine'
+import {  KnotViewer, Knot, selectRepresentation, applyStepData, ViewerError, type RawKnot, type RawProcedure, type RawStep, GEOMETRY_2D, GEOMETRY_3D, MOSAIC_DIAGRAM, GRID_DIAGRAM, expandURI, type Camera3D, type CaptureOptions  } from 'knot-engine'
 import loop from '../../v1/examples/knots/twisted-loop.json'
 import overhand from '../../v1/examples/knots/overhand.json'
 type DemoInput = { kind: 'knot'; data: RawKnot }
@@ -36,7 +36,7 @@ const selected = ref('overhand')
 const current = shallowRef<DemoInput>(examples.overhand)
 const knot = computed(() => current.value.kind === 'knot' ? current.value.data : null)
 function supportedRepresentations(data: RawKnot) {
-  return data.representations?.filter(rep => [GEOMETRY_2D, GEOMETRY_3D, MOSAIC_DIAGRAM].some(type => type === expandURI(rep.type, data.namespaces))) ?? []
+  return data.representations?.filter(rep => [GEOMETRY_2D, GEOMETRY_3D, MOSAIC_DIAGRAM, GRID_DIAGRAM].some(type => type === expandURI(rep.type, data.namespaces))) ?? []
 }
 const representations = computed(() => knot.value ? supportedRepresentations(knot.value) : [])
 const representationType = computed(() => {
@@ -171,7 +171,7 @@ function saveCode() {
 const usesSVG = computed(() => {
   const rep = representations.value.find(rep => rep.id === representationId.value)
   const type = rep ? expandURI(rep.type, knot.value?.namespaces) : undefined
-  return type === GEOMETRY_2D || type === MOSAIC_DIAGRAM
+  return type === GEOMETRY_2D || type === MOSAIC_DIAGRAM || type === GRID_DIAGRAM
 })
 async function download(options: CaptureOptions, name: string) {
   try {

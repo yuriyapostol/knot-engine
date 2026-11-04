@@ -313,6 +313,38 @@ try {
     assert.ok(continuity.alpha > 240, `Closed loop must remain continuous at physical scale ${scale}: ${JSON.stringify(continuity)}`)
   }
   console.log('2D: complementary rounded layers, hidden-endpoint dots, closed seams and physical-scale continuity regressions passed')
+  const gridKnot = fixture('v1/examples/knots/grid-diagram.json')
+  const gridXO = structuredClone(gridKnot.representations[0].data)
+  const beforeGrid = await page.evaluate(() => window.__webglContexts)
+  for (const encoding of ['xo', 'vertex-pairs']) {
+    gridKnot.representations[0].data = encoding === 'xo' ? gridXO : {
+      encoding, size: gridXO.size,
+      vertices: gridXO.x.flatMap((r,c) => [[c,r],[c,gridXO.o[c]]]).reverse(),
+    }
+    assert.equal(await setInput({ knot: gridKnot, interactive: true }), undefined)
+    const grid = page.locator('svg.knot-engine-v1-grid')
+    await grid.waitFor()
+    assert.equal(await grid.locator('[data-grid-marker]').count(), encoding === 'xo' ? 10 : 0)
+    assert.equal(await page.evaluate(() => window.__webglContexts), beforeGrid)
+    const pixels = await page.evaluate(async () => {
+      const blob = await window.__previewCapture(500, 500)
+      const image = new Image(), url = URL.createObjectURL(blob)
+      try {
+        image.src = url; await image.decode()
+        const canvas = document.createElement('canvas'); canvas.width = 500; canvas.height = 500
+        const ctx = canvas.getContext('2d'); ctx.drawImage(image, 0, 0)
+        const alpha = (x,y) => ctx.getImageData(x,y,1,1).data[3]
+        return { type: blob.type, gap: alpha(140,250), horizontal: alpha(125,250), vertical: alpha(150,250), bottom: alpha(50,400), topEmpty: alpha(50,100) }
+      } finally { URL.revokeObjectURL(url) }
+    })
+    assert.deepEqual(pixels, { type: 'image/svg+xml', gap: 0, horizontal: 255, vertical: 255, bottom: 255, topEmpty: 0 })
+    await grid.screenshot({ path: `/tmp/knot-grid-${encoding}.png` })
+    const originalBox = await grid.getAttribute('viewBox')
+    await grid.hover(); await page.mouse.wheel(0,-100)
+    await page.waitForFunction(box => document.querySelector('svg.knot-engine-v1-grid').getAttribute('viewBox') !== box, originalBox)
+  }
+  console.log('Grid: both encodings, upward row coordinates, transparent crossing gaps, vertical overpasses, wheel zoom and SVG rasterization without WebGL passed')
+
   assert.equal(await setInput({ knot: fixture('v1/examples/knots/open-rope.json') }), undefined)
   assert.ok(await page.locator('canvas.knot-engine-v1-viewer__canvas').count() > 0)
   assert.equal(await page.evaluate(async () => (await window.__previewCapture(240, 180)).type), 'image/png')
@@ -339,6 +371,26 @@ try {
   await trefoilDownload.saveAs('/tmp/knot-closed-trefoil.svg')
   assert.match(readFileSync('/tmp/knot-closed-trefoil.svg', 'utf8'), /<mask/)
   await trefoilViewer.screenshot({ path: '/tmp/knot-closed-trefoil.png' })
+  for (const model of ['overhand', 'loop']) {
+    await page.locator('.knot-engine-v1-demo__model-select select').selectOption(model)
+    for (const [encoding, name] of [['xo', 'Сіткова діаграма (X/O)'], ['vertex-pairs', 'Сіткова діаграма (пари вершин)']]) {
+      await page.locator('.knot-engine-v1-demo__representation-select').selectOption(`grid-${encoding}`)
+      const grid = page.locator('.knot-engine-v1-viewer[data-state="ready"] svg.knot-engine-v1-grid')
+      await grid.waitFor()
+      assert.equal(await page.locator('.knot-engine-v1-demo__representation-select option:checked').textContent(), name)
+      assert.equal(await grid.locator('[data-grid-marker]').count(), encoding === 'xo' ? (model === 'overhand' ? 10 : 6) : 0)
+      const [download] = await Promise.all([
+        page.waitForEvent('download'),
+        page.getByRole('button', { name: 'Експорт зображення', exact: true }).click(),
+      ])
+      assert.equal(download.suggestedFilename(), 'knot-current.svg')
+      const stream = await download.createReadStream(), chunks = []
+      for await (const chunk of stream) chunks.push(chunk)
+      assert.match(Buffer.concat(chunks).toString(), /data-grid-strands="vertical"/)
+    }
+  }
+  console.log('Demo: both grid encodings are selectable, render and export SVG for overhand and twisted loop')
+
   await page.locator('.knot-engine-v1-demo__model-select select').selectOption('loop')
   await page.waitForSelector('.knot-engine-v1-viewer[data-state="ready"]')
   await page.locator('.knot-engine-v1-demo__representation-select').selectOption('view-3d-finish')

@@ -130,6 +130,6 @@ One `grid-diagram` type now supports `xo` and `vertex-pairs`, both zero-based wi
 
 ## 6. Implementation and remaining import work
 
-3D geometry, both grid encodings, mosaics, PD and numeric DT for knots/links have implemented data and validation contracts. 3D geometry and mosaics also have built-in viewers. Image containers, editable planar diagrams, other notations and format converters need separate contracts and tests.
+3D geometry, both grid encodings, mosaics, PD and numeric DT for knots/links have implemented data and validation contracts. 2D/3D geometry, grids and mosaics also have built-in viewers. Image containers, editable planar diagrams, other notations and format converters need separate contracts and tests.
 
 Each import needs primary-source fixtures and preservation checks for geometry, closure, components, crossings, orientation, parameterization and provenance. A generated layout must not be presented as an original source image. Mathematical equivalence remains a separate task.

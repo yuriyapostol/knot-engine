@@ -66,3 +66,6 @@
 
 .knot-engine-v1-geometry2d { display: block; width: 100%; height: 100%; }
 .knot-engine-v1-geometry2d:focus-visible { outline: 3px solid var(--knot-engine-v1-viewer-focus, var(--_knot-engine-v1-viewer-focus)); outline-offset: -3px; }
+
+.knot-engine-v1-grid { display: block; width: 100%; height: 100%; }
+.knot-engine-v1-grid:focus-visible { outline: 3px solid var(--knot-engine-v1-viewer-focus, var(--_knot-engine-v1-viewer-focus)); outline-offset: -3px; }
