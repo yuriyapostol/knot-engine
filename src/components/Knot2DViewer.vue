@@ -9,6 +9,7 @@ import { locateCrossings } from './geometry2d'
 import { crossingStrokes2D, CROSSING_MASK_SCALE } from './crossingStrokes2d'
 import { flattenGeometry2D, mapCurve2D } from './curves2d'
 import { mosaicPanCenter } from './mosaicViewport'
+import { usePlaneGestures } from './usePlaneGestures'
 import { messages as defaults, type ViewerMessages } from '../locales'
 import type { CaptureOptions } from './captureOptions'
 
@@ -45,7 +46,6 @@ const svg = ref<SVGSVGElement | null>(null)
 const maskId = ref(`knot-2d-${useId().replace(/[^a-zA-Z0-9_-]/g, '-')}`)
 onMounted(() => { maskId.value += `-${nextMaskId++}` })
 const camera = ref<Geometry2DView>({ center: [0, 0], height: 1 })
-const dragging = ref<{ id: number; x: number; y: number; camera: Geometry2DView } | null>(null)
 const canInteract = computed(() => props.active && props.interactive)
 const selection = computed(() => props.knot ? selectRepresentation(props.knot, { representationId: props.representationId, type: GEOMETRY_2D }, { registries: props.registries }) : null)
 const result = computed(() => {
@@ -94,7 +94,7 @@ function box(view: Geometry2DView) {
 }
 const viewBox = computed(() => box(camera.value))
 function announceView() { emit('view-change', { center: [...camera.value.center], height: camera.value.height }) }
-function applyView() { camera.value = { center: [...initial.value.center], height: initial.value.height }; onPointerUp() }
+function applyView() { camera.value = { center: [...initial.value.center], height: initial.value.height }; clearGestures() }
 function resetView() { applyView(); announceView() }
 function fitToView() {
   if (!result.value.data) return
@@ -112,23 +112,15 @@ function onWheel(event: WheelEvent) {
   if (!canInteract.value || !ready.value || event.deltaY === 0) return
   event.preventDefault(); zoom(event.deltaY < 0 ? 1 / 1.25 : 1.25)
 }
-function onPointerDown(event: PointerEvent) {
-  if (!canInteract.value || !ready.value || !svg.value || event.button !== 0 || dragging.value) return
-  dragging.value = { id: event.pointerId, x: event.clientX, y: event.clientY, camera: { center: [...camera.value.center], height: camera.value.height } }
-  svg.value.setPointerCapture?.(event.pointerId)
-}
-function onPointerMove(event: PointerEvent) {
-  if (!canInteract.value || !dragging.value || dragging.value.id !== event.pointerId || !svg.value) return
-  const rect = svg.value.getBoundingClientRect(), start = dragging.value
-  if (!rect.width || !rect.height) return
-  camera.value = { center: mosaicPanCenter(start.camera.center, event.clientX - start.x, event.clientY - start.y, start.camera.height, rect.width, rect.height), height: start.camera.height }
-  announceView()
-}
-function onPointerUp() {
-  const id = dragging.value?.id
-  dragging.value = null
-  if (id !== undefined && svg.value?.hasPointerCapture?.(id)) svg.value.releasePointerCapture(id)
-}
+const { dragging, onPointerDown, onPointerMove, onPointerUp, clear: clearGestures } = usePlaneGestures(
+  svg, computed(() => canInteract.value && ready.value),
+  (dx, dy) => {
+    if (!svg.value) return
+    const rect = svg.value.getBoundingClientRect()
+    camera.value = { ...camera.value, center: mosaicPanCenter(camera.value.center, dx, dy, camera.value.height, rect.width, rect.height) }
+    announceView()
+  }, zoom,
+)
 function onKeyDown(event: KeyboardEvent) {
   if (!canInteract.value || !ready.value) return
   const delta = camera.value.height * 0.1
@@ -164,7 +156,6 @@ function capture(options: CaptureOptions = {}): Promise<Blob> {
   return Promise.resolve(new Blob([new XMLSerializer().serializeToString(clone)], { type: 'image/svg+xml' }))
 }
 watch(initial, applyView, { immediate: true })
-watch(canInteract, value => { if (!value) onPointerUp() })
 watch([result, error], () => {
   if (ready.value && props.knot) emit('ready', { knotId: props.knot.id, schemaVersion: 1, warnings: [] })
   else if (error.value) emit('error', { code: 'INVALID_MODEL', message: error.value, recoverable: false })
@@ -207,3 +198,4 @@ defineExpose({ resetView, fitToView, capture })
     </div>
   </div>
 </template>
+
