@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { MOSAIC_DIAGRAM, selectRepresentation, validateMosaicDiagram, resolveRepresentationView, type RawKnot, type MosaicDiagram, type RawResourceRegistry, type Reference, type ViewDefinition } from '../core'
 import { mosaicPaths } from './mosaicGeometry'
 import { mosaicPanCenter } from './mosaicViewport'
+import { usePlaneGestures } from './usePlaneGestures'
 import type { CaptureOptions } from './captureOptions'
 
 export interface MosaicView { center: [number, number]; height: number }
@@ -28,7 +29,6 @@ const emit = defineEmits<{
 const svg = ref<SVGSVGElement | null>(null)
 const zoom = ref(1)
 const center = ref<[number, number] | null>(null)
-const dragging = ref<{ x: number; y: number; center: [number, number] } | null>(null)
 const selection = computed(() => props.knot
   ? selectRepresentation(props.knot, { representationId: props.representationId, type: MOSAIC_DIAGRAM }, { registries: props.registries })
   : null)
@@ -66,6 +66,7 @@ const viewBox = computed(() => {
 })
 function announceView() { emit('view-change', current.value) }
 function applyView() {
+  clearGestures()
   const camera = selectedView.value?.space === 'plane' ? selectedView.value.camera : null
   center.value = camera ? [...camera.center] : null
   zoom.value = camera ? size.value / camera.height : 1
@@ -80,22 +81,19 @@ function onWheel(event: WheelEvent) {
   if (event.deltaY < 0) zoomIn()
   else zoomOut()
 }
-function onPointerDown(event: PointerEvent) {
-  if (!props.interactive || !props.active || !ready.value || !svg.value || event.button !== 0) return
-  dragging.value = { x: event.clientX, y: event.clientY, center: [...current.value.center] }
-  svg.value.setPointerCapture(event.pointerId)
-}
-function onPointerMove(event: PointerEvent) {
-  if (!dragging.value || !svg.value) return
-  const rect = svg.value.getBoundingClientRect()
-  if (!rect.width || !rect.height) return
-  center.value = mosaicPanCenter(
-    dragging.value.center, event.clientX - dragging.value.x,
-    event.clientY - dragging.value.y, current.value.height, rect.width, rect.height,
-  )
-  announceView()
-}
-function onPointerUp() { dragging.value = null }
+const canInteract = computed(() => props.active && props.interactive)
+const { dragging, onPointerDown, onPointerMove, onPointerUp, clear: clearGestures } = usePlaneGestures(
+  svg, computed(() => canInteract.value && ready.value),
+  (dx, dy) => {
+    if (!svg.value) return
+    const rect = svg.value.getBoundingClientRect()
+    center.value = mosaicPanCenter(current.value.center, dx, dy, current.value.height, rect.width, rect.height)
+    announceView()
+  }, factor => {
+    zoom.value = Math.max(0.25, Math.min(32, zoom.value / factor))
+    announceView()
+  },
+)
 function capture(options: CaptureOptions = {}): Promise<Blob> {
   if (!svg.value || !ready.value) return Promise.reject(new Error('Mosaic viewer is not ready'))
   const width = options.width ?? 1024, height = options.height ?? 1024
@@ -118,7 +116,7 @@ defineExpose({ resetView, fitToView, capture })
 
 <template>
   <div class="knot-engine-v1-viewer" :data-theme="theme" :data-state="ready ? 'ready' : error ? 'error' : 'empty'" :aria-label="label" :aria-description="description" role="group">
-    <svg v-if="ready" ref="svg" class="knot-engine-v1-mosaic" :viewBox="viewBox" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" :aria-label="label" @wheel="onWheel" @pointerdown="onPointerDown" @pointermove="onPointerMove" @pointerup="onPointerUp" @pointercancel="onPointerUp" @lostpointercapture="onPointerUp">
+    <svg v-if="ready" ref="svg" class="knot-engine-v1-mosaic" :viewBox="viewBox" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" :aria-label="label" :style="{ touchAction: canInteract ? 'none' : 'auto' }" @wheel="onWheel" @pointerdown="onPointerDown" @pointermove="onPointerMove" @pointerup="onPointerUp" @pointercancel="onPointerUp" @lostpointercapture="onPointerUp">
       <g>
         <g v-for="path in paths" :key="path.key" :transform="path.transform">
           <path :d="path.d" fill="none" stroke="currentColor" stroke-width="0.095" stroke-linecap="round" stroke-linejoin="round" />
@@ -131,7 +129,7 @@ defineExpose({ resetView, fitToView, capture })
       </slot>
     </div>
     <div v-if="ready && showControls && interactive" class="knot-engine-v1-viewer__toolbar">
-      <slot name="toolbar" :reset="resetView" :fit="fitToView" :zoom-in="zoomIn" :zoom-out="zoomOut" :ready="true" :touch-active="false">
+      <slot name="toolbar" :reset="resetView" :fit="fitToView" :zoom-in="zoomIn" :zoom-out="zoomOut" :ready="true" :touch-active="dragging">
         <button type="button" aria-label="Reset view" @click="resetView">↺</button>
         <button type="button" aria-label="Fit to view" @click="fitToView">⌗</button>
         <button type="button" aria-label="Zoom in" @click="zoomIn">+</button>
@@ -140,3 +138,4 @@ defineExpose({ resetView, fitToView, capture })
     </div>
   </div>
 </template>
+
