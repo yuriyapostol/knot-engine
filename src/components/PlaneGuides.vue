@@ -56,12 +56,12 @@ function rowLabel(y: number) { return String(props.mode === 'mosaic' ? Math.floo
       <defs>
         <pattern :id="id" patternUnits="userSpaceOnUse" overflow="visible" :width="step" :height="step" x="0" y="0">
           <!-- Only top and left edges; adjacent tiles supply the other edges. -->
-          <path :d="`M ${step} 0 H 0 V ${step}`" stroke-opacity="0.2" />
+          <path :d="`M ${step} 0 H 0 V ${step}`" stroke-opacity="0.4" />
         </pattern>
       </defs>
       <rect data-guide-grid="" :x="area[0]" :y="area[1]" :width="area[2]" :height="area[3]" :fill="`url(#${id})`" stroke="none" />
       <!-- The repeated cell supplies top/left edges; close only bottom/right. -->
-      <path v-if="mode !== 'geometry'" data-guide-grid-edges="" :d="`M ${field[0] + field[2]} ${field[1]} V ${field[1] + field[3]} H ${field[0]}`" stroke-opacity="0.2" />
+      <path v-if="mode !== 'geometry'" data-guide-grid-edges="" :d="`M ${field[0] + field[2]} ${field[1]} V ${field[1] + field[3]} H ${field[0]}`" stroke-opacity="0.3" />
     </template>
     <g v-if="guides.axes.visible" data-guide-axes="" stroke-opacity="0.6">
       <path data-guide-axis="x" :d="mode === 'geometry' ? `M ${viewport[0]} 0 h ${viewport[2]}` : `M ${field[0]} ${axisY} h ${field[2]}`" />
