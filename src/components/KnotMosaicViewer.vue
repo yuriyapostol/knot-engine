@@ -15,12 +15,12 @@ const props = withDefaults(defineProps<{
   registries?: RawResourceRegistry[]
   label: string
   description?: string
-  locale?: 'uk' | 'en'
+  locale?: 'en' | 'uk'
   theme?: 'light' | 'dark'
   active?: boolean
   interactive?: boolean
   showControls?: boolean
-}>(), { locale: 'uk', theme: 'light', active: true, interactive: true, showControls: true })
+}>(), { locale: 'en', theme: 'light', active: true, interactive: true, showControls: true })
 const emit = defineEmits<{
   ready: [payload: { knotId?: string; schemaVersion: 1; warnings: string[] }]
   error: [payload: { code: string; message: string; recoverable: boolean }]

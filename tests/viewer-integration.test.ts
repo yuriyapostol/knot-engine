@@ -3,6 +3,9 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { createApp, defineComponent, h, nextTick, ref } from 'vue'
 import KnotViewer from '../src/components/KnotViewer.vue'
 import KnotMosaicViewer from '../src/components/KnotMosaicViewer.vue'
+import Knot2DViewer from '../src/components/Knot2DViewer.vue'
+import Knot3DViewer from '../src/components/Knot3DViewer.vue'
+import KnotGridViewer from '../src/components/KnotGridViewer.vue'
 import open from '../v1/examples/knots/open-rope.json'
 import mosaic from '../v1/examples/knots/mosaic-diagram.json'
 import { LOMONACO_KAUFFMAN_11, type RawKnot } from '../src/core'
@@ -26,6 +29,19 @@ afterEach(() => {
   for (const { app, element } of containers.splice(0)) { app.unmount(); element.remove() }
 })
 describe('viewer integration', () => {
+  it.each([
+    ['KnotViewer', KnotViewer, 'No data', 'Немає даних'],
+    ['KnotMosaicViewer', KnotMosaicViewer, 'No data', 'Немає даних'],
+    ['Knot2DViewer', Knot2DViewer, 'No model selected', 'Модель не задано'],
+    ['Knot3DViewer', Knot3DViewer, 'No model selected', 'Модель не задано'],
+    ['KnotGridViewer', KnotGridViewer, 'No model selected', 'Модель не задано'],
+  ] as const)('%s defaults to English and allows explicit Ukrainian', async (_name, component, english, ukrainian) => {
+    const defaultViewer = mount(component, { label: 'Empty' })
+    const ukrainianViewer = mount(component, { label: 'Empty', locale: 'uk' })
+    await nextTick()
+    expect(defaultViewer.textContent?.trim()).toBe(english)
+    expect(ukrainianViewer.textContent?.trim()).toBe(ukrainian)
+  })
   it('renders a mosaic standalone and exposes its SVG paths without WebGL', async () => {
     const element = mount(KnotMosaicViewer, { knot: diagram(), label: 'Mosaic' })
     await nextTick()

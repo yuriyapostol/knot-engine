@@ -44,6 +44,7 @@ try {
  assert.equal(versions.releases[0].version,version)
  assert.deepEqual(versions.generations.map(g => g.schemaVersion), [1, 2])
  assert.equal(versions.current.path, 'v1/')
+ assert.deepEqual(versions.locales, ['en', 'uk'])
  await assert.rejects(access(path.join(output, 'v1/spec')))
  await assert.rejects(access(path.join(output, 'v1/spec.html')))
  assert.equal(JSON.parse(await readFile(path.join(output, 'v2/schema/marker.json'), 'utf8')).generation, 2)
@@ -100,6 +101,8 @@ try {
  for(const file of await files(output)) {
   if(!file.endsWith('.html')) continue
   const dom=new JSDOM(await readFile(file,'utf8'))
+  const languages = [...dom.window.document.querySelectorAll('.languages [hreflang]')].map(el => el.getAttribute('hreflang'))
+  if (dom.window.document.querySelector('body.shell')) assert.deepEqual(languages, ['en', 'uk'], `English must be first: ${file}`)
   for(const el of dom.window.document.querySelectorAll('[href], [src]')) {
    const href=el.getAttribute('href') || el.getAttribute('src')
    if(!href || /^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(href)) continue

@@ -45,7 +45,7 @@ Standard resource definitions and labels are always available for validation and
 
 `LocalizedTexts` is an array of `{language,value}` records with `getExact(locale?)` and `get(locale?)`. Exact lookup tries the full language tag and its base; `get()` additionally tries the configured fallback and English. The library does not modify `Array.prototype`. Write English first in authored multilingual arrays; array order does not determine lookup or validity.
 
-`configureLocalization({locale, fallbackLocale, overrides})` sets global defaults. `Knot.from(raw, {locale, fallbackLocale, overrides})` sets per-knot options that survive `clone()` and `select()`. Local overrides take precedence over global overrides; settings are evaluated when localized methods run. Changing the global locale does not require preparation again.
+`configureLocalization({locale, fallbackLocale, overrides})` sets global defaults; both `locale` and `fallbackLocale` initially use `en`. `Knot.from(raw, {locale, fallbackLocale, overrides})` sets per-knot options that survive `clone()` and `select()`. Local overrides take precedence over global overrides; settings are evaluated when localized methods run. Changing the global locale does not require preparation again.
 
 Subject, representation, algorithm and step methods use the owning knot's context. Name/description overrides are keyed by entity or resource ID. Steps expose `getDescription()` with the same localized fallback and description overrides as other entities. Steps also expose `getCondition(language?)` with localized fallback and no name/description overrides; `repeat` and algorithm `purpose` are preserved through editing, serialization, cloning, selection and composition. Viewer UI strings are configured separately.
 

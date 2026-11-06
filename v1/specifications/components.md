@@ -14,10 +14,12 @@
 | `initialCamera?: Camera3D` | 3D display-camera override |
 | `preserveCamera?: boolean` | Keep the current 3D camera, zoom and target when switching representations or quality within the same input object; default false |
 | `description?`, `poster?` | Accessible description; poster is a 3D fallback image |
-| `locale?: 'uk' \| 'en'`, `messages?` | UI language (default uk); message overrides apply to 2D, grid and 3D |
+| `locale?: 'en' \| 'uk'`, `messages?` | UI language (default en); message overrides apply to 2D, grid and 3D |
 | `theme?: 'light' \| 'dark'` | Default light |
 | `quality?: 'low' \| 'medium' \| 'high'` | 3D quality, default medium; triangle budget may lower it |
 | `active?`, `interactive?`, `showControls?` | Boolean controls, all default true |
+
+English (`en`) is the default for every viewer, including specialized entry points. Ukrainian requires an explicit `locale="uk"`. Language lists put English first; localized data arrays do not select the UI language.
 
 Specialized viewers accept the relevant props directly and select only their supported type. The compositor forwards props, methods, events and available slots. View selection, camera modes, registry helpers and error meanings are detailed in [viewer contracts](viewer-contracts.md).
 

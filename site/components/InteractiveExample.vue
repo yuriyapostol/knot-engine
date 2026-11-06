@@ -106,7 +106,7 @@ const displayedKnot = computed<RawKnot | null>(() => {
   return { ...source, representations: source.representations?.map(rep => rep.id === base.id ? { ...rep, data: result.data } : rep) }
 })
 const host = document.documentElement
-const locale = ref<'uk' | 'en'>(host.lang === 'uk' ? 'uk' : 'en')
+const locale = ref<'en' | 'uk'>(host.lang === 'uk' ? 'uk' : 'en')
 const theme = ref<'light' | 'dark'>(host.dataset.theme === 'dark' ? 'dark' : 'light')
 let hostObserver: MutationObserver | undefined
 onMounted(() => {

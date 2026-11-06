@@ -18,12 +18,12 @@ const props = withDefaults(defineProps<{
   label: string
   description?: string
   theme?: 'light' | 'dark'
-  locale?: 'uk' | 'en'
+  locale?: 'en' | 'uk'
   messages?: Partial<ViewerMessages>
   active?: boolean
   interactive?: boolean
   showControls?: boolean
-}>(), { theme: 'light', locale: 'uk', active: true, interactive: true, showControls: true })
+}>(), { theme: 'light', locale: 'en', active: true, interactive: true, showControls: true })
 const emit = defineEmits<{
   ready: [payload: { knotId?: string; schemaVersion: 1; warnings: string[] }]
   error: [payload: { code: string; message: string; recoverable: boolean }]

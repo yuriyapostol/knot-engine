@@ -11,9 +11,9 @@ import { messages as builtInMessages, type ViewerMessages } from '../locales'
 export interface ViewerErrorEvent { code: ViewerErrorCode; message: string; issues?: ValidationIssue[]; recoverable: boolean }
 const props = withDefaults(defineProps<{
   knot?: RawKnot | null; representationId?: string; view?: Reference | ViewDefinition; views?: ViewDefinition[]; registries?: RawResourceRegistry[]; label: string; description?: string; poster?: string
-  locale?: 'uk' | 'en'; messages?: Partial<ViewerMessages>; theme?: 'light' | 'dark'
+  locale?: 'en' | 'uk'; messages?: Partial<ViewerMessages>; theme?: 'light' | 'dark'
   quality?: Quality; active?: boolean; interactive?: boolean; showControls?: boolean; initialCamera?: Camera3D; preserveCamera?: boolean
-}>(), { locale: 'uk', theme: 'light', quality: 'medium', active: true, interactive: true, showControls: true })
+}>(), { locale: 'en', theme: 'light', quality: 'medium', active: true, interactive: true, showControls: true })
 const emit = defineEmits<{
   ready: [payload: { knotId?: string; schemaVersion: 1; warnings: string[] }]
   error: [payload: ViewerErrorEvent]

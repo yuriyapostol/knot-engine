@@ -23,13 +23,13 @@ const props = withDefaults(defineProps<{
   label: string
   description?: string
   poster?: string
-  locale?: 'uk' | 'en'
+  locale?: 'en' | 'uk'
   theme?: 'light' | 'dark'
   quality?: 'low' | 'medium' | 'high'
   active?: boolean
   interactive?: boolean
   showControls?: boolean
-}>(), { locale: 'uk', theme: 'light', quality: 'medium', active: true, interactive: true, showControls: true })
+}>(), { locale: 'en', theme: 'light', quality: 'medium', active: true, interactive: true, showControls: true })
 const emit = defineEmits<{
   ready: [payload: { knotId?: string; schemaVersion: 1; warnings: string[] }]
   error: [payload: { code: string; message: string; recoverable: boolean }]
