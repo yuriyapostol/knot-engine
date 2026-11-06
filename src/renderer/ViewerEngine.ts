@@ -1,3 +1,5 @@
+import { resolveGuides, type ViewerGuides } from '../components/guides'
+import { buildSpatialGuides, type SpatialGuides } from './guides'
 import type { RenderableModel } from '../core/resolve'
 import * as THREE from 'three'
 import { verticalDrag } from './touchGesture'
@@ -18,6 +20,8 @@ export class ViewerEngine {
   private controls: OrbitControls
   private touches = new Map<number, { x: number; y: number }>()
   private built?: BuiltModel
+  private guideOptions = resolveGuides()
+  private guides?: SpatialGuides
   private model?: RenderableModel
   private initial?: Camera3D
   private frame = 0
@@ -77,6 +81,7 @@ export class ViewerEngine {
       const { width, height } = this.container.getBoundingClientRect()
       if (width <= 0 || height <= 0) return
       const moving = this.controls.enableDamping && this.controls.update()
+      this.guides?.update(this.camera, height)
       this.renderer.render(this.scene, this.camera)
       if (!this.ready) { this.ready = true; this.onReady?.(this.built.warnings) }
       if (moving) this.requestRender()
@@ -147,9 +152,16 @@ export class ViewerEngine {
     }
     window.scrollBy({ top: delta, behavior: 'instant' })
   }
+  setGuides(options: ViewerGuides) { this.guideOptions = resolveGuides(options); this.rebuildGuides() }
+  private rebuildGuides() {
+    if (this.guides) { this.scene.remove(this.guides.group); this.guides.dispose(); this.guides = undefined }
+    if (this.built) { this.guides = buildSpatialGuides(this.built.bounds, this.guideOptions, this.theme); this.scene.add(this.guides.group) }
+    this.requestRender()
+  }
   setTheme(theme: 'light' | 'dark') {
     if (this.theme === theme) return
     this.theme = theme
+    this.rebuildGuides()
     this.built?.group.traverse(object => {
       if (!(object instanceof THREE.Mesh)) return
       const material = object.material
@@ -169,11 +181,13 @@ export class ViewerEngine {
     if (this.built) { this.scene.remove(this.built.group); this.built.dispose() }
     this.built = built
     this.scene.add(built.group)
+    this.rebuildGuides()
     if (retainedCamera) this.applyView(retainedCamera)
     else this.resetView()
   }
   clear() {
     this.operation++
+    if (this.guides) { this.scene.remove(this.guides.group); this.guides.dispose(); this.guides = undefined }
     this.model = undefined
     this.ready = false
     if (this.built) { this.scene.remove(this.built.group); this.built.dispose(); this.built = undefined }

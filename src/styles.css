@@ -5,7 +5,7 @@
   --_knot-engine-v1-viewer-foreground: #29231d;
   --_knot-engine-v1-viewer-border: #c9bdae;
   --_knot-engine-v1-viewer-focus: #1467b6;
-  --_knot-engine-v1-viewer-toolbar-background: #fffdf7e8;
+  --_knot-engine-v1-viewer-toolbar-background: #fffdf7a6;
   --_knot-engine-v1-viewer-error: #9b2525;
   position: relative;
   display: block;
@@ -24,7 +24,7 @@
   --_knot-engine-v1-viewer-foreground: #f2eee8;
   --_knot-engine-v1-viewer-border: #3f4652;
   --_knot-engine-v1-viewer-focus: #91c6ff;
-  --_knot-engine-v1-viewer-toolbar-background: #242a34e8;
+  --_knot-engine-v1-viewer-toolbar-background: #242a34a6;
   --_knot-engine-v1-viewer-error: #ffb0a7;
 }
 .knot-engine-v1-viewer:focus { outline: none }
@@ -35,6 +35,8 @@
 .knot-engine-v1-viewer__fallback button { pointer-events: auto }
 .knot-engine-v1-viewer__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain }
 .knot-engine-v1-viewer__toolbar {
+  opacity: 0;
+  pointer-events: none;
   position: absolute;
   left: var(--knot-engine-v1-viewer-toolbar-offset, 12px);
   right: var(--knot-engine-v1-viewer-toolbar-offset, 12px);
@@ -49,6 +51,19 @@
   border-radius: var(--knot-engine-v1-viewer-toolbar-radius, 10px);
   background: var(--knot-engine-v1-viewer-toolbar-background, var(--_knot-engine-v1-viewer-toolbar-background));
 }
+.knot-engine-v1-viewer:hover .knot-engine-v1-viewer__toolbar,
+.knot-engine-v1-viewer:focus-within .knot-engine-v1-viewer__toolbar {
+  opacity: 1;
+  pointer-events: auto;
+}
+.knot-engine-v1-viewer__button-icon {
+  display: inline-block;
+  width: 1em;
+  font-size: 22px;
+  line-height: 1;
+  text-align: center;
+  vertical-align: middle;
+}
 .knot-engine-v1-viewer button {
   min-width: var(--knot-engine-v1-viewer-button-min-size, 44px);
   min-height: var(--knot-engine-v1-viewer-button-min-size, 44px);
@@ -62,6 +77,13 @@
 }
 .knot-engine-v1-viewer[data-state=error] .knot-engine-v1-viewer__canvas, .knot-engine-v1-viewer[data-state=empty] .knot-engine-v1-viewer__canvas { visibility: hidden }
 
+/* Keep SVG labels from becoming a text selection during pan or other gestures. */
+.knot-engine-v1-viewer svg,
+.knot-engine-v1-viewer svg text {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 .knot-engine-v1-mosaic { display: block; width: 100%; height: 100%; color: var(--knot-engine-v1-mosaic-stroke, currentColor); }
 
 .knot-engine-v1-geometry2d { display: block; width: 100%; height: 100%; }
@@ -69,3 +91,21 @@
 
 .knot-engine-v1-grid { display: block; width: 100%; height: 100%; }
 .knot-engine-v1-grid:focus-visible { outline: 3px solid var(--knot-engine-v1-viewer-focus, var(--_knot-engine-v1-viewer-focus)); outline-offset: -3px; }
+
+.knot-engine-v1-viewer__guides { position: static; }
+.knot-engine-v1-viewer__guide-options {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 0;
+  width: max-content;
+  max-width: min(240px, 70vw);
+  max-height: 150px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--knot-engine-v1-viewer-border, var(--_knot-engine-v1-viewer-border));
+  border-radius: 8px;
+  background: var(--knot-engine-v1-viewer-background, var(--_knot-engine-v1-viewer-background));
+  box-shadow: 0 4px 16px #0002;
+}
+.knot-engine-v1-viewer__guide-options label { display: flex; align-items: center; gap: 8px; min-height: 32px; cursor: pointer; }
+.knot-engine-v1-viewer__guide-options input { accent-color: var(--knot-engine-v1-viewer-focus, var(--_knot-engine-v1-viewer-focus)); }

@@ -14,7 +14,7 @@
 | `initialCamera?: Camera3D` | 3D display-camera override |
 | `preserveCamera?: boolean` | Keep the current 3D camera, zoom and target when switching representations or quality within the same input object; default false |
 | `description?`, `poster?` | Accessible description; poster is a 3D fallback image |
-| `locale?: 'en' \| 'uk'`, `messages?` | UI language (default en); message overrides apply to 2D, grid and 3D |
+| `locale?: 'en' \| 'uk'`, `messages?` | UI language (default en); message overrides apply to all built-in viewers |
 | `theme?: 'light' \| 'dark'` | Default light |
 | `quality?: 'low' \| 'medium' \| 'high'` | 3D quality, default medium; triangle budget may lower it |
 | `active?`, `interactive?`, `showControls?` | Boolean controls, all default true |
@@ -59,7 +59,7 @@ Public `--knot-engine-v1-viewer-*` CSS variables are the preferred customization
 | `--knot-engine-v1-viewer-foreground` | `#29231d / #f2eee8` | Text color |
 | `--knot-engine-v1-viewer-border` | `#c9bdae / #3f4652` | Border color |
 | `--knot-engine-v1-viewer-focus` | `#1467b6 / #91c6ff` | Keyboard focus color |
-| `--knot-engine-v1-viewer-toolbar-background` | `#fffdf7e8 / #242a34e8` | Toolbar background |
+| `--knot-engine-v1-viewer-toolbar-background` | `#fffdf7a6 / #242a34a6` | Toolbar background |
 | `--knot-engine-v1-viewer-error` | `#9b2525 / #ffb0a7` | Error text color |
 | `--knot-engine-v1-viewer-aspect-ratio` | `4/3` | Viewer aspect ratio |
 | `--knot-engine-v1-viewer-min-height` | `260px` | Minimum viewer height |
@@ -95,3 +95,34 @@ These variables style the HTML interface, not WebGL materials, lighting or PNG b
 
 This is a project decision: package, generation and component names distinguish styles for multiple components and major versions. Inherited variables customize a group or individual instance without changing internal markup. See the [publication policy](../../design/publication.md).
 
+
+## Coordinate guides
+
+All built-in viewers and `KnotViewer` accept the application-owned `guides?: ViewerGuides` prop. It does not change knot data, camera presets or fit bounds. All guides are hidden by default.
+
+```vue
+<KnotViewer
+  v-model:guides="guides"
+  :knot="knot"
+  label="Knot"
+/>
+```
+
+```ts
+import { ref } from 'vue'
+import type { ViewerGuides } from 'knot-engine'
+const guides = ref<ViewerGuides>({
+  grid: { visible: true, step: 'auto', planes: ['xy'] },
+  axes: { visible: true, ticks: true, labels: true },
+})
+```
+
+Each nested field is optional. `grid.step` accepts `'auto'` (default) or a finite positive number in data coordinates; invalid numbers fall back to automatic spacing. `planes` selects 3D planes (`'xy' | 'xz' | 'yz'`), default `['xy']`; an empty list hides all grid planes. Plane selection is ignored by SVG viewers. Grid and mosaic always use cell spacing 1. Automatic geometry spacing uses a 1/2/5 sequence. Dense explicit geometry grids and tick labels are limited to bound rendering work; some intermediate lines or labels may be omitted.
+
+The toolbar is visible only while the viewer is hovered or contains focus, including its buttons and menu. It hides when neither condition holds. Hidden buttons remain in the Tab order and reveal the toolbar when focused. Default button symbols are 22px; buttons remain 44px and the toolbar background is approximately 65% opaque.
+
+The default toolbar has a **Guides** button opening grid, axes/indices, ticks and coordinate labels controls; 3D additionally offers plane selection. Ticks and labels default to enabled but appear only when axes are visible. The menu respects `active`, `interactive`, `showControls`, `locale` (default English) and message overrides. UI changes are local and emit `update:guides` and `guides-change` with a complete `ResolvedViewerGuides` value. Use `v-model:guides` to retain settings across viewer replacement. Changing the prop replaces local settings; it never mutates the caller's object. Reset and fit affect only the camera. Toolbar slots additionally receive `guides` and `setGuides(value: ViewerGuides)`.
+
+SVG grids use one repeating `<pattern>` cell with only its top and left edges, plus a filled rectangle; grid and mosaic add only the missing bottom and right edges to close the field. Patterns have instance-specific IDs. Text selection is disabled in viewer SVGs so labels do not become selected during panning and other gestures. Geometry 2D covers the visible plane and shows X/Y coordinate ticks; there is no separate bounds overlay. Grid and mosaic guides cover `[0,n] × [0,n]`. Their indices are zero-based and aligned with cell centers: grid rows increase upward, mosaic rows downward, matching data indexing. These are indices, not geometric coordinates of cell centers. Index axes run along the left field edge and the bottom edge for grid or top edge for mosaic. Ticks are centered on these axes, with numeric labels immediately inside the field. The axes remain available when the grid is hidden.
+
+3D uses finite `GridHelper` planes through the coordinate origin, `AxesHelper` with additional negative segments, ticks and sprite labels. Separate bounds guides are not provided. Labels show data-coordinate values; no physical-unit conversion is applied. Guide resources are released on replacement and unmount. SVG-only imports do not load Three.js. `ViewerGuides`, `ResolvedViewerGuides` and `GuidePlane` are exported by the root and all specialized viewer entries. Export settings and capture behavior have not been redesigned as part of guides.

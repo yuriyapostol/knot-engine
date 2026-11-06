@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useGuides, type ViewerGuides, type ResolvedViewerGuides } from './guides'
+import GuideControls from './GuideControls.vue'
 import type { RenderableModel } from '../core/resolve'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import type { CameraView, Camera3D, RawKnot, RawResourceRegistry, Reference, ViewDefinition, ViewerErrorCode, ValidationIssue } from '../core'
@@ -10,18 +12,22 @@ import { messages as builtInMessages, type ViewerMessages } from '../locales'
 
 export interface ViewerErrorEvent { code: ViewerErrorCode; message: string; issues?: ValidationIssue[]; recoverable: boolean }
 const props = withDefaults(defineProps<{
+  guides?: ViewerGuides
   knot?: RawKnot | null; representationId?: string; view?: Reference | ViewDefinition; views?: ViewDefinition[]; registries?: RawResourceRegistry[]; label: string; description?: string; poster?: string
   locale?: 'en' | 'uk'; messages?: Partial<ViewerMessages>; theme?: 'light' | 'dark'
   quality?: Quality; active?: boolean; interactive?: boolean; showControls?: boolean; initialCamera?: Camera3D; preserveCamera?: boolean
 }>(), { locale: 'en', theme: 'light', quality: 'medium', active: true, interactive: true, showControls: true })
 const emit = defineEmits<{
+  'update:guides': [value: ResolvedViewerGuides]
+  'guides-change': [value: ResolvedViewerGuides]
   ready: [payload: { knotId?: string; schemaVersion: 1; warnings: string[] }]
   error: [payload: ViewerErrorEvent]
   'camera-change': [view: CameraView]
   'view-change': [view: CameraView]
 }>()
+const { guides, setGuides } = useGuides(() => props.guides, value => { emit('update:guides', value); emit('guides-change', value) })
 const slots = defineSlots<{
-  toolbar(props: { reset: () => void; fit: () => void; zoomIn: () => void; zoomOut: () => void; ready: boolean; touchActive: boolean }): any
+  toolbar(props: { reset: () => void; fit: () => void; zoomIn: () => void; zoomOut: () => void; ready: boolean; touchActive: boolean; guides: ResolvedViewerGuides; setGuides: (value: ViewerGuides) => void }): any
   fallback(props: { state: string; error: ViewerErrorEvent | null; poster?: string }): any
   loading(props: { state: string }): any
 }>()
@@ -55,6 +61,7 @@ function ensureEngine() {
     }
     engine.onError = report
     engine.onCameraChange = view => { emit('camera-change', view); emit('view-change', view) }
+    engine.setGuides(guides.value)
     engine.setActive(props.active)
     engine.setInteractive(props.interactive)
     resize = new ResizeObserver(() => engine?.resize())
@@ -123,6 +130,7 @@ function onKeydown(event: KeyboardEvent) {
 watch(() => [props.knot, props.representationId, props.view, props.views, props.registries], loadModel)
 watch(() => props.quality, loadModel)
 watch(() => props.initialCamera, loadModel)
+watch(guides, value => engine?.setGuides(value), { deep: true })
 watch(() => props.theme, value => engine?.setTheme(value))
 watch(() => props.active, value => engine?.setActive(value))
 watch(() => props.interactive, value => engine?.setInteractive(value))
@@ -142,15 +150,16 @@ defineExpose({ resetView, fitToView, capture: (options?: CaptureOptions) => engi
       <slot v-else name="fallback" :state="state" :error="error" :poster="poster">
         <img v-if="poster" :src="poster" :alt="label" class="knot-engine-v1-viewer__poster">
         <span v-else>{{ state === 'empty' ? text.empty : text.unavailable }}</span>
-        <button v-if="showControls && state === 'error' && error?.recoverable" type="button" @click="retry">{{ text.retry }}</button>
+        <button v-if="showControls && interactive && state === 'error' && error?.recoverable" type="button" @click="retry">{{ text.retry }}</button>
       </slot>
     </div>
-    <div v-if="showControls && state === 'ready'" class="knot-engine-v1-viewer__toolbar">
-      <slot name="toolbar" :reset="resetView" :fit="fitToView" :zoom-in="zoomIn" :zoom-out="zoomOut" :ready="state === 'ready'" :touch-active="touchActive">
-        <button type="button" :title="text.reset" :aria-label="text.reset" @click="resetView">↺</button>
-        <button type="button" :title="text.fit" :aria-label="text.fit" @click="fitToView">⌗</button>
-        <button type="button" :title="text.zoomIn" :aria-label="text.zoomIn" @click="zoomIn">+</button>
-        <button type="button" :title="text.zoomOut" :aria-label="text.zoomOut" @click="zoomOut">−</button>
+    <div v-if="showControls && interactive && state === 'ready'" class="knot-engine-v1-viewer__toolbar">
+      <slot name="toolbar" :reset="resetView" :fit="fitToView" :zoom-in="zoomIn" :zoom-out="zoomOut" :ready="state === 'ready'" :guides="guides" :set-guides="setGuides" :touch-active="touchActive">
+        <button type="button" :title="text.reset" :aria-label="text.reset" @click="resetView"><span class="knot-engine-v1-viewer__button-icon" aria-hidden="true">↺</span></button>
+        <button type="button" :title="text.fit" :aria-label="text.fit" @click="fitToView"><span class="knot-engine-v1-viewer__button-icon" aria-hidden="true">⌗</span></button>
+        <button type="button" :title="text.zoomIn" :aria-label="text.zoomIn" @click="zoomIn"><span class="knot-engine-v1-viewer__button-icon" aria-hidden="true">+</span></button>
+        <button type="button" :title="text.zoomOut" :aria-label="text.zoomOut" @click="zoomOut"><span class="knot-engine-v1-viewer__button-icon" aria-hidden="true">−</span></button>
+        <GuideControls :guides="guides" :locale="locale" :messages="messages" :disabled="!active" :spatial="true" @change="setGuides" />
       </slot>
     </div>
   </div>

@@ -13,3 +13,5 @@ export type { CaptureOptions } from './components/captureOptions'
 export type { ViewerMessages } from './locales'
 export type { Quality } from './geometry/build'
 import './styles.css'
+
+export type { ViewerGuides, ResolvedViewerGuides, GuidePlane } from './components/guides'

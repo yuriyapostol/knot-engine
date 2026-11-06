@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useGuides, type ViewerGuides, type ResolvedViewerGuides } from './guides'
+import GuideControls from './GuideControls.vue'
+import PlaneGuides from './PlaneGuides.vue'
 import { computed, ref, watch } from 'vue'
 import { GRID_DIAGRAM, selectRepresentation, validateGridDiagram, resolveRepresentationView, type RawKnot, type RawResourceRegistry, type Reference, type ViewDefinition } from '../core'
 import { gridGeometry } from './gridGeometry'
@@ -10,6 +13,7 @@ import type { CaptureOptions } from './captureOptions'
 export interface GridView { center: [number, number]; height: number }
 
 const props = withDefaults(defineProps<{
+  guides?: ViewerGuides
   knot?: RawKnot | null
   representationId?: string
   registries?: RawResourceRegistry[]
@@ -25,10 +29,13 @@ const props = withDefaults(defineProps<{
   showControls?: boolean
 }>(), { theme: 'light', locale: 'en', active: true, interactive: true, showControls: true })
 const emit = defineEmits<{
+  'update:guides': [value: ResolvedViewerGuides]
+  'guides-change': [value: ResolvedViewerGuides]
   ready: [payload: { knotId?: string; schemaVersion: 1; warnings: string[] }]
   error: [payload: { code: string; message: string; recoverable: boolean }]
   'view-change': [view: GridView]
 }>()
+const { guides, setGuides } = useGuides(() => props.guides, value => { emit('update:guides', value); emit('guides-change', value) })
 const text = computed(() => ({ ...defaults[props.locale], ...props.messages }))
 const svg = ref<SVGSVGElement | null>(null)
 const camera = ref<GridView>({ center: [0, 0], height: 1 })
@@ -129,6 +136,7 @@ defineExpose({ resetView, fitToView, capture })
 <template>
   <div class="knot-engine-v1-viewer" :data-theme="theme" :data-state="ready ? 'ready' : error ? 'error' : 'empty'" :aria-label="label" :aria-description="description" role="group">
     <svg v-if="ready && result.data" ref="svg" class="knot-engine-v1-grid" :viewBox="viewBox" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" :aria-label="label" :tabindex="canInteract ? 0 : undefined" :style="{ touchAction: canInteract ? 'none' : 'auto' }" @wheel="onWheel" @pointerdown="onPointerDown" @pointermove="onPointerMove" @pointerup="onPointerUp" @pointercancel="onPointerUp" @lostpointercapture="onPointerUp" @keydown="onKeyDown">
+      <PlaneGuides v-if="guides.grid.visible || guides.axes.visible" :guides="guides" :box="viewBox" :size="result.data.fit.height" mode="grid" />
       <g transform="scale(1 -1)" fill="none" stroke="currentColor" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round">
         <g data-grid-strands="horizontal">
           <line v-for="(segment, i) in result.data.horizontal" :key="i" :x1="segment.start[0]" :y1="segment.start[1]" :x2="segment.end[0]" :y2="segment.end[1]" />
@@ -146,11 +154,12 @@ defineExpose({ resetView, fitToView, capture })
       <slot name="fallback" :state="error ? 'error' : 'empty'" :error="error ? { message: error } : null">{{ error ?? text.empty }}</slot>
     </div>
     <div v-if="ready && showControls && interactive" class="knot-engine-v1-viewer__toolbar">
-      <slot name="toolbar" :reset="resetView" :fit="fitToView" :zoom-in="zoomIn" :zoom-out="zoomOut" :ready="true" :touch-active="!!dragging">
-        <button type="button" :aria-label="text.reset" :disabled="!active" @click="resetView">↺</button>
-        <button type="button" :aria-label="text.fit" :disabled="!active" @click="fitToView">⌗</button>
-        <button type="button" :aria-label="text.zoomIn" :disabled="!active" @click="zoomIn">+</button>
-        <button type="button" :aria-label="text.zoomOut" :disabled="!active" @click="zoomOut">−</button>
+      <slot name="toolbar" :reset="resetView" :fit="fitToView" :zoom-in="zoomIn" :zoom-out="zoomOut" :ready="true" :guides="guides" :set-guides="setGuides" :touch-active="!!dragging">
+        <button type="button" :aria-label="text.reset" :disabled="!active" @click="resetView"><span class="knot-engine-v1-viewer__button-icon" aria-hidden="true">↺</span></button>
+        <button type="button" :aria-label="text.fit" :disabled="!active" @click="fitToView"><span class="knot-engine-v1-viewer__button-icon" aria-hidden="true">⌗</span></button>
+        <button type="button" :aria-label="text.zoomIn" :disabled="!active" @click="zoomIn"><span class="knot-engine-v1-viewer__button-icon" aria-hidden="true">+</span></button>
+        <button type="button" :aria-label="text.zoomOut" :disabled="!active" @click="zoomOut"><span class="knot-engine-v1-viewer__button-icon" aria-hidden="true">−</span></button>
+        <GuideControls :guides="guides" :locale="locale" :messages="messages" :disabled="!active" @change="setGuides" />
       </slot>
     </div>
   </div>

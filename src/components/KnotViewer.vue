@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ViewerGuides, ResolvedViewerGuides } from './guides'
 import { computed, ref, watch } from 'vue'
 import Knot3DViewer from './Knot3DViewer.vue'
 import KnotGridViewer from './KnotGridViewer.vue'
@@ -11,6 +12,7 @@ import { createViewerRegistry, selectViewerRepresentation } from './viewerRegist
 import type { CaptureOptions } from './captureOptions'
 
 const props = withDefaults(defineProps<{
+  guides?: ViewerGuides
   knot?: RawKnot | null
   representationId?: string
   view?: Reference | ViewDefinition
@@ -31,16 +33,18 @@ const props = withDefaults(defineProps<{
   showControls?: boolean
 }>(), { locale: 'en', theme: 'light', quality: 'medium', active: true, interactive: true, showControls: true })
 const emit = defineEmits<{
+  'update:guides': [value: ResolvedViewerGuides]
+  'guides-change': [value: ResolvedViewerGuides]
   ready: [payload: { knotId?: string; schemaVersion: 1; warnings: string[] }]
   error: [payload: { code: string; message: string; recoverable: boolean }]
   'camera-change': [view: unknown]
   'view-change': [view: unknown]
 }>()
 const builtIns = createViewerRegistry([
-  { typeUri: GRID_DIAGRAM, component: KnotGridViewer, capabilities: { pan: true, zoom: true, capture: ['svg'] } },
-  { typeUri: GEOMETRY_3D, component: Knot3DViewer, capabilities: { orbit: true, pan: true, zoom: true, capture: ['png'] } },
-  { typeUri: GEOMETRY_2D, component: Knot2DViewer, capabilities: { pan: true, zoom: true, capture: ['svg'] } },
-  { typeUri: MOSAIC_DIAGRAM, component: KnotMosaicViewer, capabilities: { pan: true, zoom: true, capture: ['svg'] } },
+  { typeUri: GRID_DIAGRAM, component: KnotGridViewer, capabilities: { pan: true, zoom: true, capture: ['svg'], guides: ['grid', 'axes'] } },
+  { typeUri: GEOMETRY_3D, component: Knot3DViewer, capabilities: { orbit: true, pan: true, zoom: true, capture: ['png'], guides: ['grid', 'axes'] } },
+  { typeUri: GEOMETRY_2D, component: Knot2DViewer, capabilities: { pan: true, zoom: true, capture: ['svg'], guides: ['grid', 'axes'] } },
+  { typeUri: MOSAIC_DIAGRAM, component: KnotMosaicViewer, capabilities: { pan: true, zoom: true, capture: ['svg'], guides: ['grid', 'axes'] } },
 ])
 const viewer = ref<{ resetView: () => void; fitToView: () => void; capture: (options?: CaptureOptions) => Promise<Blob> } | null>(null)
 const selection = computed(() => props.knot ? selectViewerRepresentation(props.knot, props.registry ?? builtIns, props.representationId) : null)
@@ -72,6 +76,7 @@ defineExpose({ resetView, fitToView, capture })
     :is="selected.component"
     v-if="knot && selection?.ok && selected"
     ref="viewer"
+    :guides="guides"
     :knot="knot"
     :representation-id="selection.representation.id"
     :view="view"
@@ -89,6 +94,8 @@ defineExpose({ resetView, fitToView, capture })
     :active="active"
     :interactive="interactive"
     :show-controls="showControls"
+    @update:guides="emit('update:guides', $event)"
+    @guides-change="emit('guides-change', $event)"
     @ready="emit('ready', $event)"
     @error="emit('error', $event)"
     @camera-change="emit('camera-change', $event)"

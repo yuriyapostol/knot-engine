@@ -3,6 +3,7 @@ import type { RawKnot, SelectionResult } from '../core'
 import { resolveResourceURI, selectRepresentation } from '../core'
 
 export interface ViewerCapabilities {
+  guides?: readonly ('grid' | 'axes')[]
   orbit?: boolean
   pan?: boolean
   zoom?: boolean

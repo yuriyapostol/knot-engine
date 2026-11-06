@@ -25,7 +25,7 @@ Built-ins map `2d` to `Knot2DViewer`, `3d` to `Knot3DViewer`, `grid-diagram` to 
 
 Specialized viewers call core selection with their fixed type and also require an ID when multiple matches exist. All viewers accept `RawKnot` or prepared `Knot` with the selected representation's required context. A type resource alone does not register a renderer. Registries neither load code nor fetch data.
 
-Capabilities declare `orbit`, `pan`, `zoom`, `edit`, capture formats `png`/`svg`, and `sequences`. Built-in 3D supports orbit/pan/zoom and PNG; 2D, grid and mosaic support pan/zoom and SVG. Sequence schemas and navigation are not implemented.
+Capabilities declare `orbit`, `pan`, `zoom`, `edit`, capture formats `png`/`svg`, `sequences`, and supported `guides` (`grid`, `axes`). All four built-ins support these guides. Built-in 3D supports orbit/pan/zoom and PNG; 2D, grid and mosaic support pan/zoom and SVG. Sequence schemas and navigation are not implemented.
 
 ## Application-owned views
 
@@ -39,7 +39,7 @@ Camera presets are not part of `RawKnot`. View changes, interaction and capture 
 
 ## Events, methods and capture
 
-Shared methods are `resetView()`, `fitToView()` and `capture(options?): Promise<Blob>`. Shared events are `ready`, `error` and `view-change`; 3D additionally emits `camera-change` with the same camera payload. 2D, grid and mosaic `view-change` carries `{center:[x,y],height}`. The compositor forwards events and emits structured dispatch errors itself.
+Shared methods are `resetView()`, `fitToView()` and `capture(options?): Promise<Blob>`. Shared events are `ready`, `error`, `view-change`, `update:guides` and `guides-change` (see [coordinate guides](components.md#coordinate-guides)); 3D additionally emits `camera-change` with the same camera payload. 2D, grid and mosaic `view-change` carries `{center:[x,y],height}`. The compositor forwards events and emits structured dispatch errors itself.
 
 `CaptureOptions` contains `width`, `height`, `format`, `view` and `transparent`. Dimensions are integers in 1..2048. 3D produces PNG, default 512×512; 2D, grid and mosaic produce SVG, default 1024×1024. Omitted format uses the viewer's format; explicitly unsupported formats reject. `current` captures local viewer state; `model-preview` uses the resolved spatial view/default camera or the full grid/mosaic extent. For 2D, preview uses the resolved plane view or default geometry framing. The 3D `initialCamera` override is not used for preview capture. Capturing leaves the live view unchanged. PNG supports transparent backgrounds; mosaic SVG has no background fill. 2D and grid SVG embed their stroke color and use transparent crossing gaps; their background is transparent by default, while `transparent:false` embeds the viewer background color.
 

@@ -5,7 +5,7 @@ import KnotViewer from '../src/components/KnotViewer.vue'
 import loop from '../v1/examples/knots/twisted-loop.json'
 import { applyStepData, GEOMETRY_3D, type Camera3D, type RawKnot, type ViewDefinition, type Geometry3DData } from '../src/core'
 
-const calls = vi.hoisted(() => ({ setModel: vi.fn(), view: vi.fn() }))
+const calls = vi.hoisted(() => ({ setModel: vi.fn(), view: vi.fn(), setGuides: vi.fn() }))
 vi.mock('../src/renderer/ViewerEngine', () => ({
   ViewerEngine: class {
     onReady?: (warnings: string[]) => void
@@ -17,6 +17,7 @@ vi.mock('../src/renderer/ViewerEngine', () => ({
     setActive() {}
     setInteractive() {}
     setTheme() {}
+    setGuides = calls.setGuides
     setVisible() {}
   },
 }))
@@ -27,6 +28,7 @@ async function mount(preserveCamera = false) {
   const props = shallowReactive({
     knot: structuredClone(loop) as RawKnot | null,
     label: 'Loop', representationId: 'view-3d-finish', preserveCamera,
+    guides: undefined as import('../src/components/guides').ViewerGuides | undefined,
     initialCamera: undefined as Camera3D | undefined,
     view: undefined as ViewDefinition | undefined,
     quality: 'medium' as 'medium' | 'high',
@@ -41,6 +43,7 @@ async function mount(preserveCamera = false) {
 }
 beforeEach(() => {
   calls.setModel.mockClear()
+  calls.setGuides.mockClear()
   calls.view.mockReset().mockReturnValue(camera)
   class Observer { observe() {} disconnect() {} }
   vi.stubGlobal('ResizeObserver', Observer)
@@ -99,4 +102,16 @@ it('does not reuse a stale camera after empty or invalid input', async () => {
   await flush()
   // Dispatch failures unmount the 3D viewer, so recovery must start fresh.
   expect(calls.setModel.mock.lastCall?.[3]).toBeUndefined()
+})
+
+
+it('updates 3D guides through the compositor without rebuilding geometry or resetting its camera', async () => {
+  const props = await mount(true)
+  const count = calls.setModel.mock.calls.length
+  props.guides = { grid: { visible: true, planes: ['xy'] }, axes: { visible: true } }
+  await flush()
+  expect(calls.setGuides.mock.lastCall?.[0].grid.planes).toEqual(['xy'])
+  expect(calls.setGuides.mock.lastCall?.[0].axes.visible).toBe(true)
+  expect(calls.setModel).toHaveBeenCalledTimes(count)
+  expect(calls.view).not.toHaveBeenCalled()
 })
