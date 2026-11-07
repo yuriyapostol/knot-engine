@@ -6,7 +6,7 @@ import { verticalDrag } from './touchGesture'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import type { CameraView, Camera3D } from '../core'
 import { ViewerError, validateView } from '../core'
-import { prepareCamera, cameraView, resizeCamera, DEFAULT_CAMERA, type RenderCamera } from './camera'
+import { prepareCamera, cameraView, fitView, resizeCamera, DEFAULT_CAMERA, type RenderCamera } from './camera'
 import { buildGeometry, type BuiltModel, type Quality } from '../geometry/build'
 
 import type { CaptureOptions } from '../components/captureOptions'
@@ -216,7 +216,7 @@ export class ViewerEngine {
     this.controls.update()
     this.requestRender()
   }
-  fitToView() { this.applyView(DEFAULT_CAMERA) }
+  fitToView() { this.applyView(fitView(this.camera, this.controls.target)) }
   setInitialCamera(initial?: Camera3D) { this.initial=initial; this.resetView() }
   resetView() { this.applyView(this.initial ?? this.model?.camera ?? DEFAULT_CAMERA) }
   orbit(dx: number, dy: number) {

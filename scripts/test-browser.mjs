@@ -117,6 +117,43 @@ try {
   assert.match(await setInput({ knot: invalid }), /^INVALID_REPRESENTATION:/)
   assert.equal(await page.evaluate(() => window.__webglContexts), 0, 'Malformed knot must fail before WebGL allocation')
 
+  const fitChecks = await page.evaluate(async ({ engineURL, resolveURL, knot }) => {
+    const { ViewerEngine } = await import(engineURL)
+    const { resolveKnot } = await import(resolveURL)
+    const host = document.createElement('div')
+    host.style.cssText = 'width:360px;height:280px;position:relative'
+    document.body.append(host)
+    const engine = new ViewerEngine(host)
+    const checks = []
+    try {
+      for (const projection of [{ kind: 'perspective', fovY: 1 }, { kind: 'orthographic', height: 4 }]) {
+        const initial = { mode: 'fixed', position: [4, -3, 2], target: [0, 0, 0], up: [0, 0, 1], projection }
+        engine.setModel(resolveKnot(knot), 'medium', initial)
+        engine.orbit(0.5, -0.2); engine.zoom(0.5)
+        const before = engine.view()
+        engine.fitToView()
+        const after = engine.view()
+        engine.resetView()
+        checks.push({ initial, before, after, reset: engine.view() })
+      }
+    } finally { engine.dispose(); host.remove() }
+    return checks
+  }, { engineURL: `/@fs/${resolve('src/renderer/ViewerEngine.ts')}`, resolveURL: `/@fs/${resolve('src/core/resolve.ts')}`, knot: fixture('v1/examples/knots/open-rope.json') })
+  const direction = view => {
+    const vector = view.position.map((value, i) => value - view.target[i])
+    const length = Math.hypot(...vector)
+    return vector.map(value => value / length)
+  }
+  for (const { initial, before, after, reset } of fitChecks) {
+    assert.equal(after.projection.kind, before.projection.kind)
+    if (after.projection.kind === 'perspective') assert.equal(after.projection.fovY, before.projection.fovY)
+    assert.deepEqual(after.up, before.up)
+    const a = direction(before), b = direction(after)
+    assert.ok(a.every((value, i) => Math.abs(value - b[i]) < 1e-8), 'Fit must preserve viewing direction')
+    assert.ok(reset.position.every((value, i) => Math.abs(value - initial.position[i]) < 1e-8), 'Reset must restore the initial camera')
+  }
+  console.log('3D fit: preserves current orientation, up, projection and FOV; reset restores the initial camera')
+
   for (const model of ['overhand', 'twisted-loop']) {
     const modelKnot = fixture(`v1/examples/knots/${model}.json`)
     const representationId = modelKnot.representations.find(rep => rep.type === '3d').id
@@ -437,6 +474,12 @@ try {
   await page.mouse.up()
   assert.equal(await page.evaluate(() => window.getSelection()?.toString()), '')
   await page.getByRole('button', { name: 'Умістити модель', exact: true }).click()
+  await page.getByRole('button', { name: 'Зменшити', exact: true }).click()
+  assert.equal(await page.locator('[data-guide-index="row"]').first().getAttribute('text-anchor'), 'end')
+  assert.equal(await page.locator('[data-guide-index="column"]').first().getAttribute('dominant-baseline'), 'hanging')
+  await page.getByRole('button', { name: 'Умістити модель', exact: true }).click()
+  assert.equal(await page.locator('[data-guide-index="row"]').first().getAttribute('text-anchor'), 'start')
+  assert.equal(await page.locator('[data-guide-index="column"]').first().getAttribute('dominant-baseline'), null)
   const guidePattern = page.locator('svg pattern')
   assert.equal(await guidePattern.count(), 1)
   assert.equal(await page.locator('[data-guide-grid-edges]').count(), 1)

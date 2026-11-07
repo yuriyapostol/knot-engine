@@ -48,6 +48,15 @@ const ys = computed(() => props.mode === 'geometry'
 // Index axes follow the left edge and the first row's edge of each field.
 const axisX = computed(() => props.mode === 'geometry' ? 0 : field.value[0])
 const axisY = computed(() => props.mode === 'geometry' ? 0 : props.mode === 'mosaic' ? field.value[1] : field.value[1] + field.value[3])
+// Evaluate each axis separately, including the letterboxed part of the SVG viewport.
+// Reserve a conservative glyph width plus the label offset and a small edge gap.
+const rowsOutside = computed(() => props.mode !== 'geometry' && axisX.value - viewport.value[0]! >= (String((props.size ?? 1) - 1).length * 8 + 8) * unit.value)
+const columnsOutside = computed(() => {
+  if (props.mode === 'geometry') return false
+  const space = props.mode === 'mosaic' ? axisY.value - viewport.value[1]! : viewport.value[1]! + height.value - axisY.value
+  return space >= 22 * unit.value
+})
+const columnsBelow = computed(() => props.mode === 'mosaic' ? !columnsOutside.value : columnsOutside.value)
 function rowLabel(y: number) { return String(props.mode === 'mosaic' ? Math.floor(y - field.value[1]) : Math.floor(field.value[1] + field.value[3] - y)) }
 </script>
 <template>
@@ -75,8 +84,8 @@ function rowLabel(y: number) { return String(props.mode === 'mosaic' ? Math.floo
           <text :x="viewport[0]! + viewport[2]! - 6 * unit" :y="-8 * unit" text-anchor="end">X</text>
           <text :x="8 * unit" :y="viewport[1]! + 14 * unit">Y</text>
         </template>
-        <text v-for="x in xs" :key="`x${x}`" :x="x" :y="axisY + (mode === 'mosaic' ? 6 : -6) * unit" :dominant-baseline="mode === 'mosaic' ? 'hanging' : undefined" text-anchor="middle" data-guide-index="column">{{ mode === 'geometry' ? guideLabel(x) : Math.floor(x) }}</text>
-        <text v-for="y in ys" :key="`y${y}`" :x="axisX + 6 * unit" :y="mode === 'geometry' ? -y : y" dominant-baseline="middle" data-guide-index="row">{{ mode === 'geometry' ? guideLabel(y) : rowLabel(y) }}</text>
+        <text v-for="x in xs" :key="`x${x}`" :x="x" :y="axisY + (columnsBelow ? 6 : -6) * unit" :dominant-baseline="columnsBelow ? 'hanging' : undefined" text-anchor="middle" data-guide-index="column">{{ mode === 'geometry' ? guideLabel(x) : Math.floor(x) }}</text>
+        <text v-for="y in ys" :key="`y${y}`" :x="axisX + (rowsOutside ? -6 : 6) * unit" :text-anchor="rowsOutside ? 'end' : 'start'" :y="mode === 'geometry' ? -y : y" dominant-baseline="middle" data-guide-index="row">{{ mode === 'geometry' ? guideLabel(y) : rowLabel(y) }}</text>
       </g>
     </g>
   </g>

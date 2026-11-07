@@ -83,6 +83,35 @@ it('places both kinds of indices at cell centers and preserves opposite row orde
     expect(rows.at(-1)!.textContent).toBe(knot === grid ? '0' : String(size - 1))
   }
 })
+it.each([grid, mosaic])('moves indices outside only when the visible margin fits them, independently per axis ($id)', async knot => {
+  const size = knot === grid ? 5 : 4
+  const { element, props } = await mount(knot, { guides: enabled })
+  const row = () => element.querySelector('[data-guide-index="row"]')!
+  const column = () => element.querySelector('[data-guide-index="column"]')!
+  function view(height: number, center: [number, number] = [size / 2, size / 2]) {
+    props.view = { id: 'indices', name: 'Indices', space: 'plane', camera: { mode: 'plane', center, height } }
+  }
+  const insideBaseline = knot === mosaic ? 'hanging' : null
+  expect(row().getAttribute('text-anchor')).toBe('start')
+  expect(column().getAttribute('dominant-baseline')).toBe(insideBaseline)
+  // A tiny margin must not put partially clipped labels outside.
+  view(size * 1.01); await nextTick()
+  expect(row().getAttribute('text-anchor')).toBe('start')
+  expect(column().getAttribute('dominant-baseline')).toBe(insideBaseline)
+  view(size * 1.2); await nextTick()
+  expect(row().getAttribute('text-anchor')).toBe('end')
+  expect(Number(row().getAttribute('x'))).toBeLessThan(0)
+  expect(column().getAttribute('dominant-baseline')).toBe(knot === mosaic ? null : 'hanging')
+  expect(Number(column().getAttribute('y')) * (knot === mosaic ? -1 : 1)).toBeGreaterThan(0)
+  // Pan to reveal space to the left without adding any vertical margin.
+  view(size, [size / 2 - 0.25, size / 2]); await nextTick()
+  expect(row().getAttribute('text-anchor')).toBe('end')
+  expect(column().getAttribute('dominant-baseline')).toBe(insideBaseline)
+  // Return to fit: both groups must move back inside.
+  view(size); await nextTick()
+  expect(row().getAttribute('text-anchor')).toBe('start')
+  expect(column().getAttribute('dominant-baseline')).toBe(insideBaseline)
+})
 it('hydrates visible patterns without mismatches and keeps the paint reference linked', async () => {
   const props = { knot: grid as RawKnot, label: 'SSR grid', guides: enabled }
   const element = document.createElement('div'); element.innerHTML = await renderToString(createSSRApp(KnotViewer, props)); document.body.append(element)

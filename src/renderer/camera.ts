@@ -29,6 +29,17 @@ export function prepareCamera(view: Camera3D, bounds: THREE.Box3, aspect: number
 export function cameraView(camera: RenderCamera, target: THREE.Vector3): CameraView {
   return {mode:'fixed',position:camera.position.toArray(),target:target.toArray(),up:camera.up.toArray(),projection:camera instanceof THREE.PerspectiveCamera ? {kind:'perspective',fovY:THREE.MathUtils.degToRad(camera.fov)} : {kind:'orthographic',height:(camera.top-camera.bottom)/camera.zoom}}
 }
+/** Reframe from the current viewing direction without changing projection or roll. */
+export function fitView(camera: RenderCamera, target: THREE.Vector3): Extract<Camera3D, { mode: 'fit' }> {
+  return {
+    mode: 'fit',
+    direction: camera.position.clone().sub(target).toArray(),
+    up: camera.up.toArray(),
+    projection: camera instanceof THREE.PerspectiveCamera
+      ? { kind: 'perspective', fovY: THREE.MathUtils.degToRad(camera.fov) }
+      : { kind: 'orthographic' },
+  }
+}
 export function resizeCamera(camera: RenderCamera, aspect: number) {
   if(camera instanceof THREE.PerspectiveCamera) camera.aspect=aspect
   else { const height=camera.top-camera.bottom; camera.left=-height*aspect/2;camera.right=height*aspect/2 }
