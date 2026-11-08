@@ -154,6 +154,61 @@ try {
   }
   console.log('3D fit: preserves current orientation, up, projection and FOV; reset restores the initial camera')
 
+  const pngColors = await page.evaluate(async ({ engineURL, resolveURL, knot }) => {
+    const { ViewerEngine } = await import(engineURL)
+    const { resolveKnot } = await import(resolveURL)
+    const results = []
+    const originalDPR = Object.getOwnPropertyDescriptor(window, 'devicePixelRatio')
+    try {
+      for (const dpr of [1, 2]) for (const theme of ['light', 'dark']) {
+        Object.defineProperty(window, 'devicePixelRatio', { configurable: true, value: dpr })
+        const host = document.createElement('div')
+        host.style.cssText = 'width:360px;height:280px;position:relative'
+        document.body.append(host)
+        const engine = new ViewerEngine(host)
+        const snapshot = () => {
+          const copy = document.createElement('canvas'); copy.width = engine.canvas.width; copy.height = engine.canvas.height
+          const ctx = copy.getContext('2d'); ctx.drawImage(engine.canvas, 0, 0)
+          return ctx.getImageData(0, 0, copy.width, copy.height).data
+        }
+        try {
+          engine.resize(); engine.setTheme(theme)
+          engine.setGuides({ grid: { visible: true }, axes: { visible: true } })
+          const live = await new Promise(resolve => { engine.onReady = () => resolve(snapshot()); engine.setModel(resolveKnot(knot), 'medium') })
+          const width = engine.canvas.width, height = engine.canvas.height, before = engine.view()
+          const png = await engine.capture({ width, height, transparent: true, view: 'current' })
+          const bitmap = await createImageBitmap(png)
+          const copy = document.createElement('canvas'); copy.width = width; copy.height = height
+          const ctx = copy.getContext('2d'); ctx.drawImage(bitmap, 0, 0); bitmap.close()
+          const pixels = ctx.getImageData(0, 0, width, height).data
+          let samples = 0, maxDifference = 0
+          for (let i = 0; i < live.length; i += 4) if (live[i + 3] === 255 && pixels[i + 3] === 255) {
+            samples++
+            for (let c = 0; c < 3; c++) maxDifference = Math.max(maxDifference, Math.abs(live[i + c] - pixels[i + c]))
+          }
+          const restoredSize = engine.canvas.width === width && engine.canvas.height === height
+          const restoredCamera = JSON.stringify(engine.view()) === JSON.stringify(before)
+          const solid = await engine.capture({ width: 180, height: 140, view: 'current' })
+          const solidBitmap = await createImageBitmap(solid)
+          const solidCopy = document.createElement('canvas'); solidCopy.width = 180; solidCopy.height = 140
+          const solidContext = solidCopy.getContext('2d'); solidContext.drawImage(solidBitmap, 0, 0); solidBitmap.close()
+          results.push({ theme, dpr, samples, maxDifference, restoredSize, restoredCamera, background: [...solidContext.getImageData(0, 0, 1, 1).data] })
+        } finally { engine.dispose(); host.remove() }
+      }
+    } finally {
+      if (originalDPR) Object.defineProperty(window, 'devicePixelRatio', originalDPR)
+      else delete window.devicePixelRatio
+    }
+    return results
+  }, { engineURL: `/@fs/${resolve('src/renderer/ViewerEngine.ts')}`, resolveURL: `/@fs/${resolve('src/core/resolve.ts')}`, knot: fixture('v1/examples/knots/open-rope.json') })
+  for (const result of pngColors) {
+    assert.ok(result.samples > 100, 'Compare opaque model pixels with the live canvas')
+    assert.ok(result.maxDifference <= 1, `PNG colors must match the live canvas: ${JSON.stringify(result)}`)
+    assert.ok(result.restoredSize && result.restoredCamera, 'Capture must restore the live canvas size, pixel ratio and camera')
+    assert.deepEqual(result.background, result.theme === 'light' ? [248, 245, 239, 255] : [23, 27, 36, 255])
+  }
+  console.log('PNG colors: live/capture pixels match for both themes and pixel ratios 1/2; backgrounds, camera and canvas size passed')
+
   for (const model of ['overhand', 'twisted-loop']) {
     const modelKnot = fixture(`v1/examples/knots/${model}.json`)
     const representationId = modelKnot.representations.find(rep => rep.type === '3d').id

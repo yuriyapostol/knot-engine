@@ -250,8 +250,12 @@ export class ViewerEngine {
       }
       resizeCamera(camera,width/height)
     }
-    const target = new THREE.WebGLRenderTarget(width, height, { format: THREE.RGBAFormat })
-    const pixels = new Uint8Array(width * height * 4)
+    const canvas = document.createElement('canvas')
+    canvas.width = width; canvas.height = height
+    const context = canvas.getContext('2d')
+    if (!context) throw new ViewerError('CAPTURE_FAILED', 'Canvas 2D is unavailable')
+    const previousSize = this.renderer.getSize(new THREE.Vector2())
+    const previousPixelRatio = this.renderer.getPixelRatio()
     const previousTarget = this.renderer.getRenderTarget()
     const previousBackground = this.scene.background
     const previewColors = new Map<THREE.Material, THREE.Color>()
@@ -265,18 +269,22 @@ export class ViewerEngine {
     })
     try {
       this.scene.background = options.transparent ? null : new THREE.Color(options.view === 'model-preview' || this.theme === 'light' ? 0xf8f5ef : 0x171b24)
-      this.renderer.setRenderTarget(target)
+      // Render through the same output pipeline as the visible canvas. Ordinary
+      // render targets omit per-material tone mapping and sRGB output conversion.
+      this.renderer.setRenderTarget(null)
+      this.renderer.setPixelRatio(1)
+      this.renderer.setSize(width, height, false)
       this.renderer.render(this.scene, camera)
-      this.renderer.readRenderTargetPixels(target, 0, 0, width, height, pixels)
+      context.drawImage(this.canvas, 0, 0)
     } catch { throw new ViewerError('CAPTURE_FAILED', 'Unable to capture image') }
-    finally { this.renderer.setRenderTarget(previousTarget); this.scene.background = previousBackground; for (const [material, color] of previewColors) if (material instanceof THREE.MeshStandardMaterial || material instanceof THREE.MeshBasicMaterial) material.color.copy(color); target.dispose() }
-    const canvas = document.createElement('canvas')
-    canvas.width = width; canvas.height = height
-    const context = canvas.getContext('2d')
-    if (!context) throw new ViewerError('CAPTURE_FAILED', 'Canvas 2D is unavailable')
-    const image = context.createImageData(width, height)
-    for (let y = 0; y < height; y++) image.data.set(pixels.subarray((height - y - 1) * width * 4, (height - y) * width * 4), y * width * 4)
-    context.putImageData(image, 0, 0)
+    finally {
+      this.scene.background = previousBackground
+      for (const [material, color] of previewColors) if (material instanceof THREE.MeshStandardMaterial || material instanceof THREE.MeshBasicMaterial) material.color.copy(color)
+      this.renderer.setSize(previousSize.x, previousSize.y, false)
+      this.renderer.setPixelRatio(previousPixelRatio)
+      this.renderer.setRenderTarget(previousTarget)
+      this.renderer.render(this.scene, this.camera)
+    }
     const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'))
     if (!this.alive || operation !== this.operation || !blob) throw new ViewerError('CAPTURE_FAILED', 'Capture was cancelled')
     return blob
