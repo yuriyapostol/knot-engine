@@ -1,4 +1,4 @@
-import { curveControlPoints2D } from './curves2d'
+import { curveControlPoints } from './curveControlPoints'
 import { Knot } from './model'
 import { validateGeometry2D, validateGeometry3D, applyStepData } from './validateGeometry'
 import { contributionIssues, licenseIssues, sourceIssues } from './metadata'
@@ -177,7 +177,7 @@ export function validateKnot(value: unknown, options: ValidationOptions = {}): K
     if ((rep.type === GEOMETRY_2D && validateGeometry2D(rep.data).valid) || (rep.type === GEOMETRY_3D && validateGeometry3D(rep.data).valid)) {
       const data = rep.data as Geometry2DData | Geometry3DData
       for (const element of data.elements) {
-        totalPoints += element.type === 'curve' ? ('segments' in element ? curveControlPoints2D(element).length : element.points.length) : element.vertices.length
+        totalPoints += element.type === 'curve' ? ('segments' in element ? curveControlPoints(element).length : element.points.length) : element.vertices.length
         if (element.object && (!rep.target || rep.target.kind === 'subject')) issues.push(issue(`${path}.data.elements.${element.id}.object`, 'Object reference requires construction context'))
         else if (element.object && construction && !construction.objects.some(o => o.id === element.object)) issues.push(issue(`${path}.data.elements.${element.id}.object`, 'Unknown construction object'))
       }

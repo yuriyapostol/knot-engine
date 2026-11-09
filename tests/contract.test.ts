@@ -7,7 +7,9 @@ import { buildGeometry } from '../src/geometry/build'
 import open from '../v1/examples/knots/open-rope.json'
 it('builds finite geometry for all supported interpolation modes',()=>{
   for(const interpolation of [{type:'polyline' as const},{type:'catmull-rom' as const,parameterization:'uniform' as const,tension:0.5},{type:'catmull-rom' as const,parameterization:'centripetal' as const},{type:'catmull-rom' as const,parameterization:'chordal' as const}]) {
-    const model=resolveKnot(open);model.curves[0].interpolation=interpolation
+    const model=resolveKnot(open)
+    if (!('interpolation' in model.curves[0])) throw new Error('Expected an interpolated curve')
+    model.curves[0].interpolation=interpolation
     const built=buildGeometry(model,'medium','light')
     expect(built.bounds.isEmpty()).toBe(false)
     for(const mesh of built.group.children)if('geometry' in mesh)expect(Array.from((mesh.geometry as import('three').BufferGeometry).attributes.position.array).every(Number.isFinite)).toBe(true)

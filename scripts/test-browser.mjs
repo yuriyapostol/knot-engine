@@ -209,7 +209,7 @@ try {
   }
   console.log('PNG colors: live/capture pixels match for both themes and pixel ratios 1/2; backgrounds, camera and canvas size passed')
 
-  for (const model of ['overhand', 'twisted-loop']) {
+  for (const model of ['overhand', 'twisted-loop', 'bezier-3d']) {
     const modelKnot = fixture(`v1/examples/knots/${model}.json`)
     const representationId = modelKnot.representations.find(rep => rep.type === '3d').id
     assert.equal(await setInput({ knot: modelKnot, selection: { representationId } }), undefined)

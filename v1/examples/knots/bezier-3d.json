@@ -1,0 +1,47 @@
+{
+  "schema": "Knot",
+  "schemaVersion": 1,
+  "id": "bezier-3d",
+  "subject": {
+    "id": "bezier-3d",
+    "names": [
+      { "language": "en", "value": "Spatial Bezier segments and a closed loop" },
+      { "language": "uk", "value": "Просторові сегменти Безьє та замкнена петля" }
+    ]
+  },
+  "representations": [
+    {
+      "id": "bezier-3d",
+      "type": "3d",
+      "data": {
+        "coordinateSystem": {
+          "handedness": "right",
+          "upAxis": "y",
+          "scale": { "kind": "relative" }
+        },
+        "elements": [
+          {
+            "id": "mixed",
+            "type": "curve",
+            "closed": false,
+            "start": [0, 0, 0],
+            "segments": [
+              { "type": "line", "end": [1, 0, 0] },
+              { "type": "quadratic", "control": [2, 1, 0], "end": [3, 0, 1] },
+              { "type": "cubic", "control1": [4, -1, 1], "control2": [5, 1, 2], "end": [6, 0, 2] }
+            ]
+          },
+          {
+            "id": "loop",
+            "type": "curve",
+            "closed": true,
+            "start": [-2, 0, 0],
+            "segments": [
+              { "type": "cubic", "control1": [-2, 3, 1], "control2": [-5, 0, -1], "end": [-2, 0, 0] }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -87,7 +87,7 @@ In grid and mosaic viewers, labels are indices, not geometric coordinates of cel
 
 ### 3D geometry viewer
 
-`Knot3DViewer` renders spatial curves and meshes with WebGL. The 3D geometry budget is 100,000 triangles; quality is reduced before allocation or fails if low quality remains too large.
+`Knot3DViewer` renders spatial curves and meshes with WebGL. Curves support polylines, Catmull–Rom and mixed line/quadratic/cubic Bezier segments. Segmented paths feed directly into tube geometry; zero-length spans are skipped and entirely degenerate curves are rejected. The 3D geometry budget is 100,000 triangles; quality is reduced before allocation or fails if low quality remains too large.
 
 3D uses finite `GridHelper` planes through the coordinate origin, `AxesHelper` with additional negative segments, ticks and sprite labels. Separate bounds guides are not provided. Labels show data-coordinate values; no physical-unit conversion is applied. Guide resources are released on replacement and unmount.
 

@@ -41,7 +41,9 @@ describe('RawKnot generation 1', () => {
     const a=copy(), before=JSON.stringify(a)
     const freeze=(v:unknown)=>{if(v && typeof v==='object'){Object.values(v).forEach(freeze);Object.freeze(v)}}
     freeze(a)
-    const r=resolveKnot(a);r.curves[0].points[0][0]=123
+    const r=resolveKnot(a)
+    if (!('points' in r.curves[0])) throw new Error('Expected an interpolated curve')
+    r.curves[0].points[0][0]=123
     expect(JSON.stringify(a)).toBe(before)
   })
   it('keeps algorithms independent of interpolation point counts',()=>{

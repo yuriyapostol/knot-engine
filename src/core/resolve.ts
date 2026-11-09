@@ -1,10 +1,11 @@
+import { curveControlPoints } from './curveControlPoints'
 import { GEOMETRY_3D, ROPE_TYPE, type Geometry3DData, type Mesh3D, type Camera3D, type Reference, type ViewDefinition, type RawKnot, type RawRepresentation } from './knot'
 import { validateKnot, normalizeKnot, indexKnot, constructionFor, type ValidationOptions } from './validateKnot'
 import { selectRepresentation } from './selectRepresentation'
 import { ViewerError } from './errors'
 import { validateView } from './validateSpatial'
 export type CameraView = Extract<Camera3D,{mode:'fixed'}>
-export interface RenderableCurve extends Omit<Extract<Geometry3DData['elements'][number], { type: 'curve' }>, 'type'> { radius: number }
+export type RenderableCurve = Extract<Geometry3DData['elements'][number], { type: 'curve' }> & { radius: number }
 export interface RenderableModel { id?: string; curves: RenderableCurve[]; meshes?: Mesh3D[]; camera?: Camera3D; warnings: string[] }
 export interface RepresentationSelection { representationId?: string; view?: Reference | ViewDefinition }
 export function resolveKnot(value: unknown, selection: RepresentationSelection = {}, options: ValidationOptions & { scope?: 'selected' | 'all' } = {}): RenderableModel {
@@ -28,7 +29,7 @@ export function resolveKnot(value: unknown, selection: RepresentationSelection =
   const meshes = data.elements.filter(e => e.type === 'mesh')
   const construction=rep.target && rep.target.kind !== 'subject' ? constructionFor(knot,index,rep.target.construction) : undefined
   const scale=data.coordinateSystem.scale
-  const points=[...rawCurves.flatMap(c=>c.points),...meshes.flatMap(m=>m.vertices)]
+  const points=[...rawCurves.flatMap(curveControlPoints),...meshes.flatMap(m=>m.vertices)]
   const spans=[0,1,2].map(axis=>{let min=Infinity,max=-Infinity; for(const p of points){min=Math.min(min,p[axis]);max=Math.max(max,p[axis])} return max-min})
   const displayRadius=Math.max(...spans)*0.006 || 0.005
   const curves=rawCurves.map(curve=> {
@@ -47,7 +48,7 @@ export function resolveKnot(value: unknown, selection: RepresentationSelection =
     camera = structuredClone(selected.camera)
   }
   const numbers = camera ? (camera.mode === 'fit' ? [...camera.direction,...camera.up] : [...camera.position,...camera.target,...camera.up]) : []
-  if(curves.some(c=>!Number.isFinite(c.radius) || c.radius<=0 || c.radius>1e6 || c.points.some(p=>p.some(n=>Math.abs(n)>1e6))) || numbers.some(n=>Math.abs(n)>1e6)) throw new ViewerError('LIMIT_EXCEEDED','Renderer supports coordinates and radii up to 1000000 data units',undefined,false)
+  if(curves.some(c=>!Number.isFinite(c.radius) || c.radius<=0 || c.radius>1e6 || curveControlPoints(c).some(p=>p.some(n=>Math.abs(n)>1e6))) || numbers.some(n=>Math.abs(n)>1e6)) throw new ViewerError('LIMIT_EXCEEDED','Renderer supports coordinates and radii up to 1000000 data units',undefined,false)
   return {id:knot.id,curves,meshes,camera,warnings}
 }
 /** Standalone representation convenience, with explicitly supplied resource context. */

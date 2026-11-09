@@ -16,18 +16,41 @@ export function buildGeometry(model: RenderableModel, quality: Quality, theme: '
     warnings.push(`Geometry quality reduced to ${profile} to stay within the triangle budget`)
   }
   if (triangles(profile) > 100000) throw new ViewerError('LIMIT_EXCEEDED', 'Geometry exceeds triangle budget', undefined, false)
+  const paths = model.curves.map(data => {
+    let path: THREE.Curve<THREE.Vector3>
+    if ('segments' in data) {
+      const curves = new THREE.CurvePath<THREE.Vector3>()
+      let start = new THREE.Vector3(...data.start)
+      for (const segment of data.segments) {
+        const end = new THREE.Vector3(...segment.end)
+        const curve = segment.type === 'line'
+          ? new THREE.LineCurve3(start, end)
+          : segment.type === 'quadratic'
+            ? new THREE.QuadraticBezierCurve3(start, new THREE.Vector3(...segment.control), end)
+            : new THREE.CubicBezierCurve3(start, new THREE.Vector3(...segment.control1), new THREE.Vector3(...segment.control2), end)
+        if (curve.getLength() > 0) curves.add(curve)
+        start = end
+      }
+      const initial = new THREE.Vector3(...data.start)
+      if (data.closed && !start.equals(initial)) curves.add(new THREE.LineCurve3(start, initial))
+      if (!curves.curves.length) throw new ViewerError('INVALID_MODEL', 'Curve has no renderable spans', undefined, false)
+      path = curves
+    } else {
+      const points = data.points.map(p => new THREE.Vector3(...p))
+      if (data.interpolation.type === 'polyline') {
+        const lines = new THREE.CurvePath<THREE.Vector3>()
+        for (let i = 1; i < points.length; i++) lines.add(new THREE.LineCurve3(points[i-1], points[i]))
+        if (data.closed) lines.add(new THREE.LineCurve3(points[points.length-1], points[0]))
+        path = lines
+      } else path = new THREE.CatmullRomCurve3(points, data.closed, data.interpolation.parameterization === 'uniform' ? 'catmullrom' : data.interpolation.parameterization, data.interpolation.parameterization === 'uniform' ? data.interpolation.tension : undefined)
+    }
+    return path
+  })
   const group = new THREE.Group()
   const resources: Array<THREE.BufferGeometry | THREE.Material> = []
   const [tubular, radial] = profiles[profile]
-  for (const data of model.curves) {
-    const points = data.points.map(p => new THREE.Vector3(...p))
-    let path: THREE.Curve<THREE.Vector3>
-    if (data.interpolation.type === 'polyline') {
-      const lines = new THREE.CurvePath<THREE.Vector3>()
-      for (let i = 1; i < points.length; i++) lines.add(new THREE.LineCurve3(points[i-1], points[i]))
-      if (data.closed) lines.add(new THREE.LineCurve3(points[points.length-1], points[0]))
-      path = lines
-    } else path = new THREE.CatmullRomCurve3(points, data.closed, data.interpolation.parameterization === 'uniform' ? 'catmullrom' : data.interpolation.parameterization, data.interpolation.parameterization === 'uniform' ? data.interpolation.tension : undefined)
+  for (const [index, data] of model.curves.entries()) {
+    const path = paths[index]
     const rope = new THREE.MeshStandardMaterial({ color: theme === 'dark' ? 0xe8ad73 : 0xb9793d, roughness: 0.83, metalness: 0 })
     const outline = new THREE.MeshBasicMaterial({ color: theme === 'dark' ? 0x140f17 : 0x33251e, side: THREE.BackSide })
     const geo = new THREE.TubeGeometry(path, tubular, data.radius, radial, data.closed)

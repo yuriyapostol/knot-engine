@@ -1,4 +1,4 @@
-import { curveControlPoints2D } from './curves2d'
+import { curveControlPoints } from './curveControlPoints'
 import { GEOMETRY_2D, GEOMETRY_3D, type Geometry2DData, type Geometry3DData, type GeometryElement2D, type GeometryElement3D, type CrossingPassage, type StepData } from './knot'
 import { duplicates, issue, standalone, type DataResult } from './validation'
 import type { ValidationIssue } from './errors'
@@ -12,7 +12,7 @@ function geometryIssues(data: Geometry, is2d: boolean): ValidationIssue[] {
   data.elements.forEach((element, i) => {
     if (element.type === 'curve') {
       if ('segments' in element) {
-        points += curveControlPoints2D(element).length
+        points += curveControlPoints(element).length
         return
       }
       points += element.points.length
@@ -77,8 +77,7 @@ export function applyStepData(base: Geometry, data: StepData, type: typeof GEOME
   const dimension = type === GEOMETRY_2D ? 2 : 3
   for (const [i, element] of result.elements.entries()) {
     if (type === GEOMETRY_2D && element.type !== 'curve') return { valid: false, issues: [issue(`elements.${i}`, '2D geometry supports curves only')] }
-    if (type === GEOMETRY_3D && 'segments' in element) return { valid: false, issues: [issue(`elements.${i}`, 'Segmented curves require a 2D base')] }
-    if (element.type === 'curve' && !('segments' in element) && element.points.some(point => point.length !== dimension)) return { valid: false, issues: [issue(`elements.${i}.points`, 'Point dimension does not match base')] }
+    if (element.type === 'curve' && curveControlPoints(element).some(point => point.length !== dimension)) return { valid: false, issues: [issue(`elements.${i}.${'segments' in element ? 'segments' : 'points'}`, 'Point dimension does not match base')] }
   }
   if (type === GEOMETRY_2D) {
     if (data.crossings !== undefined) (result as Geometry2DData).crossings = structuredClone(data.crossings)

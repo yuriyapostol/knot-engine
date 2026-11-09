@@ -35,7 +35,14 @@ export type CurveSegment2D =
 export interface SegmentedCurve2D { id: string; type: 'curve'; object?: string; closed: boolean; start: Point2D; segments: CurveSegment2D[] }
 export type Curve2D = InterpolatedCurve2D | SegmentedCurve2D
 export type FlattenedGeometry2DData = Omit<Geometry2DData, 'elements'> & { elements: InterpolatedCurve2D[] }
-export interface Curve3D { id: string; type: 'curve'; object?: string; closed: boolean; interpolation: Interpolation; points: Point3D[] }
+export interface InterpolatedCurve3D { id: string; type: 'curve'; object?: string; closed: boolean; interpolation: Interpolation; points: Point3D[] }
+export type CurveSegment3D =
+  | { type: 'line'; end: Point3D }
+  | { type: 'quadratic'; control: Point3D; end: Point3D }
+  | { type: 'cubic'; control1: Point3D; control2: Point3D; end: Point3D }
+/** Absolute coordinates; each segment starts at the previous endpoint (initially start). */
+export interface SegmentedCurve3D { id: string; type: 'curve'; object?: string; closed: boolean; start: Point3D; segments: CurveSegment3D[] }
+export type Curve3D = InterpolatedCurve3D | SegmentedCurve3D
 export interface Mesh3D { id: string; type: 'mesh'; object?: string; vertices: Point3D[]; faces: [number, number, number][] }
 export type GeometryElement2D = Curve2D
 export type GeometryElement3D = Curve3D | Mesh3D
