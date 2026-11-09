@@ -113,6 +113,45 @@ try {
     await page.waitForFunction(() => window.__previewReady || window.__previewError)
     return page.evaluate(() => window.__previewError)
   }
+  // Compare actual PNG captures to SVG rasterization, including rectangular letterboxing.
+  const checkSvgPng = async () => {
+    const result = await page.evaluate(async () => {
+      const svg = document.querySelector('.knot-engine-v1-viewer svg')
+      const originalStyle = svg.getAttribute('style'), webgl = window.__webglContexts
+      svg.style.color = 'rgb(12, 80, 160)'
+      svg.parentElement.style.backgroundColor = 'rgb(90, 80, 70)'
+      const checks = []
+      try {
+        for (const view of ['current', 'model-preview']) {
+          const source = await window.__previewCapture(320, 180, { view })
+          const pixels = async blob => {
+            const image = new Image(), url = URL.createObjectURL(blob)
+            try {
+              image.src = url; await image.decode()
+              const canvas = document.createElement('canvas'); canvas.width = 320; canvas.height = 180
+              const context = canvas.getContext('2d'); context.drawImage(image, 0, 0)
+              return { width: image.naturalWidth, height: image.naturalHeight, data: [...context.getImageData(0, 0, 320, 180).data] }
+            } finally { URL.revokeObjectURL(url) }
+          }
+          const before = svg.outerHTML
+          const png = await window.__previewCapture(320, 180, { view, format: 'image/png' })
+          const actual = await pixels(png), expected = await pixels(source)
+          const opaque = await pixels(await window.__previewCapture(320, 180, { view, format: 'image/png', transparent: false }))
+          checks.push({ type: png.type, width: actual.width, height: actual.height,
+            matches: actual.data.every((value, i) => value === expected.data[i]),
+            hasStrands: actual.data.some((value, i) => i % 4 === 3 && value > 0),
+            transparent: actual.data[3], background: opaque.data.slice(0, 4),
+            unchanged: before === svg.outerHTML, webgl: webgl === window.__webglContexts })
+        }
+      } finally {
+        if (originalStyle === null) svg.removeAttribute('style'); else svg.setAttribute('style', originalStyle)
+        svg.parentElement.style.removeProperty('background-color')
+      }
+      return checks
+    })
+    for (const check of result) assert.deepEqual(check, { type: 'image/png', width: 320, height: 180,
+      matches: true, hasStrands: true, transparent: 0, background: [90, 80, 70, 255], unchanged: true, webgl: true })
+  }
   const invalid = fixture('v1/examples/knots/invalid/dimension.json')
   assert.match(await setInput({ knot: invalid }), /^INVALID_REPRESENTATION:/)
   assert.equal(await page.evaluate(() => window.__webglContexts), 0, 'Malformed knot must fail before WebGL allocation')
@@ -263,6 +302,8 @@ try {
     const blob = await window.__previewCapture(240, 180)
     return { type: blob.type, content: await blob.text() }
   })
+  await checkSvgPng()
+  console.log('SVG viewers: PNG pixels, transparency, background, framing and dimensions match SVG without WebGL')
   assert.equal(svgExport.type, 'image/svg+xml')
   assert.match(svgExport.content, /<svg[^>]*>/)
   assert.match(svgExport.content, /<path\b/)
@@ -279,6 +320,7 @@ try {
   const initial2D = await planar.getAttribute('viewBox')
   await planar.hover(); await page.mouse.wheel(0, -100)
   await page.waitForFunction(value => document.querySelector('svg.knot-engine-v1-geometry2d').getAttribute('viewBox') !== value, initial2D)
+  await checkSvgPng()
   const svgPixels = await page.evaluate(async () => {
     const blob = await window.__previewCapture(512, 512)
     const content = await blob.text()
@@ -449,6 +491,7 @@ try {
     await grid.waitFor()
     assert.equal(await grid.locator('[data-grid-marker]').count(), encoding === 'xo' ? 10 : 0)
     assert.equal(await page.evaluate(() => window.__webglContexts), beforeGrid)
+    await checkSvgPng()
     const pixels = await page.evaluate(async () => {
       const blob = await window.__previewCapture(500, 500)
       const image = new Image(), url = URL.createObjectURL(blob)
@@ -488,11 +531,21 @@ try {
   assert.equal(closedTrefoil.data.crossings.length, 6)
   const [trefoilDownload] = await Promise.all([
     page.waitForEvent('download'),
-    page.getByRole('button', { name: 'Експорт зображення', exact: true }).click(),
+    page.getByRole('button', { name: 'Експорт зображення SVG', exact: true }).click(),
   ])
   assert.equal(trefoilDownload.suggestedFilename(), 'knot-current.svg')
   await trefoilDownload.saveAs('/tmp/knot-closed-trefoil.svg')
   assert.match(readFileSync('/tmp/knot-closed-trefoil.svg', 'utf8'), /<mask/)
+  const [trefoilPng] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Експорт зображення PNG', exact: true }).click(),
+  ])
+  assert.equal(trefoilPng.suggestedFilename(), 'knot-current.png')
+  await trefoilPng.saveAs('/tmp/knot-closed-trefoil-export.png')
+  const trefoilBytes = readFileSync('/tmp/knot-closed-trefoil-export.png')
+  assert.equal(trefoilBytes.subarray(0, 8).toString('hex'), '89504e470d0a1a0a')
+  assert.equal(trefoilBytes.readUInt32BE(16), 1024)
+  assert.equal(trefoilBytes.readUInt32BE(20), 1024)
   await trefoilViewer.screenshot({ path: '/tmp/knot-closed-trefoil.png' })
   for (const model of ['overhand', 'loop']) {
     await page.locator('.knot-engine-v1-demo__model-select select').selectOption(model)
@@ -504,7 +557,7 @@ try {
       assert.equal(await grid.locator('[data-grid-marker]').count(), encoding === 'xo' ? (model === 'overhand' ? 10 : 6) : 0)
       const [download] = await Promise.all([
         page.waitForEvent('download'),
-        page.getByRole('button', { name: 'Експорт зображення', exact: true }).click(),
+        page.getByRole('button', { name: 'Експорт зображення SVG', exact: true }).click(),
       ])
       assert.equal(download.suggestedFilename(), 'knot-current.svg')
       const stream = await download.createReadStream(), chunks = []
@@ -623,12 +676,12 @@ try {
   assert.equal(JSON.parse(await editor.inputValue()).schema, 'Knot')
   assert.ok(JSON.parse(await editor.inputValue()).subject)
   assert.deepEqual(failures, [])
-  assert.equal(await page.getByRole('button', { name: 'Експорт зображення', exact: true }).count(), 1)
+  assert.equal(await page.getByRole('button', { name: 'Експорт зображення PNG', exact: true }).count(), 1)
   assert.equal(await page.getByRole('button', { name: 'Експорт прев’ю в PNG', exact: true }).count(), 0)
   const exportPNG = async () => {
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByRole('button', { name: 'Експорт зображення', exact: true }).click()
+      page.getByRole('button', { name: 'Експорт зображення PNG', exact: true }).click()
     ])
     assert.equal(download.suggestedFilename(), 'knot-current.png')
     const stream = await download.createReadStream(), chunks = []

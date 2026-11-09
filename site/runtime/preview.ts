@@ -1,5 +1,5 @@
 import { createApp, h, ref, shallowRef } from 'vue'
-import { KnotViewer, type RawKnot, type RepresentationSelection } from 'knot-engine'
+import { KnotViewer, type RawKnot, type CaptureOptions, type RepresentationSelection } from 'knot-engine'
 import '../../src/styles.css'
 
 declare global {
@@ -9,7 +9,7 @@ declare global {
     __previewSetInput?: (input: { knot?: RawKnot; selection?: RepresentationSelection; interactive?: boolean }) => void
     __previewReady?: boolean
     __previewError?: string
-    __previewCapture?: (width: number, height: number) => Promise<Blob>
+    __previewCapture?: (width: number, height: number, options?: CaptureOptions) => Promise<Blob>
   }
 }
 const viewer = ref<InstanceType<typeof KnotViewer> | null>(null)
@@ -30,4 +30,4 @@ createApp({
     })
   }
 }).mount('#app')
-window.__previewCapture = (width, height) => viewer.value!.capture({ width, height, view: 'model-preview' })
+window.__previewCapture = (width, height, options) => viewer.value!.capture({ width, height, view: 'model-preview', ...options })

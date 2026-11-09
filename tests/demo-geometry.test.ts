@@ -93,6 +93,12 @@ it('imports 2D/3D geometry, applies 2D steps and exports the selected format', a
   expect(viewer.capture).toHaveBeenLastCalledWith({ view: 'current', format: 'image/svg+xml' })
   expect(downloads.at(-1)).toBe('knot-current.svg')
 
+  const pngButton = root.querySelector<HTMLButtonElement>('.knot-engine-v1-demo__stage > .knot-engine-v1-demo__actions button:nth-child(2)')!
+  pngButton.click()
+  await nextTick()
+  expect(viewer.capture).toHaveBeenLastCalledWith({ view: 'current', format: 'image/png' })
+  expect(downloads.at(-1)).toBe('knot-current.png')
+
   representation.value = 'crossing-3d'
   representation.dispatchEvent(new Event('change', { bubbles: true }))
   await nextTick()

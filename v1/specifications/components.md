@@ -65,7 +65,7 @@ UI changes are local and emit `update:guides` and `guides-change` with a complet
 
 ## Methods and capture
 
-Methods: `resetView()`, `fitToView()`, `capture(options?): Promise<Blob>`. Capture accepts `width`, `height`, `format`, `view:'current'|'model-preview'`, `transparent`; dimensions are integers in 1..2048. 3D supports `image/png` (default 512×512); 2D, grid and mosaic support `image/svg+xml` (default 1024×1024). `current` preserves local framing; `model-preview` uses the resolved spatial camera/default or the full grid/mosaic extent. For 2D, preview uses the resolved plane view or default geometry framing. PNG uses the same tone mapping, exposure and sRGB output conversion as the visible canvas; `current` preserves the current theme colors. Capture restores the live canvas size and pixel ratio and leaves the live view unchanged.
+Methods: `resetView()`, `fitToView()`, `capture(options?): Promise<Blob>`. Capture accepts `width`, `height`, `format`, `view:'current'|'model-preview'`, `transparent`; dimensions are integers in 1..2048. 3D supports `image/png` (default 512×512); 2D, grid and mosaic support `image/svg+xml` and `image/png` (default SVG, 1024×1024). `current` preserves local framing; `model-preview` uses the resolved spatial camera/default or the full grid/mosaic extent. For 2D, preview uses the resolved plane view or default geometry framing. 3D PNG uses the same tone mapping, exposure and sRGB output conversion as the visible canvas; `current` preserves the current theme colors. Capture restores the live canvas size and pixel ratio and leaves the live view unchanged.
 
 ## Slots and states
 
@@ -97,7 +97,7 @@ In grid and mosaic viewers, labels are indices, not geometric coordinates of cel
 
 The ordered `crossings` records must match the geometry. Detected tangencies, endpoint contacts, overlaps and multiple intersections at one position are rejected. Catmull–Rom and Bezier intersection detection is approximate: quadratic segments are converted exactly to cubics, then subdivided with a control-polygon distance bound of `1e-5` times the authored-point extent and maximum depth 20. Fully degenerate curves are rejected. Rendering is limited to 2048 segments after curve subdivision and 4096 intersections; exceeding either limit reports an error. `validateGeometry2D` checks structure and crossing pairs; the viewer checks geometric correspondence.
 
-`capture()` exports a self-contained SVG. Crossing gaps remain transparent on arbitrary backgrounds. The background is transparent by default; `transparent:false` includes the viewer background color.
+`capture()` exports a self-contained SVG by default or PNG with `format: 'image/png'`. Crossing gaps remain transparent on arbitrary backgrounds. The background is transparent by default; `transparent:false` includes the viewer background color.
 
 Guides cover the visible plane and show X/Y coordinate ticks; there is no separate bounds overlay.
 
@@ -110,6 +110,8 @@ Guides cover the visible plane and show X/Y coordinate ticks; there is no separa
 `KnotMosaicViewer` renders mosaic diagrams as SVG. Guides cover `[0,n] × [0,n]` with cell spacing 1. Indices are zero-based and aligned with cell centers; rows increase downward, matching data indexing. Index axes run along the left and top field edges.
 
 ### Shared SVG viewer rules
+
+SVG viewers also support `capture({ format: 'image/png' })` through browser canvas rasterization, with the same framing, colors, guides and crossing gaps as SVG. SVG remains the default format. PNG backgrounds are transparent by default; `transparent:false` fills the entire image with the viewer background color, including letterboxing. Mosaic SVG retains its unfilled background. PNG capture requires browser image and canvas APIs; SVG capture does not require canvas.
 
 SVG grids use one repeating `<pattern>` cell with only its top and left edges, plus a filled rectangle; grid and mosaic add only the missing bottom and right edges to close the field. Patterns have instance-specific IDs. Text selection is disabled in viewer SVGs so labels do not become selected during panning and other gestures. SVG-only imports do not load Three.js.
 

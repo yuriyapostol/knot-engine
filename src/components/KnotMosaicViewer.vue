@@ -9,6 +9,7 @@ import { mosaicPanCenter } from './mosaicViewport'
 import { usePlaneGestures } from './usePlaneGestures'
 import { messages as defaults, type ViewerMessages } from '../locales'
 import type { CaptureOptions } from './captureOptions'
+import { captureSvg } from './captureSvg'
 
 export interface MosaicView { center: [number, number]; height: number }
 const props = withDefaults(defineProps<{
@@ -107,14 +108,15 @@ const { dragging, onPointerDown, onPointerMove, onPointerUp, clear: clearGesture
 function capture(options: CaptureOptions = {}): Promise<Blob> {
   if (!svg.value || !ready.value) return Promise.reject(new Error('Mosaic viewer is not ready'))
   const width = options.width ?? 1024, height = options.height ?? 1024
-  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 || width > 2048 || height > 2048 || (options.format && options.format !== 'image/svg+xml') || (options.view && options.view !== 'current' && options.view !== 'model-preview')) return Promise.reject(new Error('Invalid mosaic capture dimensions, format or view'))
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 || width > 2048 || height > 2048 || (options.format && options.format !== 'image/svg+xml' && options.format !== 'image/png') || (options.view && options.view !== 'current' && options.view !== 'model-preview')) return Promise.reject(new Error('Invalid mosaic capture dimensions, format or view'))
   const clone = svg.value.cloneNode(true) as SVGSVGElement
-  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+  clone.removeAttribute('xmlns')
+  clone.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg')
   if (options.view === 'model-preview') clone.setAttribute('viewBox', `0 0 ${size.value} ${size.value}`)
   clone.setAttribute('width', String(width))
   clone.setAttribute('height', String(height))
   clone.style.color = getComputedStyle(svg.value).color
-  return Promise.resolve(new Blob([new XMLSerializer().serializeToString(clone)], { type: 'image/svg+xml' }))
+  return captureSvg(clone, options.format ?? 'image/svg+xml', options.transparent === false ? getComputedStyle(svg.value.parentElement!).backgroundColor : undefined)
 }
 watch([diagram, selectedView], applyView, { immediate: true })
 watch([ready, error], ([ok, problem]) => {

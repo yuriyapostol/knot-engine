@@ -2,7 +2,7 @@
 
 [English](README.md) | [Українська](README.uk.md)
 
-Knot modeling and rendering package with Vue 3 `KnotViewer`. The current `Knot` supports 2D and 3D geometry, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, states, algorithms and explicit resource registries. Built-in viewers render static 3D curves and meshes with perspective/orthographic cameras and PNG capture, and 2D curves, grids or mosaics as SVG with pan, zoom and SVG capture.
+Knot modeling and rendering package with Vue 3 `KnotViewer`. The current `Knot` supports 2D and 3D geometry, grid diagrams, mosaic diagrams, planar diagram codes, Dowker–Thistlethwaite codes, constructions, states, algorithms and explicit resource registries. Built-in viewers render static 3D curves and meshes with perspective/orthographic cameras and PNG capture, and 2D curves, grids or mosaics as SVG with pan, zoom and SVG/PNG capture.
 
 ## Run locally
 
@@ -57,7 +57,7 @@ Import `Knot` and raw types from `knot-engine/core`: this entry point loads no V
 
 `representation-id` selects a static representation. Without it, `KnotViewer` requires exactly one representation supported by its viewer registry. Use `Knot2DViewer` from `knot-engine/2d`, `Knot3DViewer` from `knot-engine/3d`, `KnotGridViewer` from `knot-engine/grid` or `KnotMosaicViewer` from `knot-engine/mosaic` directly when only one rendering engine is needed. Constructions contain objects and states; algorithms reference representations. Replace the knot object to update the view. Animation is not implemented.
 
-Methods: `resetView()`, `fitToView()`, `capture(options?)`. Capture supports PNG for 3D (default 512×512) and SVG for 2D, grid and mosaic (default 1024×1024), with a 2048×2048 maximum. Events: `ready`, `error`, `view-change`, plus 3D `camera-change`. Pass `view`, `views` and 3D `initialCamera` separately from knot data. See the [component API](v1/specifications/components.md) and [selection/view contracts](v1/specifications/viewer-contracts.md).
+Methods: `resetView()`, `fitToView()`, `capture(options?)`. Capture supports PNG for 3D (default 512×512) and SVG/PNG for 2D, grid and mosaic (default SVG, 1024×1024), with a 2048×2048 maximum. Events: `ready`, `error`, `view-change`, plus 3D `camera-change`. Pass `view`, `views` and 3D `initialCamera` separately from knot data. See the [component API](v1/specifications/components.md) and [selection/view contracts](v1/specifications/viewer-contracts.md).
 
 [Data contract](v1/specifications/knot.md) · [Functions](v1/specifications/functions.md) · [Component](v1/specifications/components.md) · [JSON Schema](v1/schema/knot.schema.json) · [Examples](v1/examples/knots)
 

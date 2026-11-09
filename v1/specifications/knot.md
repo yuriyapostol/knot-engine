@@ -159,7 +159,7 @@ See the detailed [grid diagram specification](grid-diagram.md) for derived count
 
 ### Mosaic diagrams
 
-The profile is defined in the [mosaic specification](mosaic-diagram.md). Types, JSON Schema, a standard resource and semantic validation via `validateMosaicDiagram` are implemented. `KnotMosaicViewer` renders SVG with pan, zoom, application-owned plane views and SVG capture; `KnotViewer` delegates to it.
+The profile is defined in the [mosaic specification](mosaic-diagram.md). Types, JSON Schema, a standard resource and semantic validation via `validateMosaicDiagram` are implemented. `KnotMosaicViewer` renders SVG with pan, zoom, application-owned plane views and SVG/PNG capture; `KnotViewer` delegates to it.
 
 ### Planar diagram codes
 

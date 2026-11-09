@@ -15,6 +15,7 @@ import { mosaicPanCenter } from './mosaicViewport'
 import { usePlaneGestures } from './usePlaneGestures'
 import { messages as defaults, type ViewerMessages } from '../locales'
 import type { CaptureOptions } from './captureOptions'
+import { captureSvg } from './captureSvg'
 
 export interface Geometry2DView { center: [number, number]; height: number }
 
@@ -145,7 +146,7 @@ function capture(options: CaptureOptions = {}): Promise<Blob> {
   if (!svg.value || !ready.value) return Promise.reject(new Error('2D viewer is not ready'))
   const width = options.width ?? 1024, height = options.height ?? 1024
   if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 || width > 2048 || height > 2048 ||
-      (options.format && options.format !== 'image/svg+xml') || (options.view && options.view !== 'current' && options.view !== 'model-preview'))
+      (options.format && options.format !== 'image/svg+xml' && options.format !== 'image/png') || (options.view && options.view !== 'current' && options.view !== 'model-preview'))
     return Promise.reject(new Error('Invalid 2D capture dimensions, format or view'))
   const clone = svg.value.cloneNode(true) as SVGSVGElement
   clone.removeAttribute('xmlns')
@@ -160,7 +161,7 @@ function capture(options: CaptureOptions = {}): Promise<Blob> {
     for (const [name, value] of Object.entries({ x, y, width: w, height: h, fill: getComputedStyle(svg.value.parentElement!).backgroundColor })) background.setAttribute(name, value!)
     clone.insertBefore(background, clone.firstChild)
   }
-  return Promise.resolve(new Blob([new XMLSerializer().serializeToString(clone)], { type: 'image/svg+xml' }))
+  return captureSvg(clone, options.format ?? 'image/svg+xml', options.transparent === false ? getComputedStyle(svg.value.parentElement!).backgroundColor : undefined)
 }
 watch(initial, applyView, { immediate: true })
 watch([result, error], () => {

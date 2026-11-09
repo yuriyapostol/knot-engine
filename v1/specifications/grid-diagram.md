@@ -70,7 +70,7 @@ Tests include a 2×2 loop, separate loops, a two-crossing/two-component diagram,
 
 The viewer supports plane views, pointer pan, wheel zoom, arrow-key pan, +/− zoom, Home/reset, fit, localized controls and toolbar/fallback slots. `resetView()` restores the requested plane view; `fitToView()` frames the full grid. `view-change` emits `{center:[x,y],height}` in grid plane coordinates.
 
-`capture()` produces self-contained SVG, default 1024×1024, with dimensions in 1..2048. `current` preserves the live camera; `model-preview` frames the full grid without changing it. The background is transparent by default; `transparent:false` embeds the viewer background color. Import `knot-engine/styles.css`. See the [component API](components.md).
+`capture()` produces self-contained SVG by default or PNG with `format: 'image/png'`, default 1024×1024, with dimensions in 1..2048. `current` preserves the live camera; `model-preview` frames the full grid without changing it. The background is transparent by default; `transparent:false` embeds the viewer background color. Import `knot-engine/styles.css`. See the [component API](components.md).
 
 ## Attribution of concrete data
 

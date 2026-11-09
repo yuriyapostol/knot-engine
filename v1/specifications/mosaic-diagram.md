@@ -1,6 +1,6 @@
 # Mosaic diagram
 
-**Data support implemented.** Types, semantic validation, JSON Schema and the standard registry entry are available. SVG rendering, pan, zoom, inline plane views and SVG capture are implemented. Raster capture remains pending; external view references are supported.
+**Data support implemented.** Types, semantic validation, JSON Schema and the standard registry entry are available. SVG rendering, pan, zoom, inline plane views and SVG/PNG capture are implemented; external view references are supported.
 
 ## Identity and scope
 
@@ -143,6 +143,6 @@ Optional `sources` and `contributions` belong to the `Representation` envelope, 
 
 ## Viewer behavior
 
-`KnotMosaicViewer` supports pointer pan, wheel zoom, application-owned plane views, `view-change` and SVG `capture()`. Raster capture is not implemented. It resolves local view IDs from the `views` prop and global references through explicit registries and declared namespaces. Omitted `view` uses full-mosaic framing. Missing/conflicting resources are errors; no network requests are made. The headless resolver is `resolveRepresentationView` from `knot-engine/core`.
+`KnotMosaicViewer` supports pointer pan, wheel zoom, application-owned plane views, `view-change` and SVG/PNG `capture()` (default SVG; use `format: 'image/png'` for PNG). It resolves local view IDs from the `views` prop and global references through explicit registries and declared namespaces. Omitted `view` uses full-mosaic framing. Missing/conflicting resources are errors; no network requests are made. The headless resolver is `resolveRepresentationView` from `knot-engine/core`.
 
 Pan uses the actual square viewport scale under `preserveAspectRatio="xMidYMid meet"`, including non-square containers. Dragging changes only the local center and never edits tile data. See [component API](components.md) and [capture contracts](viewer-contracts.md).

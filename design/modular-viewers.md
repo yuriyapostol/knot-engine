@@ -6,7 +6,7 @@ The modular viewers are implemented. Exact inputs, selection, events and capture
 
 Core validates domain data, expands namespaces, selects representations and resolves standard resources and explicitly supplied external dependencies. `KnotViewer` maps the selected expanded type URI to a registered Vue component and forwards props, slots, methods and events. Specialized viewers independently select and validate their supported representation type; they work without the compositor.
 
-`Knot3DViewer` owns Three.js geometry, cameras, interaction, GPU lifecycle and PNG capture. `KnotMosaicViewer` owns SVG tile paths, plane framing, pan/zoom and SVG capture. A registry entry declares component capabilities; registering a domain type alone does not provide rendering. Custom viewer registries replace the compositor's built-ins and perform no dynamic code loading.
+`Knot3DViewer` owns Three.js geometry, cameras, interaction, GPU lifecycle and PNG capture. `KnotMosaicViewer` owns SVG tile paths, plane framing, pan/zoom and SVG/PNG capture. A registry entry declares component capabilities; registering a domain type alone does not provide rendering. Custom viewer registries replace the compositor's built-ins and perform no dynamic code loading.
 
 ## Data and presentation
 

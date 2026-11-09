@@ -123,7 +123,7 @@ it('exports self-contained color, transparent crossing gaps and optional opaque 
   expect(parsed.documentElement.querySelector(':scope > rect')).toBeNull()
   const opaque = await read(await mounted.exposed.value!.capture({ transparent: false }))
   expect(opaque).toContain('fill="rgb(90, 80, 70)"')
-  for (const options of [{ width: 0 }, { height: 2049 }, { width: 2.5 }, { format: 'image/png' }, { view: 'bad' }]) {
+  for (const options of [{ width: 0 }, { height: 2049 }, { width: 2.5 }, { format: 'image/jpeg' }, { view: 'bad' }]) {
     await expect(mounted.exposed.value!.capture(options as CaptureOptions)).rejects.toThrow(/Invalid/)
   }
   mounted.props.knot = null; await nextTick()

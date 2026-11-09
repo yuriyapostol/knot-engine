@@ -41,10 +41,10 @@ const emit = defineEmits<{
   'view-change': [view: unknown]
 }>()
 const builtIns = createViewerRegistry([
-  { typeUri: GRID_DIAGRAM, component: KnotGridViewer, capabilities: { pan: true, zoom: true, capture: ['svg'], guides: ['grid', 'axes'] } },
+  { typeUri: GRID_DIAGRAM, component: KnotGridViewer, capabilities: { pan: true, zoom: true, capture: ['svg', 'png'], guides: ['grid', 'axes'] } },
   { typeUri: GEOMETRY_3D, component: Knot3DViewer, capabilities: { orbit: true, pan: true, zoom: true, capture: ['png'], guides: ['grid', 'axes'] } },
-  { typeUri: GEOMETRY_2D, component: Knot2DViewer, capabilities: { pan: true, zoom: true, capture: ['svg'], guides: ['grid', 'axes'] } },
-  { typeUri: MOSAIC_DIAGRAM, component: KnotMosaicViewer, capabilities: { pan: true, zoom: true, capture: ['svg'], guides: ['grid', 'axes'] } },
+  { typeUri: GEOMETRY_2D, component: Knot2DViewer, capabilities: { pan: true, zoom: true, capture: ['svg', 'png'], guides: ['grid', 'axes'] } },
+  { typeUri: MOSAIC_DIAGRAM, component: KnotMosaicViewer, capabilities: { pan: true, zoom: true, capture: ['svg', 'png'], guides: ['grid', 'axes'] } },
 ])
 const viewer = ref<{ resetView: () => void; fitToView: () => void; capture: (options?: CaptureOptions) => Promise<Blob> } | null>(null)
 const selection = computed(() => props.knot ? selectViewerRepresentation(props.knot, props.registry ?? builtIns, props.representationId) : null)

@@ -214,7 +214,10 @@ async function download(options: CaptureOptions, name: string) {
           <label v-if="steps.length">{{ content.step }}<span class="knot-engine-v1-demo__select-field"><select v-model="selectedStep" @change="chooseStep"><option v-for="step in steps" :key="step.id" :value="step.id">{{ localizedEntryName(step, locale) }}</option></select></span></label>
         </section>
         <KnotViewer ref="viewer" v-model:guides="guides" :knot="displayedKnot" :representation-id="representationId" :initial-camera="demoCamera" preserve-camera :label="localizedName(current.data, locale)" :locale="locale" :theme="theme" @error="issue = $event.message" />
-        <div class="knot-engine-v1-demo__actions"><button type="button" @click="download({ view: 'current', format: usesSVG ? 'image/svg+xml' : 'image/png' }, usesSVG ? 'knot-current.svg' : 'knot-current.png')">{{ content.export }}</button></div>
+        <div class="knot-engine-v1-demo__actions">
+          <button type="button" @click="download({ view: 'current', format: usesSVG ? 'image/svg+xml' : 'image/png' }, usesSVG ? 'knot-current.svg' : 'knot-current.png')">{{ content.export }} {{ usesSVG ? 'SVG' : 'PNG' }}</button>
+          <button v-if="usesSVG" type="button" @click="download({ view: 'current', format: 'image/png' }, 'knot-current.png')">{{ content.export }} PNG</button>
+        </div>
       </section>
     </div>
   </section>
