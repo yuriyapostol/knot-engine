@@ -53,3 +53,7 @@ Remove the proposed `planar-diagram` representation and its duplicate schema pro
 - Both PLink projection variants import without confusing unknown and virtual crossings.
 - URL, relative file and data URL images work in the built-in viewer.
 - Browser, schema, package and documentation checks pass before the PR is marked ready.
+
+### Current implementation note
+
+The core now exposes `parsePLinkProjection(text)` and `importPLink2D(text)`. The latter creates a separate 2D polyline curve for each directed PLink edge, with ordered crossing passages. This is an initial conversion, not yet a topology-preserving import of connected components: connectivity and closure of source components are not encoded in the resulting edge curves. Additional geometric and integration tests are required before claiming lossless import.
