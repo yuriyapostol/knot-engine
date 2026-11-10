@@ -63,7 +63,7 @@ v 0 1
     expect(data.elements).toHaveLength(2)
     expect(data.crossings).toEqual([
       { id: 'crossing-0', element: 'component-0', type: 'classical', overElement: 'component-1' },
-      { id: 'crossing-0', element: 'edge-1', type: 'classical', underElement: 'edge-0' },
+      { id: 'crossing-0', element: 'component-1', type: 'classical', underElement: 'component-0' },
     ])
   })
 
