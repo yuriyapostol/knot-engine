@@ -17,6 +17,11 @@
 - [PD-коди](specifications/pd-code.uk.md).
 - [DT-коди](specifications/dt-code.uk.md).
 
+## Стандартні ресурси та реєстри
+
+- [Стандартні визначення](resources/index.uk.md) — вбудовані типи, призначення алгоритмів, набори плиток і конвенції.
+- [Реєстр JSON](resources/standard.json) — машинозчитувані визначення.
+
 ## API та інтеграція
 
 - [Функції](specifications/functions.uk.md) — перевірка, вибір, імпорт.
