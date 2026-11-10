@@ -1,5 +1,7 @@
 /** RawKnot contracts, generation 1. See v1/specifications/knot.md. */
 export const KNOT_NAMESPACE = 'https://yuriyapostol.github.io/knot-engine/v1/'
+export const IMAGE_REPRESENTATION = `${KNOT_NAMESPACE}representation-types/image`
+export interface ImageRepresentationData { mimeType: string; src: string }
 export const GEOMETRY_2D = `${KNOT_NAMESPACE}representation-types/2d`
 export const GEOMETRY_3D = `${KNOT_NAMESPACE}representation-types/3d`
 export const GRID_DIAGRAM = `${KNOT_NAMESPACE}representation-types/grid-diagram`

@@ -25,3 +25,5 @@ export type { SVGPath2DOptions, SVGPath2DImportOptions } from './svgPath2d'
 
 export { parsePLinkProjection, importPLink2D } from './plink'
 export type { PLinkProjection } from './plink'
+
+export { validateImageRepresentation } from './validateImageRepresentation'

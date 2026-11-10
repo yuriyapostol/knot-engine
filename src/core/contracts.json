@@ -3303,6 +3303,25 @@
           "additionalProperties": false
         }
       ]
+    },
+    "imageRepresentation": {
+      "type": "object",
+      "properties": {
+        "mimeType": {
+          "type": "string",
+          "pattern": "^image/[a-zA-Z0-9.+-]+$"
+        },
+        "src": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1048576
+        }
+      },
+      "required": [
+        "mimeType",
+        "src"
+      ],
+      "additionalProperties": false
     }
   }
 }
