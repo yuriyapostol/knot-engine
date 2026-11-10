@@ -51,7 +51,7 @@ for (const lang of Object.keys(locales)) routes.set(lang === 'en' ? 'README.md' 
 function html(title, body, file, scope, lang, key) {
   const l = locales[lang], generation = metadata.has(scope) ? scope : current, meta = metadata.get(generation)
   const link = target => relative(file, target)
-  const nav = [['home', generation, 'index'], ['guide', generation, 'guide'], ['specifications', generation, 'specifications'], ['resources', generation, 'resources'], ['design', 'design', 'index']]
+  const nav = [['home', generation, 'index'], ['guide', generation, 'guide'], ['specifications', generation, 'specifications'], ['design', 'design', 'index']]
   const runtime = body.includes('data-knot-engine-demo="v1"')
     ? `${(exampleEntry.css || []).map(css => `<link rel="stylesheet" href="${link(`${current}/_example/${css}`)}">`).join('')}<script type="module" src="${link(`${current}/_example/${exampleEntry.file}`)}"></script>`
     : ''
