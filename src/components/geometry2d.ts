@@ -110,7 +110,7 @@ export function locateCrossings(data: Geometry2DData): CrossingPosition[] {
     if (!visit) throw new Error(`No geometric intersection for crossing ${passage.id} on ${passage.element}`)
     const hit = hits[visit.hitIndex]
     const other = hit.idA === passage.element ? hit.idB : hit.idA
-    const expected = 'underElement' in passage ? passage.underElement : passage.overElement
+    const expected = 'otherElement' in passage ? passage.otherElement : 'underElement' in passage ? passage.underElement : passage.overElement
     if (expected !== other) throw new Error(`Crossing ${passage.id} does not match geometric intersection`)
     const prior = paired.get(passage.id)
     if (prior !== undefined && prior !== visit.hitIndex) throw new Error(`Crossing ${passage.id} pairs different intersections`)
