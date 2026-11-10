@@ -1,9 +1,10 @@
 import { curveControlPoints } from './curveControlPoints'
 import { Knot } from './model'
+import { validateImageRepresentation } from './validateImageRepresentation'
 import { validateGeometry2D, validateGeometry3D, applyStepData } from './validateGeometry'
 import { contributionIssues, licenseIssues, sourceIssues } from './metadata'
 import Ajv2020 from 'ajv/dist/2020.js'
-import { GEOMETRY_2D, GEOMETRY_3D, type Geometry2DData, type Geometry3DData, GRID_DIAGRAM, MOSAIC_DIAGRAM, PD_CODE, DT_CODE, ROPE_TYPE, type RawKnot, type RawResourceRegistry, type Reference, type Construction, type ResourceEntry, type RawRepresentation, type RawRepresentationTypeDefinition, type Dependency, type RawRepresentationDocument } from './knot'
+import { IMAGE_REPRESENTATION, GEOMETRY_2D, GEOMETRY_3D, type Geometry2DData, type Geometry3DData, GRID_DIAGRAM, MOSAIC_DIAGRAM, PD_CODE, DT_CODE, ROPE_TYPE, type RawKnot, type RawResourceRegistry, type Reference, type Construction, type ResourceEntry, type RawRepresentation, type RawRepresentationTypeDefinition, type Dependency, type RawRepresentationDocument } from './knot'
 import { createResourceIndex, expandURI, resolveResourceURI, normalizeResource, addResource, namespaceIssues, resourceIssues, type ResourceIndex } from './resources'
 import { duplicates, issue, preflight, structure, KNOT_LIMITS } from './validation'
 import { validateMosaicDiagram } from './validateMosaicDiagram'
@@ -104,6 +105,7 @@ export function validateKnot(value: unknown, options: ValidationOptions = {}): K
   for (const rep of knot.representations ?? []) if (rep.target && rep.target.kind !== 'subject') { const c = checkConstruction(rep.target.construction,`representations.${rep.id}.target`); if(c) constructions.set(c.id,c) }
   for (const proc of knot.algorithms ?? []) if (proc.construction) { const c = checkConstruction(proc.construction,`algorithms.${proc.id}.construction`); if(c) constructions.set(c.id,c) }
   const checkData = (type: string, data: unknown, entry: ResourceEntry | undefined, path: string) => {
+    if (type === IMAGE_REPRESENTATION) { const r = validateImageRepresentation(data); if (!r.valid) issues.push(...r.issues.map(e => ({ ...e, path: `${path}.${e.path}` }))); return }
     if (type === GEOMETRY_2D || type === GEOMETRY_3D) { const r = type === GEOMETRY_2D ? validateGeometry2D(data) : validateGeometry3D(data); if (!r.valid) issues.push(...r.issues.map(e => ({...e,path: `${path}.${e.path}`}))); return }
     if (type === MOSAIC_DIAGRAM) { const r = validateMosaicDiagram(data); if(!r.valid) issues.push(...r.issues.map(e=>({...e,path:`${path}.${e.path}`}))); return }
     if (type === DT_CODE) { const r = validateDTCode(data); if(!r.valid) issues.push(...r.issues.map(e=>({...e,path:`${path}.${e.path}`}))); return }

@@ -21,6 +21,8 @@ const src = computed(() => {
   return props.baseUrl && !/^(?:https:|data:)/i.test(value) ? new URL(value, props.baseUrl).href : value
 })
 const zoom = ref(1), x = ref(0), y = ref(0), image = ref<HTMLImageElement | null>(null)
+const touches = new Map<number, { x: number; y: number }>()
+let pinchDistance = 0
 const loaded = ref(false), drag = ref<{ x: number; y: number; originX: number; originY: number } | null>(null)
 const ready = computed(() => !!src.value && loaded.value && !error.value)
 function announce() { emit('view-change', { zoom: zoom.value, x: x.value, y: y.value }) }
@@ -28,9 +30,22 @@ function resetView() { zoom.value = 1; x.value = 0; y.value = 0; announce() }
 function fitToView() { resetView() }
 function scale(factor: number) { zoom.value = Math.max(0.1, Math.min(32, zoom.value * factor)); announce() }
 function wheel(e: WheelEvent) { if (!props.interactive || !props.active) return; e.preventDefault(); scale(e.deltaY < 0 ? 1.2 : 1 / 1.2) }
-function pointerDown(e: PointerEvent) { if (!props.interactive || !props.active) return; drag.value = { x: e.clientX, y: e.clientY, originX: x.value, originY: y.value }; (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId) }
-function pointerMove(e: PointerEvent) { if (!drag.value) return; x.value = drag.value.originX + e.clientX - drag.value.x; y.value = drag.value.originY + e.clientY - drag.value.y; announce() }
-function pointerUp() { drag.value = null }
+function pointerDown(e: PointerEvent) {
+  if (!props.interactive || !props.active) return
+  touches.set(e.pointerId, { x: e.clientX, y: e.clientY })
+  if (touches.size === 1) drag.value = { x: e.clientX, y: e.clientY, originX: x.value, originY: y.value }
+  else { drag.value = null; pinchDistance = distance() }
+  ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+}
+function distance() { const [a, b] = [...touches.values()]; return a && b ? Math.hypot(a.x - b.x, a.y - b.y) : 0 }
+function pointerMove(e: PointerEvent) {
+  if (!touches.has(e.pointerId)) return
+  touches.set(e.pointerId, { x: e.clientX, y: e.clientY })
+  if (touches.size >= 2) { const next = distance(); if (pinchDistance > 0 && next > 0) scale(next / pinchDistance); pinchDistance = next; return }
+  if (!drag.value) return
+  x.value = drag.value.originX + e.clientX - drag.value.x; y.value = drag.value.originY + e.clientY - drag.value.y; announce()
+}
+function pointerUp(e: PointerEvent) { touches.delete(e.pointerId); drag.value = null; pinchDistance = 0 }
 function capture(options: CaptureOptions = {}): Promise<Blob> {
   if (!ready.value || !image.value) return Promise.reject(new Error('Image viewer is not ready'))
   if (options.format && options.format !== 'image/png') return Promise.reject(new Error('Image viewer supports PNG capture'))

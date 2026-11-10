@@ -26,6 +26,7 @@ const props = withDefaults(defineProps<{
   label: string
   description?: string
   poster?: string
+  baseUrl?: string
   locale?: 'en' | 'uk'
   theme?: 'light' | 'dark'
   quality?: 'low' | 'medium' | 'high'
@@ -90,6 +91,7 @@ defineExpose({ resetView, fitToView, capture })
     :label="label"
     :description="description"
     :poster="poster"
+    :base-url="baseUrl"
     :locale="locale"
     :theme="theme"
     :quality="quality"

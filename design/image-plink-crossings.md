@@ -57,3 +57,7 @@ Remove the proposed `planar-diagram` representation and its duplicate schema pro
 ### Current implementation note
 
 The core now exposes `parsePLinkProjection(text)` and `importPLink2D(text)`. The latter creates a separate 2D polyline curve for each directed PLink edge, with ordered crossing passages. This is an initial conversion, not yet a topology-preserving import of connected components: connectivity and closure of source components are not encoded in the resulting edge curves. Additional geometric and integration tests are required before claiming lossless import.
+
+### Image integration
+
+The built-in `image` representation uses `{ "mimeType": "image/png", "src": "./knot.png" }`. `KnotImageViewer` is available directly or through `KnotViewer`. Relative image paths can be resolved with the `baseUrl` prop. The viewer uses an `<img>` element rather than inserting SVG markup. PNG capture is subject to browser origin policy.
