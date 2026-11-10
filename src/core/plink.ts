@@ -85,11 +85,43 @@ export function parsePLinkProjection(source: string): PLinkProjection {
  */
 export function importPLink2D(source: string): import('./knot').Geometry2DData {
   const projection = parsePLinkProjection(source)
-  const elements: import('./knot').InterpolatedCurve2D[] = projection.edges.map(([a, b], i) => ({
-    id: `edge-${i}`, type: 'curve', closed: false,
-    interpolation: { type: 'polyline' },
-    points: [projection.vertices[a], projection.vertices[b]],
-  }))
+  // Follow directed edges to form connected components instead of losing
+  // topology by treating every PLink edge as a separate rope.
+  const outgoing = new Map<number, number[]>(), incoming = new Map<number, number[]>()
+  projection.edges.forEach(([a, b], i) => {
+    outgoing.set(a, [...(outgoing.get(a) ?? []), i])
+    incoming.set(b, [...(incoming.get(b) ?? []), i])
+  })
+  for (let vertex = 0; vertex < projection.vertices.length; vertex++) {
+    if ((outgoing.get(vertex)?.length ?? 0) > 1 || (incoming.get(vertex)?.length ?? 0) > 1)
+      throw new Error('PLink projection has branching or duplicate directed edges')
+  }
+  const visited = new Set<number>()
+  const paths: Array<{ edges: number[]; vertices: number[]; closed: boolean }> = []
+  const follow = (start: number) => {
+    const edgeIds: number[] = [], vertices: number[] = [projection.edges[start][0]]
+    let current: number | undefined = start
+    while (current !== undefined && !visited.has(current)) {
+      visited.add(current)
+      edgeIds.push(current)
+      const nextVertex: number = projection.edges[current][1]
+      vertices.push(nextVertex)
+      current = outgoing.get(nextVertex)?.[0]
+    }
+    const closed = vertices.at(-1) === vertices[0]
+    if (current !== undefined && !closed) throw new Error('PLink edges form an inconsistent component')
+    if (closed) vertices.pop()
+    paths.push({ edges: edgeIds, vertices, closed })
+  }
+  projection.edges.forEach(([start], i) => { if (!visited.has(i) && !incoming.has(start)) follow(i) })
+  projection.edges.forEach((_, i) => { if (!visited.has(i)) follow(i) })
+  const edgeMap = new Map<number, string>()
+  const elements: import('./knot').InterpolatedCurve2D[] = paths.map((path, index) => {
+    const id = `component-${index}`
+    path.edges.forEach(edge => edgeMap.set(edge, id))
+    return { id, type: 'curve', closed: path.closed, interpolation: { type: 'polyline' },
+      points: path.vertices.map(vertex => projection.vertices[vertex]) }
+  })
   const visits: Array<{ edge: number; t: number; crossing: import('./knot').CrossingPassage }> = []
   const intersection = (a: number, b: number): [number, number] => {
     const [a0, a1] = projection.edges[a], [b0, b1] = projection.edges[b]
@@ -107,7 +139,7 @@ export function importPLink2D(source: string): import('./knot').Geometry2DData {
   projection.crossings.forEach((crossing, i) => {
     const [underT, overT] = intersection(crossing.underEdge, crossing.overEdge)
     const id = `crossing-${i}`
-    const under = `edge-${crossing.underEdge}`, over = `edge-${crossing.overEdge}`
+    const under = edgeMap.get(crossing.underEdge)!, over = edgeMap.get(crossing.overEdge)!
     if (crossing.type === 'virtual') {
       visits.push({ edge: crossing.underEdge, t: underT, crossing: { id, element: under, type: 'virtual', otherElement: over } })
       visits.push({ edge: crossing.overEdge, t: overT, crossing: { id, element: over, type: 'virtual', otherElement: under } })
@@ -116,7 +148,11 @@ export function importPLink2D(source: string): import('./knot').Geometry2DData {
       visits.push({ edge: crossing.overEdge, t: overT, crossing: { id, element: over, type: 'classical', underElement: under } })
     }
   })
-  visits.sort((a, b) => a.edge - b.edge || a.t - b.t)
+  visits.sort((a, b) => {
+    const first = paths.findIndex(path => path.edges.includes(a.edge))
+    const second = paths.findIndex(path => path.edges.includes(b.edge))
+    return first - second || paths[first].edges.indexOf(a.edge) - paths[second].edges.indexOf(b.edge) || a.t - b.t
+  })
   return {
     coordinateSystem: { xAxis: 'right', yAxis: 'up', scale: { kind: 'relative' } },
     elements,
