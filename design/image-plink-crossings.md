@@ -61,3 +61,5 @@ The core now exposes `parsePLinkProjection(text)` and `importPLink2D(text)`. The
 ### Image integration
 
 The built-in `image` representation uses `{ "mimeType": "image/png", "src": "./knot.png" }`. `KnotImageViewer` is available directly or through `KnotViewer`. Relative image paths can be resolved with the `baseUrl` prop. The viewer uses an `<img>` element rather than inserting SVG markup. PNG capture is subject to browser origin policy.
+
+The importer now joins consecutive directed edges into open or closed 2D curves, rejecting branching edge graphs. PLink source fixtures and independent topology verification remain required before lossless compatibility can be asserted.

@@ -62,9 +62,29 @@ v 0 1
     const data = importPLink2D(source)
     expect(data.elements).toHaveLength(2)
     expect(data.crossings).toEqual([
-      { id: 'crossing-0', element: 'edge-0', type: 'classical', overElement: 'edge-1' },
+      { id: 'crossing-0', element: 'component-0', type: 'classical', overElement: 'component-1' },
       { id: 'crossing-0', element: 'edge-1', type: 'classical', underElement: 'edge-0' },
     ])
+  })
+
+  it('joins a directed closed polygon into one closed curve', () => {
+    const source = `% Link Projection
+1
+0 0
+3
+0 0
+10 0
+5 10
+3
+0 1
+1 2
+2 0
+0
+-1`
+    const result = importPLink2D(source)
+    expect(result.elements).toHaveLength(1)
+    expect(result.elements[0].closed).toBe(true)
+    expect(result.elements[0].points).toEqual([[0, 0], [10, 0], [5, 10]])
   })
 
   it('rejects unsupported headers and dangling edges', () => {
