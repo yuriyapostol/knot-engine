@@ -9,6 +9,7 @@ API ядра імпортується з `knot-engine/core`; ця точка в�
 | `validateDTCode(value)` | `{valid:true,data,code,warnings,componentCount,crossingCount}` або помилки; числовий DT вузлів і зачеплень із перевіркою планарної реалізовності |
 | `validatePDCode(value)` | `{valid:true,data,code,warnings,componentCount,crossingCount}` або помилки; незалежна перевірка коду планарної діаграми |
 | `validateGeometry2D(value)` / `validateGeometry3D(value)` | `{valid:true,data,warnings}` або помилки |
+| `parsePLinkProjection(source)` / `importPLink2D(source)` | Розібрати текст PLink / перетворити його на геометрію 2D; див. [посібник](../guide/import-plink.uk.md) |
 | `importSVGPath2D(d, {idPrefix, yAxis})` | Масив сегментних 2D-кривих; помилкові або непідтримувані дані спричиняють виняток |
 | `exportSVGPath2D(curve, {yAxis})` | Нормалізовані абсолютні дані SVG path |
 | `validateMosaicDiagram(value)` | `{valid:true,data,diagram,warnings,componentCount,occupiedTileCount,crossingCount}` або помилки; незалежна перевірка мозаїчної діаграми |

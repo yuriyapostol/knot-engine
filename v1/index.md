@@ -9,6 +9,12 @@ This is the first contract generation, including package versions before 1.0. Sp
 - [Read the implemented `Knot` contract](specifications/knot.md).
 - [Explore open design questions](../design/knot-draft.md).
 
+## Documentation map
+
+- **Learn:** [getting started](guide/getting-started.md), [PLink import](guide/import-plink.md).
+- **Reference:** [Knot data](specifications/knot.md), [image representation](specifications/image.md), [functions](specifications/functions.md), [viewers](specifications/components.md).
+- **Background and decisions:** [architecture](../design/architecture.md), [source-format research](../design/representation-formats.md).
+
 ## Try it
 
 Select a fixture, edit its JSON, and inspect the result. This example uses the package's `KnotViewer` and validators. Invalid edits keep the last valid view and display an error. The JSON editor does not execute JavaScript.

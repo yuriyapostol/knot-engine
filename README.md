@@ -59,9 +59,11 @@ Import `Knot` and raw types from `knot-engine/core`: this entry point loads no V
 
 Methods: `resetView()`, `fitToView()`, `capture(options?)`. Capture supports PNG for 3D (default 512×512) and SVG/PNG for 2D, grid and mosaic (default SVG, 1024×1024), with a 2048×2048 maximum. Events: `ready`, `error`, `view-change`, plus 3D `camera-change`. Pass `view`, `views` and 3D `initialCamera` separately from knot data. See the [component API](v1/specifications/components.md) and [selection/view contracts](v1/specifications/viewer-contracts.md).
 
-[Image and PLink import](v1/specifications/image-plink.md) · [Data contract](v1/specifications/knot.md) · [Functions](v1/specifications/functions.md) · [Component](v1/specifications/components.md) · [JSON Schema](v1/schema/knot.schema.json) · [Examples](v1/examples/knots)
+[Data contract](v1/specifications/knot.md) · [Functions](v1/specifications/functions.md) · [Component](v1/specifications/components.md) · [JSON Schema](v1/schema/knot.schema.json) · [Examples](v1/examples/knots)
 
 Styling uses `.knot-engine-v1-viewer…` classes and inherited `--knot-engine-v1-viewer-*` variables. The package namespace includes the major generation and component name, allowing different major versions on the same page; initial development requires no backward compatibility, including CSS. See [current variables, defaults and examples](v1/specifications/components.md#css-namespace-and-styling).
+
+[Documentation map](v1/index.md) · [PLink import guide](v1/guide/import-plink.md) · [Image contract](v1/specifications/image.md)
 
 ## Documentation
 

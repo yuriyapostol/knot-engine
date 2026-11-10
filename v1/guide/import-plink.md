@@ -1,20 +1,4 @@
-# Image representations and PLink import
-
-## Image data
-
-Use the built-in `image` representation for a raster or vector file, without treating pixels as knot topology:
-
-```json
-{"mimeType":"image/svg+xml","src":"./images/trefoil.svg"}
-```
-
-`src` accepts HTTPS, relative paths or `data:` URLs with matching MIME types. The browser loads the resource; cross-origin restrictions can prevent PNG capture. `KnotImageViewer` is the image renderer; `KnotViewer` delegates to it.
-
-## 2D crossing kinds
-
-In `2d` geometry, crossing passages may use `classical` (also the default when `type` is omitted), `unknown`, or `virtual`. Classical passages use `underElement`/`overElement`; the other kinds use `otherElement`. The pair of passages must agree on the crossing identity and kind.
-
-## Import PLink text
+# Import PLink projections
 
 PLink is an **input format**, not a Knot representation type. Import it using `knot-engine/core`:
 

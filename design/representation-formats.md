@@ -22,7 +22,7 @@ Type identities use `https://yuriyapostol.github.io/knot-engine/v1/representatio
 
 Checked sources: [KnotScape PNG](https://knotinfo.org/Diagrams_All_Folders/diagrams_knotscape/3_1.png), [SnapPy SVG](https://knotinfo.org/Diagrams_All_Folders/diagrams_snappy/3_1.svg). The SVG has `viewBox` `14.000 14.000 472.000 472.000` and six paths using `M`/`C` commands. Gaps visually encode underpasses; the file contains no separate crossing graph or PD code.
 
-The implemented `image` representation stores `{mimeType, src}`. `src` supports HTTPS, relative references and matching MIME data URLs. It preserves the original image rather than extracting topology. See [image and PLink usage](../v1/specifications/image-plink.md).
+The implemented `image` representation stores `{mimeType, src}`. `src` supports HTTPS, relative references and matching MIME data URLs. It preserves the original image rather than extracting topology. See the [image contract](../v1/specifications/image.md) and [PLink import guide](../v1/guide/import-plink.md).
 
 The page uses CSS `scaleX(-1)` on the same files for mirrored KnotScape/SnapPy/Grid images. These are not additional original models. A change of diagram chirality must not be hidden as an ordinary camera rotation and automatically assigned to the same subject.
 
@@ -45,7 +45,7 @@ The page uses CSS `scaleX(-1)` on the same files for mirrored KnotScape/SnapPy/G
 
 Indices are zero-based. A closed component has equal first/last indices. `% Virtual Link Projection` prefixes crossing pairs with `v` or `r`; that semantic difference must not be discarded.
 
-The implemented `parsePLinkProjection(source)` reads PLink text, while `importPLink2D(source)` converts directed edges to connected 2D curves and crossing passages. It is an import format, **not** a separate representation type. Geometric ambiguities and unsupported input must be rejected; the current importer does not promise lossless round trips or complete support for all source files. See [image and PLink usage](../v1/specifications/image-plink.md).
+The implemented `parsePLinkProjection(source)` reads PLink text, while `importPLink2D(source)` converts directed edges to connected 2D curves and crossing passages. It is an import format, **not** a separate representation type. Geometric ambiguities and unsupported input must be rejected; the current importer does not promise lossless round trips or complete support for all source files. See the [image contract](../v1/specifications/image.md) and [PLink import guide](../v1/guide/import-plink.md).
 
 The inspected KnotInfo page does not link the source `.lnk` for this specific `3_1` SVG. Availability of the PLink format does not prove lossless reverse conversion of that SVG.
 

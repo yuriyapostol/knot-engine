@@ -59,9 +59,11 @@ defineProps<{ knot: RawKnot }>()
 
 Методи: `resetView()`, `fitToView()`, `capture(options?)`. Знімки підтримують PNG для 3D (типово 512×512) та SVG/PNG для 2D, сіткових діаграм і мозаїки (типово SVG, 1024×1024), з максимумом 2048×2048. Події: `ready`, `error`, `view-change` і 3D `camera-change`. Передавайте `view`, `views` та 3D `initialCamera` окремо від даних вузла. Див. [API компонентів](v1/specifications/components.uk.md) і [контракти вибору/ракурсів](v1/specifications/viewer-contracts.uk.md).
 
-[Зображення та імпорт PLink](v1/specifications/image-plink.uk.md) · [Контракт даних](v1/specifications/knot.uk.md) · [Функції](v1/specifications/functions.uk.md) · [Компонент](v1/specifications/components.uk.md) · [JSON Schema](v1/schema/knot.schema.json) · [Приклади](v1/examples/knots)
+[Контракт даних](v1/specifications/knot.uk.md) · [Функції](v1/specifications/functions.uk.md) · [Компонент](v1/specifications/components.uk.md) · [JSON Schema](v1/schema/knot.schema.json) · [Приклади](v1/examples/knots)
 
 Оформлення використовує класи `.knot-engine-v1-viewer…` та наслідувані змінні `--knot-engine-v1-viewer-*`. Простір імен пакета містить мажорне покоління й назву компонента та дозволяє використовувати різні мажорні версії на одній сторінці; зворотна сумісність на початковій стадії не вимагається, включно з CSS. [Поточні змінні, типові значення та приклади](v1/specifications/components.uk.md#простір-імен-css-та-оформлення).
+
+[Карта документації](v1/index.uk.md) · [Імпорт PLink](v1/guide/import-plink.uk.md) · [Контракт зображення](v1/specifications/image.uk.md)
 
 ## Документація
 
