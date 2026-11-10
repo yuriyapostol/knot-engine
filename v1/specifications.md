@@ -17,6 +17,11 @@ These documents define the **implemented** contract. Start with the core data mo
 - [PD codes](specifications/pd-code.md).
 - [DT codes](specifications/dt-code.md).
 
+## Standard resources and registries
+
+- [Standard definitions](resources/index.md) — built-in types, algorithm purposes, tile sets and conventions.
+- [JSON registry](resources/standard.json) — machine-readable definitions.
+
 ## Runtime and integration
 
 - [Functions](specifications/functions.md) — validation, selection and import APIs.
