@@ -35,16 +35,16 @@ function geometryIssues(data: Geometry, is2d: boolean): ValidationIssue[] {
     const curves = new Set(data.elements.filter(e => e.type === 'curve').map(e => e.id))
     crossings.forEach((passage, i) => {
       if (!curves.has(passage.element)) issues.push(issue(`crossings.${i}.element`, 'Unknown curve'))
-      const other = 'underElement' in passage ? passage.underElement : passage.overElement
+      const other = 'otherElement' in passage ? passage.otherElement : 'underElement' in passage ? passage.underElement : passage.overElement
       if (!other || !curves.has(other)) issues.push(issue(`crossings.${i}`, 'Unknown crossing curve'))
       byId.set(passage.id, [...(byId.get(passage.id) ?? []), passage])
     })
     for (const [id, passages] of byId) {
       if (passages.length !== 2) { issues.push(issue('crossings', `Crossing ${id} must have two passages`)); continue }
       const [a, b] = passages
-      const otherA = 'underElement' in a ? a.underElement : a.overElement
-      const otherB = 'underElement' in b ? b.underElement : b.overElement
-      if (a.element !== otherB || b.element !== otherA || ('underElement' in a) === ('underElement' in b)) issues.push(issue('crossings', `Inconsistent crossing ${id}`))
+      const otherA = 'otherElement' in a ? a.otherElement : 'underElement' in a ? a.underElement : a.overElement
+      const otherB = 'otherElement' in b ? b.otherElement : 'underElement' in b ? b.underElement : b.overElement
+      if (a.element !== otherB || b.element !== otherA || (a.type ?? 'classical') !== (b.type ?? 'classical') || ((a.type ?? 'classical') === 'classical' && ('underElement' in a) === ('underElement' in b))) issues.push(issue('crossings', `Inconsistent crossing ${id}`))
     }
   }
   return issues

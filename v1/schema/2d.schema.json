@@ -311,6 +311,9 @@
             "underElement": {
               "type": "string",
               "minLength": 1
+            },
+            "type": {
+              "const": "classical"
             }
           },
           "required": [
@@ -334,12 +337,45 @@
             "overElement": {
               "type": "string",
               "minLength": 1
+            },
+            "type": {
+              "const": "classical"
             }
           },
           "required": [
             "id",
             "element",
             "overElement"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "element": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": {
+              "enum": [
+                "unknown",
+                "virtual"
+              ]
+            },
+            "otherElement": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "id",
+            "element",
+            "type",
+            "otherElement"
           ],
           "additionalProperties": false
         }

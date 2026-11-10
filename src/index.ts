@@ -1,5 +1,6 @@
 export { default as KnotGridViewer } from './components/KnotGridViewer.vue'
 export type { GridView } from './components/KnotGridViewer.vue'
+export { default as KnotImageViewer } from './components/KnotImageViewer.vue'
 export { default as Knot2DViewer } from './components/Knot2DViewer.vue'
 export type { Geometry2DView } from './components/Knot2DViewer.vue'
 export { default as KnotMosaicViewer } from './components/KnotMosaicViewer.vue'

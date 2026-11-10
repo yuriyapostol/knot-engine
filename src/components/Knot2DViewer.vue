@@ -80,8 +80,13 @@ const result = computed(() => {
     }
     const gap = svgExtent * 0.018
     const paths = crossingStrokes2D(project(checked.data), project(flattened), positions, gap, svgNumber)
+    const markers = positions.flatMap(position => {
+      const passage = checked.data.crossings?.find(c => c.id === position.id && c.element === position.element)
+      if (!passage || !('type' in passage) || (passage.type !== 'virtual' && passage.type !== 'unknown')) return []
+      return [{ id: position.id, type: passage.type, x: (position.x - fit.center[0]) / renderUnit, y: (position.y - fit.center[1]) / renderUnit }]
+    }).filter((marker, index, list) => list.findIndex(other => other.id === marker.id) === index)
     const transform = `translate(${fit.center[0]} ${-fit.center[1]}) scale(${renderUnit})`
-    return { data: { paths, fit, gap, transform, maskExtent: svgExtent * 1.12 }, error: null }
+    return { data: { paths, markers, fit, gap, transform, maskExtent: svgExtent * 1.12 }, error: null }
   } catch (e) { return { data: null, error: (e as Error).message } }
 })
 const resolvedView = computed(() => resolveRepresentationView(props.view, props.views, props.registries, props.knot?.namespaces))
@@ -192,6 +197,9 @@ defineExpose({ resetView, fitToView, capture })
         <template v-for="(path, i) in result.data.paths" :key="path.id">
           <use v-if="path.over" :href="`#${maskId}-curve-${i}`" :stroke-dasharray="path.over.array" :stroke-dashoffset="svgNumber(path.over.offset)" />
         </template>
+        <g v-for="marker in result.data.markers" :key="marker.id" stroke="currentColor" fill="none" :stroke-width="svgNumber(result.data.gap * 0.65)">
+          <circle :cx="svgNumber(marker.x)" :cy="svgNumber(-marker.y)" :r="svgNumber(result.data.gap * (marker.type === 'virtual' ? 1.2 : 0.9))" :stroke-dasharray="marker.type === 'unknown' ? '2 3' : undefined" />
+        </g>
       </g>
     </svg>
     <div v-else class="knot-engine-v1-viewer__fallback" :role="error ? 'alert' : undefined">

@@ -24,7 +24,7 @@ function freeze<T>(value: T): T {
 export const STANDARD_RESOURCES = freeze(standardResources as unknown as RawResourceRegistry)
 /** Reserved v1 spellings, scoped to the field's resource kind. */
 export const STANDARD_NAMES = freeze({
-  'representation-type': ['2d', '3d', 'grid-diagram', 'mosaic-diagram', 'pd-code', 'dt-code'],
+  'representation-type': ['image', '2d', '3d', 'grid-diagram', 'mosaic-diagram', 'pd-code', 'dt-code'],
   'object-type': ['rope', 'support', 'carabiner'],
   'algorithm-purpose': ['tying', 'untying', 'transformation', 'adjustment'],
   'tile-set': ['lomonaco-kauffman-11'],

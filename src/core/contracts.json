@@ -2511,6 +2511,9 @@
             "underElement": {
               "type": "string",
               "minLength": 1
+            },
+            "type": {
+              "const": "classical"
             }
           },
           "required": [
@@ -2534,12 +2537,45 @@
             "overElement": {
               "type": "string",
               "minLength": 1
+            },
+            "type": {
+              "const": "classical"
             }
           },
           "required": [
             "id",
             "element",
             "overElement"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "element": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": {
+              "enum": [
+                "unknown",
+                "virtual"
+              ]
+            },
+            "otherElement": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "id",
+            "element",
+            "type",
+            "otherElement"
           ],
           "additionalProperties": false
         }
@@ -3267,6 +3303,25 @@
           "additionalProperties": false
         }
       ]
+    },
+    "imageRepresentation": {
+      "type": "object",
+      "properties": {
+        "mimeType": {
+          "type": "string",
+          "pattern": "^image/[a-zA-Z0-9.+-]+$"
+        },
+        "src": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1048576
+        }
+      },
+      "required": [
+        "mimeType",
+        "src"
+      ],
+      "additionalProperties": false
     }
   }
 }

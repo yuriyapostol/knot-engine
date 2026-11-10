@@ -383,6 +383,29 @@
           }
         ]
       }
+    },
+    {
+      "kind": "representation-type",
+      "resource": {
+        "id": "knot-engine:representation-types/image",
+        "name": "image",
+        "description": "External or embedded raster/vector image",
+        "dataSchema": {
+          "ref": "knot-engine:schema/image.schema.json"
+        },
+        "specification": "knot-engine:specifications/knot.html",
+        "viewSpace": "plane",
+        "names": [
+          {
+            "language": "en",
+            "value": "Image"
+          },
+          {
+            "language": "uk",
+            "value": "Зображення"
+          }
+        ]
+      }
     }
   ]
 }

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuriyapostol.github.io/knot-engine/v1/schema/image.schema.json",
+  "$ref": "#/$defs/imageRepresentation",
+  "$defs": {
+    "imageRepresentation": {
+      "type": "object",
+      "properties": {
+        "mimeType": {
+          "type": "string",
+          "pattern": "^image/[a-zA-Z0-9.+-]+$"
+        },
+        "src": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1048576
+        }
+      },
+      "required": [
+        "mimeType",
+        "src"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
