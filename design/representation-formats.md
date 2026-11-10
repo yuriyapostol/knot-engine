@@ -1,6 +1,6 @@
 # KnotInfo representations: source data and adaptations
 
-Source-format research, checked on 12 October 2026. Implemented adaptations link to their current specifications; image containers and editable planar diagrams remain candidates. This note does not define automatic importers. See [open design questions](knot-draft.md).
+Source-format research, checked on 12 October 2026. Implemented adaptations use the current contracts. PLink has a text-to-2D importer; the source-format analysis below is not a general importer API. See [open design questions](knot-draft.md).
 
 ## 1. What the page actually provides
 
@@ -8,8 +8,8 @@ The [3_1 diagrams page](https://knotinfo.org/diagram_display.php?3_1) provides:
 
 | Label | Actual data | Representation mapping |
 | --- | --- | --- |
-| KnotScape | PNG | `diagram-image`; structural diagram separately if original data can be obtained |
-| SnapPy | SVG with cubic Bezier paths | `diagram-image`; SnapPea/PLink projection for editable diagrams |
+| KnotScape | PNG | `image`; structural diagram separately if original data can be obtained |
+| SnapPy | SVG with cubic Bezier paths | `image`; SnapPea/PLink projection for editable diagrams |
 | 3D | JavaScript XYZ array and curve construction settings | `3d` with explicit interpolation |
 | Grid | SVG and a coordinate list in the knot record | `grid-diagram` with encoding profiles |
 | Minimal mosaic and tile diagrams | PNG; structured mosaics in the author's repository | `mosaic-diagram` with a defined tile set |
@@ -22,7 +22,7 @@ Type identities use `https://yuriyapostol.github.io/knot-engine/v1/representatio
 
 Checked sources: [KnotScape PNG](https://knotinfo.org/Diagrams_All_Folders/diagrams_knotscape/3_1.png), [SnapPy SVG](https://knotinfo.org/Diagrams_All_Folders/diagrams_snappy/3_1.svg). The SVG has `viewBox` `14.000 14.000 472.000 472.000` and six paths using `M`/`C` commands. Gaps visually encode underpasses; the file contains no separate crossing graph or PD code.
 
-Proposed `diagram-image.data` requires `mediaType` (initially `image/png` or `image/svg+xml`) and `content`, exactly one of `{uri: URL}` or `{base64: string}`; `description` is optional. This is our container for an existing file, not a topology format. URI content is an external dependency; autonomous export includes its bytes. Topological analysis is not promised.
+The implemented `image` representation stores `{mimeType, src}`. `src` supports HTTPS, relative references and matching MIME data URLs. It preserves the original image rather than extracting topology. See [image and PLink usage](../v1/specifications/image-plink.md).
 
 The page uses CSS `scaleX(-1)` on the same files for mirrored KnotScape/SnapPy/Grid images. These are not additional original models. A change of diagram chirality must not be hidden as an ordinary camera rotation and automatically assigned to the same subject.
 
@@ -45,9 +45,7 @@ The page uses CSS `scaleX(-1)` on the same files for mirrored KnotScape/SnapPy/G
 
 Indices are zero-based. A closed component has equal first/last indices. `% Virtual Link Projection` prefixes crossing pairs with `v` or `r`; that semantic difference must not be discarded.
 
-Proposed `planar-diagram.data` has `vertices` `[x,y][]`, `edges` `[start,end][]`, `crossings` `{under,over}[]`, `components` `{start,end}[]`, and an explicit 2D coordinate system. The initial profile covers ordinary crossings only. Virtual crossings need another shape and validation; unsupported input must be rejected. Active vertex is editor state, not topology.
-
-This adaptation preserves geometry and explicit over/under needed by editing/rendering; it does not invent layout from PD alone. Validate indices, nonzero edges, component ordering, geometric crossing consistency, and absence of ambiguous touching/overlapping segments. Numerical tolerance remains open. Preserve original text as provenance: the PLink writer formats integer coordinates, so exact export of arbitrary fractional geometry is not guaranteed.
+The implemented `parsePLinkProjection(source)` reads PLink text, while `importPLink2D(source)` converts directed edges to connected 2D curves and crossing passages. It is an import format, **not** a separate representation type. Geometric ambiguities and unsupported input must be rejected; the current importer does not promise lossless round trips or complete support for all source files. See [image and PLink usage](../v1/specifications/image-plink.md).
 
 The inspected KnotInfo page does not link the source `.lnk` for this specific `3_1` SVG. Availability of the PLink format does not prove lossless reverse conversion of that SVG.
 
@@ -130,6 +128,6 @@ One `grid-diagram` type now supports `xo` and `vertex-pairs`, both zero-based wi
 
 ## 6. Implementation and remaining import work
 
-3D geometry, both grid encodings, mosaics, PD and numeric DT for knots/links have implemented data and validation contracts. 2D/3D geometry, grids and mosaics also have built-in viewers. Image containers, editable planar diagrams, other notations and format converters need separate contracts and tests.
+2D/3D geometry, image references, both grid encodings, mosaics, PD and numeric DT for knots/links have implemented data and validation contracts. Built-in viewers cover image, 2D/3D geometry, grids and mosaics; PLink text imports into 2D geometry. Other source-format conversions and broad real-world PLink compatibility need independent fixtures and tests.
 
 Each import needs primary-source fixtures and preservation checks for geometry, closure, components, crossings, orientation, parameterization and provenance. A generated layout must not be presented as an original source image. Mathematical equivalence remains a separate task.
