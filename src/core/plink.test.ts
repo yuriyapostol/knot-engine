@@ -84,7 +84,7 @@ v 0 1
     const result = importPLink2D(source)
     expect(result.elements).toHaveLength(1)
     expect(result.elements[0].closed).toBe(true)
-    expect(result.elements[0].points).toEqual([[0, 0], [10, 0], [5, 10]])
+    expect(result.elements[0]).toMatchObject({ points: [[0, 0], [10, 0], [5, 10]] })
   })
 
   it('rejects unsupported headers and dangling edges', () => {
