@@ -77,3 +77,49 @@ export function parsePLinkProjection(source: string): PLinkProjection {
   if (position !== lines.length) throw new Error('Unexpected trailing PLink content')
   return { virtual, components, vertices, edges, crossings, activeVertex }
 }
+
+/**
+ * Convert PLink's edge-based drawing to existing 2D curves.
+ * Edge identity is preserved in the generated curve IDs; each crossing
+ * contributes one ordered passage on each incident edge.
+ */
+export function importPLink2D(source: string): import('./knot').Geometry2DData {
+  const projection = parsePLinkProjection(source)
+  const elements: import('./knot').InterpolatedCurve2D[] = projection.edges.map(([a, b], i) => ({
+    id: `edge-${i}`, type: 'curve', closed: false,
+    interpolation: { type: 'polyline' },
+    points: [projection.vertices[a], projection.vertices[b]],
+  }))
+  const visits: Array<{ edge: number; t: number; crossing: import('./knot').CrossingPassage }> = []
+  const intersection = (a: number, b: number): [number, number] => {
+    const [a0, a1] = projection.edges[a], [b0, b1] = projection.edges[b]
+    const [p, q, r, s] = [projection.vertices[a0], projection.vertices[a1], projection.vertices[b0], projection.vertices[b1]]
+    const ux = q[0] - p[0], uy = q[1] - p[1], vx = s[0] - r[0], vy = s[1] - r[1]
+    const det = ux * vy - uy * vx
+    if (Math.abs(det) <= 1e-12 * Math.hypot(ux, uy) * Math.hypot(vx, vy))
+      throw new Error('PLink crossing edges must intersect transversely')
+    const dx = r[0] - p[0], dy = r[1] - p[1]
+    const ta = (dx * vy - dy * vx) / det, tb = (dx * uy - dy * ux) / det
+    if (ta <= 0 || ta >= 1 || tb <= 0 || tb >= 1)
+      throw new Error('PLink crossing must lie inside both edges')
+    return [ta, tb]
+  }
+  projection.crossings.forEach((crossing, i) => {
+    const [underT, overT] = intersection(crossing.underEdge, crossing.overEdge)
+    const id = `crossing-${i}`
+    const under = `edge-${crossing.underEdge}`, over = `edge-${crossing.overEdge}`
+    if (crossing.type === 'virtual') {
+      visits.push({ edge: crossing.underEdge, t: underT, crossing: { id, element: under, type: 'virtual', otherElement: over } })
+      visits.push({ edge: crossing.overEdge, t: overT, crossing: { id, element: over, type: 'virtual', otherElement: under } })
+    } else {
+      visits.push({ edge: crossing.underEdge, t: underT, crossing: { id, element: under, type: 'classical', overElement: over } })
+      visits.push({ edge: crossing.overEdge, t: overT, crossing: { id, element: over, type: 'classical', underElement: under } })
+    }
+  })
+  visits.sort((a, b) => a.edge - b.edge || a.t - b.t)
+  return {
+    coordinateSystem: { xAxis: 'right', yAxis: 'up', scale: { kind: 'relative' } },
+    elements,
+    crossings: visits.map(visit => visit.crossing),
+  }
+}
