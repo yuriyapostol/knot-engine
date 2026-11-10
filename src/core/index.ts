@@ -23,5 +23,5 @@ export { validateGeometry2D, validateGeometry3D, applyStepData } from './validat
 export { importSVGPath2D, exportSVGPath2D } from './svgPath2d'
 export type { SVGPath2DOptions, SVGPath2DImportOptions } from './svgPath2d'
 
-export { parsePLinkProjection } from './plink'
+export { parsePLinkProjection, importPLink2D } from './plink'
 export type { PLinkProjection } from './plink'
