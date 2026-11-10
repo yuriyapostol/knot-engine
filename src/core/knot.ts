@@ -47,7 +47,8 @@ export interface Mesh3D { id: string; type: 'mesh'; object?: string; vertices: P
 export type GeometryElement2D = Curve2D
 export type GeometryElement3D = Curve3D | Mesh3D
 export type CrossingPassage = { id: string; element: string } & (
-  { underElement: string; overElement?: never } | { overElement: string; underElement?: never }
+  ({ type?: 'classical' } & ({ underElement: string; overElement?: never } | { overElement: string; underElement?: never }))
+  | { type: 'unknown' | 'virtual'; otherElement: string; underElement?: never; overElement?: never }
 )
 export interface Geometry2DData { coordinateSystem: { xAxis: 'right'; yAxis: 'up'; scale: CoordinateScale }; elements: GeometryElement2D[]; crossings?: CrossingPassage[] }
 export interface Geometry3DData { coordinateSystem: { handedness: 'right'; upAxis: 'y'; scale: CoordinateScale }; elements: GeometryElement3D[] }
