@@ -63,6 +63,8 @@ Methods: `resetView()`, `fitToView()`, `capture(options?)`. Capture supports PNG
 
 Styling uses `.knot-engine-v1-viewer…` classes and inherited `--knot-engine-v1-viewer-*` variables. The package namespace includes the major generation and component name, allowing different major versions on the same page; initial development requires no backward compatibility, including CSS. See [current variables, defaults and examples](v1/specifications/components.md#css-namespace-and-styling).
 
+[Documentation map](v1/index.md) · [PLink import guide](v1/guide/import-plink.md) · [Image contract](v1/specifications/image.md)
+
 ## Documentation
 
 Explain consequential contract decisions in the relevant specifications, with sources for definitions and implementations, checked examples and reasons for deviations from adopted conventions. Identify local project decisions as such rather than external standards. Data attribution, contributions and licensing follow the [metadata contract](v1/specifications/sources.md).

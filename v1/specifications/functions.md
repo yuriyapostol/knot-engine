@@ -9,6 +9,7 @@ Import core APIs from `knot-engine/core`; this entry point uses no Vue, Three.js
 | `validateDTCode(value)` | `{valid:true,data,code,warnings,componentCount,crossingCount}` or issues; numeric knot/link DT with planar-realizability validation |
 | `validatePDCode(value)` | `{valid:true,data,code,warnings,componentCount,crossingCount}` or issues; independent planar diagram code validation |
 | `validateGeometry2D(value)` / `validateGeometry3D(value)` | `{valid:true,data,warnings}` or issues |
+| `parsePLinkProjection(source)` / `importPLink2D(source)` | Parse PLink projection text / convert it to 2D geometry; see [import guide](../guide/import-plink.md) |
 | `importSVGPath2D(d, {idPrefix, yAxis})` | Array of segmented 2D curves; invalid or unsupported path data throws |
 | `exportSVGPath2D(curve, {yAxis})` | Normalized absolute SVG path data |
 | `validateMosaicDiagram(value)` | `{valid:true,data,diagram,warnings,componentCount,occupiedTileCount,crossingCount}` or issues; independent mosaic diagram validation |

@@ -34,3 +34,8 @@ Use the [open-rope knot](../examples/knots/open-rope.json) as `open-rope.json`. 
 <!-- interactive-example -->
 
 The same fixture files are used by the documentation and interactive example. Changes here remain in the browser unless you save the JSON file. No source file is overwritten.
+
+## Import external data
+
+- [Import a PLink projection](import-plink.md).
+- [Image representation contract](../specifications/image.md).
