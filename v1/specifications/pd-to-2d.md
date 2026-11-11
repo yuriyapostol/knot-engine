@@ -22,6 +22,6 @@ if (!validateGeometry2D(geometry).valid) throw new Error('Invalid 2D geometry')
 
 ## Viewing
 
-`Knot2DViewer` accepts a `pd-code` representation and converts it automatically. The generic `KnotViewer` also supports `pd-code` via its built-in viewer registry. Specify `representationId` when the knot contains multiple supported representations. The PD input remains unchanged.
+Conversion is **explicit** and independent of viewers. `convertPDTo2D(code)` returns geometry data that can be stored as a `2d` representation in a `Knot`; only then can `Knot2DViewer` or `KnotViewer` render it. Neither viewer implicitly accepts or converts `pd-code` representations.
 
-CI covers the trefoil, a two-component link, isolated crossings, crossing-free components, and both viewer paths. Passing tests does not constitute a mathematical proof of correctness for every possible PD code.
+CI tests the trefoil, a two-component link, isolated crossings, crossing-free components, and rejection of implicit PD conversion by viewers. Passing tests does not guarantee correctness for every possible PD code.
