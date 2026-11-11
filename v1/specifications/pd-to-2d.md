@@ -19,3 +19,9 @@ const geometry = convertPDTo2D({
 })
 if (!validateGeometry2D(geometry).valid) throw new Error('Invalid 2D geometry')
 ```
+
+## Viewing
+
+`Knot2DViewer` accepts a `pd-code` representation and converts it automatically. The generic `KnotViewer` also supports `pd-code` via its built-in viewer registry. Specify `representationId` when the knot contains multiple supported representations. The PD input remains unchanged.
+
+CI covers the trefoil, a two-component link, isolated crossings, crossing-free components, and both viewer paths. Passing tests does not constitute a mathematical proof of correctness for every possible PD code.
