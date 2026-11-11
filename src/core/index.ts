@@ -10,6 +10,7 @@ export { STANDARD_RESOURCES, STANDARD_NAMES, resolveResourceURI, expandURI, vali
 export { KNOT_LIMITS } from './validation'
 export * from './validateMosaicDiagram'
 export * from './validatePDCode'
+export * from './tracePDComponents'
 export { validateDTCode } from './validateDTCode'
 export * from './selectRepresentation'
 
