@@ -174,5 +174,8 @@ it('renders a PD-only knot through the 2D viewer without modifying the input', a
   expect(mounted.ready).toBeGreaterThan(0)
   expect(mounted.root.querySelector('[data-state="ready"]')).not.toBeNull()
   expect(mounted.root.querySelector('svg')).not.toBeNull()
+  const generic = await mount({ knot, representationId: 'pd' }, true)
+  expect(generic.errors).toEqual([])
+  expect(generic.root.querySelector('[data-state="ready"]')).not.toBeNull()
   expect(JSON.stringify(knot)).toBe(before)
 })
