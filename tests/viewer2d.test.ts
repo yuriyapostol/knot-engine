@@ -157,3 +157,22 @@ it('renders and captures mixed Bezier paths and one-segment closed loops through
     expect(JSON.stringify(knot)).toBe(before)
   }
 })
+
+it('renders a PD-only knot through the 2D viewer without modifying the input', async () => {
+  const knot: RawKnot = {
+    schema: 'Knot', schemaVersion: 1,
+    namespaces: { 'knot-engine': 'https://yuriyapostol.github.io/knot-engine/v1/' },
+    id: 'pd-trefoil', subject: { id: 'pd-trefoil-subject' },
+    representations: [{
+      id: 'pd', type: 'pd-code',
+      data: { convention: 'pd-ccw-under-first', crossings: [[1,5,2,4],[3,1,4,6],[5,3,6,2]] },
+    }],
+  }
+  const before = JSON.stringify(knot)
+  const mounted = await mount({ knot, representationId: 'pd' })
+  expect(mounted.errors).toEqual([])
+  expect(mounted.ready).toBeGreaterThan(0)
+  expect(mounted.root.querySelector('[data-state="ready"]')).not.toBeNull()
+  expect(mounted.root.querySelector('svg')).not.toBeNull()
+  expect(JSON.stringify(knot)).toBe(before)
+})
