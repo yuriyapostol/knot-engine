@@ -1,4 +1,4 @@
-import type { PDCode } from './knot'
+import type { CrossingPassage, PDCode } from './knot'
 import { validatePDCode } from './validatePDCode'
 
 /** A visit to a crossing while following one continuous strand. */
@@ -59,4 +59,26 @@ export function tracePDComponents(code: PDCode): PDComponent[] {
   }
   for (let i = 0; i < (code.unlinkedComponents ?? 0); i++) components.push({ visits: [] })
   return components
+}
+
+/**
+ * Build ordered crossing records for the 2D contract. The caller must supply
+ * a planar drawing whose component orientation follows tracePDComponents().
+ * Each crossing contributes exactly two passages, including self-crossings.
+ */
+export function pdCrossingPassages(code: PDCode): CrossingPassage[] {
+  const components = tracePDComponents(code)
+  const ids = components.map((_, i) => `component-${i + 1}`)
+  const result: CrossingPassage[] = []
+  for (let i = 0; i < components.length; i++) {
+    for (const visit of components[i].visits) {
+      const otherIndex = components.findIndex((component, index) =>
+        index !== i && component.visits.some(v => v.crossing === visit.crossing))
+      const other = otherIndex < 0 ? ids[i] : ids[otherIndex]
+      result.push(visit.under
+        ? { id: `crossing-${visit.crossing + 1}`, element: ids[i], overElement: other }
+        : { id: `crossing-${visit.crossing + 1}`, element: ids[i], underElement: other })
+    }
+  }
+  return result
 }
