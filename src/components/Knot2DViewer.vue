@@ -7,7 +7,7 @@ import { useGuides, type ViewerGuides, type ResolvedViewerGuides } from './guide
 import GuideControls from './GuideControls.vue'
 import PlaneGuides from './PlaneGuides.vue'
 import { computed, onMounted, ref, useId, watch } from 'vue'
-import { GEOMETRY_2D, PD_CODE, convertPDTo2D, selectRepresentation, validateGeometry2D, resolveRepresentationView, type FlattenedGeometry2DData, type Geometry2DData, type RawKnot, type RawResourceRegistry, type Reference, type ViewDefinition } from '../core'
+import { GEOMETRY_2D, selectRepresentation, validateGeometry2D, resolveRepresentationView, type FlattenedGeometry2DData, type Geometry2DData, type RawKnot, type RawResourceRegistry, type Reference, type ViewDefinition } from '../core'
 import { locateCrossings } from './geometry2d'
 import { crossingStrokes2D, CROSSING_MASK_SCALE } from './crossingStrokes2d'
 import { flattenGeometry2D, mapCurve2D } from './curves2d'
@@ -55,21 +55,10 @@ const maskId = ref(`knot-2d-${useId().replace(/[^a-zA-Z0-9_-]/g, '-')}`)
 onMounted(() => { maskId.value += `-${nextMaskId++}` })
 const camera = ref<Geometry2DView>({ center: [0, 0], height: 1 })
 const canInteract = computed(() => props.active && props.interactive)
-const selection = computed(() => {
-  if (!props.knot) return null
-  const geometry = selectRepresentation(props.knot, { representationId: props.representationId, type: GEOMETRY_2D }, { registries: props.registries })
-  if (geometry.ok || (geometry.issues[0]?.code !== 'UNSUPPORTED_REPRESENTATION' && geometry.issues[0]?.code !== 'REPRESENTATION_NOT_FOUND')) return geometry
-  return selectRepresentation(props.knot, { representationId: props.representationId, type: PD_CODE }, { registries: props.registries })
-})
+const selection = computed(() => props.knot ? selectRepresentation(props.knot, { representationId: props.representationId, type: GEOMETRY_2D }, { registries: props.registries }) : null)
 const result = computed(() => {
   if (!selection.value?.ok) return { data: null, error: selection.value && !selection.value.ok ? selection.value.issues[0]?.message : null }
-  let geometry: unknown
-  try {
-    geometry = selection.value.typeUri === PD_CODE
-      ? convertPDTo2D(selection.value.representation.data as Parameters<typeof convertPDTo2D>[0])
-      : selection.value.representation.data
-  } catch (e) { return { data: null, error: (e as Error).message } }
-  const checked = validateGeometry2D(geometry)
+  const checked = validateGeometry2D(selection.value.representation.data)
   if (!checked.valid) return { data: null, error: checked.issues[0]?.message }
   try {
     const flattened = flattenGeometry2D(checked.data)
