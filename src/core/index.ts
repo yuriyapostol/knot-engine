@@ -28,3 +28,5 @@ export { parsePLinkProjection, importPLink2D } from './plink'
 export type { PLinkProjection } from './plink'
 
 export { validateImageRepresentation } from './validateImageRepresentation'
+
+export * from './convertPDTo2D'
