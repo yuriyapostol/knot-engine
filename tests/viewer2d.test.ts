@@ -157,3 +157,14 @@ it('renders and captures mixed Bezier paths and one-segment closed loops through
     expect(JSON.stringify(knot)).toBe(before)
   }
 })
+
+it('does not implicitly convert PD representations in either viewer', async () => {
+  const knot = structuredClone(example) as RawKnot
+  const representation = knot.representations!.find(r => r.id === 'crossing-2d')!
+  representation.type = 'pd-code'
+  representation.data = { convention: 'pd-ccw-under-first', crossings: [[1,5,2,4],[3,1,4,6],[5,3,6,2]] }
+  const direct = await mount({ knot })
+  expect(direct.root.querySelector('[data-state="error"]')).not.toBeNull()
+  const generic = await mount({ knot }, true)
+  expect(generic.root.querySelector('[data-state="error"]')).not.toBeNull()
+})
