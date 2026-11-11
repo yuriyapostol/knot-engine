@@ -42,6 +42,20 @@ export function convertPDTo2D(code: PDCode): Geometry2DData {
 
   let offset = 0
   for (const group of groups) {
+    // A one-crossing component consists of two loop edges. Its expanded
+    // graph has parallel sides, so no non-square simple exterior face.
+    // Place its four ports explicitly in CCW order instead.
+    if (group.length === 1) {
+      const c = group[0]
+      const size = 4
+      const ports: Point2D[] = [
+        [offset, 0], [offset + size, 0],
+        [offset + size, size], [offset, size],
+      ]
+      for (let slot = 0; slot < 4; slot++) points[4*c + slot] = ports[slot]
+      offset += size + 4
+      continue
+    }
     const vertices = group.flatMap(c => [4*c, 4*c+1, 4*c+2, 4*c+3])
     // Each port has three distinct darts. Unlike a neighbour map, darts
     // distinguish parallel edges (including a PD edge along a square side).
