@@ -50,6 +50,7 @@ export function tracePDComponents(code: PDCode): PDComponent[] {
     do {
       if (visited[h]) throw new Error('PD strand traversal returned to a different cycle')
       visited[h] = 1
+      visited[opposite(h)] = 1
       const vertex = Math.floor(h / 4), slot = h % 4
       visits.push({ crossing: vertex, slot, edge: code.crossings[vertex][slot], under: slot % 2 === 0 })
       h = mate[opposite(h)]
