@@ -43,50 +43,54 @@ export function convertPDTo2D(code: PDCode): Geometry2DData {
   let offset = 0
   for (const group of groups) {
     const vertices = group.flatMap(c => [4*c, 4*c+1, 4*c+2, 4*c+3])
-    const vertexSet = new Set(vertices)
-    // Local planar port graph: two square neighbours and one PD edge.
-    const neighbours = new Map<number, number[]>()
+    // Each port has three distinct darts. Unlike a neighbour map, darts
+    // distinguish parallel edges (including a PD edge along a square side).
+    const target = new Int32Array(n * 12)
+    const reverse = new Int32Array(n * 12)
+    const dart = (h: number, slot: number) => h * 3 + slot
     for (const h of vertices) {
-      const c = h & ~3, s = h % 4
-      neighbours.set(h, [c + (s + 3) % 4, c + (s + 1) % 4, edge[h]])
+      const c = h & ~3, slot = h % 4
+      target[dart(h, 0)] = c + (slot + 3) % 4
+      target[dart(h, 1)] = c + (slot + 1) % 4
+      target[dart(h, 2)] = edge[h]
+      reverse[dart(h, 0)] = dart(c + (slot + 3) % 4, 1)
+      reverse[dart(h, 1)] = dart(c + (slot + 1) % 4, 0)
+      reverse[dart(h, 2)] = dart(edge[h], 2)
     }
-    // Enumerate faces using the port rotation [previous, next, edge].
-    const visited = new Set<string>(), faces: number[][] = []
-    for (const h of vertices) for (const next of neighbours.get(h)!) {
-      const key = `${h}:${next}`
-      if (visited.has(key)) continue
+    const visited = new Set<number>(), faces: number[][] = []
+    for (const h of vertices) for (let slot = 0; slot < 3; slot++) {
+      const seed = dart(h, slot)
+      if (visited.has(seed)) continue
       const face: number[] = []
-      let from = h, to = next
+      let current = seed
       do {
-        const k = `${from}:${to}`
-        if (visited.has(k)) throw new Error('Invalid expanded PD rotation')
-        visited.add(k)
-        face.push(from)
-        const ring = neighbours.get(to)!
-        const at = ring.indexOf(from)
-        if (at < 0) throw new Error('Invalid expanded PD edge')
-        const following = ring[(at + 1) % ring.length]
-        from = to; to = following
-      } while (from !== h || to !== next)
+        if (visited.has(current)) throw new Error('Invalid expanded PD rotation')
+        visited.add(current)
+        face.push(Math.floor(current / 3))
+        const reversed = reverse[current]
+        current = dart(Math.floor(reversed / 3), (reversed % 3 + 1) % 3)
+      } while (current !== seed)
       faces.push(face)
     }
-    // Select the four-port face of the first crossing as the exterior.
-    const root = group[0], outer = [4*root, 4*root+1, 4*root+2, 4*root+3]
-    const outerSet = new Set(outer)
-    const outerIndex = faces.findIndex(face => face.length === 4 &&
-      face.every(h => outerSet.has(h)))
-    if (outerIndex < 0) throw new Error('Cannot find crossing boundary face')
+    // The crossing-square faces contain the crossing centres and must not
+    // become the exterior. Prefer a non-square face with a simple boundary.
+    const squareFace = (face: number[]) => face.length === 4 &&
+      face.every(h => (h & ~3) === (face[0] & ~3))
+    const outerIndex = faces.findIndex(face => !squareFace(face) &&
+      face.length >= 3 && new Set(face).size === face.length)
+    if (outerIndex < 0) throw new Error('No simple exterior face for PD layout')
+    const outer = faces[outerIndex]
     const fixed = new Map<number, Point2D>()
     const size = Math.max(4, Math.sqrt(group.length) * 4)
-    outer.forEach((h, i) => fixed.set(h, [
-      offset + size * [0, 1, 1, 0][i],
-      size * [0, 0, 1, 1][i],
-    ]))
+    outer.forEach((h, i) => {
+      const angle = 2 * Math.PI * i / outer.length
+      fixed.set(h, [offset + size * (1 + Math.cos(angle)), size * (1 + Math.sin(angle))])
+    })
     // Triangulate the non-exterior faces by connecting a face centre to
     // each boundary vertex. Tutte's spring embedding then places the
     // expanded planar graph inside the fixed convex exterior.
     const adjacency = new Map<number, Set<number>>()
-    for (const h of vertices) adjacency.set(h, new Set(neighbours.get(h)))
+    for (const h of vertices) adjacency.set(h, new Set([target[dart(h, 0)], target[dart(h, 1)], target[dart(h, 2)]]))
     let nextId = n * 4
     const centres: number[] = []
     for (let f = 0; f < faces.length; f++) {
