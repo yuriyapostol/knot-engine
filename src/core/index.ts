@@ -32,3 +32,5 @@ export { validateImageRepresentation } from './validateImageRepresentation'
 export * from './convertPDTo2D'
 
 export { convertDTToPD, convertDTTo2D } from './convertDTTo2D'
+
+export { convertPDToDT } from './convertPDToDT'
